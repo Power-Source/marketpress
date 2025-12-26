@@ -477,11 +477,6 @@ jQuery( document ).ready( function( $ ) {
 
                 wp.media.string.props = function( props, attachment )
                 {
-                    //console.log( props );
-                    //placeholder_image.attr( 'src', props.url );
-                    //placeholder_image.attr( 'width', 30 );
-                    //placeholder_image.attr( 'height', 30 );
-                    //save_inline_post_data( post_id, '_thumbnail_id', props.id, '' );
 
                     $( '.check-column-box:checked' ).each( function( ) {
 
@@ -541,11 +536,6 @@ jQuery( document ).ready( function( $ ) {
         var post_id = $( this ).closest( 'td' ).attr( 'data-post-image-id' );
         wp.media.string.props = function( props, attachment )
         {
-            //console.log( props );
-            //placeholder_image.attr( 'src', props.url );
-            //placeholder_image.attr( 'width', 30 );
-            //placeholder_image.attr( 'height', 30 );
-            //save_inline_post_data( post_id, '_thumbnail_id', props.id, '' );
             placeholder_image.attr( 'src', attachment.url );
             placeholder_image.attr( 'width', 30 );
             placeholder_image.attr( 'height', 30 );
@@ -554,7 +544,6 @@ jQuery( document ).ready( function( $ ) {
 
         wp.media.editor.send.attachment = function( props, attachment )
         {
-            //console.log(attachment.id);
             placeholder_image.attr( 'src', attachment.url );
             placeholder_image.attr( 'width', 30 );
             placeholder_image.attr( 'height', 30 );

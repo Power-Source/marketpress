@@ -25,7 +25,7 @@ jQuery(document).ready(function($) {
         // Hinweis zum optionalen Kommentar - Überprüfe, ob das Optional-Label bereits vorhanden ist
         if (!$commentField.find('label .optional').length) {
             $commentField.find('label').html(function(_, html) {
-                return html.replace(/\*/, '') + ' <span class="optional">(' + mp_ratings_i18n.optional + ')</span>';
+                return html.replace(/\*/g, '') + ' <span class="optional">(' + mp_ratings_i18n.optional + ')</span>';
             });
         }
         $commentField.find('textarea').prop('required', false);

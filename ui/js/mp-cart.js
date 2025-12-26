@@ -64,6 +64,25 @@ var mp_cart = { };
      * @since 3.0
      */
     mp_cart.initProductListListeners = function() {
+        var $forms = $( '#mp-products .mp_form-buy-product, .mp-multiple-products .mp_form-buy-product' );
+        var $container1 = $('#mp-products');
+        var $container2 = $('.mp-multiple-products');
+        if ($forms.length > 0) {
+            var events = (typeof jQuery._data === 'function') ? jQuery._data($forms[0], 'events') : $forms.eq(0).data('events');
+        }
+
+        // Fallback: Binde Submit-Handler direkt an alle .mp_form-buy-product-Formulare, falls Delegation nicht greift
+        $('.mp_form-buy-product').each(function() {
+            var $form = $(this);
+            // Prüfe, ob schon ein Handler gebunden ist (verhindert Doppelbindung bei Listen)
+            if (!$form.data('mp-fallback-handler')) {
+                $form.data('mp-fallback-handler', true);
+                $form.on('submit', function(e) {
+                    e.preventDefault();
+                    mp_cart.addItem($form, $form.find('[name="product_id"]').val());
+                });
+            }
+        });
         $( '#mp-products, .mp-multiple-products' ).on( 'submit', '.mp_form-buy-product', function( e ) {
             e.preventDefault();
             $( '.mp_ajax_loader' ).remove();
@@ -72,19 +91,16 @@ var mp_cart = { };
 
             $this.on( 'mp_cart/before_add_item', function( e, item, qty ) {
                 $this.addClass( 'invisible' );
-                //$( 'body' ).children( '.mp_ajax_loader' ).clone().insertAfter( $this ).show();
                 if ( $( ".mp_ajax_loader" ).length ) {
-
                 } else {
                     $( mp_cart_i18n.ajax_loader ).insertAfter( $this ).show();
                 }
-                //marketpress.loadingOverlay( 'show' );
             } );
 
             $this.on( 'mp_cart/after_add_item', function( e, resp, item, qty ) {
-                $this.removeClass( 'invisible' );//.next( '.mp_ajax_loader' ).remove();
+               
+                $this.removeClass( 'invisible' );
                 $( '.mp_ajax_loader' ).remove();
-                //marketpress.loadingOverlay( 'hide' );
             } );
 
             mp_cart.addItem( $this, $this.find( '[name="product_id"]' ).val() );
@@ -493,7 +509,6 @@ var mp_cart = { };
                 var buttonType = $form.find( '[type="submit"]' ).attr( 'name' );
 
                 if ( resp.success ) {
-
                     if ( resp.data.cart_updated === false ) {
                         alert( mp_cart_i18n.cart_updated_error_limit );
                     }
@@ -509,8 +524,8 @@ var mp_cart = { };
 					mp_cart.update_product_input( resp.data.product_input, $form );
 					mp_cart.update_product_buttons( resp.data.out_of_stock, $form );
 
-					//Init button listeners when ajax loaded
-					mp_cart.initCartButtonListeners();
+                    //Init button listeners when ajax loaded
+                    mp_cart.initCartButtonListeners();
 
                     $form.get( 0 ).reset();
 
@@ -522,6 +537,10 @@ var mp_cart = { };
                     }, 100 );
                 }
                 $( window ).trigger( 'resize' );
+                // Overlay nach AJAX immer ausblenden
+                if (typeof marketpress !== 'undefined' && typeof marketpress.loadingOverlay === 'function') {
+                    marketpress.loadingOverlay('hide');
+                }
             } );
     };
 

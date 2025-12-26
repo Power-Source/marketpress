@@ -54,17 +54,20 @@ function mp_st_enqueue_scripts($hook) {
 add_action('wp_ajax_mp_get_sales_data', 'mp_st_get_sales_data');
 function mp_st_get_sales_data() {
     check_ajax_referer('mp_stats_nonce', 'nonce');
-
     global $wpdb;
 
     $period = isset($_POST['period']) ? sanitize_text_field($_POST['period']) : '3_months';
     $month1 = isset($_POST['month1']) ? sanitize_text_field($_POST['month1']) : null;
     $month2 = isset($_POST['month2']) ? sanitize_text_field($_POST['month2']) : null;
 
-    $query = "SELECT DATE_FORMAT(post_date, '%%Y-%%m') AS month, SUM(meta_value) AS total
-              FROM {$wpdb->posts} p
-              JOIN {$wpdb->postmeta} m ON p.ID = m.post_id
-              WHERE post_type = %s AND meta_key = %s";
+    // Caching-Key generieren (pro Filter-Parameter)
+    $cache_key = 'mp_stats_' . md5( serialize([$period, $month1, $month2]) );
+    $cache = get_transient($cache_key);
+    if ($cache !== false) {
+        wp_send_json($cache);
+    }
+
+    $query = "SELECT DATE_FORMAT(post_date, '%%Y-%%m') AS month, SUM(meta_value) AS total\r\n              FROM {$wpdb->posts} p\r\n              JOIN {$wpdb->postmeta} m ON p.ID = m.post_id\r\n              WHERE post_type = %s AND meta_key = %s";
 
     $params = ['mp_order', 'mp_order_total'];
 
@@ -85,10 +88,7 @@ function mp_st_get_sales_data() {
     $results = $wpdb->get_results($wpdb->prepare($query, $params));
 
     // Gesamtumsatz berechnen
-    $total_query = "SELECT SUM(meta_value) AS total
-                    FROM {$wpdb->posts} p
-                    JOIN {$wpdb->postmeta} m ON p.ID = m.post_id
-                    WHERE post_type = %s AND meta_key = %s";
+    $total_query = "SELECT SUM(meta_value) AS total\r\n                    FROM {$wpdb->posts} p\r\n                    JOIN {$wpdb->postmeta} m ON p.ID = m.post_id\r\n                    WHERE post_type = %s AND meta_key = %s";
     $total = $wpdb->get_var($wpdb->prepare($total_query, 'mp_order', 'mp_order_total'));
 
     // Fallback, falls $total null ist
@@ -96,10 +96,13 @@ function mp_st_get_sales_data() {
         $total = 0;
     }
 
-    wp_send_json([
+    $response = [
         'data' => $results,
         'total' => $total,
-    ]);
+    ];
+    // Cache für 5 Minuten speichern
+    set_transient($cache_key, $response, 5 * MINUTE_IN_SECONDS);
+    wp_send_json($response);
 }
 
 /* Admin-Seite für Statistiken */

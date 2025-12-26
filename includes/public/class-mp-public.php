@@ -375,12 +375,12 @@ class MP_Public {
 	public function frontend_scripts() {
 
 		if ( is_singular( MP_Product::get_post_type() ) ) {
-			   wp_enqueue_style( 'swiper-bundle', mp_plugin_url( 'node_modules/swiper/swiper-bundle.min.css' ), array(), MP_VERSION );
+			   wp_enqueue_style( 'swiper-bundle', mp_plugin_url( 'ui/swiper/swiper-bundle.min.css' ), array(), MP_VERSION );
 			   wp_enqueue_style( 'mp-swiper-custom', mp_plugin_url( 'ui/css/mp-swiper-custom.css' ), array('swiper-bundle'), MP_VERSION );
-			   wp_enqueue_script( 'swiper-bundle', mp_plugin_url( 'node_modules/swiper/swiper-bundle.min.js' ), array(), MP_VERSION );
+			   wp_enqueue_script( 'swiper-bundle', mp_plugin_url( 'ui/swiper/swiper-bundle.min.js' ), array(), MP_VERSION );
 			   wp_enqueue_script( 'mp-swiper-init', mp_plugin_url( 'ui/js/mp-swiper-init.js' ), array('swiper-bundle'), MP_VERSION );
 			   // Colorbox script removed
-			   // wp_enqueue_script( 'basiclightbox', mp_plugin_url( 'ui/js/basicLightbox.js' ), array(), '5.0.4' );
+			   wp_enqueue_script( 'basiclightbox', mp_plugin_url( 'ui/js/basicLightbox.js' ), array(), '5.0.4' );
 			   // Modul-Attribut für Swiper-Init setzen
 			   add_filter( 'script_loader_tag', function( $tag, $handle, $src ) {
 				   if ( 'mp-swiper-init' === $handle ) {

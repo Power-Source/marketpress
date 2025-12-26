@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Dies ist ein Platzhalter für die Integration von Swiper in das MarketPress-Plugin.
 // Die Datei wird als Brücke dienen, um Swiper im Theme/Plugin zu laden und zu initialisieren.
 
-import Swiper from '../../node_modules/swiper/swiper-bundle.min.mjs';
+import Swiper from '../swiper/swiper-bundle.min.mjs';
 // ...existing code...
 
 window.initProductGallerySwiper = function(selector, options = {}) {

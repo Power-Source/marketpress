@@ -368,14 +368,14 @@ mp_checkout = {
       );
       if (!submit) return;
       if (!submit.dataset.mpOriginalHtml) {
-        submit.dataset.mpOriginalHtml = submit.innerHTML;
+        submit.dataset.mpOriginalHtml = submit.textContent;
       }
       if (this.getAttribute("data-mp-use-confirmation-step") === "true") {
-        submit.innerHTML =
+        submit.textContent =
           submit.getAttribute("data-mp-alt-html") ||
           submit.dataset.mpOriginalHtml;
       } else {
-        submit.innerHTML = submit.dataset.mpOriginalHtml;
+        submit.textContent = submit.dataset.mpOriginalHtml;
       }
       // Fehleranzeige ggf. nachbauen
       mp_checkout.errorSummary && mp_checkout.errorSummary("hide");
