@@ -21,14 +21,14 @@ class PSOURCE_Field_Repeater extends PSOURCE_Field {
 	 *
 	 *		@type string $layout How to display the repeater subfields - either "table" or "rows".
 	 *		@type string $add_row_label The label for the add row button.
-	 *		@type bool $sortable Whether the fields should be sortable or not. Defaults to true.
+	 *		@type bool $draggable Whether the fields should be sortable (per Drag&Drop) oder nicht. Defaults to true.
 	 * }
 	 */
 	public function on_creation( $args ) {
 		$this->args = array_replace_recursive(array(
 			'layout' => 'table',
 			'add_row_label' => __('Add Row', 'psource_metaboxes'),
-			'sortable' => true,
+			   'draggable' => true,
 		), $args);
 	}
 	
@@ -244,7 +244,7 @@ class PSOURCE_Field_Repeater extends PSOURCE_Field {
 		<div class="<?php echo $class; ?>"<?php echo $atts; ?>>
 		<?php		
 		if ( $this->args['layout'] == 'table' ) : ?>
-			<table class="psource-subfields widefat<?php echo ( ! $this->args['sortable'] ) ? ' no-sorting' : ''; ?>">
+			   <table class="psource-subfields widefat<?php echo ( ! $this->args['draggable'] ) ? ' no-sorting' : ''; ?>">
 				<thead>
 					<tr>
 						<th style="width:15px">&nbsp;</th>
@@ -381,7 +381,7 @@ jQuery(document).ready(function($){
 		});
 	};
 	
-	// Initialize Vanilla Drag and Drop for sortable tables
+	// Initialize Vanilla Drag and Drop for draggable tables
 	var initializeDragAndDrop = function() {
 		var draggedElement = null;
 		

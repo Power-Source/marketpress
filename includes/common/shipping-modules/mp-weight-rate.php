@@ -118,7 +118,7 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 		));
 		$layers = $metabox->add_field( 'repeater', array(
 			'name' => $this->get_field_name( 'rates' ),
-			'sortable' => false,
+			   'draggable' => false,
 		) );
 		if ( $layers instanceof PSOURCE_Field ) {
 			$layers->add_sub_field( 'text', array(
