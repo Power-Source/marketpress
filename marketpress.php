@@ -1,10 +1,8 @@
 <?php
-
-
 /*
 Plugin Name: MarketPress
-Plugin URI:  https://cp-psource.github.io/marketpress/
-Description: The complete ClassicPress ecommerce plugin - works perfectly with Multisite too to create a social marketplace, where you can take a percentage! Activate the plugin, adjust your settings then add some products to your store.
+Plugin URI:  https://power-source.github.io/marketpress/
+Description: Das komplette ClassicPress E-Commerce-Plugin – funktioniert auch perfekt mit Multisite, um einen sozialen Marktplatz zu erstellen, auf dem Du eine Provision einbehalten kannst! Aktiviere das Plugin, passen Deine Einstellungen an und füge dann Produkte zu Deinem Shop hinzu.
 Version:     1.0.0
 Author:      PSOURCE
 Author URI:  https://github.com/cp-psource
@@ -381,6 +379,11 @@ class Marketpress {
 
 		// Include constants.
 		require_once $this->plugin_dir( 'includes/common/constants.php' );
+
+		// Dashicons im Frontend für Mini-Cart-Icon immer laden
+		add_action( 'wp_enqueue_scripts', function() {
+			wp_enqueue_style( 'dashicons' );
+		} );
 
 		// Includes.
 		add_action( 'init', array( &$this, 'includes' ), -1 );
