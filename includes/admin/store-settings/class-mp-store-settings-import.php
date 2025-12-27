@@ -494,9 +494,9 @@ function wxr_term_meta( $term ) {
  *
  * @global wpdb $wpdb ClassicPress database abstraction object.
  *
- * @param array $post_ids Array of post IDs to filter the query by. Optional.
+ * @param array|null $post_ids Array of post IDs to filter the query by. Optional.
  */
-function wxr_authors_list( array $post_ids = null ) {
+function wxr_authors_list( ?array $post_ids = null ) {
 	global $wpdb;
 
 	if ( !empty( $post_ids ) ) {
