@@ -15,9 +15,9 @@
     // Initialize modern UI components
     function initModernUI() {
         
-        // Preserve WordPress native metabox functionality
+        // Preserve ClassicPress native metabox functionality
         if (typeof postboxes !== 'undefined') {
-            // Let WordPress handle metabox open/close
+            // Let ClassicPress handle metabox open/close
             postboxes.init();
         }
         

@@ -6,11 +6,11 @@ Requires PHP: 7.4
 Tested up to: 6.8.1
 Stable tag: 1.0.0
 
-Leistungsstarker E-Commerce-Marktplatz für WordPress und Multisite. 100 % kostenlos und keine Erweiterungen erforderlich.
+Leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos und keine Erweiterungen erforderlich.
 
 == Beschreibung ==
 
-MarketPress E-Commerce ist ein vollständig kostenloser Premium-Online-Shop für WordPress und Multisite.
+MarketPress E-Commerce ist ein vollständig kostenloser Premium-Online-Shop für ClassicPress und Multisite.
 
 Verkaufen Sie alles, von digitalen Downloads bis hin zu physischen Waren in allen Formen und Größen, bieten Sie Produktvariationen und sofortige Downloads von einem benutzerfreundlichen Online-Marktplatz an.
 
@@ -51,7 +51,7 @@ Das Einrichten Ihres eigenen Online-Shops war noch nie so einfach wie mit Market
 
 = Anpassen ohne Programmierkenntnisse = 
 
-MarketPress ist so konzipiert, dass es nahtlos mit jedem gut programmierten WordPress-Theme funktioniert.
+MarketPress ist so konzipiert, dass es nahtlos mit jedem gut programmierten ClassicPress-Theme funktioniert.
 
 * Shortcodes und integrierte Widgets ermöglichen es Ihnen, Elemente überall auf Ihrer Website anzuzeigen
 * Enthält CSS-Stilvorlagen
@@ -422,7 +422,7 @@ Also, worauf warten Sie noch? Starten Sie noch heute mit <a href="http://premium
 = 2.9.2.4 = 
 * Fixed: Coupon codes would not honor the "applies to" setting http://wp.mu/8z8
 * Fixed: Simplify gateway would display an "Simplify token not generated correctly" error when not activated with any other gateway plugins http://wp.mu/8yo
-* Fixed: Compatibility bug with WordPress HTTPS http://wp.mu/8y3
+* Fixed: Compatibility bug with ClassicPress HTTPS http://wp.mu/8y3
 * Fixed: Bug with low stock notifications
 
 = 2.9.2.3 = 
@@ -445,7 +445,7 @@ Also, worauf warten Sie noch? Starten Sie noch heute mit <a href="http://premium
 * Fixed: Divide by zero warning in USPS gateway
 * Fixed: Mixed-content warnings in wp-admin
 * Fixed: Session handling code that caused issues with PayPal Express checkout 
-* Fixed: Conflict with WordPress Social Invitations plugin http://wp.mu/8ul
+* Fixed: Conflict with ClassicPress Social Invitations plugin http://wp.mu/8ul
 * Fixed: When using WPML and [mp_product] shortcode the non-translated version of the product would be returned
 * Fixed: GA E-Commerce bug http://wp.mu/8ve
 * Fixed mixed-content issues on checkout pages when using SSL

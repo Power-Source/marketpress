@@ -2508,7 +2508,7 @@ WHERE $delete_where"
 	}
 
 	/**
-	 * Füge die Standard-WordPress-Metabox für Produktbilder wieder hinzu
+	 * Füge die Standard-ClassicPress-Metabox für Produktbilder wieder hinzu
 	 *
 	 * @since 3.0
 	 * @access public

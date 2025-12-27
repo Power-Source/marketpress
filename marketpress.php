@@ -5,7 +5,7 @@ Plugin URI:  https://power-source.github.io/marketpress/
 Description: Das komplette ClassicPress E-Commerce-Plugin – funktioniert auch perfekt mit Multisite, um einen sozialen Marktplatz zu erstellen, auf dem Du eine Provision einbehalten kannst! Aktiviere das Plugin, passen Deine Einstellungen an und füge dann Produkte zu Deinem Shop hinzu.
 Version:     1.0.0
 Author:      PSOURCE
-Author URI:  https://github.com/cp-psource
+Author URI:  https://github.com/Power-Source
 Text Domain: mp
 PS Network: required
 
@@ -13,7 +13,7 @@ PS Network: required
 */
 
 /*
-Copyright 2016-2025 PSOURCE (https://github.com/cp-psource)
+Copyright 2016-2025 PSOURCE (https://github.com/Power-Source)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License (Version 2 - GPLv2) as
@@ -442,7 +442,7 @@ class Marketpress {
 	 * Localization.
 	 */
 	function localization() {
-		// Load up the localization file if we're using WordPress in a different language.
+		// Load up the localization file if we're using ClassicPress in a different language.
 		// Place it in this plugin's "languages" folder and name it "mp-[value in wp-config].mo".
 		$mu_plugins = wp_get_mu_plugins();
 		$lang_dir   = dirname( plugin_basename( $this->_plugin_file ) ) . '/languages/';
@@ -579,7 +579,7 @@ class Marketpress {
 	}
 
 	/**
-	 * Called from WordPress when the admin page init process is invoked.
+	 * Called from ClassicPress when the admin page init process is invoked.
 	 *
 	 * @since 3.0
 	 */

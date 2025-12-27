@@ -21,7 +21,7 @@ SVNUSER="PSOURCE" # your svn username
 # Let's begin...
 echo ".........................................."
 echo
-echo "Preparing to deploy WordPress plugin"
+echo "Preparing to deploy ClassicPress plugin"
 echo
 echo ".........................................."
 echo

@@ -277,7 +277,7 @@ class MP_Installer {
 					//we need to check, if term is numeric, treat it
 					if ( is_numeric( $variation_term_vals[1] ) ) {
 						//usually this is the term name, check if not exist, we will create with a prefix on slug,
-						//to force it to string, as when WordPress using the term_exist, it will priority the ID than slug, which can cause wrong import
+						//to force it to string, as when ClassicPress using the term_exist, it will priority the ID than slug, which can cause wrong import
 						$slug = $variation_term_vals[1] . '_mp_attr';
 						if ( ! term_exists( $slug ) ) {
 							$tid = wp_insert_term( $variation_term_vals[1], $variation_term_vals[0], array(
@@ -640,7 +640,7 @@ class MP_Installer {
 					if ( is_multisite() ) {
 						?>
 						<p class="mp-important">
-							<strong><?php _e( 'Please update each subsite in your WordPress network where you have older version of the MarketPress plugin.', 'mp' ); ?></strong>
+							<strong><?php _e( 'Please update each subsite in your ClassicPress network where you have older version of the MarketPress plugin.', 'mp' ); ?></strong>
 						</p>
 						<?php
 					}

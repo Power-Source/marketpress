@@ -162,7 +162,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         // Sicherstellen, dass Kommentare für Produkte aktiviert sind mit höherer Priorität als die MarketPress-Kernfunktion (die 10 hat)
         add_filter('comments_open', array($this, 'enable_comments_for_products'), 20, 2);
         
-        // Entferne die standard WordPress Comments-Metabox für Produkte und füge eine Bewertungs-Metabox hinzu
+        // Entferne die standard ClassicPress Comments-Metabox für Produkte und füge eine Bewertungs-Metabox hinzu
         add_action('add_meta_boxes', array($this, 'replace_comments_metabox'), 10);
         
         // Entferne die Diskussions-Metabox für Produkte (nicht benötigt)
@@ -260,12 +260,12 @@ class MP_MARKETPRESS_COMMENTS_Addon {
     /**
      * Sicherstellen, dass Kommentare für Produkte aktiviert sind
      * Dies ist ein wichtiger Hook, der sicherstellt, dass Kommentare für Produkte immer aktiviert sind,
-     * unabhängig von den WordPress-Einstellungen
+     * unabhängig von den ClassicPress-Einstellungen
      */
     public function enable_comments_for_products($open, $post_id) {
         $post_type = get_post_type($post_id);
         if ($post_type === 'product') {
-            // Aktiviere Kommentare für alle Produkte, unabhängig von den WordPress-Einstellungen
+            // Aktiviere Kommentare für alle Produkte, unabhängig von den ClassicPress-Einstellungen
             return true;
         }
         return $open;
@@ -534,7 +534,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
     }
     
     /**
-     * Ersetze die standard WordPress Comments-Metabox für Produkte
+     * Ersetze die standard ClassicPress Comments-Metabox für Produkte
      */
     public function replace_comments_metabox() {
         // Entferne die Standard-Metabox für Kommentare bei Produkten

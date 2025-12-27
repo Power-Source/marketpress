@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: MarketPress-Statistiken
-Plugin URI: https://github.com/cp-psource/marketpress
+Plugin URI: https://github.com/Power-Source/marketpress
 Description: Zeigt MarketPress-Statistiken mithilfe von Chart.js an.
 Version: 1.0.0
 Author: DerN3rd

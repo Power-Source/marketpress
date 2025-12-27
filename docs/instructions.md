@@ -1,6 +1,6 @@
 MarketPress eCommerce Instructions
 To Get Started:
-If you’re new to WordPress, you’ll want to start off by reading the Installing Plugins section in our comprehensive WordPress and WordPress Multisite Manual, so you can get MarketPress installed on your site properly.
+If you’re new to ClassicPress, you’ll want to start off by reading the Installing Plugins section in our comprehensive ClassicPress and ClassicPress Multisite Manual, so you can get MarketPress installed on your site properly.
 
 Once you’ve got MarketPress installed and activated, you’ll be presented with our Quick Setup wizard. You can skip it if you really want to, but we highly recommend that you follow it all the way through (as it’ll make the setup of your store easier):
 
@@ -62,7 +62,7 @@ You’ll also be able to adjust how they’re sorted, what they’re sorted by, 
 
 Product Categories/Product Tags
 
-As WordPress allows you to create categories & tags for your posts, so too does MarketPress allow you to do the same for your products, via the “Product Categories” & “Product Tags” settings pages. After all, when it comes to making products available, you want to make it easy as possible for a customer to find what he wants.
+As ClassicPress allows you to create categories & tags for your posts, so too does MarketPress allow you to do the same for your products, via the “Product Categories” & “Product Tags” settings pages. After all, when it comes to making products available, you want to make it easy as possible for a customer to find what he wants.
 
 Capabilities
 
@@ -186,7 +186,7 @@ Found inside of:
 
 Store Settings -> Add Ons
 
-You’ll see the add ons available in MarketPress, which will vary depending on whether you’re running a normal WordPress site, or if you’re running a Multisite installation.
+You’ll see the add ons available in MarketPress, which will vary depending on whether you’re running a normal ClassicPress site, or if you’re running a Multisite installation.
 
 For the “Coupons” add on, you’ll see a new sub-entry in the “Store” menu item, from which you can create new coupons:
 
@@ -208,7 +208,7 @@ How the PDF should be viewed
 What emails should it be attached to
 Whether to disable it for free products, or not
 As well as template settings for the invoice itself
-Using on WordPress Multisite
+Using on ClassicPress Multisite
 On Multisite, you can choose to activate MarketPress in one of two ways:
 
 Way #1: Activating MarketPress site-by-site

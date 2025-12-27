@@ -6,8 +6,8 @@ title: "MarketPress Themeing"
 <h2 align="center" style="color:#38c2bb;">📚 MarketPress Themeing</h2>
 
 <div class="menu">
-  <a href="https://github.com/cp-psource/marketpress/discussions" style="color:#38c2bb;">💬 Forum</a>
-  <a href="https://github.com/cp-psource/marketpress/releases" style="color:#38c2bb;">📝 Download</a>
+  <a href="https://github.com/Power-Source/marketpress/discussions" style="color:#38c2bb;">💬 Forum</a>
+  <a href="https://github.com/Power-Source/marketpress/releases" style="color:#38c2bb;">📝 Download</a>
   <a href="readme-en.html" style="color:#38c2bb;">📝 ENGLISCH</a>
 </div>
 

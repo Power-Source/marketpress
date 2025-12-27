@@ -1,7 +1,7 @@
 <?php
 /**
  * MarketPress Produktbewertungen Template
- * Überschreibt das Standard-WordPress-Kommentartemplate für Produkte
+ * Überschreibt das Standard-ClassicPress-Kommentartemplate für Produkte
  */
 
 // Sicherstellen, dass das Skript nicht direkt aufgerufen wird
