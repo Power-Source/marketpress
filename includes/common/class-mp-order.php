@@ -1401,7 +1401,18 @@ JS;
 			$timestamp            = time();
 			$orders[ $timestamp ] = $new_order;
 			$expire               = time() + 31536000; // 1 year expire
-			setcookie( $key, serialize( $orders ), $expire, COOKIEPATH, COOKIE_DOMAIN );
+			
+			// Setze SameSite=None und Secure für Cross-Site-Kompatibilität (z.B. Payment Redirects)
+			$options = [
+				'expires'  => $expire,
+				'path'     => COOKIEPATH,
+				'domain'   => COOKIE_DOMAIN,
+				'secure'   => is_ssl(),
+				'httponly' => false,
+				'samesite' => 'None' // Erlaubt Cross-Site-Requests
+			];
+			
+			setcookie( $key, serialize( $orders ), $options );
 		}
 
 		if ( has_filter( 'mp_new_order' ) ) {

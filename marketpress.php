@@ -425,6 +425,10 @@ class Marketpress {
 		add_action( 'wp_enqueue_scripts', function() {
 			wp_enqueue_style( 'dashicons' );
 		} );
+		
+		// Fix SameSite Cookie Attribute für Payment Gateway Redirects (z.B. Stripe)
+		// Ohne SameSite=None werden Cookies beim Redirect von externen Seiten blockiert
+		add_filter( 'send_auth_cookies', array( &$this, 'fix_auth_cookies_samesite' ), 10, 1 );
 
 		// Includes.
 		add_action( 'init', array( &$this, 'includes' ), -1 );
@@ -493,6 +497,48 @@ class Marketpress {
 		} else {
 			load_plugin_textdomain( 'mp', false, $lang_dir );
 		}
+	}
+
+	/**
+	 * Fix SameSite cookie attribute for auth cookies
+	 * 
+	 * WordPress Auth-Cookies werden standardmäßig ohne SameSite=None gesetzt,
+	 * was beim Redirect von Payment Gateways (z.B. Stripe) zu Problemen führt.
+	 * 
+	 * @param bool $send Whether to send auth cookies
+	 * @return bool
+	 */
+	function fix_auth_cookies_samesite( $send ) {
+		if ( ! $send || ! is_ssl() ) {
+			return $send;
+		}
+		
+		// Fange die Cookie-Header ab und füge SameSite=None hinzu
+		// Dies muss über header_register_callback gemacht werden, da setcookie bereits aufgerufen wurde
+		if ( ! headers_sent() ) {
+			header_register_callback( function() {
+				$headers = headers_list();
+				header_remove( 'Set-Cookie' );
+				
+				foreach ( $headers as $header ) {
+					if ( stripos( $header, 'Set-Cookie:' ) === 0 ) {
+						// Prüfe ob es ein WordPress Auth-Cookie ist
+						if ( strpos( $header, 'wordpress_logged_in_' ) !== false || 
+						     strpos( $header, 'wordpress_' ) !== false ||
+						     strpos( $header, 'wp-settings-' ) !== false ) {
+							
+							// Füge SameSite=None hinzu, falls noch nicht vorhanden
+							if ( strpos( $header, 'SameSite' ) === false ) {
+								$header .= '; SameSite=None; Secure';
+							}
+						}
+						header( $header, false );
+					}
+				}
+			} );
+		}
+		
+		return $send;
 	}
 
 	/**

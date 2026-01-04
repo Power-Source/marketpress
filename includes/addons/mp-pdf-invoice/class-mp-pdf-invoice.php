@@ -35,8 +35,27 @@ class MP_PDF_Invoice {
 		if ( $order->exists() == false ) {
 			return false;
 		}
-		//if current user is not the owner of this order or not admin, false
+		
+		// Prüfe ob der User berechtigt ist (eingeloggt und Owner/Admin ODER Gast mit Order in Session)
+		$is_authorized = false;
+		
+		// Eingeloggter User und Order-Eigentümer oder Admin
 		if ( get_current_user_id() == $order->post_author || current_user_can( 'manage_options' ) ) {
+			$is_authorized = true;
+		} else {
+			// Nicht eingeloggt - prüfe ob Order in Session vorhanden ist
+			$orders = mp_get_order_history();
+			if ( is_array( $orders ) ) {
+				foreach ( $orders as $session_order ) {
+					if ( isset( $session_order['id'] ) && $session_order['id'] == $order->ID ) {
+						$is_authorized = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		if ( $is_authorized ) {
 			$wpnonce = wp_create_nonce( $order_id );
 			//build html
 			$http_params = array(
@@ -51,6 +70,8 @@ class MP_PDF_Invoice {
 
 			return apply_filters( 'mp_pdf_invoice_button', $html, $http_params, $type, $order );
 		}
+		
+		return false;
 	}
 
 	/**

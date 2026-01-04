@@ -2479,7 +2479,17 @@ class MP_Cart {
 			$cookie_domain = get_blog_details( mp_main_site_id() )->domain;
 		}
 
-		setcookie( $this->_cookie_id, json_encode( $this->_items ), $expire, '/', $cookie_domain );
+		// Setze SameSite=None und Secure für Cross-Site-Kompatibilität (z.B. Stripe Redirect)
+		$options = [
+			'expires'  => $expire,
+			'path'     => '/',
+			'domain'   => $cookie_domain,
+			'secure'   => is_ssl(), // Nur mit HTTPS
+			'httponly' => false,
+			'samesite' => 'None' // Erlaubt Cross-Site-Requests (wichtig für Payment Redirects)
+		];
+		
+		setcookie( $this->_cookie_id, json_encode( $this->_items ), $options );
 	}
 
 	/**

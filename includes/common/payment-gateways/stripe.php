@@ -279,6 +279,27 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	}
 
 	public function process_payment( $cart, $billing_info, $shipping_info ) {
+		// Debug: Log die Shipping Info
+		error_log( 'Stripe: Billing Info: ' . print_r( $billing_info, true ) );
+		error_log( 'Stripe: Shipping Info: ' . print_r( $shipping_info, true ) );
+		
+		// Falls Shipping-Adresse leer ist (außer Email/Name), verwende Billing-Adresse
+		if ( empty( $shipping_info['address1'] ) && ! empty( $billing_info['address1'] ) ) {
+			error_log( 'Stripe: Shipping-Adresse leer, verwende Billing-Adresse' );
+			$shipping_info = array_merge( $shipping_info, array(
+				'first_name'   => $billing_info['first_name'],
+				'last_name'    => $billing_info['last_name'],
+				'company_name' => $billing_info['company_name'],
+				'address1'     => $billing_info['address1'],
+				'address2'     => $billing_info['address2'],
+				'city'         => $billing_info['city'],
+				'state'        => $billing_info['state'],
+				'zip'          => $billing_info['zip'],
+				'country'      => $billing_info['country'],
+				'phone'        => $billing_info['phone'],
+			) );
+		}
+		
 		// Stripe initialisieren
 		if ( ! class_exists( '\Stripe\Stripe' ) ) {
 			require_once mp_plugin_dir( 'vendor/autoload.php' );
