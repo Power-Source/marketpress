@@ -1065,11 +1065,6 @@ public $ID = null;
 		$html .= '
 			</div><!-- end mp_order_detail -->';
 
-		// Show "Pay Now" button for unpaid orders
-		if ( $this->_post->post_status === 'order_received' ) {
-			$html .= $this->get_pay_now_html();
-		}
-
 		/**
 		 * Filter the order header html
 		 *
