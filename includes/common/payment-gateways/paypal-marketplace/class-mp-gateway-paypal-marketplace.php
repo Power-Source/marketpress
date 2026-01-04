@@ -362,38 +362,25 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
         );
         
         if ( ! $order_id ) {
-            return array(
-                'result'  => 'fail',
-                'message' => __( 'Order creation failed', 'mp' ),
-            );
+            mp_checkout()->add_error( __( 'Order creation failed', 'mp' ), 'general' );
+            return;
         }
         
         $order_data = $this->create_paypal_order_data( $cart, $order );
         $api_result = $this->paypal_api_create_order( $order_data );
         if ( is_wp_error( $api_result ) ) {
-            return array(
-                'result' => 'fail',
-                'message' => $api_result->get_error_message(),
-            );
+            mp_checkout()->add_error( $api_result->get_error_message(), 'general' );
+            return;
         }
         // Order-ID in der Bestellung speichern
         if ( $order && isset( $order->ID ) ) {
             update_post_meta( $order->ID, '_paypal_marketplace_order_id', $api_result['id'] );
         }
         
-        // For AJAX requests, store order in cache instead of redirecting
-        if ( wp_doing_ajax() ) {
-            wp_cache_set( 'order_object', $order, 'mp' );
-            return array(
-                'result'   => 'redirect',
-                'redirect' => $api_result['approval_url'],
-            );
-        }
-        
-        return array(
-            'result'   => 'redirect',
-            'redirect' => $api_result['approval_url'],
-        );
+        // Store order in cache and set PayPal redirect URL
+        // The checkout handler will send the approval_url to the frontend
+        wp_cache_set( 'order_object', $order, 'mp', 3600 );
+        wp_cache_set( 'order_paypal_redirect_url', $api_result['approval_url'], 'mp', 3600 );
     }
 
     /**

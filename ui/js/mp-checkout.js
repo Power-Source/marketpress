@@ -685,3 +685,47 @@ document.addEventListener("DOMContentLoaded", function () {
   // Nach Seitenreload (z.B. durch Browser-Autofill)
   window.addEventListener('pageshow', validateRequiredFields);
 });
+
+// Handle "Pay Now" form submission on order status page
+document.addEventListener('DOMContentLoaded', function() {
+  const payOrderForm = document.getElementById('mp-pay-order-form');
+  if (payOrderForm) {
+    payOrderForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const method = document.getElementById('mp-pay-order-method').value;
+      if (!method) {
+        alert('Bitte wähle eine Zahlungsmethode aus!');
+        return;
+      }
+      
+      const submitBtn = payOrderForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verarbeite Zahlung...';
+      
+      const formData = new FormData(payOrderForm);
+      
+      fetch(mp_i18n.ajaxurl, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.data.redirect_url) {
+          // Redirect to payment gateway
+          window.location.href = data.data.redirect_url;
+        } else {
+          alert(data.data.message || data.data.errors || 'Ein Fehler ist aufgetreten');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Jetzt bezahlen';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Jetzt bezahlen';
+      });
+    });
+  }
+});

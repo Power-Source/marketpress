@@ -984,6 +984,9 @@ public $ID = null;
 		// Status
 		$status       = __( 'Received', 'mp' );
 		$status_extra = '';
+		if ( $this->_post->post_status === 'order_received' ) {
+			$status = __( 'Pending', 'mp' );
+		}
 		switch ( $this->_post->post_status ) {
 			case 'order_shipped' :
 				if( $is_download_only ) {
@@ -1046,8 +1049,25 @@ public $ID = null;
 				</div><!-- end mp_tooltip_content -->
 			</div><!-- end mp_order_detail_item -->';
 
+		// Manual payment instructions for unpaid orders
+		$payment_gateway = $this->get_meta( 'mp_payment_info->gateway_plugin_name', '' );
+		if ( $this->_post->post_status === 'order_received' && $payment_gateway === 'manual_payments' ) {
+			$instruction = mp_get_setting( 'gateways->manual_payments->instruction', '' );
+			if ( $instruction ) {
+				$html .= '<div class="mp_order_manual_notice" style="margin-top:15px; padding:12px; border:1px dashed #e0a800; background:#fff8e1;">';
+				$html .= '<strong>' . __( 'Ausstehend: Bitte Zahlung abschließen', 'mp' ) . '</strong><br />';
+				$html .= wpautop( wp_kses_post( $instruction ) );
+				$html .= '</div>';
+			}
+		}
+
 		$html .= '
 			</div><!-- end mp_order_detail -->';
+
+		// Show "Pay Now" button for unpaid orders
+		if ( $this->_post->post_status === 'order_received' ) {
+			$html .= $this->get_pay_now_html();
+		}
 
 		/**
 		 * Filter the order header html
@@ -1071,6 +1091,84 @@ public $ID = null;
 		} else {
 			return $html;
 		}
+	}
+
+	/**
+	 * Display "Pay Now" button for unpaid orders
+	 *
+	 * @since 3.0
+	 * @access public
+	 * @return string
+	 */
+	public function get_pay_now_html() {
+		$gateways = MP_Gateway_API::get_active_gateways();
+		
+		if ( empty( $gateways ) ) {
+			return '';
+		}
+
+		$html = '<div class="mp_order_pay_now" style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 4px;">';
+		$html .= '<h4 style="margin-top: 0;">' . __( 'Diese Bestellung wurde noch nicht bezahlt', 'mp' ) . '</h4>';
+		$html .= '<p>' . __( 'Wähle eine Zahlungsmethode, um jetzt zu bezahlen:', 'mp' ) . '</p>';
+		
+		$form_action = admin_url( 'admin-ajax.php' );
+		$html .= '<form method="POST" id="mp-pay-order-form" action="' . esc_url( $form_action ) . '" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">';
+		$html .= wp_nonce_field( 'mp_pay_order_' . $this->ID, 'mp_pay_order_nonce', true, false );
+		
+		$html .= '<input type="hidden" name="action" value="mp_pay_order">';
+		$html .= '<input type="hidden" name="order_id" value="' . esc_attr( $this->get_id() ) . '">';
+		$html .= '<input type="hidden" name="order_post_id" value="' . esc_attr( $this->ID ) . '">';
+		
+		// Get guest email if needed
+		$guest_email = $this->get_meta( 'mp_billing_info->email', '' );
+		if ( $guest_email ) {
+			$html .= '<input type="hidden" name="guest_email" value="' . esc_attr( $guest_email ) . '">';
+		}
+		
+		$html .= '<select name="payment_method" id="mp-pay-order-method" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required>';
+		$html .= '<option value="">' . __( 'Zahlungsmethode wählen...', 'mp' ) . '</option>';
+		
+		foreach ( $gateways as $code => $gateway ) {
+			if ( $code === 'free_orders' ) {
+				continue; // Skip free orders gateway for paid orders
+			}
+			$html .= '<option value="' . esc_attr( $code ) . '">' . esc_html( $gateway->public_name ) . '</option>';
+		}
+		
+		$html .= '</select>';
+		$html .= '<button type="submit" class="button button-primary" style="padding: 8px 16px; cursor: pointer;">' . __( 'Jetzt bezahlen', 'mp' ) . '</button>';
+		$html .= '</form>';
+		$html .= <<<'JS'
+<script>
+(function(){
+	var form = document.getElementById('mp-pay-order-form');
+	if(!form) return;
+	form.addEventListener('submit', function(e){
+		e.preventDefault();
+		var submitBtn = form.querySelector('button[type="submit"]');
+		if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Verarbeite Zahlung...'; }
+		var data = new FormData(form);
+		fetch(form.action, { method: 'POST', body: data })
+			.then(function(resp){ return resp.json(); })
+			.then(function(json){
+				if(json && json.success && json.data && json.data.redirect_url){
+					window.location.href = json.data.redirect_url;
+				} else {
+					alert((json && json.data && (json.data.message || json.data.errors)) || 'Ein Fehler ist aufgetreten.');
+					if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Jetzt bezahlen'; }
+				}
+			})
+			.catch(function(){
+				alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
+				if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Jetzt bezahlen'; }
+			});
+	});
+})();
+</script>
+JS;
+		$html .= '</div>';
+		
+		return $html;
 	}
 
 	/**
@@ -1142,10 +1240,13 @@ public $ID = null;
 			return false;
 		}
 
+		// Generate a unique order ID first
+		$order_id = $this->_generate_id();
+
 		// Create new post
 		$post_id = wp_insert_post( array(
-			'post_title'   => $this->get_id(),
-			'post_name'    => $this->get_id(),
+			'post_title'   => $order_id,
+			'post_name'    => $order_id,
 			'post_content' => serialize( $cart->get_items() ) . serialize( $shipping_info ) . serialize( $billing_info ),
 			// this is purely for search capabilities
 			'post_status'  => ( $paid ) ? 'order_paid' : 'order_received',
@@ -1342,6 +1443,9 @@ public $ID = null;
 
 		// Cache the ID for later use
 		wp_cache_set( 'order_object', $this, 'mp' );
+		
+		// Return the order ID for confirmation
+		return $this->ID;
 	}
 
 	/**
