@@ -508,6 +508,10 @@ public $ID = null;
 				'ID'          => $this->ID,
 				'post_status' => $status,
 			) );
+			// Neu laden um den aktuellen Status zu haben
+			$this->_post = get_post( $this->ID );
+			wp_cache_delete( $this->ID, 'posts' );
+			clean_post_cache( $this->ID );
 		}
 	}
 
@@ -985,14 +989,14 @@ public $ID = null;
 		$status       = __( 'Received', 'mp' );
 		$status_extra = '';
 		if ( $this->_post->post_status === 'order_received' ) {
-			$status = __( 'Pending', 'mp' );
+			$status = __( 'Ausstehend', 'mp' );
 		}
 		switch ( $this->_post->post_status ) {
 			case 'order_shipped' :
 				if( $is_download_only ) {
-					$status = __( 'Finished', 'mp' );
+					$status = __( 'Abgeschlossen', 'mp' );
 				} else {
-					$status = __( 'Shipped', 'mp' );
+					$status = __( 'Versand', 'mp' );
 				}
 
 				if ( $tracking_num = $this->get_meta( 'mp_shipping_info->tracking_num' ) ) {
@@ -1001,15 +1005,12 @@ public $ID = null;
 				break;
 
 			case 'order_paid' :
-				if( $is_download_only ) {
-					$status = __( 'Finished', 'mp' );
-				} else {
-					$status = __( 'In Process', 'mp' );
-				}
+				// Bei bezahlten Bestellungen immer "Bezahlt" anzeigen
+				$status = __( 'Bezahlt', 'mp' );
 				break;
 
 			case 'order_closed' :
-				$status = __( 'Closed', 'mp' );
+				$status = __( 'Abgeschlossen', 'mp' );
 				break;
 		}
 

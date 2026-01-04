@@ -2227,6 +2227,9 @@ if ( ! function_exists( 'mp_order_status' ) ) :
 				error_log( 'mp_order_status: Gast-Zugriff - Order ID: ' . $order_id . ', existiert: ' . ( $order->exists() ? 'ja' : 'nein' ) );
 				
 				if ( $order->exists() ) {
+					// Prüfe ob dies eine Stripe-Zahlung ist die noch auf Bestätigung wartet
+					mp_stripe_verify_payment( $order );
+					
 					$html .= $order->details( false );
 				} else {
 					error_log( 'mp_order_status: Order existiert NICHT für ID: ' . $order_id );

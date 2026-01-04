@@ -1094,12 +1094,11 @@ class MP_Orders_Admin {
 				}
 
 				$actions = array(
-					'order_received' => __( 'Received', 'mp' ),
-					'order_paid'     => __( 'Paid', 'mp' ),
-					'order_shipped'  => __( 'Shipped', 'mp' ),
-					'order_closed'   => __( 'Closed', 'mp' ),
-				);
-
+				'order_received' => __( 'Ausstehend', 'mp' ),
+				'order_paid'     => __( 'Bezahlt', 'mp' ),
+				'order_shipped'  => __( 'Versand', 'mp' ),
+				'order_closed'   => __( 'Abgeschlossen', 'mp' ),
+			);
 				$html .= '<div class="mp_order_status ' . get_post_status() . '">';
 
 				if ( isset( $actions ) ) {
