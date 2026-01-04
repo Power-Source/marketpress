@@ -667,7 +667,7 @@ class MP_Cart {
 			} elseif ( empty( $zipcode ) && ! empty( $city ) ) {
 				$header = sprintf( __( 'Geschätzter Gesamtbetrag (%s)', 'mp' ), $city );
 			} elseif ( ! empty( $zipcode ) && empty( $city ) ) {
-				$header = sprintf( __( 'Geschätzter Gesamtbetrag (%s, %s)', 'mp' ), $zipcode );
+				$header = sprintf( __( 'Geschätzter Gesamtbetrag (%s)', 'mp' ), $zipcode );
 			} else {
 				$header = sprintf( __( 'Geschätzter Gesamtbetrag (%s, %s)', 'mp' ), $city, $zipcode );
 			}

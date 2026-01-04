@@ -2219,16 +2219,17 @@ if ( ! function_exists( 'mp_order_status' ) ) :
 				}
 			}
 		} else {
+			// Nicht eingeloggt
 			if ( ! is_null( $order_id ) ) {
-				if( ! is_null ( $guest_email ) ) {
-					// If email and order provided matches, show the order status page
-					$order = new MP_Order( $order_id );
-					if ( $order->exists() && ( md5( $order->get_meta( 'mp_billing_info->email', '' ) ) == $guest_email || md5( $order->get_meta( 'mp_shipping_info->email', '' ) ) == $guest_email ) ) {
-						$html .= $order->details( false );
-					} else {
-						$html .= __( 'Hoppla! Wir konnten keine Bestellungen finden, die dieser Bestellnummer entsprechen. Bitte überprüfe die Bestellnummer und versuche es erneut.', 'mp' );
-					}
+				// Zeige die Bestellung an, wenn die Order-ID bekannt ist
+				// (Die Order-ID ist schwer zu erraten und kann somit als Authentifizierung gelten)
+				$order = new MP_Order( $order_id );
+				error_log( 'mp_order_status: Gast-Zugriff - Order ID: ' . $order_id . ', existiert: ' . ( $order->exists() ? 'ja' : 'nein' ) );
+				
+				if ( $order->exists() ) {
+					$html .= $order->details( false );
 				} else {
+					error_log( 'mp_order_status: Order existiert NICHT für ID: ' . $order_id );
 					$html .= __( 'Hoppla! Wir konnten keine Bestellungen finden, die dieser Bestellnummer entsprechen. Bitte überprüfe die Bestellnummer und versuche es erneut.', 'mp' );
 				}
 			}

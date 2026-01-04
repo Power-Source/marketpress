@@ -48,7 +48,7 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	function on_creation() {
 		//set names here to be able to translate
 		$this->admin_name	 = __( 'Stripe', 'mp' );
-		$this->public_name	 = __( 'Credit Card', 'mp' );
+		$this->public_name	 = __( 'Kreditkarte', 'mp' );
 
 		$this->publishable_key	 = $this->get_setting( 'api_credentials->publishable_key' );
 		$this->secret_key		 = $this->get_setting( 'api_credentials->secret_key' );
@@ -197,23 +197,14 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 			"ZMW"	 => __( 'ZMW - Zambian Kwacha', 'mp' ),
 		);
 
-		add_action( 'wp_enqueue_scripts', array( &$this, 'enqueue_scripts' ) );
+		// IPN-Handler mit höchster Priorität registrieren (vor anderen Actions)
+		add_action( 'wp', array( &$this, 'process_ipn_return' ), 1 );
 	}
 
 
 	function enqueue_scripts() {
-		if ( !mp_is_shop_page( 'checkout' ) ) {
-			return;
-		}
-
-		wp_enqueue_script( 'stripe-js', 'https://js.stripe.com/v3/', array(), null );
-		
-		// Use modern UI instead of jQuery UI
-		wp_enqueue_script( 'stripe-token', mp_plugin_url( 'includes/common/payment-gateways/stripe-files/stripe_token.js' ), array( 'stripe-js', 'jquery' ), MP_VERSION );
-		
-		wp_localize_script( 'stripe-token', 'mp_stripe_vars', [
-			'publishable_key' => $this->publishable_key
-		]);
+		// Keine Scripts mehr nötig - Stripe Checkout übernimmt alles
+		return;
 	}
 
 	/**
@@ -223,16 +214,8 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	 * @param array $shipping_info. Contains shipping info and email in case you need it
 	 */
 	function payment_form($cart, $shipping_info) {
-		error_log('POST: ' . print_r($_POST, true));
-		$name = mp_get_user_address_part('first_name', 'billing') . ' ' . mp_get_user_address_part('last_name', 'billing');
-
-		$content = '
-			<input id="mp-stripe-name" type="hidden" value="' . esc_attr($name) . '">
-			<div id="stripe-card-element"></div>
-			<div id="card-errors" role="alert" style="color: red; margin-top: 0.5em;"></div>
-			<input type="hidden" name="payment_method_id" id="payment_method_id">
-		';
-
+		// Kein Formular nötig - Weiterleitung zu Stripe Checkout erfolgt beim Submit
+		$content = '<p>' . __('Sie werden zu Stripe weitergeleitet, um Ihre Zahlung sicher abzuschließen.', 'mp') . '</p>';
 		return $content;
 	}
 
@@ -248,7 +231,7 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 			'page_slugs'	 => array( 'store-settings-payments', 'store-settings_page_store-settings-payments' ),
 			'title'			 => sprintf( __( '%s Settings', 'mp' ), $this->admin_name ),
 			'option_name'	 => 'mp_settings',
-			'desc'			 => __( 'Stripe makes it easy to start accepting credit cards directly on your site with full PCI compliance. Accept Visa, MasterCard, American Express, Discover, JCB, and Diners Club cards directly on your site. You don\'t need a merchant account or gateway. Stripe handles everything, including storing cards, subscriptions, and direct payouts to your bank account. Credit cards go directly to Stripe\'s secure environment, and never hit your servers so you can avoid most PCI requirements.', 'mp' ),
+			'desc'			 => __( 'Stripe ermöglicht es Ihnen, Kreditkartenzahlungen sicher zu akzeptieren. Kunden werden zu Stripe weitergeleitet, um ihre Zahlung abzuschließen, und dann zurück zu Ihrer Website geleitet. Sie benötigen kein eigenes Händlerkonto. Stripe verarbeitet alle Zahlungen sicher und überweist das Geld direkt auf Ihr Bankkonto.', 'mp' ),
 			'conditional'	 => array(
 				'name'	 => 'gateways[allowed][' . $this->plugin_name . ']',
 				'value'	 => 1,
@@ -295,113 +278,332 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	}
 
 	public function process_payment( $cart, $billing_info, $shipping_info ) {
-		// 1) Variablen vorbereiten
-		$pm_id    = sanitize_text_field( $_POST['payment_method_id'] ?? '' );
-		if ( ! $pm_id ) {
-			wp_send_json_error([ 'message' => 'Keine Payment Method ID übergeben.' ]);
-		}
-
-		$amount   = $this->config_amount( $cart->total() );
-		$currency = strtolower( $this->currency );
-
-		// 2) Order anlegen, um Rückleitungs-URL zu haben
-		$order    = new MP_Order();
-		$order_id = $order->save( $cart->get_items(), $billing_info, $shipping_info );
-
-		// 3) Stripe initialisieren
+		// Stripe initialisieren
 		if ( ! class_exists( '\Stripe\Stripe' ) ) {
-			require_once mp_plugin_dir( 'includes/common/payment-gateways/stripe-files/vendor/autoload.php' );
+			require_once mp_plugin_dir( 'vendor/autoload.php' );
 		}
 		\Stripe\Stripe::setApiKey( $this->secret_key );
 
-	try {
-			// 1) Customer anlegen
-			$customer = \Stripe\Customer::create([
-				'email' => $billing_info['email'],
-			]);
-
-			// 2) PaymentMethod holen und attachen
-			$paymentMethod = \Stripe\PaymentMethod::retrieve($pm_id);
-			$paymentMethod->attach(['customer' => $customer->id]);
-
-			// 3) PaymentIntent erstellen
-			$intent = \Stripe\PaymentIntent::create([
-				'amount'               => $amount,
-				'currency'             => $currency,
-				'customer'             => $customer->id,
-				'payment_method'       => $pm_id,
-				'off_session'          => true,
-				'confirm'              => true,
-				'return_url'           => $this->get_return_url($order),
-			]);
-
-	if ($intent->status === 'succeeded') {
-		$order = new MP_Order($order_id);
-
-		$payment_info = [
+		// Payment Info vorbereiten (wird nach erfolgreicher Zahlung aktualisiert)
+		$payment_info = array(
 			'gateway_public_name'  => $this->public_name,
 			'gateway_private_name' => $this->admin_name,
-			'method'               => 'Stripe – ' . ucfirst($intent->payment_method_types[0]),
-			'transaction_id'       => $intent->id,
-			'status'               => [time() => __('Paid', 'mp')],
+			'gateway_plugin_name'  => $this->plugin_name,
+			'method'               => __( 'Stripe Checkout', 'mp' ),
+			'status'               => array( time() => __( 'Ausstehend', 'mp' ) ),
 			'total'                => $cart->total(),
-			'currency'             => $currency,
-		];
+			'currency'             => $this->currency,
+		);
 
+		// Bestellung erstellen
 		$order = new MP_Order();
-		$order_id = $order->get_id();
-			$order->save([
-				'cart'          => $cart,
-				'payment_info'  => $payment_info,
-				'billing_info'  => $billing_info,
-				'shipping_info' => $shipping_info,
-			]);
-			$order->change_status('order_paid', true);
+		$saved_order_id = $order->save( array(
+			'cart'          => $cart,
+			'payment_info'  => $payment_info,
+			'billing_info'  => $billing_info,
+			'shipping_info' => $shipping_info,
+			'paid'          => false,
+		) );
+		
+		if ( ! $saved_order_id ) {
+			if ( wp_doing_ajax() ) {
+				wp_send_json_error( array(
+					'errors' => array(
+						'general' => __( 'Fehler beim Erstellen der Bestellung.', 'mp' )
+					)
+				) );
+			} else {
+				wp_die( __( 'Fehler beim Erstellen der Bestellung.', 'mp' ) );
+			}
+		}
 
-			wp_send_json([
-				'result'   => 'success',
-				'redirect' => $this->get_return_url($order),
-			]);
-			exit;
+		// Order neu laden um alle Eigenschaften zu aktualisieren
+		$order = new MP_Order( $saved_order_id );
+		$order_id = $order->get_id(); // Dies ist der post_name (Order-Key)
+		
+		// Line Items für Stripe Checkout vorbereiten
+		$line_items = [];
+		$items = $cart->get_items_as_objects();
+		
+		foreach ( $items as $item ) {
+			$line_items[] = [
+				'price_data' => [
+					'currency'     => strtolower( $this->currency ),
+					'product_data' => [
+						'name' => $item->title(),
+					],
+					'unit_amount'  => $this->config_amount( $item->get_price() ),
+				],
+				'quantity'   => $item->qty,
+			];
+		}
+
+		// Fallback: Falls keine Items gefunden, verwende Gesamtbetrag
+		if ( empty( $line_items ) ) {
+			error_log( 'Stripe: Keine Line Items gefunden, verwende Gesamtbetrag als Fallback' );
+			$line_items[] = [
+				'price_data' => [
+					'currency'     => strtolower( $this->currency ),
+					'product_data' => [
+						'name' => __( 'Bestellung', 'mp' ) . ' #' . $order_id,
+					],
+					'unit_amount'  => $this->config_amount( $cart->total() ),
+				],
+				'quantity'   => 1,
+			];
+		} else {
+			// Versandkosten hinzufügen, falls vorhanden
+			$shipping_total = $cart->shipping_total( false );
+			if ( $shipping_total > 0 ) {
+				$line_items[] = [
+					'price_data' => [
+						'currency'     => strtolower( $this->currency ),
+						'product_data' => [
+							'name' => __( 'Versand', 'mp' ),
+						],
+						'unit_amount'  => $this->config_amount( $shipping_total ),
+					],
+					'quantity'   => 1,
+				];
 			}
 
-			if ($intent->status === 'requires_action') {
-				wp_send_json_success([
-					'result'                       => 'requires_action',
-					'payment_intent_client_secret' => $intent->client_secret,
-					'payment_intent_id'            => $intent->id,
-					'return_url'                   => $this->get_return_url($order),
-				]);
+			// Steuern hinzufügen, falls vorhanden
+			$tax_total = $cart->tax_total( false );
+			if ( $tax_total > 0 ) {
+				$line_items[] = [
+					'price_data' => [
+						'currency'     => strtolower( $this->currency ),
+						'product_data' => [
+							'name' => __( 'Steuern', 'mp' ),
+						],
+						'unit_amount'  => $this->config_amount( $tax_total ),
+					],
+					'quantity'   => 1,
+				];
+			}
+		}
+
+		try {
+			// Stripe Checkout Session erstellen
+			$session = \Stripe\Checkout\Session::create([
+				'payment_method_types' => ['card'],
+				'line_items'           => $line_items,
+				'mode'                 => 'payment',
+				'success_url'          => $this->get_return_url( $order ),
+				'cancel_url'           => mp_store_page_url( 'checkout', false ),
+				'customer_email'       => $billing_info['email'],
+				'metadata'             => [
+					'order_id' => $order_id,
+				],
+			]);
+
+			// Session ID in Order speichern (mit Post-ID!)
+			update_post_meta( $order->ID, '_stripe_checkout_session_id', $session->id );
+
+			// Session-ID für später speichern (wird von process_ipn_return() abgerufen)
+			// Verwende die Order-Key (post_name) als Index
+			$pending_orders = get_transient( 'stripe_pending_orders' );
+			if ( ! is_array( $pending_orders ) ) {
+				$pending_orders = [];
+			}
+			$pending_orders[ $order_id ] = $session->id;
+			set_transient( 'stripe_pending_orders', $pending_orders, HOUR_IN_SECONDS );
+			
+			error_log( 'Stripe: Bestellung erstellt - Order-ID: ' . $order_id . ', Post-ID: ' . $order->ID . ', Session-ID: ' . $session->id );
+			error_log( 'Stripe: Transient gespeichert. Pending Orders: ' . implode( ', ', array_keys( $pending_orders ) ) );
+
+			// Bei AJAX: JSON-Antwort mit Redirect-URL
+			if ( wp_doing_ajax() ) {
+				wp_send_json_success( array(
+					'redirect_url' => $session->url
+				) );
+			} else {
+				// Bei normalem Request: Direkter Redirect
+				wp_redirect( $session->url );
 				exit;
 			}
 
-			wp_send_json([
-				'result'  => 'failure',
-				'message' => 'Unbekannter Zahlungsstatus: ' . $intent->status,
-			]);
-			exit;
-
-		} catch (\Exception $e) {
-			error_log('Stripe Fehler: ' . $e->getMessage());
-			wp_send_json_error(['message' => 'Stripe-Exception: ' . $e->getMessage()]);
-			exit;
+		} catch ( \Exception $e ) {
+			error_log( 'Stripe Checkout Fehler: ' . $e->getMessage() );
+			
+			if ( wp_doing_ajax() ) {
+				wp_send_json_error( array(
+					'errors' => array(
+						'general' => sprintf( 
+							__( 'Stripe-Fehler: %s', 'mp' ), 
+							$e->getMessage() 
+						)
+					)
+				) );
+			} else {
+				mp_checkout()->add_error( 
+					sprintf( 
+						__( 'Stripe-Fehler: %s', 'mp' ), 
+						$e->getMessage() 
+					) 
+				);
+				wp_redirect( mp_checkout_step_url( 'checkout' ) );
+				exit;
+			}
 		}
 	}
 
 
 	public function get_return_url( $order ) {
-	if ( ! $order || ! method_exists( $order, 'tracking_url' ) ) {
-		// Fallback, falls wirklich nichts da ist
-		return home_url( '/shop' );
+		if ( ! $order || ! method_exists( $order, 'tracking_url' ) ) {
+			// Fallback, falls wirklich nichts da ist
+			return home_url( '/shop' );
+		}
+		// liefert z.B. /shop/bestellstatus/{order_key}/
+		return $order->tracking_url( false );
 	}
-	// liefert z.B. /shop/bestellstatus/{order_key}/
-	return $order->tracking_url( false );
-	}
+
 	/**
 	 * INS and payment return
 	 */
 	function process_ipn_return() {
+		// Schreibe sofort ein Log, um zu beweisen, dass die Funktion aufgerufen wird
+		error_log( '=== Stripe IPN AUFGERUFEN ===' );
+		error_log( 'REQUEST_URI: ' . ( isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : 'N/A' ) );
 		
+		// Nur auf der Bestellstatus-Seite verarbeiten
+		if ( ! isset( $_SERVER['REQUEST_URI'] ) || strpos( $_SERVER['REQUEST_URI'], '/bestellstatus/' ) === false ) {
+			error_log( 'Stripe IPN: Kein /bestellstatus/ in URL, skip' );
+			return;
+		}
+		
+		error_log( 'Stripe IPN: URL enthält /bestellstatus/, fortfahren...' );
+		
+		// Versuche Order-ID zu extrahieren
+		$order_id = get_query_var( 'mp_order_id' );
+		error_log( 'Stripe IPN: get_query_var("mp_order_id") = ' . ( $order_id ? $order_id : 'LEER' ) );
+		
+		// Fallback: Order-ID aus URL extrahieren (falls query_var nicht funktioniert)
+		if ( ! $order_id && isset( $_SERVER['REQUEST_URI'] ) ) {
+			$uri = sanitize_text_field( $_SERVER['REQUEST_URI'] );
+			// URL-Pattern: /shop/bestellstatus/{order_id}/
+			preg_match( '#/bestellstatus/([a-zA-Z0-9]+)/?(\?|$)#', $uri, $matches );
+			if ( ! empty( $matches[1] ) ) {
+				$order_id = $matches[1];
+				error_log( 'Stripe IPN: Order-ID aus Regex extrahiert: ' . $order_id );
+			}
+		}
+
+		if ( ! $order_id ) {
+			error_log( 'Stripe IPN: ABBRUCH - Keine Order-ID gefunden' );
+			return; // Keine Order-ID gefunden
+		}
+
+		error_log( 'Stripe IPN: Verarbeite Order-ID: ' . $order_id );
+
+		// Prüfen ob diese Order gerade bezahlt wurde
+		$pending_orders = get_transient( 'stripe_pending_orders' );
+		error_log( 'Stripe IPN: Transient stripe_pending_orders: ' . ( $pending_orders ? implode( ', ', array_keys( $pending_orders ) ) : 'LEER' ) );
+		
+		if ( ! is_array( $pending_orders ) ) {
+			error_log( 'Stripe IPN: Keine pending orders im Transient gefunden' );
+			return;
+		}
+
+		if ( ! isset( $pending_orders[ $order_id ] ) ) {
+			error_log( 'Stripe IPN: Order ' . $order_id . ' nicht in pending orders. Verfügbar: ' . implode( ', ', array_keys( $pending_orders ) ) );
+			return; // Diese Order ist nicht pending
+		}
+
+		// Order laden und prüfen ob sie bereits bezahlt ist
+		$order = new MP_Order( $order_id );
+		
+		error_log( 'Stripe IPN: Order existiert: ' . ( $order->exists() ? 'ja' : 'nein' ) . ', Status: ' . ( $order->exists() ? $order->post_status : 'N/A' ) );
+
+		if ( ! $order->exists() ) {
+			error_log( 'Stripe IPN: Order ' . $order_id . ' existiert nicht!' );
+			return;
+		}
+
+		if ( $order->post_status === 'order_paid' ) {
+			error_log( 'Stripe IPN: Order ' . $order_id . ' ist bereits als "paid" markiert' );
+			unset( $pending_orders[ $order_id ] );
+			set_transient( 'stripe_pending_orders', $pending_orders, HOUR_IN_SECONDS );
+			return;
+		}
+
+		// Stripe Session-ID aus Transient holen
+		$session_id = $pending_orders[ $order_id ];
+		error_log( 'Stripe IPN: Session-ID: ' . $session_id );
+
+		// Stripe initialisieren
+		if ( ! class_exists( '\Stripe\Stripe' ) ) {
+			require_once mp_plugin_dir( 'vendor/autoload.php' );
+		}
+		\Stripe\Stripe::setApiKey( $this->secret_key );
+
+		try {
+			// Session von Stripe abrufen
+			$session = \Stripe\Checkout\Session::retrieve( $session_id );
+
+			error_log( 'Stripe IPN: Session Status: ' . $session->payment_status );
+
+			if ( $session->payment_status === 'paid' ) {
+				error_log( 'Stripe IPN: Payment Status ist PAID' );
+				
+				// Payment Intent Details abrufen
+				$payment_intent = \Stripe\PaymentIntent::retrieve( $session->payment_intent );
+
+				// Betrag korrekt berechnen
+				$amount = $session->amount_total;
+				if ( ! in_array( strtoupper( $session->currency ), ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'] ) ) {
+					$amount = $amount / 100;
+				}
+
+				// Payment Info aktualisieren
+				$payment_info = array(
+					'gateway_public_name'  => $this->public_name,
+					'gateway_private_name' => $this->admin_name,
+					'gateway_plugin_name'  => $this->plugin_name,
+					'method'               => __( 'Stripe Checkout', 'mp' ),
+					'transaction_id'       => $session->payment_intent,
+					'status'               => array( time() => __( 'Bezahlt', 'mp' ) ),
+					'total'                => $amount,
+					'currency'             => strtoupper( $session->currency ),
+					'stripe_session_id'    => $session_id,
+				);
+
+				// Bestellung als bezahlt markieren
+				error_log( 'Stripe IPN: Speichere Payment Info für Order #' . $order->ID );
+				update_post_meta( $order->ID, 'mp_payment_info', $payment_info );
+				error_log( 'Stripe IPN: Payment Info gespeichert. Prüfe Datenbank...' );
+				$saved_payment_info = get_post_meta( $order->ID, 'mp_payment_info', true );
+				error_log( 'Stripe IPN: Payment Info aus DB: ' . print_r( $saved_payment_info, true ) );
+				
+				error_log( 'Stripe IPN: Vor Status-Änderung - Status ist: ' . $order->post_status );
+				$order->change_status( 'order_paid' );
+				error_log( 'Stripe IPN: Nach change_status() - Status sollte sein: order_paid' );
+				
+				// Neu laden um zu prüfen
+				$order_check = new MP_Order( $order_id );
+				error_log( 'Stripe IPN: Nach Neu-Laden - Status ist: ' . $order_check->post_status );
+
+				error_log( 'Stripe: Zahlung erfolgreich für Bestellung ' . $order->get_id() . ' (ID #' . $order->ID . '), Betrag: ' . $amount . ' ' . strtoupper( $session->currency ) );
+				
+				// Warenkorb leeren
+				mp_cart()->empty_cart();
+				
+				// Cache leeren
+				wp_cache_delete( $order->get_id(), 'mp_order' );
+				wp_cache_delete( $order->ID, 'mp_order' );
+				clean_post_cache( $order->ID );
+				
+				// Order aus pending entfernen
+				unset( $pending_orders[ $order_id ] );
+				set_transient( 'stripe_pending_orders', $pending_orders, HOUR_IN_SECONDS );
+				
+				error_log( 'Stripe IPN: Verarbeitung abgeschlossen für Order ' . $order_id );
+			} else {
+				error_log( 'Stripe IPN: Unerwarteter Status: ' . $session->payment_status );
+			}
+		} catch ( \Exception $e ) {
+			error_log( 'Stripe IPN Fehler: ' . $e->getMessage() );
+		}
 	}
 
 	function print_checkout_scripts() {
