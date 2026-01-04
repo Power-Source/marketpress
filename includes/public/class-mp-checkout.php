@@ -98,10 +98,6 @@ class MP_Checkout {
 		add_action( 'wp_ajax_mp_process_checkout', array( &$this, 'ajax_process_checkout' ) );
 		add_action( 'wp_ajax_nopriv_mp_process_checkout', array( &$this, 'ajax_process_checkout' ) );
 
-		// Pay existing order
-		add_action( 'wp_ajax_mp_pay_order', array( &$this, 'ajax_pay_order' ) );
-		add_action( 'wp_ajax_nopriv_mp_pay_order', array( &$this, 'ajax_pay_order' ) );
-
 		// Maybe process checkout confirm
 		add_action( 'wp', array( &$this, 'maybe_process_checkout_confirm' ) );
 		add_action( 'wp', array( &$this, 'maybe_process_checkout' ) );
@@ -610,100 +606,6 @@ class MP_Checkout {
 				'general' => __( 'An unknown error occurred. Please try again.', 'mp' ),
 			),
 		) );
-	}
-
-	/**
-	 * Pay for an existing order
-	 *
-	 * @since 3.0
-	 * @access public
-	 * @action wp_ajax_mp_pay_order, wp_ajax_nopriv_mp_pay_order
-	 */
-	public function ajax_pay_order() {
-		// Verify nonce
-		$order_id = mp_get_post_value( 'order_id' );
-		$post_id = mp_get_post_value( 'order_post_id' );
-		$payment_method = mp_get_post_value( 'payment_method' );
-		$nonce = mp_get_post_value( 'mp_pay_order_nonce' );
-		
-		if ( ! wp_verify_nonce( $nonce, 'mp_pay_order_' . $post_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Security check failed', 'mp' ) ) );
-		}
-		
-		if ( ! $order_id || ! $payment_method ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid request', 'mp' ) ) );
-		}
-		
-		// Load the order
-		$order = new MP_Order( $order_id );
-		
-		if ( ! $order->exists() ) {
-			wp_send_json_error( array( 'message' => __( 'Order not found', 'mp' ) ) );
-		}
-		
-		// Check if order is already paid
-		if ( $order->_post->post_status === 'order_paid' || $order->_post->post_status === 'order_shipped' ) {
-			wp_send_json_error( array( 'message' => __( 'This order has already been paid', 'mp' ) ) );
-		}
-		
-		// Get active gateways
-		$gateways = MP_Gateway_API::get_active_gateways();
-		if ( ! isset( $gateways[ $payment_method ] ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid payment method', 'mp' ) ) );
-		}
-		
-		$gateway = $gateways[ $payment_method ];
-		
-		// Get cart from order
-		$cart = $order->get_meta( 'mp_cart_info' );
-		if ( ! $cart instanceof MP_Cart ) {
-			wp_send_json_error( array( 'message' => __( 'Could not load order items', 'mp' ) ) );
-		}
-		
-		// Get billing and shipping info
-		$billing_info = $order->get_meta( 'mp_billing_info' );
-		$shipping_info = $order->get_meta( 'mp_shipping_info' );
-		
-		// Store cart in session for gateway processing
-		mp_cart( $cart );
-		
-		// Store order ID in cache for gateway to use
-		wp_cache_set( 'order_object', $order, 'mp', 3600 );
-		
-		// Call the gateway's payment processing
-		do_action( 'mp_process_payment_' . $payment_method, $cart, $billing_info, $shipping_info );
-		
-		// Check for errors
-		if ( $this->has_errors() ) {
-			wp_send_json_error( array(
-				'errors' => mp_arr_get_value( 'general', $this->_errors )
-			) );
-		}
-		
-		// Try to get order from cache
-		$order = wp_cache_get( 'order_object', 'mp' );
-		
-		// Check if there's a special redirect URL (e.g., for PayPal)
-		$redirect_url = wp_cache_get( 'order_paypal_redirect_url', 'mp' );
-		if ( ! $redirect_url && $order && is_object( $order ) && method_exists( $order, 'tracking_url' ) ) {
-			$redirect_url = $order->tracking_url( false );
-		}
-		
-		// Fallback to store page if no redirect URL found
-		if ( ! $redirect_url ) {
-			$redirect_url = mp_store_page_url( 'order-status', false );
-		}
-		
-		// Clean up cache
-		wp_cache_delete( 'order_paypal_redirect_url', 'mp' );
-		
-		if ( $order && is_object( $order ) && method_exists( $order, 'tracking_url' ) ) {
-			wp_send_json_success( array( 'redirect_url' => $redirect_url ) );
-		} else {
-			wp_send_json_error( array(
-				'message' => __( 'Payment processing failed', 'mp' )
-			) );
-		}
 	}
 
 	/**
