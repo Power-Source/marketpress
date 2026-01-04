@@ -121,21 +121,21 @@ class MP_Short_Codes {
 			'validation'   => array(
 				'required'    => __( 'Dieses Feld ist erforderlich.', 'mp' ),
 				'remote'      => __( 'Bitte korrigiere dieses Feld.', 'mp' ),
-				'email'       => __( 'Please enter a valid email address.', 'mp' ),
-				'url'         => __( 'Please enter a valid URL.', 'mp' ),
-				'date'        => __( 'Please enter a valid date.', 'mp' ),
-				'dateISO'     => __( 'Please enter a valid date (ISO).', 'mp' ),
-				'number'      => __( 'Please enter a valid number.', 'mp' ),
-				'digits'      => __( 'Please enter only digits.', 'mp' ),
-				'creditcard'  => __( 'Please enter a valid credit card number.', 'mp' ),
-				'equalTo'     => __( 'Please enter the same value again.', 'mp' ),
-				'accept'      => __( 'Please enter a value with a valid extension.', 'mp' ),
-				'maxlength'   => __( 'Please enter no more than {0} characters.', 'mp' ),
-				'minlength'   => __( 'Please enter at least {0} characters.', 'mp' ),
-				'rangelength' => __( 'Please enter a value between {0} and {1} characters long.', 'mp' ),
-				'range'       => __( 'Please enter a value between {0} and {1}.', 'mp' ),
-				'max'         => __( 'Please enter a value less than or equal to {0}.', 'mp' ),
-				'min'         => __( 'Please enter a value greater than or equal to {0}.', 'mp' ),
+				'email'       => __( 'Bitte gib eine gültige E-Mail-Adresse ein.', 'mp' ),
+				'url'         => __( 'Bitte gib eine gültige URL ein.', 'mp' ),
+				'date'        => __( 'Bitte gib ein gültiges Datum ein.', 'mp' ),
+				'dateISO'     => __( 'Bitte gib ein gültiges Datum (ISO) ein.', 'mp' ),
+				'number'      => __( 'Bitte gib eine gültige Zahl ein.', 'mp' ),
+				'digits'      => __( 'Bitte gib nur Ziffern ein.', 'mp' ),
+				'creditcard'  => __( 'Bitte gib eine gültige Kreditkartennummer ein.', 'mp' ),
+				'equalTo'     => __( 'Bitte gib denselben Wert erneut ein.', 'mp' ),
+				'accept'      => __( 'Bitte gib einen Wert mit einer gültigen Erweiterung ein.', 'mp' ),
+				'maxlength'   => __( 'Bitte gib nicht mehr als {0} Zeichen ein.', 'mp' ),
+				'minlength'   => __( 'Bitte gib mindestens {0} Zeichen ein.', 'mp' ),
+				'rangelength' => __( 'Bitte gib einen Wert zwischen {0} und {1} Zeichen ein.', 'mp' ),
+				'range'       => __( 'Bitte gib einen Wert zwischen {0} und {1} ein.', 'mp' ),
+				'max'         => __( 'Bitte gib einen Wert kleiner oder gleich {0} ein.', 'mp' ),
+				'min'         => __( 'Bitte gib einen Wert größer oder gleich {0} ein.', 'mp' ),
 			),
 		) );
 
@@ -151,8 +151,8 @@ class MP_Short_Codes {
 		// Localize scripts
 		wp_localize_script( 'mp-cart', 'mp_cart_i18n', array(
 			'ajaxurl'                  => mp_get_ajax_url(),
-			'ajax_loader'              => '<span class="mp_ajax_loader"><img src="' . mp_plugin_url( 'ui/images/ajax-loader.gif' ) . '" alt=""> ' . __( 'Adding...', 'mp' ) . '</span>',
-			'cart_updated_error_limit' => __( 'Cart update notice: this item has a limit per order or you have reached the stock limit.', 'mp' ),
+			'ajax_loader'              => '<span class="mp_ajax_loader"><img src="' . mp_plugin_url( 'ui/images/ajax-loader.gif' ) . '" alt=""> ' . __( 'Hinzufügen...', 'mp' ) . '</span>',
+			'cart_updated_error_limit' => __( 'Warenkorb-Hinweis: Dieser Artikel hat eine Bestellgrenze oder Sie haben das Lagerlimit erreicht.', 'mp' ),
 			'is_cart_page'             => mp_is_shop_page( 'cart' ),
 		) );
 	}
@@ -422,7 +422,7 @@ class MP_Short_Codes {
 			$product			 = new MP_Product( $product_id );
 			$related_products	 = '<div id="mp-related-products" class="mp-multiple-products"><div class="mp_product_tab_content_products mp_products mp_products-related mp_products-list">' . $product->related_products( $args ) . '</div></div>';
 		} else {
-			$related_products = __( 'product_id must be defined', 'mp' );
+			$related_products = __( 'product_id muss definiert sein', 'mp' );
 		}
 		return $related_products;
 	}
@@ -628,7 +628,7 @@ class MP_Short_Codes {
 			return __( 'Unlimited stock', 'mp' );
 		}
 		
-		return sprintf( __( 'Only %s left in stock...', 'mp' ), $stock );
+		return sprintf( __( 'Nur noch %s auf Lager...', 'mp' ), $stock );
 	}
 
 	/**

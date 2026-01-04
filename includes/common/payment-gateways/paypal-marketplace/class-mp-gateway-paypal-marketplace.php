@@ -216,16 +216,37 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
      * Gibt die vorbereiteten Daten für die PayPal-API zurück
      */
     public function create_paypal_order_data( $cart, $order ) {
+        // Get cart items properly from MP_Cart object
+        $cart_items = array();
+        if ( is_object( $cart ) && method_exists( $cart, 'get_items' ) ) {
+            $cart_items = $cart->get_items();
+        } elseif ( is_array( $cart ) ) {
+            $cart_items = $cart;
+        }
+        
+        // Get currency from order or default to store currency
+        $currency = 'EUR';
+        if ( $order && is_object( $order ) && isset( $order->currency ) ) {
+            $currency = $order->currency;
+        } else {
+            $currency = mp_get_setting( 'currency', 'EUR' );
+        }
+        
         $splits = $this->get_split_payments( $cart );
         $items = array();
-        foreach ( $cart as $item ) {
+        foreach ( $cart_items as $item ) {
+            // Skip if item is not properly structured
+            if ( ! is_array( $item ) ) {
+                continue;
+            }
+            
             $items[] = array(
-                'name' => $item['name'],
+                'name' => isset( $item['name'] ) ? $item['name'] : 'Product',
                 'unit_amount' => array(
-                    'currency_code' => $order->currency,
-                    'value' => number_format( floatval( $item['price'] ), 2, '.', '' ),
+                    'currency_code' => $currency,
+                    'value' => number_format( floatval( isset( $item['price'] ) ? $item['price'] : 0 ), 2, '.', '' ),
                 ),
-                'quantity' => intval( $item['qty'] ),
+                'quantity' => intval( isset( $item['qty'] ) ? $item['qty'] : 1 ),
             );
         }
         $payees = array();
@@ -233,7 +254,7 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
             $payees[] = array(
                 'payee' => array('merchant_id' => $merchant_id),
                 'amount' => array(
-                    'currency_code' => $order->currency,
+                    'currency_code' => $currency,
                     'value' => number_format( floatval( $amount ), 2, '.', '' ),
                 ),
             );
@@ -323,12 +344,30 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
      * @param array $shipping_info
      */
     public function process_payment( $cart, $billing_info, $shipping_info ) {
-        // Hole ggf. Order-ID oder erstelle sie wie benötigt
-        $order_id = isset( $cart->order_id ) ? $cart->order_id : 0;
-        $order = null;
-        if ( $order_id ) {
-            $order = get_post( $order_id );
+        // Create the order first so we have an order object
+        $order = new MP_Order();
+        $order_id = $order->save(
+            array(
+                'cart'         => $cart,
+                'payment_info' => array(
+                    'gateway_public_name'  => $this->public_name,
+                    'gateway_private_name' => $this->admin_name,
+                    'gateway_plugin_name'  => $this->plugin_name,
+                    'method'               => __( 'PayPal', 'mp' ),
+                    'transaction_id'       => '',
+                    'currency'             => mp_get_setting( 'currency' ),
+                ),
+                'paid'         => false,
+            )
+        );
+        
+        if ( ! $order_id ) {
+            return array(
+                'result'  => 'fail',
+                'message' => __( 'Order creation failed', 'mp' ),
+            );
         }
+        
         $order_data = $this->create_paypal_order_data( $cart, $order );
         $api_result = $this->paypal_api_create_order( $order_data );
         if ( is_wp_error( $api_result ) ) {
@@ -341,6 +380,16 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
         if ( $order && isset( $order->ID ) ) {
             update_post_meta( $order->ID, '_paypal_marketplace_order_id', $api_result['id'] );
         }
+        
+        // For AJAX requests, store order in cache instead of redirecting
+        if ( wp_doing_ajax() ) {
+            wp_cache_set( 'order_object', $order, 'mp' );
+            return array(
+                'result'   => 'redirect',
+                'redirect' => $api_result['approval_url'],
+            );
+        }
+        
         return array(
             'result'   => 'redirect',
             'redirect' => $api_result['approval_url'],

@@ -167,6 +167,9 @@ mp_checkout = {
     if (checkoutForm) {
       checkoutForm.querySelectorAll('.mp_button-checkout-next-step').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
+          // WICHTIG: Verhindere Form-Submit - wir wollen nur zum nächsten Schritt wechseln!
+          e.preventDefault();
+          
           // Nur Felder im aktuellen Schritt prüfen
           const current = checkoutForm.querySelector('.mp_form-checkout .current');
           let valid = true;
@@ -211,19 +214,48 @@ mp_checkout = {
             });
           }
           if (!valid) {
-            e.preventDefault();
             alert('Bitte fülle alle benötigten Felder aus!');
             if (firstInvalid) firstInvalid.focus();
+            return; // Abbrechen wenn nicht valide
+          }
+          
+          // Validierung erfolgreich - wechsle zum nächsten Schritt
+          const allSections = Array.from(checkoutForm.querySelectorAll('.mp_checkout_section'));
+          const currentIndex = allSections.indexOf(current);
+          const nextSection = allSections[currentIndex + 1];
+          
+          if (nextSection) {
+            mp_checkout.changeStep(current, nextSection);
           }
         });
       });
     }
-        // Validierung beim Klick auf Next Step (Submit-Button)
+        // Form-Submit: Im letzten Schritt per AJAX submitten
         if (checkoutForm) {
           checkoutForm.addEventListener('submit', function(e) {
+            // Prüfe ob wir im letzten Schritt sind
+            const orderReviewSection = document.getElementById('mp-checkout-section-order-review-payment');
+            const isLastStep = orderReviewSection && orderReviewSection.classList.contains('current');
+            
+            if (!isLastStep) {
+              // Nicht im letzten Schritt - Submit verhindern (wird durch Next-Step Button gehandelt)
+              e.preventDefault();
+              return;
+            }
+            
+            // Im letzten Schritt - immer preventDefault, wir machen AJAX
+            e.preventDefault();
+            
+            // Validiere Zahlungsmethode
+            const paymentMethod = checkoutForm.querySelector('input[name="payment_method"]:checked');
+            if (!paymentMethod) {
+              alert('Bitte wähle eine Zahlungsmethode aus!');
+              return;
+            }
+            
+            // Validiere alle Felder
             let valid = true;
             let firstInvalid = null;
-            // Prüfe ALLE Pflichtfelder im gesamten Formular
             checkoutForm.querySelectorAll('[required], .mp_field_required').forEach(function(input) {
               let el = input;
               if (el.tagName === 'SPAN' && el.classList.contains('mp_field_required')) {
@@ -240,10 +272,51 @@ mp_checkout = {
               }
             });
             if (!valid) {
-              e.preventDefault();
               alert('Bitte fülle alle benötigten Felder aus!');
               if (firstInvalid) firstInvalid.focus();
+              return;
             }
+            
+            // Alle Validierungen OK - sende per AJAX
+            const submitBtn = checkoutForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Verarbeite Bestellung...';
+            }
+            
+            // Sende AJAX-Request
+            const formData = new FormData(checkoutForm);
+            formData.append('action', 'mp_process_checkout');
+            
+            fetch(mp_i18n.ajaxurl, {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success && data.data.redirect_url) {
+                // Erfolgreich - weiterleiten zur Order-Status-Seite
+                window.location.href = data.data.redirect_url;
+              } else {
+                // Fehler anzeigen
+                if (submitBtn) {
+                  submitBtn.disabled = false;
+                  submitBtn.textContent = 'Jetzt bestellen';
+                }
+                const errorMsg = data.data && data.data.errors ? 
+                  Object.values(data.data.errors).join('\n') : 
+                  'Ein Fehler ist aufgetreten. Bitte versuche es erneut.';
+                alert(errorMsg);
+              }
+            })
+            .catch(error => {
+              console.error('Checkout error:', error);
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Jetzt bestellen';
+              }
+              alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
+            });
           });
         }
     var checkoutForm = document.getElementById("mp-checkout-form");
@@ -355,7 +428,10 @@ mp_checkout = {
       var val = this.value;
       var target = document.getElementById("mp-gateway-form-" + val);
       var checkout = document.getElementById("mp-checkout-form");
-      if (!checkout.classList.contains("last-step")) return;
+      // Prüfe ob wir im order-review-payment Schritt sind (statt auf last-step Klasse zu prüfen)
+      var orderReviewSection = document.getElementById("mp-checkout-section-order-review-payment");
+      var isLastStep = checkout.classList.contains("last-step") || (orderReviewSection && orderReviewSection.classList.contains("current"));
+      if (!isLastStep) return;
       // Alle Gateway-Formulare ausblenden
       document.querySelectorAll(".mp_gateway_form").forEach(function (form) {
         form.style.display = "none";

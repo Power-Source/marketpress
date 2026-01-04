@@ -261,27 +261,22 @@ if ( ! function_exists( 'mp_filter_email' ) ) :
 		} else {
 			$payment_info .= __( 'Your payment for this order is not yet complete. Here is the latest status:', 'mp' ) . "\n";
 			$statuses = $order->get_meta( 'mp_payment_info->status' );
+		if ( is_array( $statuses ) && ! empty( $statuses ) ) {
 			krsort( $statuses ); //sort with latest status at the top
 			$status    = reset( $statuses );
 			$timestamp = key( $statuses );
 			$payment_info .= mp_format_date( $timestamp ) . ': ' . $status;
 		}
+	}
 
-		// Total
-		$order_total = mp_format_currency( $currency, $order->get_meta( 'mp_payment_info->total' ) );
+	// Tracking URL
+	$tracking_url = $order->tracking_url( false );
 
-		// Tracking URL
-		$tracking_url = $order->tracking_url( false );
+	// Total
+	$order_total = mp_format_currency( $currency, $order->get_meta( 'mp_payment_info->total' ) );
 
-		$customer_name = MP_EMAIL_USE_BILLIG_NAME ? $order->get_meta( 'mp_billing_info->first_name' ) . ' ' . $order->get_meta( 'mp_billing_info->last_name' ) : $order->get_meta( 'mp_shipping_info->first_name' ) . ' ' . $order->get_meta( 'mp_shipping_info->last_name' );
-
-		// If we don't have shipping name (for example on digital download only orders), lets use the name on the billing info
-		if( empty( $customer_name ) ) $customer_name = trim( $order->get_meta( 'mp_billing_info->first_name' ) . ' ' . $order->get_meta( 'mp_billing_info->last_name' ) );
-
-		// Setup search/replace
-		$search_replace = array(
-			'CUSTOMERNAME' => $customer_name,
-			'ORDERID'      => $order->get_id(),
+	$search_replace = array(
+		'ORDERID'      => $order->get_id(),
 			'ORDERINFOSKU' => $order_info,
 			'ORDERINFO'    => $order_info,
 			'SHIPPINGINFO' => $shipping_billing_info,

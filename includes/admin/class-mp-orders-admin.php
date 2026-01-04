@@ -901,7 +901,8 @@ class MP_Orders_Admin {
 	 * @param object $query
 	 */
 	public function modify_query( $query ) {
-		if ( $query->get( 'post_type' ) != 'mp_order' || get_current_screen()->id != 'edit-mp_order' ) {
+		$current_screen = get_current_screen();
+		if ( $query->get( 'post_type' ) != 'mp_order' || ! $current_screen || $current_screen->id != 'edit-mp_order' ) {
 			//bail
 			return;
 		}

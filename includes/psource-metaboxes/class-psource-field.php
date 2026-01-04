@@ -619,7 +619,11 @@ class PSOURCE_Field {
 	 * @param mixed $post_id
 	 */
 	public function sanitize_for_db( $value, $post_id ) {
-		$value = is_array( $value ) ? $this->array_map_deep( $value, 'trim' ) : trim( $value );
+		if ( is_array( $value ) ) {
+			$value = $this->array_map_deep( $value, 'trim' );
+		} else {
+			$value = ( $value !== null ) ? trim( $value ) : '';
+		}
 
 		if ( !empty( $this->args[ 'save_callback' ] ) ) {
 			foreach ( (array) $this->args[ 'save_callback' ] as $func ) {

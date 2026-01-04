@@ -83,8 +83,15 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 			'paid'			 => false
 		) );
 
-		wp_redirect( $order->tracking_url( false ) );
-		exit;
+		// Prüfe ob es ein AJAX-Request ist
+		if ( wp_doing_ajax() ) {
+			// Bei AJAX: Order im Cache speichern für die AJAX-Response
+			wp_cache_set( 'order_object', $order, 'mp' );
+		} else {
+			// Bei normalem Request: Weiterleiten
+			wp_redirect( $order->tracking_url( false ) );
+			exit;
+		}
 	}
 
 	/**

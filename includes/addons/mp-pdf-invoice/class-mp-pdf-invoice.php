@@ -181,8 +181,12 @@ class MP_PDF_Invoice {
 				$country = '';
 			}
 			//we will append the contry the #2 of the array
-			$billing[2]  = $billing[2] . ', ' . $country;
-			$shipping[2] = $shipping[2] . ', ' . $country;
+			if ( isset( $billing[2] ) ) {
+				$billing[2] = $billing[2] . ', ' . $country;
+			}
+			if ( isset( $shipping[2] ) ) {
+				$shipping[2] = $shipping[2] . ', ' . $country;
+			}
 		}
 
 

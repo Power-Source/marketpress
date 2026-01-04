@@ -546,6 +546,7 @@ class MP_Checkout {
 			$cart			 = mp_cart();
 			$is_download_only = $cart->is_download_only();
 			$billing_info	 = mp_get_user_address( 'billing' );
+			$shipping_info	 = mp_get_user_address( 'shipping' );
 			$this->_sections = apply_filters( 'mp_checkout/sections_array', array(
 				   'login-register'             => __( 'Anmelden/Registrieren', 'mp' ),
 				   'billing-shipping-address'   => ( !$is_download_only ) ? __( 'Rechnungs-/Lieferadresse', 'mp' ) : __( 'Abrechnungsdaten', 'mp' ),
@@ -571,7 +572,14 @@ class MP_Checkout {
 			}
 
 			$order = wp_cache_get( 'order_object', 'mp' );
-			wp_send_json_success( array( 'redirect_url' => $order->tracking_url( false ) ) );
+			
+			// Prüfe ob Order erstellt wurde
+			if ( $order && is_object( $order ) && method_exists( $order, 'tracking_url' ) ) {
+				wp_send_json_success( array( 'redirect_url' => $order->tracking_url( false ) ) );
+			} else {
+				// Fallback: Gehe zur Order-Status-Seite (das Gateway sollte bereits weitergeleitet haben)
+				wp_send_json_success( array( 'redirect_url' => mp_store_page_url( 'order-status', false ) ) );
+			}
 		}
 
 		wp_send_json_error( array(
@@ -735,6 +743,12 @@ class MP_Checkout {
 				$visible_section = $section;
 				break;
 			}
+		}
+		
+		// Setze last-step Klasse, wenn order-review-payment der sichtbare/aktuelle Schritt ist
+		if ( $visible_section === 'order-review-payment' || ( ! $visible_section && count( $this->_sections ) > 0 && array_key_last( $this->_sections ) === 'order-review-payment' ) ) {
+			// Füge last-step Klasse zum Formular hinzu, wenn wir im letzten Schritt sind
+			$html = str_replace( 'mp_form-checkout"', 'mp_form-checkout last-step"', $html );
 		}
 
 		foreach ( $this->_sections as $section => $heading_text ) {
@@ -1000,7 +1014,9 @@ class MP_Checkout {
 				break;
 
 			case 'next' :
-				$text		 = __( 'Next Step &raquo;', 'mp' );
+				// Prüfe ob dies der letzte Schritt ist (order-review-payment)
+				$is_last_step = ( $section === 'order-review-payment' || $this->_step === 'order-review-payment' );
+				$text		 = $is_last_step ? __( 'Jetzt bestellen', 'mp' ) : __( 'Next Step &raquo;', 'mp' );
 				$classes[]	 = 'mp_button-medium';
 				$link = '<button class="' . implode( ' ', $classes ) . '" type="submit">' . $text . '</button>';
 				break;
@@ -1017,6 +1033,11 @@ class MP_Checkout {
 	 * @action wp
 	 */
 	public function maybe_process_checkout() {
+		// Security: Only process on POST requests to prevent accidental or malicious GET-based checkouts
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			return;
+		}
+
 		if ( wp_verify_nonce( mp_get_post_value( 'mp_checkout_nonce' ), 'mp_process_checkout' ) ) {
 			$payment_method	 = mp_get_post_value( 'payment_method' );
 			$cart			 = mp_cart();
