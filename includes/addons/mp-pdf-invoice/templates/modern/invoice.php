@@ -18,80 +18,89 @@
 	}
 	
 	.pdf-wrapper {
-		padding: 20px;
+		padding: 0;
 		border: 1px solid #ddd;
 		background: #fff;
+		overflow: hidden;
 	}
 
-	.container {
-		width: 100%;
-	}
-
-	.header {
-		margin-bottom: 15px;
-		padding-bottom: 10px;
-		border-bottom: 2px solid <?php echo esc_attr($vars['primary_color']); ?>;
+	.header-bar {
+		background: linear-gradient(135deg, <?php echo esc_attr($vars['primary_color']); ?> 0%, <?php echo esc_attr($vars['accent_color']); ?> 100%);
+		padding: 15px 20px;
+		margin: 0 0 15px 0;
+		color: #fff;
 	}
 	
-	.header-flex {
+	.header-content {
 		display: table;
 		width: 100%;
 	}
 	
 	.header-left {
 		display: table-cell;
-		width: 50%;
-		vertical-align: top;
+		width: 60%;
+		vertical-align: middle;
 	}
 	
 	.header-right {
 		display: table-cell;
-		width: 50%;
-		vertical-align: top;
+		width: 40%;
+		vertical-align: middle;
 		text-align: right;
 	}
-
-	.header img {
-		max-height: 50px;
+	
+	.header-bar img {
+		max-height: 45px;
 		width: auto;
-	}
-
-	.company-info {
-		font-size: 7pt;
-		color: #666;
-		margin-bottom: 10px;
-		padding: 3px 0;
-		border-bottom: 1px solid #ddd;
+		filter: brightness(0) invert(1);
 	}
 	
-	.invoice-title {
-		font-size: 16pt;
+	.invoice-number {
+		font-size: 20pt;
 		font-weight: bold;
-		margin: 8px 0 5px 0;
-		color: <?php echo esc_attr($vars['primary_color']); ?>;
+		margin: 0;
+	}
+	
+	.invoice-date {
+		font-size: 8pt;
+		opacity: 0.9;
 	}
 
-	.invoice-meta-box {
-		float: right;
-		width: 45%;
+	.sender-info {
+		font-size: 7pt;
+		color: #666;
+		padding: 3px 0;
+		margin-bottom: 8px;
+		border-bottom: 1px solid #eee;
+	}
+	
+	.recipient {
 		margin: 10px 0 15px 0;
-		padding: 8px;
-		background: #f9f9f9;
-		border-left: 3px solid <?php echo esc_attr($vars['accent_color']); ?>;
+		line-height: 1.4;
+	}
+	
+	.meta-box {
+		float: right;
+		width: 40%;
+		margin: 0 0 15px 15px;
+		padding: 10px;
+		background: <?php echo esc_attr($vars['primary_color']); ?>;
+		color: #fff;
 		font-size: 8pt;
 	}
 	
-	.invoice-meta-box table {
+	.meta-box table {
 		width: 100%;
 	}
 	
-	.invoice-meta-box td {
-		padding: 2px 5px;
+	.meta-box td {
+		padding: 3px 5px;
 	}
 
-	.billing-address {
-		margin: 10px 0 15px 0;
-		line-height: 1.4;
+	.greeting {
+		margin: 15px 0 10px 0;
+		font-size: 8pt;
+		line-height: 1.5;
 	}
 
 	table.items {
@@ -102,64 +111,64 @@
 	}
 
 	table.items thead th {
-		background-color: <?php echo esc_attr($vars['primary_color']); ?>;
-		padding: 6px 8px;
+		background: <?php echo esc_attr($vars['primary_color']); ?>;
+		padding: 8px;
 		color: #fff;
 		text-align: left;
 		font-weight: normal;
-		border-bottom: 2px solid <?php echo esc_attr($vars['primary_color']); ?>;
 	}
 
 	table.items tbody td {
-		padding: 5px 8px;
-		border-bottom: 1px solid #eee;
+		padding: 6px 8px;
+		border-bottom: 1px solid #f0f0f0;
 	}
 	
-	table.items tbody tr.subtotal td,
-	table.items tbody tr.total td {
+	table.items tbody tr:nth-child(even) {
+		background: #fafafa;
+	}
+	
+	table.items tbody tr.subtotal td {
+		border-top: 2px solid #ddd;
 		font-weight: bold;
+		padding-top: 8px;
 	}
 	
 	table.items tbody tr.total td {
-		border-top: 2px solid <?php echo esc_attr($vars['primary_color']); ?>;
-		padding-top: 8px;
+		border-top: 3px solid <?php echo esc_attr($vars['primary_color']); ?>;
+		background: <?php echo esc_attr($vars['accent_color']); ?>;
+		color: #fff;
+		font-weight: bold;
 		font-size: 10pt;
-		background: #f9f9f9;
+		padding: 10px 8px;
 	}
 	
 	table.items tbody td.no-border {
 		border-bottom: none;
 	}
 	
-	.shipping-address {
+	.shipping-box {
 		margin: 10px 0;
-		padding: 8px;
-		background: #f9f9f9;
-		border-left: 3px solid <?php echo esc_attr($vars['accent_color']); ?>;
+		padding: 10px;
+		background: #f5f5f5;
+		border-left: 4px solid <?php echo esc_attr($vars['accent_color']); ?>;
 		font-size: 8pt;
 	}
 	
-	.legal-note {
+	.legal-notice {
 		margin: 10px 0;
-		padding: 8px;
-		background: #fffbe6;
-		border-left: 3px solid <?php echo esc_attr($vars['accent_color']); ?>;
+		padding: 10px;
+		background: #fffef0;
+		border-left: 4px solid <?php echo esc_attr($vars['accent_color']); ?>;
 		font-size: 8pt;
-		line-height: 1.4;
 	}
 	
 	.footer {
-		margin-top: 15px;
+		margin-top: 20px;
 		padding-top: 10px;
-		border-top: 1px solid #ddd;
+		border-top: 2px solid <?php echo esc_attr($vars['primary_color']); ?>;
 		font-size: 7pt;
 		color: #666;
 		text-align: center;
-	}
-	
-	.greeting {
-		margin: 10px 0 5px 0;
-		font-size: 8pt;
 	}
 	
 	<?php if (!empty($vars['custom_css'])): ?>
@@ -169,65 +178,63 @@
 </style>
 
 <div class="pdf-wrapper">
-<div class="container">
-	<!-- Header mit Logo und Firmeninfo -->
-	<div class="header">
-		<div class="header-flex">
-			<div class="header-left">
-				{{logo}}
-			</div>
-			<div class="header-right" style="font-size: 7pt; color: #666;">
-				<strong>{{company_name}}</strong><br>
-				{{company_address}}
-			</div>
+<!-- Farbiger Header -->
+<div class="header-bar">
+	<div class="header-content">
+		<div class="header-left">
+			{{logo}}
+		</div>
+		<div class="header-right">
+			<div class="invoice-number">Rechnung</div>
+			<div class="invoice-date">#{{invoice_number}}</div>
 		</div>
 	</div>
-	
-	<!-- Rechnungsdetails Box rechts -->
-	<div class="invoice-meta-box">
+</div>
+
+<div class="container" style="padding: 0 20px 20px 20px;">
+	<!-- Meta-Informationen Box -->
+	<div class="meta-box">
 		<table>
 			<tr>
 				<td><strong>Rechnungsnummer:</strong></td>
 				<td style="text-align: right;">{{invoice_number}}</td>
 			</tr>
 			<tr>
-				<td><strong>Rechnungsdatum:</strong></td>
+				<td><strong>Datum:</strong></td>
 				<td style="text-align: right;"><?php echo date_i18n( 'd.m.Y', current_time( 'timestamp' ) ); ?></td>
 			</tr>
 			<tr>
-				<td><strong>Bestellnummer:</strong></td>
+				<td><strong>Bestellung:</strong></td>
 				<td style="text-align: right;">{{order_id}}</td>
 			</tr>
 		</table>
 	</div>
 	
-	<!-- Absender (Kleingedruckt) -->
-	<div class="company-info">
+	<!-- Absender -->
+	<div class="sender-info">
 		{{company_name}} &bull; {{company_address}}
 	</div>
 	
-	<!-- Rechnungsempfänger -->
-	<div class="billing-address">
+	<!-- Empfänger -->
+	<div class="recipient">
 		{{billing}}
 	</div>
 	
 	<div style="clear: both;"></div>
 	
-	<div class="invoice-title">Rechnung</div>
-	
 	<div class="greeting">
-		Sehr geehrte Damen und Herren,<br>
-		vielen Dank für Ihre Bestellung. Hiermit stellen wir Ihnen folgende Position(en) in Rechnung:
+		<strong>Sehr geehrte Damen und Herren,</strong><br>
+		vielen Dank für Ihre Bestellung. Nachfolgend finden Sie die Rechnung für folgende Position(en):
 	</div>
 	
 	<!-- Artikeltabelle -->
 	<table class="items">
 		<thead>
 			<tr>
-				<th style="width: 50%;">Artikel</th>
+				<th style="width: 48%;">Artikel</th>
 				<th style="width: 12%; text-align: center;">Menge</th>
-				<th style="width: 19%; text-align: right;">Einzelpreis</th>
-				<th style="width: 19%; text-align: right;">Gesamtpreis</th>
+				<th style="width: 20%; text-align: right;">Einzelpreis</th>
+				<th style="width: 20%; text-align: right;">Gesamt</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -235,22 +242,22 @@
 		</tbody>
 	</table>
 	
-	<!-- Versandadresse falls abweichend -->
+	<!-- Versandadresse -->
 	<?php if ( $show_shipping == true ): ?>
-	<div class="shipping-address">
+	<div class="shipping-box">
 		<strong>Versandadresse:</strong><br>
 		<div style="margin-top: 5px;">{{shipping}}</div>
 	</div>
 	<?php endif; ?>
 	
-	<!-- Rechtlicher Hinweis bei Kleinunternehmer -->
+	<!-- Rechtlicher Hinweis -->
 	<?php if ( !empty($vars['custom_note']) ): ?>
-	<div class="legal-note">
+	<div class="legal-notice">
 		<strong>Hinweis:</strong> {{custom_note}}
 	</div>
 	<?php endif; ?>
 	
-	<!-- Footer mit Pflichtangaben -->
+	<!-- Footer -->
 	<div class="footer">
 		<strong>{{company_name}}</strong> &bull; {{company_address}}<br>
 		<?php if ( !empty($vars['vat_id']) || !empty($vars['tax_number']) ): ?>

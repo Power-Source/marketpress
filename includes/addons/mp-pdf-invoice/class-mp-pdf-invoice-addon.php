@@ -237,6 +237,60 @@ class MP_PDF_Invoice_Addon {
 			'name'  => 'pdf_invoice[template_logo]',
 			'label' => array( 'text' => __( "Shop header/logo", "mp" ) ),
 		) );
+		
+		// Farbeinstellungen
+		$metabox->add_field( 'advanced_color', array(
+			'name'          => 'pdf_invoice[primary_color]',
+			'label'         => array( 'text' => __( 'Primärfarbe', 'mp' ) ),
+			'desc'          => __( 'Farbe für Kopfzeile und Akzente', 'mp' ),
+			'default_value' => '#333333',
+		) );
+		$metabox->add_field( 'advanced_color', array(
+			'name'          => 'pdf_invoice[accent_color]',
+			'label'         => array( 'text' => __( 'Akzentfarbe', 'mp' ) ),
+			'desc'          => __( 'Farbe für Highlights und wichtige Elemente', 'mp' ),
+			'default_value' => '#ffc107',
+		) );
+		$metabox->add_field( 'advanced_color', array(
+			'name'          => 'pdf_invoice[text_color]',
+			'label'         => array( 'text' => __( 'Textfarbe', 'mp' ) ),
+			'desc'          => __( 'Haupttextfarbe', 'mp' ),
+			'default_value' => '#000000',
+		) );
+		
+		// Custom CSS
+		$css_selectors_help = '<div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 4px solid #2271b1; font-size: 12px;">';
+		$css_selectors_help .= '<strong style="font-size: 13px; margin-bottom: 10px; display: block;">📋 Verfügbare CSS-Selektoren:</strong>';
+		$css_selectors_help .= '<table style="width: 100%; border-collapse: collapse;">';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; width: 30%; font-family: monospace; color: #d63638;">.pdf-wrapper</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Äußerer Container mit Border und Padding</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">.header</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Kopfbereich der Rechnung</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">.header-bar</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Farbiger Header-Balken (Modern Template)</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">.invoice-title</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">"Rechnung" Überschrift</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">.invoice-meta-box</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Box mit Rechnungsnummer, Datum, etc.</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">.billing-address</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Rechnungsadresse</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">table.items</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Artikeltabelle</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">table.items thead th</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Tabellen-Kopfzeile</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">table.items tbody td</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Tabellen-Zellen</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">.shipping-address</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Versandadresse-Box</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">.legal-note</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Rechtlicher Hinweis (Kleinunternehmer)</td></tr>';
+		$css_selectors_help .= '<tr><td style="padding: 5px; border-bottom: 1px solid #ddd; font-family: monospace; color: #d63638;">.footer</td><td style="padding: 5px; border-bottom: 1px solid #ddd;">Fußzeile mit Pflichtangaben</td></tr>';
+		$css_selectors_help .= '</table>';
+		$css_selectors_help .= '<div style="margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ddd;">';
+		$css_selectors_help .= '<strong>💡 Beispiel:</strong><br>';
+		$css_selectors_help .= '<code style="display: block; margin-top: 5px; padding: 10px; background: #f0f0f0; font-family: monospace; font-size: 11px; line-height: 1.6;">';
+		$css_selectors_help .= '.pdf-wrapper { border: 2px solid #000; }<br>';
+		$css_selectors_help .= '.invoice-title { color: #ff0000; font-size: 20pt; }<br>';
+		$css_selectors_help .= 'table.items thead th { background: #0066cc; }';
+		$css_selectors_help .= '</code>';
+		$css_selectors_help .= '</div>';
+		$css_selectors_help .= '</div>';
+		
+		$metabox->add_field( 'textarea', array(
+			'name'  => 'pdf_invoice[custom_css]',
+			'label' => array( 'text' => __( 'Eigenes CSS', 'mp' ) ),
+			'desc'  => __( 'Füge eigenes CSS hinzu um das Template anzupassen', 'mp' ) . $css_selectors_help,
+			'custom' => array( 'rows' => 10 ),
+		) );
 		/*$metabox->add_field( 'text', array(
 			'name'  => 'pdf_invoice[shop_name]',
 			'label' => array( 'text' => __( "Shop name", "mp" ) )

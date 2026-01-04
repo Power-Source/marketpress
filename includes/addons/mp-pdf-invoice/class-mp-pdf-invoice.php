@@ -229,42 +229,76 @@ class MP_PDF_Invoice {
 			if ( !is_array( $order_items ) ) $order_items = array();
 			foreach ( $order_items as $product_id => $items ){
 				foreach ( $items as $item ){
-					$order_details[] = sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', $item['name'], $item['quantity'], mp_format_currency( '', $item['price'] )
+					// Berechne Einzelpreis und Gesamtpreis
+					$unit_price = $item['price'] / $item['quantity'];
+					$total_price = $item['price'];
+					
+					$order_details[] = sprintf( 
+						'<tr><td>%s</td><td class="align-right" style="text-align: center;">%s</td><td class="align-right">%s</td><td class="align-right">%s</td></tr>', 
+						$item['name'], 
+						$item['quantity'], 
+						mp_format_currency( '', $unit_price ),
+						mp_format_currency( '', $total_price )
 					);
 				}								
 			}
+			
 			//times for the subtotal
-			$order_details[] = sprintf( '<tr><td class="no-bg">%s</td><td class="no-bg">%s</td><td>%s</td></tr>', '', __( "Subtotal", "mp" ), $cart->product_total( true ) );
+			$order_details[] = sprintf( 
+				'<tr class="subtotal"><td colspan="3" class="no-border align-right"><strong>%s:</strong></td><td class="align-right"><strong>%s</strong></td></tr>', 
+				__( "Zwischensumme", "mp" ), 
+				$cart->product_total( true ) 
+			);
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_subtotal', $order_details, $order, $cart, $type );
 
 			if ( $total_discount_value !== 0 ) {
-				$order_details[] = sprintf( '<tr><td class="no-bg">%s</td><td class="no-bg">%s</td><td>%s</td></tr>', '', __( "Discount", "mp" ), mp_format_currency( '', $total_discount_value ) );
+				$order_details[] = sprintf( 
+					'<tr><td colspan="3" class="no-border align-right">%s:</td><td class="align-right">%s</td></tr>', 
+					__( "Rabatt", "mp" ), 
+					mp_format_currency( '', $total_discount_value ) 
+				);
 			}
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_discount', $order_details, $order, $cart, $type );
 
 			if ( $cart->shipping_total() > 0 ) {
-				$order_details[] = sprintf( '<tr><td class="no-bg">%s</td><td class="no-bg">%s</td><td>%s</td></tr>', '', __( "Shipping", "mp" ), $cart->shipping_total( true ) );
+				$order_details[] = sprintf( 
+					'<tr><td colspan="3" class="no-border align-right">%s:</td><td class="align-right">%s</td></tr>', 
+					__( "Versandkosten", "mp" ), 
+					$cart->shipping_total( true ) 
+				);
 			}
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_shipping_total', $order_details, $order, $cart, $type );
 
-			$tax_label = mp_get_setting( 'tax->label', __( 'Tax', 'mp' ) );
+			$tax_label = mp_get_setting( 'tax->label', __( 'MwSt.', 'mp' ) );
+			$is_small_business = mp_get_setting( 'legal->small_business', false );
 
-			if ( $cart->tax_total() ) {
-				$order_details[] = sprintf( '<tr><td class="no-bg">%s</td><td class="no-bg">%s</td><td>%s</td></tr>', '', $tax_label, $cart->tax_total( true ) );
+			if ( $cart->tax_total() && !$is_small_business ) {
+				$order_details[] = sprintf( 
+					'<tr><td colspan="3" class="no-border align-right">%s (19%%):</td><td class="align-right">%s</td></tr>', 
+					$tax_label, 
+					$cart->tax_total( true ) 
+				);
 			}
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_tax_total', $order_details, $order, $cart, $type );
 
 			//get gateway
 			$gateway         = $order->get_meta( 'mp_payment_info->gateway_public_name' );
-			$order_details[] = sprintf( '<tr><td class="no-bg">%s</td><td class="no-bg">%s</td><td>%s</td></tr>', '', __( "Total", "mp" ), $cart->total( true ) );
+			$order_details[] = sprintf( 
+				'<tr class="total"><td colspan="3" class="align-right"><strong>%s:</strong></td><td class="align-right"><strong>%s</strong></td></tr>', 
+				__( "Gesamtbetrag", "mp" ), 
+				$cart->total( true ) 
+			);
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_total', $order_details, $order, $cart, $type );
 
-			$order_details[] = sprintf( '<tr><td class="no-bg">%s</td><td class="no-bg"></td><td class="no-bg"></td></tr>', sprintf( __( "Payment Method: %s", "mp" ), $gateway ) );
+			$order_details[] = sprintf( 
+				'<tr><td colspan="4" class="no-border" style="padding-top: 15px; font-size: 9pt;">%s</td></tr>', 
+				sprintf( __( "Zahlungsart: %s", "mp" ), $gateway ) 
+			);
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_payment_method', $order_details, $order, $cart, $type );
 
@@ -322,6 +356,24 @@ class MP_PDF_Invoice {
 		} else {
 			$show_shipping = true;
 		}
+		
+		// Hole die Legal Settings
+		$legal_settings = mp_get_setting( 'legal' );
+		
+		// Mache alle Variablen im Template verfügbar
+		$pdf_settings = mp_get_setting( 'pdf_invoice' );
+		$vars = array(
+			'company_name'    => isset($legal_settings['company_name']) ? $legal_settings['company_name'] : '',
+			'company_address' => isset($legal_settings['company_address']) ? nl2br($legal_settings['company_address']) : '',
+			'vat_id'          => isset($legal_settings['vat_id']) ? $legal_settings['vat_id'] : '',
+			'tax_number'      => isset($legal_settings['tax_number']) ? $legal_settings['tax_number'] : '',
+			'custom_note'     => isset($legal_settings['custom_note']) ? $legal_settings['custom_note'] : '',
+			'primary_color'   => isset($pdf_settings['primary_color']) ? $pdf_settings['primary_color'] : '#333333',
+			'accent_color'    => isset($pdf_settings['accent_color']) ? $pdf_settings['accent_color'] : '#ffc107',
+			'text_color'      => isset($pdf_settings['text_color']) ? $pdf_settings['text_color'] : '#000000',
+			'custom_css'      => isset($pdf_settings['custom_css']) ? $pdf_settings['custom_css'] : '',
+		);
+		
 		ob_start();
 		include $template;
 
