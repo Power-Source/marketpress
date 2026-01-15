@@ -389,7 +389,7 @@ function addCustomValidation() {
         /**
          * Triggers right before a field container is hidden
          *
-         * @since 3.0
+         * @since 1.0
          * @access public
          * @param jQuery $container The jQuery object to be hidden.
          */
@@ -400,7 +400,7 @@ function addCustomValidation() {
         /**
          * Triggers right after a field container is hidden
          *
-         * @since 3.0
+         * @since 1.0
          * @access public
          * @param jQuery $container The jQuery object that was hidden.
          */
@@ -412,7 +412,7 @@ function addCustomValidation() {
         /**
          * Triggers right before a field container is show
          *
-         * @since 3.0
+         * @since 1.0
          * @access public
          * @param jQuery $container The jQuery object to be shown.
          */
@@ -422,7 +422,7 @@ function addCustomValidation() {
             /**
              * Triggers right after a field container is fully shown
              *
-             * @since 3.0
+             * @since 1.0
              * @access public
              * @param jQuery $container The jQuery object that was shown.
              */

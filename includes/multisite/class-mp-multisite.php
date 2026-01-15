@@ -5,7 +5,7 @@ class MP_Multisite {
 	/**
 	 * Refers to the current multisite build
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var int
 	 */
@@ -14,7 +14,7 @@ class MP_Multisite {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -23,7 +23,7 @@ class MP_Multisite {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -38,7 +38,7 @@ class MP_Multisite {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -212,7 +212,7 @@ class MP_Multisite {
 	}
 
 	/**
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function register_post_type() {
@@ -233,7 +233,7 @@ class MP_Multisite {
 	 * @param MP_Product $item
 	 * @param $paid
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function record_sale( MP_Product $item, $paid ) {
@@ -243,7 +243,7 @@ class MP_Multisite {
 	/**
 	 * @param $post_id
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function untrash_post( $post_id ) {
@@ -255,7 +255,7 @@ class MP_Multisite {
 	/**
 	 * @param $post_id
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function delete_product( $post_id ) {
@@ -267,7 +267,7 @@ class MP_Multisite {
 	 * @param $post
 	 * @param $update
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 */
 	public function save_post( $post_id, $post, $update ) {
 		if ( $post->post_type != MP_Product::get_post_type() ) {
@@ -292,7 +292,7 @@ class MP_Multisite {
 	 * @param $product_id
 	 *
 	 * @return mixed
-	 * @since 3.0
+	 * @since 1.0
 	 */
 	public function find_index( $blog_id, $product_id ) {
 		global $wpdb;
@@ -495,7 +495,7 @@ class MP_Multisite {
 	 *
 	 * @return array
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @deprecated
 	 */
@@ -609,7 +609,7 @@ class MP_Multisite {
 	 * @param $atts
 	 *
 	 * @return string
-	 * @since 3.0
+	 * @since 1.0
 	 */
 	function mp_global_categories_list_sc( $atts ) {
 		return mp_global_taxonomy_list( 'product_category', $atts, false );
@@ -659,7 +659,7 @@ class MP_Multisite {
 	}
 
 	/**
-	 * @since 3.0
+	 * @since 1.0
 	 */
 	public function load_shipping_plugins() {
 		/**
@@ -672,7 +672,7 @@ class MP_Multisite {
 	/**
 	 * Drop old multisite tables
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @global $wpdb
 	 */
@@ -689,7 +689,7 @@ class MP_Multisite {
 	/**
 	 * Truncate index table
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @global $wpdb
 	 */
@@ -701,7 +701,7 @@ class MP_Multisite {
 	/**
 	 * Filter out gateways that aren't allowed according to network admin settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_gateway_api/get_gateways
 	 */
@@ -736,7 +736,7 @@ class MP_Multisite {
 	/**
 	 * Check to see if install sequence needs to be run
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function maybe_install() {
@@ -813,7 +813,7 @@ class MP_Multisite {
 	/**
 	 * Add/update network settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function ms_settings() {
@@ -846,7 +846,7 @@ class MP_Multisite {
 	/**
 	 * Make sure product post types are indexed by Post Indexer
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function post_indexer_set_post_types() {
@@ -873,7 +873,7 @@ class MP_Multisite {
 	 *
 	 * See https://core.trac.classicpress.org/ticket/20861 for more info.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function product_url( $url, $product ) {
@@ -892,7 +892,7 @@ class MP_Multisite {
 	 * mp_settings to not update accordingly which affects things like tax and
 	 * shipping rates.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action switch_blog
 	 */

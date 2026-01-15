@@ -2,7 +2,7 @@
 	
 	/**
 	 * Custom tooltip implementation to replace jQuery UI tooltip
-	 * @since 3.0
+	 * @since 1.0
 	 */
 	$.mptooltip = function( element, options ) {
 		this.$element = $( element );
@@ -79,7 +79,7 @@
 	/**
      * Apply a coupon code to the cart
      *
-     * @since 3.0
+     * @since 1.0
      * @param string couponCode The coupon code to apply.
      * @param int The store ID that the coupon comes from.
      * @param object $couponForm The coupon form being applied.
@@ -119,7 +119,7 @@ var mp_coupons = { };
         /**
          * Remove a coupon
          *
-         * @since 3.0
+         * @since 1.0
          * @param int couponID The internal ID (post ID) of the coupon to remove.
          * @param int storeID The store ID (blog ID) of the coupon to remove.
          */
@@ -157,7 +157,7 @@ var mp_coupons = { };
         /**
          * Init coupon form listeners
          *
-         * @since 3.0
+         * @since 1.0
          */
         initCouponFormListeners: function() {
             $( '.mp_coupon_form' ).each( function() {

@@ -5,7 +5,7 @@ class MP_Dashboard_Widgets {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Dashboard_Widgets {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -28,7 +28,7 @@ class MP_Dashboard_Widgets {
 	/**
 	 * Constructor
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -40,7 +40,7 @@ class MP_Dashboard_Widgets {
 	/**
 	 * Enqueue styles and scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function enqueue_styles_scripts() {

@@ -5,7 +5,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Refers to the current build of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var int
 	 */
@@ -23,7 +23,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -38,7 +38,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Constructor
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -82,7 +82,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Force check the global gateway
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter psource_field/get_value/gateways[allowed][ {global_gateway} ]
 	 */
@@ -96,7 +96,7 @@ class MP_Admin_Multisite {
 	 * When changing the network_store_page value update the product_category and
 	 * product_tag slug that is shown before those fields.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action psource_field/print_scripts/network_store_page
 	 */
@@ -131,7 +131,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Enqueue admin styles and scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_enqueue_scripts
 	 */
@@ -145,7 +145,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Initialize metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_metaboxes() {
@@ -162,7 +162,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Initialize general settings metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_general_settings_metabox() {
@@ -348,7 +348,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Initialize global gateway metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_global_gateway_settings_metabox() {
@@ -388,7 +388,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Initialize gateway permissions metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_gateway_permissions_metabox() {
@@ -413,7 +413,7 @@ class MP_Admin_Multisite {
 		/**
 		 * Filter the gateway permissions options list
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 *
 		 * @param array $options_permissions An array of options.
@@ -436,7 +436,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Initialize theme permissions metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_theme_permissions_metabox() {
@@ -459,7 +459,7 @@ class MP_Admin_Multisite {
 		/**
 		 * Filter the theme permissions options list
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 *
 		 * @param array $options_permissions An array of options.
@@ -479,7 +479,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Add menu items to the network admin menu
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function add_menu_items() {
@@ -492,7 +492,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Displays the network settings form/metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function network_store_settings() {
@@ -508,7 +508,7 @@ class MP_Admin_Multisite {
 					/**
 					 * Render PSOURCE Metabox settings
 					 *
-					 * @since 3.0
+					 * @since 1.0
 					 */
 					do_action( 'psource_metabox/render_settings_metaboxes' );
 					?>
@@ -521,7 +521,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Pages for network cart (marketplace,marketplace/categories etc)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_network_pages() {
@@ -565,7 +565,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Display "create page" button next to a given field
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * filter psource_field/after_field
 	 */
@@ -601,7 +601,7 @@ class MP_Admin_Multisite {
 	/**
 	 * Print scripts for creating store page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action psource_field/print_scripts
 	 */

@@ -19,7 +19,7 @@ class MP_Taxes {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */

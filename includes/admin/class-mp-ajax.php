@@ -5,7 +5,7 @@ class MP_Ajax {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Ajax {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -28,7 +28,7 @@ class MP_Ajax {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -357,7 +357,7 @@ class MP_Ajax {
 	/**
 	 * Process ajax login
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_nopriv_mp_ajax_login
 	 */
@@ -400,7 +400,7 @@ class MP_Ajax {
 	/**
 	 * Bulk edit products
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_bulk_edit_product
 	 */
@@ -434,7 +434,7 @@ class MP_Ajax {
 	/**
 	 * Check  if an email address exists
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_nopriv_mp_check_if_email_exists
 	 */
@@ -449,7 +449,7 @@ class MP_Ajax {
 	/**
 	 * Check if an username exists
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @access wp_ajax_nopriv_mp_check_if_username_exists
 	 */
@@ -464,7 +464,7 @@ class MP_Ajax {
 	/**
 	 * Create a store page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_create_store_page
 	 */
@@ -487,7 +487,7 @@ class MP_Ajax {
 	/**
 	 * Look up an order by it's ID
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_lookup_order, wp_ajax_nopriv_mp_lookup_order
 	 */
@@ -516,7 +516,7 @@ class MP_Ajax {
 	/**
 	 * Update product list
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_nopriv_mp_update_product_list, wp_ajax_mp_update_product_list
 	 */
@@ -565,7 +565,7 @@ class MP_Ajax {
 	/**
 	 * Update state dropdown list and determine if zip code field should be shown
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_update_states_dropdown, wp_ajax_nopriv_mp_update_states_dropdown
 	 */
@@ -595,7 +595,7 @@ class MP_Ajax {
 	/**
 	 * Remove custom shipping method
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function mp_remove_custom_shipping_method() {

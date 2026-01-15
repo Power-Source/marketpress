@@ -4,7 +4,7 @@ class MP_Store_Settings_Addons {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -13,7 +13,7 @@ class MP_Store_Settings_Addons {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -27,7 +27,7 @@ class MP_Store_Settings_Addons {
 	/**
 	 * Display add-on settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function display_addon_settings() {
@@ -58,7 +58,7 @@ class MP_Store_Settings_Addons {
 	/**
 	 * Add metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function display_list_table() {
@@ -134,7 +134,7 @@ jQuery(document).ready(function($){
 	/**
 	 * Display settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action 
 	 */
@@ -149,7 +149,7 @@ jQuery(document).ready(function($){
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {

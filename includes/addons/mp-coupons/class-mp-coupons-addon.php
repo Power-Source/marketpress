@@ -5,7 +5,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Refers to all of the coupons
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -23,7 +23,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Refers to the applied coupons
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -32,7 +32,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Refers to the applied coupons as objects
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -41,7 +41,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Refers to the build of the addon
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var int
 	 */
@@ -50,7 +50,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -65,7 +65,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -161,7 +161,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Convert an array of coupon IDs to objects
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @uses $wpdb
 	 *
@@ -180,7 +180,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Install
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	protected function _install() {
@@ -204,7 +204,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Updates the coupon schema.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	public function _update_coupon_schema() {
@@ -282,7 +282,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Update coupon session data
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	protected function _update_session() {
@@ -297,7 +297,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Filter the cart product total
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_cart/cart_meta/product_total
 	 * @return string
@@ -333,7 +333,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Filter the cart total
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_cart/total
 	 * @return float
@@ -389,7 +389,7 @@ class MP_Coupons_Addon {
 	/**
 	 * When an item is removed from the cart, validate applied coupons to ensure they are still valid
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action mp_cart/before_item_removed
 	 * @global $switched
@@ -416,7 +416,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Display the coupon form
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_cart/after_cart_html
 	 * @return string
@@ -446,7 +446,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Get coupon code value
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action psource_field_get_value_coupon_code
 	 * @return string
@@ -475,7 +475,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Get total discount amount
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return float
 	 */
@@ -509,7 +509,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Determine if there are applied coupons
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return bool
 	 */
@@ -520,7 +520,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Save the coupon data
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_insert_post_data
 	 *
@@ -546,7 +546,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Process coupons when a new order is created
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action mp_order/new_order
 	 */
@@ -568,7 +568,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Initialize the coupon metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action init
 	 */
@@ -762,7 +762,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Init settings metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action init
 	 */
@@ -788,7 +788,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Changes the sort order of product coupons
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action pre_get_posts
 	 *
@@ -816,7 +816,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Defines the product coupon sortable columns
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action manage_edit-product_coupon_sortable_columns
 	 *
@@ -834,7 +834,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Prints applicable CSS
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_print_styles
 	 */
@@ -873,7 +873,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Prints applicable javascript
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_print_footer_scripts
 	 */
@@ -896,7 +896,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Adds menu items to the admin menu
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_menu
 	 */
@@ -908,7 +908,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Apply a coupon
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param MP_Coupon $coupon The coupon object to apply.
@@ -927,7 +927,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Apply coupon (ajax)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_cart_apply_coupon, wp_ajax_nopriv_mp_cart_apply_coupon
 	 */
@@ -965,7 +965,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Remove coupon (ajax)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_cart_remove_coupon, wp_ajax_nopriv_mp_cart_remove_coupon
 	 */
@@ -995,7 +995,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Register post type
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function register_post_type() {
@@ -1044,7 +1044,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Remove all coupons
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action mp_cart/after_empty_cart
 	 */
@@ -1056,7 +1056,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Check items in cart. If cart is empty, remove all coupons
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function check_items_in_cart() {
@@ -1070,7 +1070,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Remove a given coupon
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $coupon_id The coupon ID to remove.
@@ -1091,7 +1091,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Change the product price to reflect coupon value
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_product/get_price
 	 * @return array
@@ -1155,7 +1155,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Filter the product total
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_cart/product_total
 	 * @return float
@@ -1170,7 +1170,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Defines the column headers for the product coupon list table
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action manage_product_coupon_posts_columns
 	 *
@@ -1194,7 +1194,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Defines the list table data for product coupons
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action manage_product_coupon_posts_custom_column
 	 *
@@ -1247,7 +1247,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Enqueue frontend styles
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_enqueue_scripts
 	 */
@@ -1262,7 +1262,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Enqueue frontend scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_print_scripts
 	 */
@@ -1287,7 +1287,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Get all coupons from db
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return array
 	 */
@@ -1307,7 +1307,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Get applied coupons from session
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action switch_blog
 	 * @return array
@@ -1326,7 +1326,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Get applied coupons as objects
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return array
 	 */
@@ -1368,7 +1368,7 @@ if ( ! function_exists( 'mp_coupons_addon' ) ) :
 	/**
 	 * Get the MP_Coupons instance
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @return MP_Coupons
 	 */
 	function mp_coupons_addon() {

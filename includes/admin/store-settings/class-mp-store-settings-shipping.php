@@ -5,7 +5,7 @@ class MP_Store_Settings_Shipping {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Store_Settings_Shipping {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -28,7 +28,7 @@ class MP_Store_Settings_Shipping {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -39,7 +39,7 @@ class MP_Store_Settings_Shipping {
 	/**
 	 * Prints the necessary javascript
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function print_scripts() {
@@ -83,7 +83,7 @@ class MP_Store_Settings_Shipping {
 	/**
 	 * Add payment gateway settings metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function add_metaboxes() {

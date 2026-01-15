@@ -5,7 +5,7 @@ class MP_Cart {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Cart {
 	/**
 	 * Refers to the cart's items
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -23,7 +23,7 @@ class MP_Cart {
 	/**
 	 * Refers to the cart's items that are in the user's cart cookie, but are no longer available
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	protected $_items_unavailable = array( 'deleted' => array(), 'stock_issue' => array() );
@@ -31,7 +31,7 @@ class MP_Cart {
 	/**
 	 * Refers to the current cart ID
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var int
 	 */
@@ -40,7 +40,7 @@ class MP_Cart {
 	/**
 	 * Refers to the original cart ID
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var int
 	 */
@@ -49,7 +49,7 @@ class MP_Cart {
 	/**
 	 * Refers to the cart cookie id
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var string
 	 */
@@ -58,7 +58,7 @@ class MP_Cart {
 	/**
 	 * Refers to if the cart is download only
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var bool
 	 */
@@ -67,7 +67,7 @@ class MP_Cart {
 	/**
 	 * Refers to the cart total
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -76,7 +76,7 @@ class MP_Cart {
 	/**
 	 * Refers to whether or not the cart is using cookies or not
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var bool
 	 */
@@ -85,7 +85,7 @@ class MP_Cart {
 	/**
 	 * Refers to whether or not we're using global cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var bool
 	 */
@@ -94,7 +94,7 @@ class MP_Cart {
 	/**
 	 * Refers to if the current cart is editable
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @type bool
 	 */
@@ -103,7 +103,7 @@ class MP_Cart {
 	/*	 * Refers to the number of times products have been downloaded
 	 *
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @type array
 	 */
@@ -112,7 +112,7 @@ class MP_Cart {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -127,7 +127,7 @@ class MP_Cart {
 	/**
 	 * Add an item to the cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $item_id The id of the item to add
@@ -167,7 +167,7 @@ class MP_Cart {
 	/**
 	 * Enqueue admin styles and scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_enqueue_scripts
 	 */
@@ -186,7 +186,7 @@ class MP_Cart {
 	/**
 	 * Get cart price (takes into account tax rules)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param float $price The individual product price.
@@ -208,7 +208,7 @@ class MP_Cart {
 	/**
 	 * Get the cart's URL
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return string
 	 */
@@ -235,7 +235,7 @@ class MP_Cart {
 	/**
 	 * Update the cart (ajax)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_update_cart, wp_ajax_nopriv_mp_update_cart
 	 */
@@ -337,7 +337,7 @@ class MP_Cart {
 	/**
 	 * Convert an array of items to an array of MP_Product objects
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $items
@@ -378,7 +378,7 @@ class MP_Cart {
 	/**
 	 * Get cart cookie
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	protected function _get_cart_cookie() {
@@ -409,7 +409,7 @@ class MP_Cart {
 	/**
 	 * Check if a given item ID is a global item ID
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 *
 	 * @param string /int $item_id
@@ -423,7 +423,7 @@ class MP_Cart {
 	/**
 	 * Get all cart items across all blogs
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return array
 	 */
@@ -434,7 +434,7 @@ class MP_Cart {
 	/**
 	 * Get the ids of the blogs that contain items in the user's cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return array
 	 */
@@ -453,7 +453,7 @@ class MP_Cart {
 	/**
 	 * Get the current blog id of the cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return int
 	 */
@@ -464,7 +464,7 @@ class MP_Cart {
 	/**
 	 * Get a single item quantity from the cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $item_id
@@ -482,7 +482,7 @@ class MP_Cart {
 	/**
 	 * Get cart items
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return array
 	 */
@@ -499,7 +499,7 @@ class MP_Cart {
 	/**
 	 * Gets cart items as objects
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return array
 	 */
@@ -512,7 +512,7 @@ class MP_Cart {
 	/**
 	 * Get cart line item html
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param MP_Product /int $product The product to get the html for.
@@ -529,7 +529,7 @@ class MP_Cart {
 		/**
 		 * Filter cart columns array
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param array The cart columns array.
 		 */
@@ -599,7 +599,7 @@ class MP_Cart {
 			/**
 			 * Filter the column html
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param string The current column html.
 			 * @param string The current column slug.
@@ -617,7 +617,7 @@ class MP_Cart {
 		/**
 		 * Filter the line item html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current line html.
 		 * @param MP_Product $product The current product object.
@@ -630,7 +630,7 @@ class MP_Cart {
 	/**
 	 * Check if all digital products to hide shipping estimate
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 */
@@ -650,7 +650,7 @@ class MP_Cart {
 	/**
 	 * Display cart meta html
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo Optional, whether to echo or return. Defaults to true.
@@ -675,7 +675,7 @@ class MP_Cart {
 			/**
 			 * Filter the header text
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param string The current header text.
 			 * @param MP_Cart The current cart object.
@@ -701,7 +701,7 @@ class MP_Cart {
 		/**
 		 * Filter the product total html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The current product total html.
 		 * @param MP_Cart The current cart object.
@@ -722,7 +722,7 @@ class MP_Cart {
 		/**
 		 * Filter the shipping total html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The current shipping total html.
 		 * @param MP_Cart The current cart object.
@@ -739,7 +739,7 @@ class MP_Cart {
 			/**
 			 * Filter the estimated tax html
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param string The current estimated tax html.
 			 * @param MP_Cart The current cart object.
@@ -757,7 +757,7 @@ class MP_Cart {
 		/**
 		 * Filter the order total html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The current order total html.
 		 * @param MP_Cart The current cart object.
@@ -767,7 +767,7 @@ class MP_Cart {
 		/**
 		 * Filter the cart meta html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The current cart meta html.
 		 * @param MP_Cart The current cart object.
@@ -784,7 +784,7 @@ class MP_Cart {
 	/**
 	 * Display the cart contents
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $args {
@@ -823,7 +823,7 @@ class MP_Cart {
 			/**
 			 * Filter the no items in your cart message
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param string $message The default message.
 			 */
@@ -850,7 +850,7 @@ class MP_Cart {
 		/**
 		 * Add html before cart
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string
 		 * @param MP_Cart $this The current cart object.
@@ -867,7 +867,7 @@ class MP_Cart {
 		/**
 		 * Filter the cart classes array
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param array The default classes.
 		 */
@@ -905,7 +905,7 @@ class MP_Cart {
 				/**
 				 * Filter the html after each store cart items
 				 *
-				 * @since 3.0
+				 * @since 1.0
 				 *
 				 * @param string $after_cart_store_items_html The current html.
 				 * @param MP_Cart $this The current cart object.
@@ -932,7 +932,7 @@ class MP_Cart {
 		/**
 		 * Filter html after cart
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string
 		 * @param MP_Cart $this The current cart object.
@@ -964,7 +964,7 @@ class MP_Cart {
 			/**
 			 * Filter the checkout button tooltip text
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param string The current tooltip text.
 			 */
@@ -998,7 +998,7 @@ class MP_Cart {
 			/**
 			 * Filter the checkout button text
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param string The current button text.
 			 */
@@ -1007,7 +1007,7 @@ class MP_Cart {
 			/**
 			 * Filter the checkout button classes
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param array The current button classes.
 			 * @param bool $editable Whether the cart is editable or not.
@@ -1017,7 +1017,7 @@ class MP_Cart {
 			/**
 			 * Filter the Continue Shopping button classes
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param array The current button classes.
 			 */
@@ -1060,7 +1060,7 @@ class MP_Cart {
 		/**
 		 * Filter the cart contents html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current html.
 		 * @param MP_Cart $this The current MP_Cart object.
@@ -1078,7 +1078,7 @@ class MP_Cart {
 	/**
 	 * Display the item quantity dropdown
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $args {
@@ -1093,7 +1093,7 @@ class MP_Cart {
 		/**
 		 * Change the default max quantity allowed
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param int The default maximum.
 		 */
@@ -1110,7 +1110,7 @@ class MP_Cart {
 		/**
 		 * Filter drop down maximum qty, by default it's 10
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param int max qty to display on dropdown
 		 */
@@ -1176,14 +1176,14 @@ class MP_Cart {
 	/**
 	 * Empty cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function empty_cart() {
 		/**
 		 * Fires right before the cart is emptied
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param MP_Cart $this The current cart object.
 		 */
@@ -1199,7 +1199,7 @@ class MP_Cart {
 		/**
 		 * Fires right after the cart is emptied
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param MP_Cart $this The current cart object.
 		 */
@@ -1209,7 +1209,7 @@ class MP_Cart {
 	/**
 	 * Enqueue styles and scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_enqueue_scripts
 	 * @uses $post
@@ -1245,7 +1245,7 @@ class MP_Cart {
 	/**
 	 * Display the floating cart html
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_footer
 	 */
@@ -1306,7 +1306,7 @@ class MP_Cart {
 	/**
 	 * Display the cart products
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $context Cart context widget or floating.
@@ -1368,7 +1368,7 @@ class MP_Cart {
 	/**
 	 * Get the html markup for an individual line item for the floating cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $item_id The product's ID.
@@ -1431,7 +1431,7 @@ class MP_Cart {
 		/**
 		 * Filter the floating cart line item HTML
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current line item html.
 		 * @param MP_Product $product The current product object.
@@ -1444,7 +1444,7 @@ class MP_Cart {
 	/**
 	 * Check if cart has a specific item
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param $item_id The item ID
@@ -1458,7 +1458,7 @@ class MP_Cart {
 	/**
 	 * Check if cart has items
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function has_items() {
@@ -1482,7 +1482,7 @@ class MP_Cart {
 	/**
 	 * Check if cart contains only downloadable products
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return bool
 	 */
@@ -1526,7 +1526,7 @@ class MP_Cart {
 	/**
 	 * Display the item count
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo Optional, whether to echo or return. Defaults to echo.
@@ -1578,7 +1578,7 @@ class MP_Cart {
 	/**
 	 * Get the product total
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $format Optional, whether to format the value or not. Defaults to false.
@@ -1615,7 +1615,7 @@ class MP_Cart {
 				/**
 				 * Filter the product total
 				 *
-				 * @since 3.0
+				 * @since 1.0
 				 *
 				 * @param float The cart total.
 				 * @param MP_Cart The current cart object.
@@ -1643,7 +1643,7 @@ class MP_Cart {
 	/**
 	 * Get the total price for tangible products.
 	 *
-	 * @since 3.0.8
+	 * @since 1.0.8
 	 * @access public
 	 *
 	 * @param bool $format Optional, whether to format the value or not. Defaults to false.
@@ -1733,7 +1733,7 @@ class MP_Cart {
 				/**
 				 * Filter the product original total, also, this variable should be internal
 				 *
-				 * @since 3.0
+				 * @since 1.0
 				 *
 				 * @param float The cart total.
 				 * @param MP_Cart The current cart object.
@@ -1761,7 +1761,7 @@ class MP_Cart {
 	/**
 	 * Remove an item
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $item_id The item ID to remove.
@@ -1776,7 +1776,7 @@ class MP_Cart {
 			/**
 			 * Fires right before an item has been removed from the cart
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 * @access public
 			 *
 			 * @param int The ID of the item that has been removed.
@@ -1790,7 +1790,7 @@ class MP_Cart {
 			/**
 			 * Fires after an item has been removed from the cart
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 * @access public
 			 *
 			 * @param int The ID of the item that has been removed.
@@ -1807,7 +1807,7 @@ class MP_Cart {
 	/**
 	 * Get removed cart line item html
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param MP_Product /int $product The product to get the html for.
@@ -1824,7 +1824,7 @@ class MP_Cart {
 		/**
 		 * Filter cart removed item columns array
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param array The cart removed item columns array.
 		 */
@@ -1866,7 +1866,7 @@ class MP_Cart {
 			/**
 			 * Filter the column html
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param string The current column html.
 			 * @param string The current column slug.
@@ -1884,7 +1884,7 @@ class MP_Cart {
 		/**
 		 * Filter the line removed item html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current line html.
 		 * @param MP_Product $product The current product object.
@@ -1897,7 +1897,7 @@ class MP_Cart {
 	/**
 	 * Reset cart ID back to the original
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function reset_id() {
@@ -1916,7 +1916,7 @@ class MP_Cart {
 	/**
 	 * Set the cart ID
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $id
@@ -1939,7 +1939,7 @@ class MP_Cart {
 	/**
 	 * Get the amount of tax applied to the shipping total
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $format Optional, whether to format the returned value or not. Defaults to false.
@@ -1963,7 +1963,7 @@ class MP_Cart {
 		/**
 		 * Filter the shipping tax amount
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param int $shipping_tax The current shipping tax amount.
 		 * @param float $shipping_price The current shipping price including tax
@@ -1977,7 +1977,7 @@ class MP_Cart {
 	/**
 	 * Check if shipping price
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return bool
 	 */
@@ -1993,7 +1993,7 @@ class MP_Cart {
 	/**
 	 * Get the calculated price for shipping
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return float The calculated price. False, if shipping address is not available
 	 */
@@ -2091,7 +2091,7 @@ class MP_Cart {
 	/**
 	 * Get the total shipping weight
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return float
 	 */
@@ -2120,7 +2120,7 @@ class MP_Cart {
 		/**
 		 * Filter the cart shipping weight
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 *
 		 * @param float $weight The current shipping weight.
@@ -2217,7 +2217,7 @@ class MP_Cart {
 				/**
 				 * Filter the tax price
 				 *
-				 * @since 3.0
+				 * @since 1.0
 				 *
 				 * @param float $tax_amt The calculated tax price.
 				 * @param float $total The cart total.
@@ -2248,7 +2248,7 @@ class MP_Cart {
 	/**
 	 * Get total tax for DP
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return float
 	 */
@@ -2305,7 +2305,7 @@ class MP_Cart {
 	/**
 	 * Get total tax for special products
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return float
 	 */
@@ -2354,7 +2354,7 @@ class MP_Cart {
 	/**
 	 * Get total
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $format Optional, whether to format or not. Defaults to false.
@@ -2368,7 +2368,7 @@ class MP_Cart {
 			/**
 			 * Filter the total
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param float The current total.
 			 * @param array An array containing all of the applicable cart subtotals (e.g. tax, shipping, etc)
@@ -2407,7 +2407,7 @@ class MP_Cart {
 	/**
 	 * Update an item quantity
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $item_id The item to update.
@@ -2426,7 +2426,7 @@ class MP_Cart {
 	/**
 	 * Alert about unavailable items or stock issues
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_footer
 	 */
@@ -2454,7 +2454,7 @@ class MP_Cart {
 	/**
 	 * Update the cart cookie
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	protected function _update_cart_cookie() {
@@ -2540,7 +2540,7 @@ class MP_Cart {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 *
 	 * @param bool $use_cookies Optional, whether the cart should use cookies or not. Defaults to true.

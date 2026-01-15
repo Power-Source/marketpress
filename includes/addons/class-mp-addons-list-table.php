@@ -18,7 +18,7 @@ class MP_Addons_List_Table extends WP_List_Table {
 		return array(
 			'cb' => '<input type="checkbox" />',
 			'label' => __('Name', 'mp'),		
-			'desc' => __('Description', 'mp'),
+			'desc' => __('Beschreibung', 'mp'),
 			'status' => __('Status', 'mp'),
 			'settings' => '',
 		);
@@ -30,8 +30,8 @@ class MP_Addons_List_Table extends WP_List_Table {
 	
 	function get_bulk_actions() {
 		return array(
-			'enable' => __('Enable', 'mp'),
-			'disable' => __('Disable', 'mp'),
+			'enable' => __('Aktivieren', 'mp'),
+			'disable' => __('Deaktivieren', 'mp'),
 		);
 	}
 	
@@ -42,10 +42,10 @@ class MP_Addons_List_Table extends WP_List_Table {
 		foreach ( $addons as $addon ) {
 			if ( MP_Addons::get_instance()->is_addon_enabled($addon->class) ) {
 				$enabled = true;
-				$status = '<a class="button mp-enable-disable-addon" title="' . __('Disable add-on', 'mp') . '" href="#"><span class="mp-addon-status enabled"></span>' . __('Enabled', 'mp') . '</a>';
+				$status = '<a class="button mp-enable-disable-addon" title="' . __('Deaktiviere Add-on', 'mp') . '" href="#"><span class="mp-addon-status enabled"></span>' . __('Aktiviert', 'mp') . '</a>';
 			} else {
 				$enabled = false;
-				$status = '<a class="button mp-enable-disable-addon" title="' . __('Enable add-on', 'mp') . '" href="#"><span class="mp-addon-status disabled"></span>' . __('Disabled', 'mp') . '</a>';	
+				$status = '<a class="button mp-enable-disable-addon" title="' . __('Aktiviere Add-on', 'mp') . '" href="#"><span class="mp-addon-status disabled"></span>' . __('Deaktiviert', 'mp') . '</a>';	
 			}
 
 			$status = apply_filters( 'mp_addon_status_column_data', $status, $addon );
@@ -81,12 +81,12 @@ class MP_Addons_List_Table extends WP_List_Table {
 		switch ( $this->current_action() ) {
 			case 'enable' :
 				MP_Addons::get_instance()->enable($ids);
-				$notice = sprintf(_n('1 add-on enabled', '%s add-ons enabled', $count, 'mp'), $count);
+				$notice = sprintf(_n('1 Add-on aktiviert', '%s Add-ons aktiviert', $count, 'mp'), $count);
 			break;
 			
 			case 'disable' :
 				MP_Addons::get_instance()->disable($ids);
-				$notice = sprintf(_n('1 add-on disabled', '%s add-ons disabled', $count, 'mp'), $count);
+				$notice = sprintf(_n('1 Add-on deaktiviert', '%s Add-ons deaktiviert', $count, 'mp'), $count);
 			break;
 		}
 		
@@ -125,7 +125,7 @@ class MP_Addons_List_Table extends WP_List_Table {
 	
 	function column_settings( $item ) {
 		if ( mp_addons()->is_addon_enabled( $item['class'] ) && $item['has_settings'] ) {
-			return '<a href="' . add_query_arg( array( 'page' => 'store-settings-addons', 'addon' => $item['class'] ), admin_url( 'admin.php' ) ) . '">' . __( 'Settings', 'mp' ) . '</a>';
+			return '<a href="' . add_query_arg( array( 'page' => 'store-settings-addons', 'addon' => $item['class'] ), admin_url( 'admin.php' ) ) . '">' . __( 'Einstellungen', 'mp' ) . '</a>';
 		}
 		
 		return '';

@@ -88,7 +88,7 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 	/**
 	 * Search by title only
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter posts_search
 	 * @param string $search
@@ -126,7 +126,7 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 	/**
 	 * Prints scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	       public function print_scripts() {

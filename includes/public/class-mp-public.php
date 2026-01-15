@@ -16,7 +16,7 @@ class MP_Public {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -25,7 +25,7 @@ class MP_Public {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -40,7 +40,7 @@ class MP_Public {
 	/**
 	 * Constructor
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -124,7 +124,7 @@ class MP_Public {
 	/**
 	 * Safely start session
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	public function start_session() {
@@ -137,7 +137,7 @@ class MP_Public {
 	/**
 	 * Disable comments on store pages
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function disable_comments_on_store_pages( $open, $post_id ) {
@@ -178,7 +178,7 @@ class MP_Public {
 	/**
 	 * Hide the single product title
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter the_title
 	 * @return string
@@ -194,7 +194,7 @@ class MP_Public {
 	/**
 	 * Check if the current page is a store page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $page The specific page to check - e.g. "cart".
 	 *
@@ -287,7 +287,7 @@ class MP_Public {
 	/**
 	 * Include files
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function includes() {
@@ -343,7 +343,7 @@ class MP_Public {
 	/**
 	 * Enqueue frontend styles and scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 
@@ -369,7 +369,7 @@ class MP_Public {
 	/**
 	 * Enqueue frontend styles and scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function frontend_scripts() {
@@ -448,7 +448,7 @@ class MP_Public {
 	/**
 	 * Load template for a store page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter page_template
 	 * @uses $post
@@ -480,7 +480,7 @@ class MP_Public {
 	/**
 	 * Load template for a single product
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter single_template
 	 * @uses $post, $wp_query
@@ -532,7 +532,7 @@ class MP_Public {
 	 * We don't want to use the default taxonomy template as this doesn't provide
 	 * enough flexibility to correctly display product layouts, etc
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter taxonomy_template
 	 * @uses $wp_query
@@ -604,7 +604,7 @@ class MP_Public {
 	/**
 	 * Maybe start the session
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action init
 	 */
@@ -619,7 +619,7 @@ class MP_Public {
 	/**
 	 * Hide the post thumbnail on single product, product category and product tag templates
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter get_post_metadata
 	 */
@@ -638,7 +638,7 @@ class MP_Public {
 	/**
 	 * Serve a file download
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	function serve_download( $product_id ) {
@@ -710,7 +710,7 @@ class MP_Public {
 		/**
 		 * Triggered when a file is served for download
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $url The url of the file being served.
 		 * @param MP_Order $order The order object associated with the file
@@ -859,7 +859,7 @@ class MP_Public {
 	/**
 	 * Filter the content for a single product
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter the_content
 	 * @return string
@@ -880,7 +880,7 @@ class MP_Public {
 	/**
 	 * Change the title output for product_category and product_tag archives
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter the_title
 	 */
@@ -897,7 +897,7 @@ class MP_Public {
 		/**
 		 * Filter the taxonomy title for product category/tag templates
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $title A title.
 		 * @param Object $tax A taxonomy object.
@@ -911,7 +911,7 @@ class MP_Public {
 	/**
 	 * Change the content for product_category and product_tag archives
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter the_content
 	 */

@@ -13,7 +13,7 @@
 	 * Not ideal, but the jQuery validate plugin requires fields to have names
 	 * so this function will add them at the last possible minute
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 */
 	function addInputNames() {
 		$( '#mp-cc-num' ).attr( 'name', 'mp_cc_num' );
@@ -24,7 +24,7 @@
 	/**
 	 * Remove CC input names before submitting form for PCI compliance
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 */
 	function removeInputNames() {
 		$( '#mp-cc-num, #mp-cc-exp, #mp-cc-cvc' ).removeAttr( 'name' );
@@ -33,7 +33,7 @@
 	/**
 	 * Generate card token
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 */		
 	function generateToken() {
 		marketpress.loadingOverlay( 'show' );
@@ -61,7 +61,7 @@
   /**
 	 * Show/hide the payment error message
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @param string action Either "show" or "hide".
 	 * @param string message The message to show. Required if action is "show".
 	 */

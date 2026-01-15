@@ -45,7 +45,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 	/**
 	 * Gets the available Fedex services.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	function get_services() {
@@ -119,7 +119,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 	/**
 	 * Add additional shipping fields
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_checkout/address_fields_array
 	 *
@@ -187,7 +187,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 	/**
 	 * Updates the plugin settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $settings
@@ -234,7 +234,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 	/**
 	 * Initialize the settings metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_settings_metabox() {

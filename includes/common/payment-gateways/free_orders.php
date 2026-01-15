@@ -57,7 +57,7 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 	/**
 	 * Display the payment form
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @param array $cart. Contains the cart contents for the current blog
 	 * @param array $shipping_info. Contains shipping info and email in case you need it
@@ -110,7 +110,7 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 	/**
 	 * Filter the order confirmation email text
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_order/notification_body/free_orders
 	 */
@@ -125,7 +125,7 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 	/**
 	 * Filter the order confirmation text that shows up on the order status page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter mp_order/confirmation_text/free_orders
 	 */
@@ -136,7 +136,7 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 	/**
 	 * Initialize the settings metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_settings_metabox() {

@@ -4,7 +4,7 @@ class MP_Store_Settings_Notifications {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -13,7 +13,7 @@ class MP_Store_Settings_Notifications {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -27,7 +27,7 @@ class MP_Store_Settings_Notifications {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -37,7 +37,7 @@ class MP_Store_Settings_Notifications {
 	/**
 	 * Init metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_metaboxes() {

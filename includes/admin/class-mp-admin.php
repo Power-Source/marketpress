@@ -5,7 +5,7 @@ class MP_Admin {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Admin {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -28,7 +28,7 @@ class MP_Admin {
 	/**
 	 * Constructor
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -135,7 +135,7 @@ class MP_Admin {
 	/**
 	 * Includes any necessary files
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function _includes() {
@@ -150,7 +150,7 @@ class MP_Admin {
 	/**
 	 * Adds the MarketPress help tab
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function add_help_tab() {
@@ -164,7 +164,7 @@ class MP_Admin {
 	/**
 	 * Displays the export orders form
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function export_orders_form() {
@@ -228,7 +228,7 @@ class MP_Admin {
 	/**
 	 * Enqueue styles and scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function enqueue_styles_scripts() {
@@ -340,7 +340,7 @@ class MP_Admin {
 	/**
 	 * Modifies the post-updated messages for the mp_order, product and mp_coupon post types
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter post_updated_messages
 	 *

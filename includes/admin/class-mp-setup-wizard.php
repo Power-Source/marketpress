@@ -5,7 +5,7 @@ class MP_Setup_Wizard {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -261,7 +261,7 @@ class MP_Setup_Wizard {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -276,7 +276,7 @@ class MP_Setup_Wizard {
 	/**
 	 * Display setup wizard nag message
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_notices
 	 */
@@ -294,7 +294,7 @@ class MP_Setup_Wizard {
 	/**
 	 * Init metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_metaboxes() {
@@ -659,7 +659,7 @@ class MP_Setup_Wizard {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -779,7 +779,7 @@ class MP_Setup_Wizard {
 	/**
 	 * Find currency base on country
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	function determine_currency() {

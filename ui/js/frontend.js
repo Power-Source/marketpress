@@ -2,13 +2,13 @@
     /**
      * Preload loading icon
      *
-     * @since 3.0
+     * @since 1.0
      */
     $( '<img>' ).get( 0 ).src = mp_i18n.loadingImage;
     /**
      * Add or remove cart ajax loading icon
      *
-     * @since 3.0
+     * @since 1.0
      * @param string action Optional, either "show" or "hide". Defaults to "show".
      */
     $.fn.ajaxLoading = function( action ) {
@@ -55,7 +55,7 @@ var marketpress = { };
         /**
          * Show or hide the loading overlay
          *
-         * @since 3.0
+         * @since 1.0
          * @param string action Either show/hide. Optional.
          */
         loadingOverlay: function( action ) {
@@ -81,7 +81,7 @@ var marketpress = { };
         /**
          * Initialize tooltips using browser native title attribute
          *
-         * @since 3.0
+         * @since 1.0
          */
         initToolTips: function( ) {
             // Use native browser tooltips via title attribute
@@ -146,7 +146,7 @@ var marketpress = { };
         /**
          * Initialize Slim Select elements (statt select2)
          *
-         * @since 3.0
+         * @since 1.0
          */
         initSelect2: function() {
             var selects = document.querySelectorAll('select.mp_select2, select.mp-select2, select.mp_select2_search');
@@ -167,7 +167,7 @@ var marketpress = { };
         /**
          * Initialize order look up
          *
-         * @since 3.0
+         * @since 1.0
          */
         initOrderLookup: function( ) {
             var $form = $( '#mp-order-lookup-form' );
@@ -205,7 +205,7 @@ var marketpress = { };
         /**
          * Initialize content tabs on the single product template
          *
-         * @since 3.0
+         * @since 1.0
          */
         initProductTabs: function( ) {
 
@@ -237,7 +237,7 @@ var marketpress = { };
         /**
          * Trigger events after an ajax request
          *
-         * @since 3.0
+         * @since 1.0
          * @param string event The base event string.
          * @param object resp The ajax response object.
          * @param object $scope Optional, the scope for triggered events. Defaults to document.
@@ -252,7 +252,7 @@ var marketpress = { };
             /**
              * Fires whether the response was successful or not
              *
-             * @since 3.0
+             * @since 1.0
              * @param object The response data.
              */
             $scope.trigger( event, [ resp ] );
@@ -260,7 +260,7 @@ var marketpress = { };
                 /**
                  * Fires on success
                  *
-                 * @since 3.0
+                 * @since 1.0
                  * @param object The response data object.
                  */
                 $scope.trigger( successEvent.replace( '//', '/' ), [ resp.data ] );
@@ -269,7 +269,7 @@ var marketpress = { };
                 /**
                  * Fires on error
                  *
-                 * @since 3.0
+                 * @since 1.0
                  * @param string Any applicable error message.
                  */
                 $scope.trigger( errorEvent.replace( '//', '/' ), [ message ] );
@@ -278,7 +278,7 @@ var marketpress = { };
         /**
          * Initialize product image lightbox
          *
-         * @since 3.0
+         * @since 1.0
          */
         initImageLightbox: function() {
             // Vanilla JS: Öffnet basicLightbox für Produktbilder
@@ -306,7 +306,7 @@ var marketpress = { };
         /**
          * Initialize product filters/pagination
          *
-         * @since 3.0
+         * @since 1.0
          */
         initProductFiltersPagination: function( ) {
             var $form = $( '#mp-products-filter-form' );
@@ -339,7 +339,7 @@ var marketpress = { };
         /**
          * Update product list
          *
-         * @since 3.0
+         * @since 1.0
          * @access public
          */
         updateProductList: function( ) {
@@ -357,7 +357,7 @@ var marketpress = { };
         /**
          * Unserialize a string
          *
-         * @since 3.0
+         * @since 1.0
          * @param string str A serialized string or a url containing a querystring
          * @return object
          */
@@ -378,7 +378,7 @@ var marketpress = { };
         /**
          * Initialize global product filters/pagination
          *
-         * @since 3.0
+         * @since 1.0
          */
         initGlobalProductFiltersPagination: function( ) {
             var $form = $( '#mp_global_product_list_refine' );
@@ -403,7 +403,7 @@ var marketpress = { };
         /**
          * Update global product list
          *
-         * @since 3.0
+         * @since 1.0
          * @access public
          */
         updateGlobalProductList: function( ) {

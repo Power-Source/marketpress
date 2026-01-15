@@ -318,7 +318,7 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		/**
 		 * Filter product list html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $content The current html content.
 		 * @param array $args The arguments passed to mp_list_products
@@ -362,8 +362,8 @@ if ( ! function_exists( 'mp_global_products_nav' ) ) {
                     'current'      => max( 1, $paged ),
                     'show_all'     => false,
                     'prev_next'    => true,
-                    'prev_text'    => __( 'Prev', 'mp' ),
-                    'next_text'    => __( 'Next', 'mp' ),
+                    'prev_text'    => __( 'Vorherige', 'mp' ),
+                    'next_text'    => __( 'Nächste', 'mp' ),
                     'add_args'     => true,
                     'add_fragment' => '',
                 ) );
@@ -376,7 +376,7 @@ if ( ! function_exists( 'mp_global_products_nav' ) ) {
         /**
          * Filter the products nav html
          *
-         * @since 3.0
+         * @since 1.0
          *
          * @param string $html
          * @param WP_Query $custom_query
@@ -397,7 +397,7 @@ if ( ! function_exists( 'mp_global_products_filter' ) ) :
 	/**
 	 * Display product filters
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param bool $hidden Are the filters hidden or visible?
 	 * @param int $per_page The number of posts per page
@@ -622,7 +622,7 @@ if ( ! function_exists( '_mp3_global_products_html' ) ) {
 
 						<div style="display:none">
 							<span class="entry-title">' . $product->title( false ) . '</span> was last modified:
-							<time class="updated">' . get_the_time( 'Y-m-d\TG:i' ) . '</time> by
+							<time class="updated">' . get_the_time( 'd.m.Y H:i' ) . '</time> by
 							<span class="author vcard"><span class="fn">' . get_the_author_meta( 'display_name' ) . '</span></span>
 						</div>
 
@@ -643,7 +643,7 @@ if ( ! function_exists( '_mp3_global_products_html' ) ) {
 		/**
 		 * Filter the product list html content
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html .
 		 * @param WP_Query $custom_query .
@@ -749,7 +749,7 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 
 						<div style="display:none">
 							<span class="entry-title">' . $product->title( false ) . '</span> was last modified:
-							<time class="updated">' . get_the_time( 'Y-m-d\TG:i' ) . '</time> by
+							<time class="updated">' . get_the_time( 'd.m.Y H:i' ) . '</time> by
 							<span class="author vcard"><span class="fn">' . get_the_author_meta( 'display_name' ) . '</span></span>
 						</div>
 					</div>
@@ -768,7 +768,7 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 		/**
 		 * Filter the product list html content
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html .
 		 * @param WP_Query $custom_query .

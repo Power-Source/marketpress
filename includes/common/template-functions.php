@@ -508,7 +508,7 @@ if ( ! function_exists( '_mp_order_status_overview' ) ) :
 	/**
 	 * Display the order status overview html.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @return string
 	 */
 	function _mp_order_status_overview() {
@@ -561,7 +561,7 @@ if ( ! function_exists( '_mp_products_html' ) ) :
 	/**
 	 * Display products according to preference
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $view Either "grid" or "list".
@@ -666,7 +666,7 @@ if ( ! function_exists( '_mp_products_html' ) ) :
 
 						<div style="display:none">
 							<span class="entry-title">' . $product->title( false ) . '</span> was last modified:
-							<time class="updated">' . get_the_time( 'Y-m-d\TG:i' ) . '</time> by
+							<time class="updated">' . get_the_time( 'd.m.Y H:i' ) . '</time> by
 							<span class="author vcard"><span class="fn">' . get_the_author_meta( 'display_name' ) . '</span></span>
 						</div>
 
@@ -691,7 +691,7 @@ if ( ! function_exists( '_mp_products_html' ) ) :
 		/**
 		 * Filter the product list html content
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html .
 		 * @param WP_Query $custom_query .
@@ -707,7 +707,7 @@ if ( ! function_exists( '_mp_products_html_list' ) ) :
 	/**
 	 * Display product list in list layout
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param WP_Query $custom_query
 	 *
@@ -724,7 +724,7 @@ if ( ! function_exists( '_mp_products_html_grid' ) ) :
 	/**
 	 * Display product list in grid layout
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param WP_Query $custom_query
 	 *
@@ -741,7 +741,7 @@ if ( ! function_exists( 'mp_before_tax_price' ) ) :
 	/**
 	 * Get the price before taxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param float $tax_price The price including tax.
 	 * @param float $rate Optional. The tax rate applied to the price.
@@ -793,7 +793,7 @@ if ( ! function_exists( 'mp_cart_link' ) ) :
 
 	/**
 	 * Display the current shopping cart link. If global cart is on reflects global location
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param bool $echo Optional, whether to echo. Defaults to true.
 	 * @param bool $url Optional, whether to return a link or url. Defaults to show link.
@@ -816,7 +816,7 @@ if ( ! function_exists( 'mp_cart_link' ) ) :
 		/**
 		 * Filter the cart link
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $link The current link.
 		 * @param bool $echo Optional, whether to echo. Defaults to true.
@@ -839,7 +839,7 @@ if ( ! function_exists( 'mp_checkout_step_url' ) ) :
 	/**
 	 * Get the current shopping cart link with checkout step
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $checkoutstep . Possible values: checkout-edit, shipping, checkout, confirm-checkout, confirmation
 	 */
@@ -854,7 +854,7 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 	/**
 	 * Create a store page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $type The type of page to create.
 	 *
@@ -952,7 +952,7 @@ if ( ! function_exists( 'mp_display_currency' ) ) :
 	/**
 	 * Format a number as currency without the symbol
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param float $amount The amount to format.
 	 * @param int $dec_places Optional, the number of decimal places to show.
@@ -979,7 +979,7 @@ if ( ! function_exists( 'mp_format_currency' ) ) :
 	/**
 	 * Formats currency
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $currency The currency code to use for formatting (defaults to value set in currency settings)
 	 * @param float $amount The amount to format
@@ -1026,7 +1026,7 @@ if ( ! function_exists( 'mp_format_currency' ) ) :
 		/**
 		 * Filter the currency symbol used to format curency
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $symbol
 		 * @param string $currency
@@ -1103,7 +1103,7 @@ if ( ! function_exists( 'mp_format_currency' ) ) :
 		/**
 		 * Filter the formatted currency
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $formatted
 		 * @param string $currency
@@ -1122,7 +1122,7 @@ if ( ! function_exists( 'mp_format_date' ) ) :
 	/**
 	 * Format a date according to settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param int $timestamp
 	 * @param bool $date_only Optional, whether to return just the date part or include the time as well. Defaults to include time.
@@ -1133,7 +1133,7 @@ if ( ! function_exists( 'mp_format_date' ) ) :
 			$format .= ' - ' . get_option( 'time_format' );
 		}
 
-		$date = get_date_from_gmt( date( 'Y-m-d H:i:s', $timestamp ), $format );
+		$date = get_date_from_gmt( date( 'd.m.Y H:i', $timestamp ), $format );
 
 		return $date;
 		//return date_i18n( $format, $timestamp);
@@ -1146,7 +1146,7 @@ if ( ! function_exists( 'mp_get_current_user_zipcode' ) ) :
 	/**
 	 * Get the current user's zipcode
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return string The zipcode. False, if no zipcode could be retrieved.
 	 */
@@ -1175,7 +1175,7 @@ if ( ! function_exists( 'mp_get_current_user_city' ) ) :
 	/**
 	 * Get the current user's zipcode
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return string The zipcode. False, if no zipcode could be retrieved.
 	 */
@@ -1204,7 +1204,7 @@ if ( ! function_exists( 'mp_get_user_address' ) ) :
 	/**
 	 * Get full user address
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $what Either shipping or billing.
 	 * @param WP_User /int $user Optional, an WP_User object or a user ID. Defaults to the current user.
@@ -1284,7 +1284,7 @@ if ( ! function_exists( 'mp_list_categories' ) ) :
 		/**
 		 * Filter the category list html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $list
 		 * @param array $args
@@ -1305,7 +1305,7 @@ if ( ! function_exists( 'mp_list_payment_options' ) ) :
 	/**
 	 * List available payment options (if there is more than one)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param bool $echo Optional, whether to echo or return. Defaults to echo.
 	 */
@@ -1334,7 +1334,7 @@ if ( ! function_exists( 'mp_list_payment_options' ) ) :
 		/**
 		 * Filter the options array before formatting to html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param array $options
 		 */
@@ -1370,7 +1370,7 @@ if ( ! function_exists( 'mp_list_payment_options' ) ) :
 		/**
 		 * Filter the payment options html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current html.
 		 */
@@ -1390,7 +1390,7 @@ if ( ! function_exists( 'mp_list_plugin_shipping_options' ) ) :
 	/**
 	 * Display an array of shipping plugin shipping options as html
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param MP_Shipping_API $plugin A shipping plugin object.
 	 * @param bool $echo Optional, whether to echo or return. Defaults to return.
@@ -1399,7 +1399,7 @@ if ( ! function_exists( 'mp_list_plugin_shipping_options' ) ) :
 	 */
 	function mp_list_plugin_shipping_options( $plugin, $echo = false ) {
 		if ( ! $plugin instanceof MP_Shipping_API ) {
-			trigger_error( $plugin . ' is not an instance of MP_Shipping_API', E_USER_ERROR );
+			trigger_error( $plugin . ' ist keine Instanz deraw MP_Shipping_API', E_USER_ERROR );
 		}
 
 		$what                = ( mp_get_post_value( 'enable_shipping_address' ) ) ? 'shipping' : 'billing';
@@ -1439,7 +1439,7 @@ if ( ! function_exists( 'mp_list_plugin_shipping_options' ) ) :
 		/**
 		 * Filter the shipping options list html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html Current html.
 		 * @param array $options An array of shipping options.
@@ -1460,7 +1460,7 @@ if ( ! function_exists( 'mp_get_user_address_part' ) ) :
 	/**
 	 * Get user address part
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $what What to get (e.g. address1, address2, etc)
 	 * @param string $type Either shipping or billing.
@@ -1520,7 +1520,7 @@ if ( ! function_exists( 'mp_get_states' ) ) :
 	/**
 	 * Get an array of states/provinces for a given country
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $country A country code.
@@ -1537,7 +1537,7 @@ if ( ! function_exists( 'mp_get_states' ) ) :
 		/**
 		 * Filter the state/province list
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param array $list The current state/province list.
 		 * @param string $country The current country.
@@ -1553,7 +1553,7 @@ if ( ! function_exists( 'mp_get_image_size' ) ) :
 	/**
 	 * Get the image size per presentation settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $view Either "single" or "list".
 	 *
@@ -1587,7 +1587,7 @@ if ( ! function_exists( 'mp_get_order_history' ) ) :
 	/**
 	 * Get order history for a given user
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param int $user_id The ID of the user to retrieve order history for.
 	 *
@@ -1630,7 +1630,7 @@ if ( ! function_exists( 'mp_get_order_history' ) ) :
 		/**
 		 * Filter the user's order history
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param array $orders The current array of orders.
 		 * @param int $user_id The user's ID.
@@ -1650,7 +1650,7 @@ if ( ! function_exists( 'mp_store_page_uri' ) ) {
 	/**
 	 * Get a store page uri
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $page The page to get the uri for.
 	 * @param bool $echo Optional, whether to echo or return. Defaults to echo.
@@ -1681,7 +1681,7 @@ if ( ! function_exists( 'mp_store_page_url' ) ) :
 	/**
 	 * Get a store page url
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $page The page to get the URL for.
 	 * @param bool $echo Optional, whether to echo or return. Defaults to echo.
@@ -1717,7 +1717,7 @@ if ( ! function_exists( 'mp_tax_rate' ) ) :
 	/**
 	 * Get the tax rate per settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param bool $echo Optional, whether to echo or return. Defaults to return.
 	 */
@@ -1783,7 +1783,7 @@ if ( ! function_exists( 'mp_tax_rate' ) ) :
 		/**
 		 * Filter the tax rate
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param float
 		 * @param float $tax_rate The current tax rate.
@@ -1804,7 +1804,7 @@ if ( ! function_exists( 'mp_weight_label' ) ) :
 	/**
 	 * Display the appropriate weight label (kgs/lbs) according to settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param int /float $val
 	 *
@@ -1817,7 +1817,7 @@ if ( ! function_exists( 'mp_weight_label' ) ) :
 		/**
 		 * Filter the weight label
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html
 		 * @param int /float $val
@@ -1835,7 +1835,7 @@ if ( ! function_exists( 'mp_dimension_label' ) ) :
 	/**
 	 * Display the appropriate dimension label (in/cm) according to settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param int /float $val
 	 */
@@ -1846,7 +1846,7 @@ if ( ! function_exists( 'mp_dimension_label' ) ) :
 		/**
 		 * Filter the dimension label
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html
 		 * @param int /float $val
@@ -1865,7 +1865,7 @@ if ( ! function_exists( 'mp_is_shop_page' ) ) :
 	/**
 	 * Check if current page is a shop page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param array /string $page The specific page to check - e.g. "cart".
 	 *
@@ -1882,7 +1882,7 @@ if ( ! function_exists( 'mp_list_products' ) ) :
 	/**
 	 * Display a list of products according to preference
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param bool $echo Optional, whether to echo or return
 	 * @param bool $paginate Optional, whether to paginate
@@ -1966,21 +1966,6 @@ if ( ! function_exists( 'mp_list_products' ) ) :
 				$query['paged'] = $args['page'] = intval( get_query_var( 'page' ) );
 			}
 
-			/*//Get session values for order and order_by
-			if ( session_id() == '' ) {
-				if (version_compare(phpversion(), '5.4.0', '<')) {
-				     if(session_id() == '') {
-				        @session_start();
-				     }
-				 }
-				 else
-				 {
-				    if (session_status() == PHP_SESSION_NONE) {
-				        @session_start();
-				    }
-				 }
-			}*/
-
 			if( !isset( $_SESSION ) ){
 				$_SESSION = array();
 			}
@@ -1996,7 +1981,7 @@ if ( ! function_exists( 'mp_list_products' ) ) :
 				$args['order']    = $order;
 			}
 
-// Get order by
+			// Get order by
 			if ( ! is_null( $args['order_by'] ) ) {
 				if ( 'price' == $args['order_by'] ) {
 					$query['meta_key'] = 'sort_price';
@@ -2018,13 +2003,13 @@ if ( ! function_exists( 'mp_list_products' ) ) :
 			}
 		}
 
-// Get order direction
+		// Get order direction
 		$query['order'] = mp_get_setting( 'order' );
 		if ( ! is_null( $args['order'] ) ) {
 			$query['order'] = $args['order'];
 		}
 
-// Filter by featured
+		// Filter by featured
 		if ( (bool) $args['featured'] ) {
 			$query['meta_query'][]     = array(
 				'key'     => 'featured',
@@ -2060,16 +2045,16 @@ if ( ! function_exists( 'mp_list_products' ) ) :
             );
         }
 
-// The Query
+		// The Query
 		$custom_query = new WP_Query( $query );
-// Get layout type
+		// Get layout type
 		$layout_type = mp_get_setting( 'list_view' );
 		if ( ! is_null( $args['list_view'] ) ) {
 			$layout_type = $args['list_view'] ? 'list' : 'grid';
 		}
 
 		//$layout_type_output = (( 'grid' == $layout_type ) ? 'mp_products-grid' : 'mp_products-list');
-// Build content
+		// Build content
 		$content = '';
 
 		if ( ! mp_doing_ajax() ) {
@@ -2092,7 +2077,7 @@ if ( ! function_exists( 'mp_list_products' ) ) :
 		/**
 		 * Filter product list html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $content The current html content.
 		 * @param array $args The arguments passed to mp_list_products
@@ -2113,7 +2098,7 @@ if ( ! function_exists( 'mp_order_lookup_form' ) ) :
 	/**
 	 * Display a form for looking up orders
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param array $args {
 	 *        Optional, an array of arguments.
@@ -2158,7 +2143,7 @@ if ( ! function_exists( 'mp_order_lookup_form' ) ) :
 		/**
 		 * Filter the order lookup form html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $form The form HTML.
 		 * @param array $args Any arguments passed to the function.
@@ -2179,7 +2164,7 @@ if ( ! function_exists( 'mp_order_status' ) ) :
 	/**
 	 * Display the order status page html
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param array $args {
 	 *        Optional, an array of arguments.
@@ -2276,7 +2261,7 @@ if ( ! function_exists( 'mp_featured_products' ) ) :
 	/**
 	 * Displays a list of popular products ordered by sales.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @uses mp_list_products()
 	 *
@@ -2306,7 +2291,7 @@ if ( ! function_exists( 'mp_featured_products' ) ) :
 		/**
 		 * Filter the featured products html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $content The current HTML markup.
 		 * @param array $args mp_featured_products short code attributes.
@@ -2328,7 +2313,7 @@ if ( ! function_exists( 'mp_popular_products' ) ) :
 	/**
 	 * Displays a list of popular products ordered by sales.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param bool $echo Optional, whether to echo or return
 	 * @param int $num Optional, max number of products to display. Defaults to 5
@@ -2372,7 +2357,7 @@ if ( ! function_exists( 'mp_popular_products' ) ) :
 		/**
 		 * Filter the popular products html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $content The current HTML markup.
 		 * @param int $num The number of products to display.
@@ -2682,7 +2667,7 @@ if ( ! function_exists( 'mp_product' ) ) {
 						/**
 						 * Filter the content tab html
 						 *
-						 * @since 3.0
+						 * @since 1.0
 						 *
 						 * @param string
 						 * @param string $slug The tab slug.
@@ -2708,7 +2693,7 @@ if ( ! function_exists( 'mp_product' ) ) {
 		/**
 		 * Filter the product html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $return The current product html.
 		 * @param int $product ->ID The product's ID.
@@ -2813,7 +2798,7 @@ if ( ! function_exists( 'mp_products_nav' ) ) :
 		/**
 		 * Filter the products nav html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html
 		 * @param WP_Query $custom_query
@@ -2834,7 +2819,7 @@ if ( ! function_exists( 'mp_products_filter' ) ) :
 	/**
 	 * Display product filters
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param bool $hidden Are the filters hidden or visible?
 	 * @param int $per_page The number of posts per page
@@ -2951,7 +2936,7 @@ if ( ! function_exists( 'mp_related_products' ) ) :
 	/**
 	 * Get related products
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param int $product_id .
 	 * @param string $relate_by Optional, how to relate the products - either by category, tag, or both.
@@ -2995,7 +2980,7 @@ if ( ! function_exists( 'mp_get_store_email' ) ) :
 	/**
 	 * Get the store admin email address
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @return string
 	 */
 	function mp_get_store_email() {
@@ -3009,7 +2994,7 @@ if ( ! function_exists( 'mp_send_email' ) ) :
 	/**
 	 * Send an email
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $email The email address to send to.
 	 * @param string $subject The subject of the email.

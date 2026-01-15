@@ -22,7 +22,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Refers to the registered plugins set by register_plugin()
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access private
 		 * @var array
 		 */
@@ -31,7 +31,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Refers to the active plugins
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access private
 		 * @var array
 		 */
@@ -40,7 +40,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Refers to the plugins that are loaded for the admin only (we need to load all the plugins for their settings)
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access private
 		 * @var array
 		 */
@@ -61,7 +61,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Gets all of the registered plugins
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 * @return array
 		 */
@@ -72,7 +72,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Loads the active plugins
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 * @return array
 		 */
@@ -123,7 +123,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Gets the active plugins
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 * @return array
 		 */
@@ -134,7 +134,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Generats the appropriate metabox ID for the plugin
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access private
 		 * @return string
 		 */
@@ -154,7 +154,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Add additional shipping fields
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 * @filter mp_checkout/address_fields_array
 		 * @param array $fields
@@ -252,7 +252,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Set session variables and return free shipping array
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access protected
 		 * @return array
 		 */
@@ -267,7 +267,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Initialize the settings metabox
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 */
 		public function init_settings_metabox() {
@@ -277,7 +277,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Generates an appropriate field name
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 * @param string $name The name of the field (e.g. name->subname1->subname2).
 		 * @return string
@@ -295,7 +295,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Gets a setting specific to the gateway
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 * @param string $setting
 		 * @param mixed $default
@@ -308,7 +308,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Gets a network setting specific to the gateway
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 * @param string $setting
 		 * @param mixed $default
@@ -321,7 +321,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Determines if the gateway settings needs to be updated
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 */
 		public final function maybe_update() {
@@ -335,7 +335,7 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		/**
 		 * Updates the plugin settings
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 * @param array $settings
 		 * @return array
@@ -370,7 +370,7 @@ class MP_Shipping_Handler {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -379,7 +379,7 @@ class MP_Shipping_Handler {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */

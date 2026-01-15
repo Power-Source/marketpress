@@ -5,7 +5,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -29,7 +29,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -58,7 +58,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Print scripts for creating store page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action psource_field/print_scripts
 	 */
@@ -106,7 +106,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Initialize metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_metaboxes() {
@@ -121,7 +121,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Gets the appropriate image size label for a given size.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $size The image size.
@@ -139,7 +139,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Display "create page" button next to a given field
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * filter psource_field/after_field
 	 */
@@ -183,7 +183,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Init the store page/slugs settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_store_pages_slugs_settings() {
@@ -244,7 +244,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Init the product list settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_product_list_settings() {
@@ -479,7 +479,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Init the related product settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_related_product_settings() {
@@ -559,7 +559,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Init the general settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_product_page_settings() {
@@ -711,7 +711,7 @@ class MP_Store_Settings_Presentation {
 	/**
 	 * Init the general settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_general_settings() {

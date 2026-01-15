@@ -14,7 +14,7 @@ class MP_Multi_File_Download_Addon {
 	/**
 	* Refers to a single instance of the class
 	*
-	* @since 3.0
+	* @since 1.0
 	* @access private
 	* @var object
 	*/
@@ -23,7 +23,7 @@ class MP_Multi_File_Download_Addon {
 	/**
 	* Gets the single instance of the class
 	*
-	* @since 3.0
+	* @since 1.0
 	* @access public
 	* @return object
 	*/
@@ -40,7 +40,7 @@ class MP_Multi_File_Download_Addon {
 	/**
 	* Constructor function
 	*
-	* @since 3.0
+	* @since 1.0
 	* @access private
 	*/
 	private function __construct() {

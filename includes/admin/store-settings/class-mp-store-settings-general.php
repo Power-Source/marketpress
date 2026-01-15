@@ -6,7 +6,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -15,7 +15,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -29,7 +29,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Gets an updated currency symbol based upon a given currency code
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_update_currency
 	 */
@@ -45,7 +45,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -66,7 +66,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Initialize metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_metaboxes() {
@@ -83,7 +83,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Update the product post type
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action psource_metabox/settings_metabox_saved
 	 * @uses $wpdb
@@ -111,7 +111,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Formats the tax rate value from decimal to percentage
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter psource_field/get_value
 	 * @return string
@@ -128,7 +128,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Formats the tax rate value from percentage to decimal prior to saving to db
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter psource_field/sanitize_for_db
 	 * @return string
@@ -145,7 +145,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Prints javascript for updating the currency symbol when user updates the currency value
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action psource_field/print_scripts/currency
 	 */
@@ -187,7 +187,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Prints javascript for updating the base_province dropdown when user updates the base_country value
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action psource_field/print_scripts/base_country
 	 */
@@ -225,7 +225,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Init advanced settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_advanced_settings() {
@@ -264,7 +264,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Init download settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_download_settings() {
@@ -294,7 +294,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Init misc settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_misc_settings() {
@@ -393,7 +393,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Init currency settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_currency_settings() {
@@ -461,7 +461,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Init tax settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_tax_settings() {
@@ -561,7 +561,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Init digital products settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_digital_settings() {
@@ -595,7 +595,7 @@ class MP_Store_Settings_General {
 	/**
 	 * Init location settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_location_settings() {

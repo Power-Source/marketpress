@@ -20,7 +20,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
     /**
      * Refers to a single instance of the class
      *
-     * @since 3.0
+     * @since 1.0
      * @access private
      * @var object
      */
@@ -29,7 +29,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
     /**
      * Gets the single instance of the class
      *
-     * @since 3.0
+     * @since 1.0
      * @access public
      * @return object
      */
@@ -703,7 +703,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
 /**
  * Hilfsfunktion für den Zugriff auf die Addon-Instanz
  *
- * @since 3.0
+ * @since 1.0
  * @access public
  * @return MP_MARKETPRESS_COMMENTS_Addon
  */

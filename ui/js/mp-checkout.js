@@ -4,7 +4,7 @@ mp_checkout = {
   /**
    * Initialize event listeners
    *
-   * @since 3.0
+   * @since 1.0
    */
   initListeners: function () {
     this.initShippingAddressListeners && this.initShippingAddressListeners();
@@ -20,7 +20,7 @@ mp_checkout = {
   /**
    * Update state list/zipcode field when country changes
    *
-   * @since 3.0
+   * @since 1.0
    */
   initUpdateStateFieldListeners: function () {
     document
@@ -69,7 +69,7 @@ mp_checkout = {
   /**
    * Show the checkout form
    *
-   * @since 3.0
+   * @since 1.0
    */
   showForm: function () {
     var form = document.getElementById("mp-checkout-form");
@@ -78,7 +78,7 @@ mp_checkout = {
   /**
    * Get a value from a hashed query string
    *
-   * @since 3.0
+   * @since 1.0
    * @param string what The name of the variable to retrieve.
    * @param mixed defaultVal Optional, what to return if the variable doesn't exist. Defaults to false.
    * @return mixed
@@ -111,7 +111,7 @@ mp_checkout = {
   /**
    * Show/hide checkout section error summary
    *
-   * @since 3.0
+   * @since 1.0
    * @param string action Either "show" or "hide".
    * @param int count The number of errors.
    */
@@ -119,20 +119,20 @@ mp_checkout = {
   /**
    * Execute when on the last step of checkout
    *
-   * @since 3.0
+   * @since 1.0
    * @event mp_checkout/step_changed
    */
   // lastStep: Funktion ggf. auf Vanilla JS umstellen, falls benötigt
   /**
    * Go to next step in checkout
    *
-   * @since 3.0
+   * @since 1.0
    */
   // nextStep: Funktion ggf. auf Vanilla JS umstellen, falls benötigt
   /**
    * Change checkout steps
    *
-   * @since 3.0
+   * @since 1.0
    * @param jQuery $out The jquery object being transitioned FROM
    * @param jQuery $in The jquery object being transitioned TO
    */
@@ -159,7 +159,7 @@ mp_checkout = {
   /**
    * Initialize checkout steps
    *
-   * @since 3.0
+   * @since 1.0
    */
   initCheckoutSteps: function () {
     var checkoutForm = document.getElementById("mp-checkout-form");
@@ -369,7 +369,7 @@ mp_checkout = {
   /**
    * Initialize the active/selected payment method
    *
-   * @since 3.0
+   * @since 1.0
    */
   initActivePaymentMethod: function () {
     var inputs = document.querySelectorAll('input[name="payment_method"]');
@@ -387,7 +387,7 @@ mp_checkout = {
   /**
    * Initialize credit card validation events/rules
    *
-   * @since 3.0
+   * @since 1.0
    */
   initCardValidation: function () {
     import("./mp-creditcard-validate.js").then((cc) => {
@@ -413,7 +413,7 @@ mp_checkout = {
   /**
    * Init events related to toggling payment options
    *
-   * @since 3.0
+   * @since 1.0
    * @access public
    */
   initPaymentOptionListeners: function () {
@@ -461,7 +461,7 @@ mp_checkout = {
   /**
    * Enable/disable shipping address fields
    *
-   * @since 3.0
+   * @since 1.0
    */
   toggleShippingAddressFields: function () {
     var cb = document.querySelector('input[name="enable_shipping_address"]');
@@ -487,7 +487,7 @@ mp_checkout = {
   /**
    * Enable/disable registration fields
    *
-   * @since 3.0
+   * @since 1.0
    */
   toggleRegistrationFields: function () {
     var cb = document.querySelector('input[name="enable_registration_form"]');
@@ -508,7 +508,7 @@ mp_checkout = {
   /**
    * Initialize events related to registration fields
    *
-   * @since 3.0
+   * @since 1.0
    */
   initAccountRegistrationListeners: function () {
     var enableRegistration = document.querySelector(
@@ -524,7 +524,7 @@ mp_checkout = {
   /**
    * Initialize events related to shipping address fields
    *
-   * @since 3.0
+   * @since 1.0
    */
   initShippingAddressListeners: function () {
     var enableShippingAddress = document.querySelector(
@@ -570,7 +570,7 @@ mp_checkout = {
   /**
    * Trigger step change event
    *
-   * @since 3.0
+   * @since 1.0
    */
   triggerStepChange: function () {
     var current = document.querySelector('.mp_checkout_section.current');

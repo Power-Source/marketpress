@@ -5,7 +5,7 @@ class MP_Installer {
 	/**
 	 * Refers to the single instance of the class.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Installer {
 	/**
 	 * Gets the single instance of the class.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -29,7 +29,7 @@ class MP_Installer {
 	/**
 	 * Constructor.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	private function __construct() {
@@ -47,7 +47,7 @@ class MP_Installer {
 	/**
 	 * Enqueue db update scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function enqueue_db_update_scripts() {
@@ -345,7 +345,7 @@ class MP_Installer {
 	/**
 	 * Update product postmeta
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_update_product_postmeta
 	 */
@@ -495,7 +495,7 @@ class MP_Installer {
 	/**
 	 * Update tax settings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $settings
@@ -517,7 +517,7 @@ class MP_Installer {
 	/**
 	 * Add admin menu items and enqueue scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_menu
 	 */
@@ -533,7 +533,7 @@ class MP_Installer {
 	/**
 	 * Update sales count if undefined
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function update_sales_count( $post_id ) {
@@ -547,7 +547,7 @@ class MP_Installer {
 	/**
 	 * Add term_order column to $wpdb->terms table
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wpdb
 	 */
@@ -564,7 +564,7 @@ class MP_Installer {
 	/**
 	 * Add post_status column to $wpdb->mp_products table
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wpdb
 	 */
@@ -585,7 +585,7 @@ class MP_Installer {
 	/**
 	 * Display the db update page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wpdb
 	 */
@@ -661,7 +661,7 @@ class MP_Installer {
 	/**
 	 * Display data update notice
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_notices
 	 */
@@ -676,7 +676,7 @@ class MP_Installer {
 	/**
 	 * Runs the installer code.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function run() {
@@ -765,7 +765,7 @@ class MP_Installer {
 	/**
 	 * Creates the product attributes table.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wpdb
 	 */
@@ -803,7 +803,7 @@ class MP_Installer {
 	/**
 	 * Adds the cart widget to the default/first sidebar.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action widgets_init
 	 */
@@ -814,7 +814,7 @@ class MP_Installer {
 	/**
 	 * Updates presentation settings.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $settings
@@ -848,7 +848,7 @@ class MP_Installer {
 	/**
 	 * Updates notification settings.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $settings
@@ -884,7 +884,7 @@ class MP_Installer {
 	 *
 	 * In the event that a user needs to rollback to a plugin version < 3.0 this data can be used to restore legacy settings.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $settings
@@ -902,7 +902,7 @@ class MP_Installer {
 	/**
 	 * Add store custom capabilities to admin users
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action after_switch_theme
 	 */
@@ -1227,7 +1227,7 @@ class MP_Installer {
 	/**
 	 * Alter multisite table columns, add blog_id and public columns
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function alter_mp_term_relationships_table() {
@@ -1248,7 +1248,7 @@ class MP_Installer {
 	/**
 	 * Update sort_price if silently on version check
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function update_sort_price( $settings ) {
@@ -1281,7 +1281,7 @@ class MP_Installer {
 	/**
 	 * Runs on 3.1.2 update.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $settings
@@ -1297,7 +1297,7 @@ class MP_Installer {
 	/**
 	 * Runs on 3.0.0.7 update.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $settings
@@ -1313,7 +1313,7 @@ class MP_Installer {
 	/**
 	 * Runs on 3.0 update.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $settings
@@ -1341,7 +1341,7 @@ class MP_Installer {
 	/**
 	 * Runs on 2.9.2.3 update to fix low inventory emails not being sent.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function update_2923() {
@@ -1354,7 +1354,7 @@ class MP_Installer {
 	/**
 	 * Runs on 2.1.4 update to fix price sorts.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function update_214() {
@@ -1417,7 +1417,7 @@ class MP_Installer {
 	/**
 	 * Set flag that db update is required
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	protected function _db_update_required() {

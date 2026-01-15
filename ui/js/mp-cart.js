@@ -1,7 +1,7 @@
 /**
  * Escape special characters in a dynamic jQuery selector (e.g. period, colons, etc)
  *
- * @since 3.0
+ * @since 1.0
  */
 String.prototype.escapeSelector = function() {
     return this.replace( /([:\\.\\[\\]\\\\])/g, "\\$1" );
@@ -14,7 +14,7 @@ var mp_cart = { };
     /**
      * Refers to the validation args for the add-to-cart/buy-now form
      *
-     * @since 3.0
+     * @since 1.0
      * @type object
      */
     mp_cart.productFormValidationArgs = {
@@ -51,7 +51,7 @@ var mp_cart = { };
     /**
      * Initialization method
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.init = function() {
         this.initCartAnimation();
@@ -61,7 +61,7 @@ var mp_cart = { };
     /**
      * Initialize product list listeners
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.initProductListListeners = function() {
         var $forms = $( '#mp-products .mp_form-buy-product, .mp-multiple-products .mp_form-buy-product' );
@@ -110,7 +110,7 @@ var mp_cart = { };
 	/**
      * Initialize cart buttons listeners
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.initCartButtonListeners = function() {
         $( '.mp_button-widget-cart-empty' ).on( 'click', function( e ) {
@@ -151,7 +151,7 @@ var mp_cart = { };
     /**
      * Initalize single product listeners
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.initSingleProductListeners = function() {
         var me = this;
@@ -202,7 +202,7 @@ var mp_cart = { };
     /**
      * Initialize cart form listeners
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.initCartFormListeners = function() {
         $( '#mp-cart-form' )
@@ -218,7 +218,7 @@ var mp_cart = { };
     /**
      * Initialize cart listeners
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.initCartListeners = function() {
         mp_cart.initProductListListeners();
@@ -232,7 +232,7 @@ var mp_cart = { };
     /**
      * Init colorbox listeners
      *
-     * @since 3.0
+     * @since 1.0
      * @event cbox_complete
      */
     mp_cart.initCboxListeners = function() {
@@ -265,7 +265,7 @@ var mp_cart = { };
     /**
      * Update product attributes via ajax
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.updateProductAttributes = function() {
 
@@ -405,7 +405,7 @@ var mp_cart = { };
 	/**
      * Update product quantity
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.checkProductQuantity = function() {
     	var $this = $( this );
@@ -421,7 +421,7 @@ var mp_cart = { };
     /**
      * Initialize product options lightbox for variable products
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.initProductOptionsLightbox = function() {
         // Vanilla JS: Öffnet basicLightbox für Produktoptionen
@@ -468,7 +468,7 @@ var mp_cart = { };
     /**
      * Add an item to the shopping cart
      *
-     * @since 3.0
+     * @since 1.0
      * @param object $form The current form object.
      * @param int/object item Either an item ID or, if a variable product, an item object.
      * @param int qty The quantity to add to the cart. Optional.
@@ -486,7 +486,7 @@ var mp_cart = { };
         /**
          * Fires before adding an item to the cart
          *
-         * @since 3.0
+         * @since 1.0
          * @param object/int item The item id or item object (if a variation).
          * @param int qty The quantity added.
          */
@@ -547,7 +547,7 @@ var mp_cart = { };
     /**
      * Remove an item from the shopping cart
      *
-     * @since 3.0
+     * @since 1.0
      * @param int itemId The item ID to remove.
      */
     mp_cart.removeItem = function( itemId ) {
@@ -591,7 +591,7 @@ var mp_cart = { };
     /**
      * Undo Remove an item from the shopping cart
      *
-     * @since 3.0
+     * @since 1.0
      * @param int itemId The item ID to remove.
      */
     mp_cart.undoRemoveItem = function( itemId ) {
@@ -624,7 +624,7 @@ var mp_cart = { };
 	/**
      * Remove all items from the shopping cart
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.emptyCart = function() {
         var url = mp_cart_i18n.ajaxurl + '?action=mp_update_cart';
@@ -644,7 +644,7 @@ var mp_cart = { };
     /**
      * Update the cart html
      *
-     * @since 3.0
+     * @since 1.0
      * @param string html The cart html.
      */
     mp_cart.update = function( html ) {
@@ -655,7 +655,7 @@ var mp_cart = { };
 	/**
      * Update the cart widget html
      *
-     * @since 3.0
+     * @since 1.0
      * @param string html The cart html.
      */
     mp_cart.update_widget = function( html ) {
@@ -665,7 +665,7 @@ var mp_cart = { };
 	/**
      * Update the product qty input
      *
-     * @since 3.0
+     * @since 1.0
      * @param string html The product qty input.
      */
     mp_cart.update_product_input = function( html, $form ) {
@@ -679,7 +679,7 @@ var mp_cart = { };
      /**
      * Update the product add to cart button
      *
-     * @since 3.0
+     * @since 1.0
      * @param bool is the product out of stock.
      */
     mp_cart.update_product_buttons = function( out_of_stock, $form ) {
@@ -694,7 +694,7 @@ var mp_cart = { };
     /**
      * Update an item's qty
      *
-     * @since 3.0
+     * @since 1.0
      * @param int itemID The item ID to update.
      * @param int qty The new qty.
      * @param object $scope Optional, the scope of triggered events. Defaults to document.
@@ -732,7 +732,7 @@ var mp_cart = { };
     /**
      * Initialize the cart show/hide animation
      *
-     * @since 3.0
+     * @since 1.0
      */
     mp_cart.initCartAnimation = function() {
         var $cart = $( '#mp-floating-cart' );

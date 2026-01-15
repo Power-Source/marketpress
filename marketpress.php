@@ -94,7 +94,7 @@ class Marketpress {
 	/**
 	 * Refers to the post types that MarketPress uses
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var array
 	 */
@@ -104,7 +104,7 @@ class Marketpress {
 	/**
 	 * Refers to the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -113,7 +113,7 @@ class Marketpress {
 	/**
 	 * Refers to the absolute path to the plugin's main file
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var string
 	 */
@@ -122,7 +122,7 @@ class Marketpress {
 	/**
 	 * Refers to the absolute url to the plugin's directory
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var string
 	 */
@@ -131,7 +131,7 @@ class Marketpress {
 	/**
 	 * Refers to the absolute path to the plugin's directory
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var string
 	 */
@@ -147,7 +147,7 @@ class Marketpress {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -162,7 +162,7 @@ class Marketpress {
 	/**
 	 * Gets an absolute path to the plugin's base directory
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 *
 	 * @param string $path (optional) Will be appended onto the base directory.
@@ -176,7 +176,7 @@ class Marketpress {
 	/**
 	 * Gets an absolute url to the plugin's base directory
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 *
 	 * @param string $path (optional) Will be appended onto the base directory.
@@ -190,7 +190,7 @@ class Marketpress {
 	/**
 	 * Register custom post types, taxonomies and stati
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wp_version
 	 */
@@ -391,7 +391,7 @@ class Marketpress {
 	/**
 	 * Load payment and shipping gateways
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function load_plugins() {
@@ -411,7 +411,7 @@ class Marketpress {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -668,7 +668,7 @@ class Marketpress {
 	/**
 	 * Called from ClassicPress when the admin page init process is invoked.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 */
 	function mp_admin_init() {
 		if ( is_multisite() ) {
@@ -685,7 +685,7 @@ class Marketpress {
 	/**
 	 * Adds a 'settings' link on the plugin links.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @param array $links links for this plugin.
 	 * @return array $links links including Settings link
 	 */
@@ -781,7 +781,7 @@ class Marketpress {
 	/**
 	 * Register add ons
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function register_addons() {
@@ -851,7 +851,7 @@ class Marketpress {
 		/**
 		 * Fires after all internal addons have been registered
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 */
 		do_action( 'marketpress/register_addons' );
@@ -963,7 +963,7 @@ class Marketpress {
 	/**
 	 * Maybe flush rewrite rules.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action init
 	 */
@@ -982,7 +982,7 @@ class Marketpress {
 	 * Before 3.0 only shipping info was captured. This function will return the
 	 * shipping info if billing info doesn't exist for the given user.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @param $value
 	 * @param int    $user_id      User ID.
@@ -1019,7 +1019,7 @@ class Marketpress {
 	/**
 	 * Include necessary files
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function includes() {
@@ -1033,7 +1033,6 @@ class Marketpress {
 		require_once $this->plugin_dir( 'includes/common/class-mp-installer.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-cart.php' );
 		require_once $this->plugin_dir( 'includes/common/template-functions.php' );
-		require_once $this->plugin_dir( 'includes/common/class-mp-backward-compatibility.php' );
 		//require_once $this->plugin_dir( 'includes/common/class-mp-taxes.php' );
 
 		if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
@@ -1066,7 +1065,7 @@ class Marketpress {
 	/**
 	 * Initializes the class variables
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function _init_vars() {
@@ -1082,7 +1081,7 @@ class Marketpress {
 		/**
 		 * Filter the currencies list
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param array $this ->currencies An array of available currencies
 		 */

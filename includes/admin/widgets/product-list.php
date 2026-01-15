@@ -128,7 +128,7 @@ class MarketPress_Product_List extends WP_Widget {
 				}
 
 				echo '<div style="display:none">
-							<time class="updated">' . get_the_time( 'Y-m-d\TG:i' ) . '</time> by
+							<time class="updated">' . get_the_time( 'd.m.Y H:i' ) . '</time> by
 							<span class="author vcard"><span class="fn">' . get_the_author_meta( 'display_name' ) . '</span></span>
 						</div>';
 				echo '</div><!-- end mp_product -->';

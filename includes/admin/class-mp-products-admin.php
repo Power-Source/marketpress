@@ -7,7 +7,7 @@ class MP_Products_Screen {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -16,7 +16,7 @@ class MP_Products_Screen {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -31,7 +31,7 @@ class MP_Products_Screen {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 	private function __construct() {
@@ -84,7 +84,7 @@ class MP_Products_Screen {
 	/**
 	 * Initialisiert die Produktbilder-Metabox (jQuery-frei, mit Drag & Drop und Mehrfachbildern)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_product_images_metabox() {
@@ -174,7 +174,7 @@ class MP_Products_Screen {
 	/**
 	 * Enqueues admin javascript/css
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function enqueue_styles_scripts() {
@@ -185,7 +185,7 @@ class MP_Products_Screen {
 	/**
 	 * Print js related to displaying/hiding of product attributes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action in_admin_footer
 	 */
@@ -238,7 +238,7 @@ class MP_Products_Screen {
 	/**
 	 * Maybe hide some core metaboxes.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action psource_field/print_scripts/has_variations
 	 */
@@ -273,7 +273,7 @@ class MP_Products_Screen {
 	/**
 	 * Set mp_flush_rewrites_30 to 1 after saving/publishing new product.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int     $post_id   Post ID.
@@ -318,7 +318,7 @@ class MP_Products_Screen {
 	/**
 	 * Save the custom quick edit form fields.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action save_post
 	 *
@@ -383,7 +383,7 @@ class MP_Products_Screen {
 	/**
 	 * Purge variations transient after post update
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action save_post
 	 *
@@ -442,7 +442,7 @@ class MP_Products_Screen {
 	/**
 	 * Enqueue quick/bulk edit script
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_print_scripts-edit.php
 	 */
@@ -460,7 +460,7 @@ class MP_Products_Screen {
 	/**
 	 * Display the custom quick edit box
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action quick_edit_custom_box
 	 *
@@ -481,7 +481,7 @@ class MP_Products_Screen {
 	/**
 	 * Display the custom bulk edit box
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action bulk_edit_custom_box
 	 *
@@ -511,7 +511,7 @@ class MP_Products_Screen {
 	/**
 	 * Filter the product admin columns
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter manage_product_posts_columns, manage_mp_product_posts_columns
 	 * @return array
@@ -535,7 +535,7 @@ class MP_Products_Screen {
 	/**
 	 * Display data for each product admin column
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action manage_product_posts_custom_column, manage_mp_product_posts_custom_column
 	 */
@@ -693,7 +693,7 @@ class MP_Products_Screen {
 	/**
 	 * Initialize metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_metaboxes() {
@@ -709,7 +709,7 @@ class MP_Products_Screen {
 	/**
 	 * Remove add-new submenu item from store admin menu
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function remove_menu_items() {
@@ -721,7 +721,7 @@ class MP_Products_Screen {
 	/**
 	 * Saves the product attributes to the database
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter psource_field/save_value/product_attr_*
 	 */
@@ -735,7 +735,7 @@ class MP_Products_Screen {
 	/**
 	 * Gets the product variations from the database and formats for repeater field
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter psource_field/get_value/variations
 	 */
@@ -1092,7 +1092,7 @@ class MP_Products_Screen {
 	/**
 	 * Save inline changed data for variations
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wpdb
 	 */
@@ -1187,7 +1187,7 @@ class MP_Products_Screen {
 	/**
 	 * Hide content editor from admin for products with variations
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action init
 	 */
@@ -1211,7 +1211,7 @@ class MP_Products_Screen {
 	 * Add new terms if don't exist
 	 * Add new taxonomies if don't exist
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action init
 	 * @uses $wpdb
@@ -1379,7 +1379,7 @@ class MP_Products_Screen {
 	/**
 	 * Saves the product variations to the database
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter psource_field/save_value/variations
 	 * @uses $wpdb
@@ -1463,7 +1463,7 @@ WHERE $delete_where"
 	/**
 	 * Initializes the related products metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_related_products_metabox() {
@@ -1490,7 +1490,7 @@ WHERE $delete_where"
 	/**
 	 * Initializes the featured product metabox
 	 *
-	 * @since 3.0.0.8
+	 * @since 1.0.0.8
 	 * @access public
 	 */
 	public function init_featured_product_metabox() {
@@ -1510,7 +1510,7 @@ WHERE $delete_where"
 	/**
 	 * Initializes the product type metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_product_type_metabox() {
@@ -1916,7 +1916,7 @@ WHERE $delete_where"
 	/**
 	 * Initializes the product details metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_product_details_metabox() {
@@ -2162,7 +2162,7 @@ WHERE $delete_where"
 	/**
 	 * Initializes the product variation metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_variations_metabox() {
@@ -2478,7 +2478,7 @@ WHERE $delete_where"
 	/**
 	 * Add custom title placeholder to product edit screen
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter enter_title_here
 	 */
@@ -2493,7 +2493,7 @@ WHERE $delete_where"
 	/**
 	 * Remove metaboxes from the single product admin page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action admin_menu
 	 */
@@ -2510,7 +2510,7 @@ WHERE $delete_where"
 	/**
 	 * Füge die Standard-ClassicPress-Metabox für Produktbilder wieder hinzu
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action add_meta_boxes
 	 */

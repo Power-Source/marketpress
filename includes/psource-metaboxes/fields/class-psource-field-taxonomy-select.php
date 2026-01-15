@@ -46,7 +46,7 @@ class PSOURCE_Field_Taxonomy_Select extends PSOURCE_Field {
 	/**
 	 * Prints scripts
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	       public function print_scripts() {

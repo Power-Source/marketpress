@@ -5,7 +5,7 @@ class MP_Order {
 	/**
 	 * Refers to the internal post ID
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var int
 	 */
@@ -14,7 +14,7 @@ public $ID = null;
 	/**
 	 * Refers to the order ID
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var string
 	 */
@@ -23,7 +23,7 @@ public $ID = null;
 	/**
 	 * Refers to the order's internal WP_Post object
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @type WP_Post
 	 */
@@ -32,7 +32,7 @@ public $ID = null;
 	/**
 	 * Refers to the whether the order exists or not
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @type bool
 	 */
@@ -41,7 +41,7 @@ public $ID = null;
 	/**
 	 * Refers to the order meta
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @type array
 	 */
@@ -50,7 +50,7 @@ public $ID = null;
 	/**
 	 * Attempt to get an internal WP_Post object property (e.g post_name, post_status, etc)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $name The property name.
@@ -72,7 +72,7 @@ public $ID = null;
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $post
 	 *
@@ -99,7 +99,7 @@ public $ID = null;
 	/**
 	 * Convert legacy cart info from orders created in < 3.0
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 *
 	 * @param array $items Cart info from an order created in < 3.0.
@@ -142,7 +142,7 @@ public $ID = null;
 	/**
 	 * Generate a unique order id
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @return string
 	 */
@@ -171,7 +171,7 @@ public $ID = null;
 		 * It's VERY important to make sure order numbers are unique and not
 		 * sequential.
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $order_id
 		 */
@@ -183,7 +183,7 @@ public $ID = null;
 	/**
 	 * Attempt to set the internal WP_Post object
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @uses $wpdb
 	 */
@@ -226,7 +226,7 @@ public $ID = null;
 	/**
 	 * Send email to buyers
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 *
 	 * @param string $subject The email subject text.
@@ -259,7 +259,7 @@ public $ID = null;
 	/**
 	 * Send new order notifications
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	protected function _send_new_order_notifications() {
@@ -309,7 +309,7 @@ public $ID = null;
 		/**
 		 * Filter the notification subject
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $subject The current subject.
 		 * @param MP_Order $this The current order object.
@@ -319,7 +319,7 @@ public $ID = null;
 		/**
 		 * Filter the notification message
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $msg The current message.
 		 * @param MP_Order $this The current order object.
@@ -337,7 +337,7 @@ public $ID = null;
 		/**
 		 * Filter the admin order notification message
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $msg
 		 * @param MP_Order $order
@@ -350,7 +350,7 @@ public $ID = null;
 	/**
 	 * Send notification that the order has shipped
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	protected function _send_shipment_notification() {
@@ -391,7 +391,7 @@ public $ID = null;
 		/**
 		 * Filter the shipment notification subject
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $subject The email subject.
 		 * @param MP_Order $this The current order object.
@@ -402,7 +402,7 @@ public $ID = null;
 		/**
 		 * Filter the shipment notification body before string replacements happen
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $msg The email message.
 		 * @param MP_Order $this The current order object.
@@ -413,7 +413,7 @@ public $ID = null;
 		/**
 		 * Filter the shipment notification body after string replacements happen
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $msg The email message.
 		 * @param MP_Order $this The current order object.
@@ -426,7 +426,7 @@ public $ID = null;
 	/**
 	 * Change the order status
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $status The new order status.
@@ -496,7 +496,7 @@ public $ID = null;
 		/**
 		 * Fires when an order status is updated
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param MP_Order $this The current order object.
 		 */
@@ -518,7 +518,7 @@ public $ID = null;
 	/**
 	 * Delete meta data
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $key_string The meta key to delete (e.g. meta_name->key1->key2)
@@ -539,7 +539,7 @@ public $ID = null;
 	/**
 	 * Display the order details
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo Optional, whether to echo or return. Defaults to echo.
@@ -556,7 +556,7 @@ public $ID = null;
 		/**
 		 * Filter the confirmation text
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The current confirmation text.
 		 * @param MP_Order The order object.
@@ -656,7 +656,7 @@ public $ID = null;
 		/**
 		 * Filter the order details
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current details.
 		 * @param MP_Order $this The current order object.
@@ -673,7 +673,7 @@ public $ID = null;
 	/**
 	 * Check if a order exists
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return bool
 	 */
@@ -684,7 +684,7 @@ public $ID = null;
 	/**
 	 * Get an address html
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $type Either "billing" or "shipping".
@@ -824,7 +824,7 @@ public $ID = null;
 		/**
 		 * Filter the address html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current address html.
 		 * @param string $type Either "billing" or "shipping".
@@ -837,7 +837,7 @@ public $ID = null;
 	/**
 	 * Get billing/shipping addresses
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $editable Optional, whether the address fields should be editable. Defaults to false.
@@ -876,7 +876,7 @@ public $ID = null;
 		/**
 		 * Filter the addresses html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current address html.
 		 * @param MP_Order $this The current order object.
@@ -888,7 +888,7 @@ public $ID = null;
 	/**
 	 * Get the cart object from meta data
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return MP_Cart
 	 */
@@ -906,7 +906,7 @@ public $ID = null;
 	/**
 	 * Get the order ID
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return string
 	 */
@@ -917,7 +917,7 @@ public $ID = null;
 	/**
 	 * Get order meta
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $name The name of the meta to retrieve.
@@ -938,7 +938,7 @@ public $ID = null;
 	/**
 	 * Get buyer's full name
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $type Optional, either "shipping" or "billing". Defaults to "billing".
@@ -955,7 +955,7 @@ public $ID = null;
 	/**
 	 * Display the order header
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function header( $echo = true ) {
@@ -1032,7 +1032,7 @@ public $ID = null;
 		/**
 		 * Filter the order total tooltip content
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $tooltip_content
 		 * @param MP_Order $this The current order object.
@@ -1068,7 +1068,7 @@ public $ID = null;
 		/**
 		 * Filter the order header html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current order header html.
 		 * @param MP_Order $this The current order object.
@@ -1092,7 +1092,7 @@ public $ID = null;
 	/**
 	 * Log IPN history status
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $status The status text to log.
@@ -1108,7 +1108,7 @@ public $ID = null;
 	/**
 	 * Save the order to the database
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $args {
@@ -1262,7 +1262,7 @@ public $ID = null;
 			/**
 			 * Fires after the sale of a product during checkout
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param MP_Product $item The product that was sold.
 			 * @param bool $paid Whether the associated order has been paid.
@@ -1339,7 +1339,7 @@ public $ID = null;
 		/**
 		 * Fires when an order is created
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param MP_Order $this The current order object.
 		 */
@@ -1380,7 +1380,7 @@ public $ID = null;
 	/**
 	 * Decrease Sales
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 */
@@ -1398,7 +1398,7 @@ public $ID = null;
 	/**
 	 * Increase Sales
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 */
@@ -1416,7 +1416,7 @@ public $ID = null;
 	/**
 	 * Get the order's shipment tracking url
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo Optional, whether to echo or return. Defaults to echo.
@@ -1450,7 +1450,7 @@ public $ID = null;
 					/**
 					 * Filter the tracking link for methods that don't exists
 					 *
-					 * @since 3.0
+					 * @since 1.0
 					 *
 					 * @param string $tracking_number
 					 * @param string $method
@@ -1463,7 +1463,7 @@ public $ID = null;
 		/**
 		 * Filter the tracking link
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $url
 		 * @param string $tracking_number
@@ -1489,7 +1489,7 @@ public $ID = null;
 	/**
 	 * Get the order's internal tracking url
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo Optional, whether to echo or return. Defaults to echo.
@@ -1513,7 +1513,7 @@ public $ID = null;
 		/**
 		 * Filter the tracking URL
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 *
 		 * @param string $url The tracking URL.
@@ -1523,7 +1523,7 @@ public $ID = null;
 		/**
 		 * Filter the status URL
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 * @access public
 		 *
 		 * @param string $url The status URL.
@@ -1545,7 +1545,7 @@ public $ID = null;
 	/**
 	 * Update meta data
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $key The meta key to update (e.g. meta_name->key1->key2)

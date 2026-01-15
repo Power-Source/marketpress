@@ -153,7 +153,7 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 	/**
 	 * Initialize the settings metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_settings_metabox() {

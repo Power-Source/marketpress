@@ -5,7 +5,7 @@ class MP_Store_Settings_Admin {
 	/**
 	 * Refers to a single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 * @var object
 	 */
@@ -14,7 +14,7 @@ class MP_Store_Settings_Admin {
 	/**
 	 * Gets the single instance of the class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return object
 	 */
@@ -28,7 +28,7 @@ class MP_Store_Settings_Admin {
 	/**
 	 * Constructor function
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access private
 	 */
 private function __construct() {
@@ -85,7 +85,7 @@ private function __construct() {
 	/**
 	 * Set menu item parent file
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action parent_file
 	 */
@@ -103,7 +103,7 @@ private function __construct() {
 	/**
 	 * Add items to the admin menu
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wp_version
 	 */
@@ -190,7 +190,7 @@ private function __construct() {
 	/**
 	 * Add help tab to current screen
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function add_help_tab() {
@@ -200,7 +200,7 @@ private function __construct() {
 	/**
 	 * Print scripts for setting the active admin menu item when on the product tag page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function print_product_tag_scripts() {
@@ -219,7 +219,7 @@ private function __construct() {
 	/**
 	 * Print scripts for setting the active admin menu item when on the product category page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function print_product_category_scripts() {
@@ -238,7 +238,7 @@ private function __construct() {
 	/**
 	 * Gets an appropriate message by it's key
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function get_message_by_key( $key ) {
@@ -253,7 +253,7 @@ private function __construct() {
 	/**
 	 * Displays the settings form/metaboxes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function display_settings_form() {
@@ -322,14 +322,14 @@ private function __construct() {
 					/**
 					 * Render PSOURCE Metabox settings
 					 *
-					 * @since 3.0
+					 * @since 1.0
 					 */
 					do_action( 'psource_metabox/render_settings_metaboxes' );
 
 					/**
 					 * Render settings
 					 *
-					 * @since 3.0
+					 * @since 1.0
 					 */
 					do_action( 'mp_render_settings/' . mp_get_current_screen()->id );
 					?>

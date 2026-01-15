@@ -31,7 +31,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 	/**
 	 * Format input as decimal
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @filter psource_field/sanitize_for_db
 	 * @return string
@@ -49,7 +49,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
   /**
    * Initialize the settings metabox
    *
-   * @since 3.0
+   * @since 1.0
    * @access public
    */
   public function init_settings_metabox() {

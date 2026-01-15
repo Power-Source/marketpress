@@ -12,7 +12,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Build of the gateway plugin
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var int
 	 */
@@ -21,7 +21,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Private gateway slug. Lowercase alpha (a-z) and dashes (-) only please!
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var string
 	 */
@@ -30,7 +30,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Name of your gateway, for the admin side.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var string
 	 */
@@ -39,7 +39,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Public name of your gateway, for lists and such.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var string
 	 */
@@ -48,7 +48,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Url for an image for your checkout method. Displayed on checkout form if set.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var string
 	 */
@@ -57,7 +57,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Url for an submit button image for your checkout method. Displayed on checkout form if set.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var string
 	 */
@@ -66,7 +66,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Whether or not ssl is needed for checkout page
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var bool
 	 */
@@ -75,7 +75,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Always contains the url to send payment notifications to if needed by your gateway. Populated by the parent class.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var string
 	 */
@@ -84,7 +84,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * whether if this is the only enabled gateway it can skip the payment_form step
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var string
 	 */
@@ -93,7 +93,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * The gateway's currencies
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var array
 	 */
@@ -112,7 +112,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * The gateway's error code mappings
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var array
 	 */
@@ -262,7 +262,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Runs when your class is instantiated. Use to setup your plugin instead of __construct()
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	function on_creation() {
@@ -291,7 +291,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	/**
 	 * Return fields you need to add to the payment screen, like your credit card info fields
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @param array $cart. Contains the cart contents for the current blog, global cart if mp()->global_cart is true
 	 * @param array $shipping_info. Contains shipping info and email in case you need it
@@ -569,7 +569,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
   /**
    * Updates the gateway settings
    *
-   * @since 3.0
+   * @since 1.0
    * @access public
    * @param array $settings
    * @return array
@@ -603,7 +603,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
   /**
    * Initialize the settings metabox
    *
-   * @since 3.0
+   * @since 1.0
    * @access public
    */
   public function init_settings_metabox() {

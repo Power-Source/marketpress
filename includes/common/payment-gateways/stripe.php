@@ -36,7 +36,7 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	/**
 	 * Gateway currencies
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var array
 	 */
@@ -223,7 +223,7 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	/**
 	 * Initialize the settings metabox
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function init_settings_metabox() {

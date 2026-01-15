@@ -4,7 +4,7 @@ class MP_Exporter_Orders {
 	/**
 	 * Export orders
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public static function export() {
@@ -161,7 +161,7 @@ class MP_Exporter_Orders {
 	/**
 	 * Display the export order form
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wpdb, $wp_locale
 	 */

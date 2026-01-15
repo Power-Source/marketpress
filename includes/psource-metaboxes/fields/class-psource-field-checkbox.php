@@ -5,7 +5,7 @@ class PSOURCE_Field_Checkbox extends PSOURCE_Field {
 	/**
 	 * Runs on construct of parent class
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @param array $args {
 	 * 		An array of arguments.
@@ -71,7 +71,7 @@ class PSOURCE_Field_Checkbox extends PSOURCE_Field {
 	/**
 	 * Displays the field
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @param int $post_id
 	 */

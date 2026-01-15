@@ -8,7 +8,7 @@ class MP_Product {
 	/**
 	 * Refers to the product's ID.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var int
 	 */
@@ -17,7 +17,7 @@ public $ID = null;
 	/**
 	 * Refers to the product's qty
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @var int
 	 */
@@ -26,7 +26,7 @@ public $qty = 1;
 	/**
 	 * Refers to the product default variation.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -35,7 +35,7 @@ public $qty = 1;
 	/**
 	 * Refers to the product's variations.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -44,7 +44,7 @@ public $qty = 1;
 	/**
 	 * Refers to the product's variation IDs
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -53,7 +53,7 @@ public $qty = 1;
 	/**
 	 * Refers to the product's attributes.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var array
 	 */
@@ -62,7 +62,7 @@ public $qty = 1;
 	/**
 	 * Refers to if the product is on sale.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @var bool
 	 */
@@ -71,7 +71,7 @@ public $qty = 1;
 	/**
 	 * Refers to the product's price
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 *
 	 * @param array
@@ -81,7 +81,7 @@ public $qty = 1;
 	/**
 	 * Refers to the product's internal WP_Post object.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @type WP_Post
 	 */
@@ -90,7 +90,7 @@ public $qty = 1;
 	/**
 	 * Refers to the whether the product exists or not.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 * @type bool
 	 */
@@ -99,7 +99,7 @@ public $qty = 1;
 	/**
 	 * Refers to the product's content tabs
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @type array
 	 */
@@ -108,7 +108,7 @@ public $content_tabs = array();
 	/**
 	 * Get the internal post type for products.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return string
 	 */
@@ -123,7 +123,7 @@ public $content_tabs = array();
 	/**
 	 * Display the lightbox for product variations
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_product_get_variations_lightbox, wp_ajax_nopriv_mp_product_get_variations_lightbox
 	 */
@@ -205,7 +205,7 @@ public $content_tabs = array();
 	/**
 	 * Update the product attributes based upon selection
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @action wp_ajax_mp_product_update_attributes, wp_ajax_nopriv_mp_product_update_attributes
 	 */
@@ -276,7 +276,7 @@ public $content_tabs = array();
 								/**
 								 * Filter the out of stock alert message
 								 *
-								 * @since 3.0
+								 * @since 1.0
 								 *
 								 * @param string The default message.
 								 * @param MP_Product The product that is out of stock.
@@ -338,7 +338,7 @@ public $content_tabs = array();
 	/**
 	 * MP_Product constructor
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $post
 	 *
@@ -367,7 +367,7 @@ public $content_tabs = array();
 	/**
 	 * Display an attribute option
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param $term_id
@@ -384,7 +384,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the attribute option
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html
 		 * @param int $term_id
@@ -400,7 +400,7 @@ public $content_tabs = array();
 	/**
 	 * Return the maximum product qty allowed to add to the cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $product_id Optional
@@ -433,7 +433,7 @@ public $content_tabs = array();
 		/**
 		 * Filter default max product order limit
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param int $max
 		 */
@@ -469,7 +469,7 @@ public $content_tabs = array();
 	/**
 	 * Display the attribute fields
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -518,7 +518,7 @@ public $content_tabs = array();
 			/**
 			 * Filter the default option label for the select field
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 * @access public
 			 *
 			 * @param string The default option label.
@@ -567,7 +567,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the attribute fields
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The current html.
 		 * @param MP_Product The current MP_Product object.
@@ -607,7 +607,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the out of stock alert message
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The default message.
 		 * @param MP_Product The product that is out of stock.
@@ -617,7 +617,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the order limit alert message
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The default message.
 		 * @param MP_Product The product that is out of order limit.
@@ -662,7 +662,7 @@ public $content_tabs = array();
 	/**
 	 * Get a parent product if product is a variation
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @return false/MP_Product
@@ -681,7 +681,7 @@ public $content_tabs = array();
 	/**
 	 * Get a specific variation by it's index
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $index Optional.
@@ -695,7 +695,7 @@ public $content_tabs = array();
 	/**
 	 * Get product default variation
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return false/MP_Product An MP_Product objects.
 	 */
@@ -714,7 +714,7 @@ public $content_tabs = array();
 	/**
 	 * Set product default variation
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return false/MP_Product An MP_Product objects.
 	 */
@@ -748,7 +748,7 @@ public $content_tabs = array();
 	/**
 	 * Get product variation ids
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return array
 	 */
@@ -765,7 +765,7 @@ public $content_tabs = array();
 	/**
 	 * Get product variations
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return array An array of MP_Product objects.
 	 */
@@ -831,7 +831,7 @@ public $content_tabs = array();
 	/**
 	 * Get variations by the given attributes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $attributes An array of attribute arrays in $taxonomy => $term_id format.
@@ -887,7 +887,7 @@ public $content_tabs = array();
 	/**
 	 * Get product weight
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param float $default The default weight if a weight isn't set for the product.
@@ -918,7 +918,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product's ID for global cart
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return string
 	 */
@@ -929,7 +929,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product price before tax
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return float
 	 */
@@ -1017,7 +1017,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product content
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -1048,7 +1048,7 @@ public $content_tabs = array();
 	/**
 	 * Check if the product has content
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @return bool
@@ -1071,7 +1071,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product's excerpt
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $excerpt_more Optional
 	 * @param string $excerpt Optional
@@ -1129,7 +1129,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the product excerpt
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $text
 		 * @param string $excerpt
@@ -1144,7 +1144,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product's content tab labels
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -1166,7 +1166,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the product tabs html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current HTML markup.
 		 * @param MP_Product $this The current product object.
@@ -1183,7 +1183,7 @@ public $content_tabs = array();
 	/**
 	 * Get custom image tag
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -1240,7 +1240,7 @@ public $content_tabs = array();
 	/**
 	 * Get the display product price
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -1306,7 +1306,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the display price of the product
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string The current display price text
 		 * @param array The current price object
@@ -1324,7 +1324,7 @@ public $content_tabs = array();
 	/**
 	 * Add tax to the product price
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param double $price
@@ -1384,7 +1384,7 @@ public $content_tabs = array();
 	/**
 	 * Display (tax incl.) or (tax excl.)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -1423,7 +1423,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product's download url - if applicable
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $order_id The order ID for the download.
@@ -1462,7 +1462,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the product's download url
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $url The current url.
 		 * @param string $order_id The order ID.
@@ -1474,7 +1474,7 @@ public $content_tabs = array();
 	/**
 	 * Determine if product has variations
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return bool
 	 */
@@ -1487,7 +1487,7 @@ public $content_tabs = array();
 	/**
 	 * Determine if product is featured
 	 *
-	 * @since 3.0.0.8
+	 * @since 1.0.0.8
 	 * @access public
 	 * @return bool
 	 */
@@ -1498,7 +1498,7 @@ public $content_tabs = array();
 	/**
 	 * Determine if product is on sale
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return bool
 	 */
@@ -1535,7 +1535,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the on sale flag
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param bool $on_sale The default on-sale flag.
 		 * @param MP_Product $this The current product.
@@ -1550,7 +1550,7 @@ public $content_tabs = array();
 	 *
 	 * Will return the product's regular and sale price - if applicable.
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $what Optional, the subset of the price array to be returned.
@@ -1614,7 +1614,7 @@ public $content_tabs = array();
 				/**
 				 * Filter the maximum number of days before the "only x days left" nag shows
 				 *
-				 * @since 3.0
+				 * @since 1.0
 				 *
 				 * @param int The default number of days
 				 */
@@ -1638,7 +1638,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the price array
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param array The current pricing array.
 		 * @param MP_Product The current product.
@@ -1661,7 +1661,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product's lowest price
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return float The product's lowest price.
 	 */
@@ -1675,7 +1675,7 @@ public $content_tabs = array();
 	/**
 	 * Get related products
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param array $args {
 	 *        Optional, an array of arguments.
@@ -1804,7 +1804,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the related products html
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $html The current html.
 		 * @param MP_Product $this The current product object.
@@ -1823,7 +1823,7 @@ public $content_tabs = array();
 	/**
 	 * Set price
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param array $price The pricing array.
@@ -1835,7 +1835,7 @@ public $content_tabs = array();
 	/**
 	 * Get the special tax amount for the item
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo Optional, whether to echo or return. Defaults to return.
@@ -1861,7 +1861,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the special tax rate
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param float $special_rate The current special tax rate.
 		 * @param bool $is_fixed_amt Whether the special tax rate is a fixed amount or not.
@@ -1878,7 +1878,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the special tax price
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param float $special_tax_amt The current special tax price.
 		 * @param float $special_tax_rate The current special tax rate.
@@ -1892,7 +1892,7 @@ public $content_tabs = array();
 	/**
 	 * Get the current inventory in stock
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return int/array Number of units in stock or an array containing the number of units in stock for each variation.
 	 */
@@ -1913,7 +1913,7 @@ public $content_tabs = array();
 	/*
 	 * Get the product image
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @param bool $echo Optional, whether to echo
 	 * @param string $context Options are list, single, or widget
 	 * @param int $size An optional width/height for the image if contect is widget
@@ -1929,7 +1929,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the post_id used for the product image
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param int $post_id
 		 */
@@ -2122,7 +2122,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product image url
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -2159,7 +2159,7 @@ public $content_tabs = array();
 			/**
 			 * Filter the default image url
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param string The current default image url.
 			 */
@@ -2169,7 +2169,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the product image url
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $img_url The current image url.
 		 * @param string /int $size
@@ -2188,7 +2188,7 @@ public $content_tabs = array();
 	/**
 	 * Check if product is in stock
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param int $qty The quantity to check against.
@@ -2243,7 +2243,7 @@ public $content_tabs = array();
 	/**
 	 * Check if the product is a digital download
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return bool
 	 */
@@ -2260,7 +2260,7 @@ public $content_tabs = array();
 	/**
 	 * Check if the product is a variation of another product
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function is_variation() {
@@ -2274,7 +2274,7 @@ public $content_tabs = array();
 	/**
 	 * Send low-stock notification
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 */
 	public function low_stock_notification() {
@@ -2307,7 +2307,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the low stock notification message
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $msg The current message text.
 		 * @param int $this ->ID The product's ID.
@@ -2320,7 +2320,7 @@ public $content_tabs = array();
 	/**
 	 * Get a product's attribute
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $attribute
@@ -2336,7 +2336,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product attributes
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @uses $wpdb
 	 * @return array
@@ -2434,7 +2434,7 @@ public $content_tabs = array();
 	/**
 	 * Get product meta value
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $name The name of the meta to get.
@@ -2470,7 +2470,7 @@ public $content_tabs = array();
 	/**
 	 * Display product meta value
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $name The name of the meta to get.
@@ -2486,7 +2486,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product's url
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -2507,7 +2507,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the product's URL
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $url The product's current URL.
 		 * @param MP_Product $this The current product object.
@@ -2524,7 +2524,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product's edit url
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo Optional, defaults to true.
@@ -2546,7 +2546,7 @@ public $content_tabs = array();
 	/**
 	 * Update product meta
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $name The name of the meta to update.
@@ -2563,7 +2563,7 @@ public $content_tabs = array();
 	/**
 	 * Get Pinterest PinIt button
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $context
 	 * @param bool $echo
@@ -2635,7 +2635,7 @@ public $content_tabs = array();
 	/**
 	 * Get Twitter button
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $context
 	 * @param bool $echo
@@ -2689,7 +2689,7 @@ public $content_tabs = array();
 	/**
 	 * Get Facebook button
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 *
 	 * @param string $context
 	 * @param bool $echo
@@ -2772,7 +2772,7 @@ public $content_tabs = array();
 	/**
 	 * Get the product title
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param bool $echo
@@ -2787,7 +2787,7 @@ public $content_tabs = array();
 		/**
 		 * Filter the product title
 		 *
-		 * @since 3.0
+		 * @since 1.0
 		 *
 		 * @param string $title The product title.
 		 * @param MP_Product $this The current product object.
@@ -2804,7 +2804,7 @@ public $content_tabs = array();
 	/**
 	 * Check if a product exists
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @return bool
 	 */
@@ -2815,7 +2815,7 @@ public $content_tabs = array();
 	/**
 	 * Attempt to get an internal WP_Post object property (e.g post_name, post_status, etc)
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 *
 	 * @param string $name The property name.
@@ -2837,7 +2837,7 @@ public $content_tabs = array();
 	/**
 	 * Attempt to set the internal WP_Post object
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 *
 	 * @param int /object/WP_Post $product
@@ -2860,7 +2860,7 @@ public $content_tabs = array();
 	/**
 	 * Set content tabs
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access protected
 	 */
 	protected function _set_content_tabs( $product ) {
@@ -2887,7 +2887,7 @@ public $content_tabs = array();
 			/**
 			 * Filter the product tabs array
 			 *
-			 * @since 3.0
+			 * @since 1.0
 			 *
 			 * @param array $tabs The default product tabs.
 			 * @param MP_Product $this The current product object.

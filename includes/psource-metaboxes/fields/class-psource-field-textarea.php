@@ -5,7 +5,7 @@ class PSOURCE_Field_Textarea extends PSOURCE_Field {
 	/**
 	 * Displays the field
 	 *
-	 * @since 3.0
+	 * @since 1.0
 	 * @access public
 	 * @param int $post_id
 	 */
