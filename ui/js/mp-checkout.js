@@ -97,7 +97,7 @@ mp_checkout = {
     var hashParts = hash.substr(2).split("&"),
       hashPairs = {};
 
-    $.each(hashParts, function (index, value) {
+    hashParts.forEach(function (value) {
       var tmp = value.split("=");
       hashPairs[tmp[0]] = tmp[1];
     });

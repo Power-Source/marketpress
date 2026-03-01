@@ -3,6 +3,12 @@
 
 // Vanilla JS Inline Edit
 document.addEventListener('DOMContentLoaded', function() {
+    var $ = window.jQuery;
+
+    if (typeof $ !== 'function') {
+        return;
+    }
+
     function selectRange(input, start, end) {
         if (input.setSelectionRange) {
             input.focus();
