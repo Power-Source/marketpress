@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('a.open_ajax').forEach(function(link) {
         link.addEventListener('click', function(e) {
             var variationId = link.getAttribute('data-popup-id');
-            var url = mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + variationId;
+            var url = mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + variationId + '&ajax_nonce=' + encodeURIComponent(mp_product_admin_i18n.ajax_nonce);
             fetch(url)
                 .then(function(resp){ return resp.text(); })
                 .then(function(html){
@@ -303,6 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var formData = new URLSearchParams();
             formData.append('action', 'ajax_add_new_variant');
             formData.append('parent_post_id', parent_post_id);
+            formData.append('ajax_nonce', mp_product_admin_i18n.ajax_nonce);
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -313,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var response;
                 try { response = JSON.parse(data); } catch(e) { response = {}; }
                 if (response && response.type === true) {
-                    var popupUrl = mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + response.post_id + '&new_variation';
+                    var popupUrl = mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + response.post_id + '&new_variation&ajax_nonce=' + encodeURIComponent(mp_product_admin_i18n.ajax_nonce);
                     fetch(popupUrl)
                         .then(function(resp){ return resp.text(); })
                         .then(function(html){

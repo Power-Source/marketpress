@@ -332,6 +332,9 @@ class MP_Admin {
 		if ( isset( $quick_setup ) ) {
 			//wp_enqueue_style( 'mp-quick-setup', mp_plugin_url( 'includes/admin/ui/css/quick-setup.css' ), array(), MP_VERSION );
 			wp_enqueue_script( 'mp-quick-setup', mp_plugin_url( 'includes/admin/ui/js/quick-setup.js' ), array( 'jquery' ), MP_VERSION );
+			wp_localize_script( 'mp-quick-setup', 'mp_quick_setup_i18n', array(
+				'ajax_nonce' => wp_create_nonce( 'mp-ajax-nonce' ),
+			) );
 		}
 
 		wp_enqueue_style( 'mp-admin', mp_plugin_url( 'includes/admin/ui/css/admin.css' ), array(), MP_VERSION );

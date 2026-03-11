@@ -932,6 +932,8 @@ class MP_Coupons_Addon {
 	 * @action wp_ajax_mp_cart_apply_coupon, wp_ajax_nopriv_mp_cart_apply_coupon
 	 */
 	public function ajax_apply_coupon() {
+		check_ajax_referer( 'mp_coupons_nonce', 'nonce' );
+
 		$coupon_code = mp_get_post_value( 'coupon_code' );
 		$blog_id     = mp_get_post_value( 'blog_id' );
 
@@ -970,6 +972,8 @@ class MP_Coupons_Addon {
 	 * @action wp_ajax_mp_cart_remove_coupon, wp_ajax_nopriv_mp_cart_remove_coupon
 	 */
 	public function ajax_remove_coupon() {
+		check_ajax_referer( 'mp_coupons_nonce', 'nonce' );
+
 		$coupon_id = mp_get_post_value( 'coupon_id' );
 		$blog_id   = mp_get_post_value( 'blog_id' );
 
@@ -1277,6 +1281,7 @@ class MP_Coupons_Addon {
 		), MP_VERSION );
 		wp_localize_script( 'mp-coupons', 'mp_coupons_i18n', array(
 			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'mp_coupons_nonce' ),
 			'messages' => array(
 				'required' => __( 'Please enter a code', 'mp' ),
 				'added'    => __( 'Coupon added successfully', 'mp' ),

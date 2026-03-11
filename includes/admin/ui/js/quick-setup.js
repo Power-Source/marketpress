@@ -76,7 +76,8 @@ jQuery(document).ready(function ($) {
             url: ajaxurl,
             data: {
                 action: 'mp_preset_currency_base_country',
-                country: data
+                country: data,
+                ajax_nonce: mp_quick_setup_i18n.ajax_nonce
             },
             success: function (data) {
 				// Reload page to update shipping methods

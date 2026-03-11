@@ -48,7 +48,7 @@ class MP_Store_Settings_Payments {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'          => 'mp-settings-payments',
 			'page_slugs'  => array( 'store-settings-payments', 'store-settings_page_store-settings-payments' ),
-			'title'       => __( 'Payment Gateways', 'mp' ),
+			'title'       => __( 'Zahlungsgateways', 'mp' ),
 			'option_name' => 'mp_settings',
 			'order'       => 1,
 		) );
@@ -63,8 +63,8 @@ class MP_Store_Settings_Payments {
 
 		$metabox->add_field( 'checkbox_group', array(
 			'name'    => 'gateways[allowed]',
-			'label'   => array( 'text' => __( 'Enabled Gateways', 'mp' ) ),
-			'desc'    => __( 'Choose the gateway(s) that you would like to be available for checkout.', 'mp' ),
+			'label'   => array( 'text' => __( 'Aktivierte Gateways', 'mp' ) ),
+			'desc'    => __( 'Wähle die Gateways aus, die für den Checkout verfügbar sein sollen.', 'mp' ),
 			'options' => $options,
 			'width'   => '50%',
 		) );

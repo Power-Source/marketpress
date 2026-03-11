@@ -125,7 +125,8 @@
 					url: ajaxurl,
 					data: {
 						action: 'mp_remove_custom_shipping_method',
-						id: selected
+						id: selected,
+						ajax_nonce: mp_admin_orders.ajax_nonce
 					},
 					beforeSend: function () {
 						that.attr('disabled', 'disabled');

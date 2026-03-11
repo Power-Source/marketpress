@@ -22,7 +22,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
    */
   function on_creation() {
     //set name here to be able to translate
-    $this->public_name = __( 'Flat Rate', 'mp' );
+    $this->public_name = __( 'Pauschalpreis', 'mp' );
     
     //format values
     add_filter( 'psource_field/sanitize_for_db', array( &$this, 'format_input' ), 10, 3 );
@@ -60,8 +60,8 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 				'store-settings_page_store-settings-shipping',
 				'store-setup-wizard'
 			),
-			'title' => sprintf( __( '%s Settings', 'mp' ), $this->public_name ),
-			'desc' => __( 'Be sure to enter a shipping price for every option or those customers may get free shipping.', 'mp' ),
+			'title' => sprintf( __( '%s Einstellungen', 'mp' ), $this->public_name ),
+			'desc' => __( 'Stelle sicher, dass Du für jede Option einen Versandpreis eingibst, da sonst Kunden möglicherweise kostenlosen Versand erhalten.', 'mp' ),
 			'option_name' => 'mp_settings',
 			'conditional' => array(
 				'action' => 'show',
@@ -80,7 +80,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 		if ( 'US' == mp_get_setting( 'base_country') ) {
 			$complex->add_field( 'text', array(
 				'name' => 'lower_48',
-				'label' => array( 'text' => __( 'Lower 48 States', 'mp' ) ),
+				'label' => array( 'text' => __( 'Untere 48 Staaten', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'number' => true,
@@ -89,7 +89,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 			) );
 			$complex->add_field( 'text', array(
 				'name' => 'hi_ak',
-				'label' => array( 'text' => __( 'Hawaii and Alaska', 'mp' ) ),
+				'label' => array( 'text' => __( 'Hawaii und Alaska', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'number' => true,
@@ -98,7 +98,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 			) );
 			$complex->add_field( 'text', array(
 				'name' => 'canada',
-				'label' => array( 'text' => __( 'Canada', 'mp' ) ),
+				'label' => array( 'text' => __( 'Kanada', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'number' => true,
@@ -108,7 +108,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 		} else {
 			$complex->add_field( 'text', array(
 				'name' => 'in_country',
-				'label' => array( 'text' => __( 'In Country', 'mp' ) ),
+				'label' => array( 'text' => __( 'Im Land', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'number' => true,
@@ -120,7 +120,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 		if ( 'CA' == mp_get_setting( 'base_country') ) { 
 			$complex->add_field( 'text', array(
 				'name' => 'usa',
-				'label' => array( 'text' => __( 'United States', 'mp' ) ),
+				'label' => array( 'text' => __( 'Vereinigte Staaten', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'number' => true,
@@ -132,7 +132,7 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 		if ( in_array( mp_get_setting( 'base_country', '' ), mp()->eu_countries ) ) { 
 			$complex->add_field( 'text', array(
 				'name' => 'eu',
-				'label' => array( 'text' => __( 'European Union', 'mp' ) ),
+				'label' => array( 'text' => __( 'Europäische Union', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'number' => true,
@@ -220,4 +220,4 @@ class MP_Shipping_Flat_Rate extends MP_Shipping_API {
 }
 
 //register plugin
-MP_Shipping_API::register_plugin( 'MP_Shipping_Flat_Rate', 'flat_rate', __('Flat Rate', 'mp') );
+MP_Shipping_API::register_plugin( 'MP_Shipping_Flat_Rate', 'flat_rate', __('Pauschalpreis', 'mp') );

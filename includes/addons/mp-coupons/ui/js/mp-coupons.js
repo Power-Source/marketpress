@@ -97,7 +97,8 @@
             type: "POST",
             data: {
                 blog_id: storeID,
-                coupon_code: "'" + couponCode + "'"
+                coupon_code: "'" + couponCode + "'",
+                nonce: mp_coupons_i18n.nonce
             }
         } )
             .done( function( resp ) {
@@ -132,7 +133,8 @@ var mp_coupons = { };
                 type: "POST",
                 data: {
                     blog_id: storeID,
-                    coupon_id: couponID
+                    coupon_id: couponID,
+                    nonce: mp_coupons_i18n.nonce
                 }
             } )
                 .done( function( resp ) {

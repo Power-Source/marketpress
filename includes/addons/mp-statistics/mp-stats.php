@@ -54,6 +54,11 @@ function mp_st_enqueue_scripts($hook) {
 add_action('wp_ajax_mp_get_sales_data', 'mp_st_get_sales_data');
 function mp_st_get_sales_data() {
     check_ajax_referer('mp_stats_nonce', 'nonce');
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( array( 'message' => __( 'Unzureichende Berechtigungen.', 'mp_st' ) ), 403 );
+    }
+
     global $wpdb;
 
     $period = isset($_POST['period']) ? sanitize_text_field($_POST['period']) : '3_months';

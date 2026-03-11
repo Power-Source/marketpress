@@ -1,10 +1,5 @@
 <?php
 
-/*
-  MarketPress FREE Orders Gateway Plugin
-  Author: Marko Miljus (Incsub)
- */
-
 class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 
 	//private gateway slug. Lowercase alpha (a-z) and dashes (-) only please!
@@ -12,7 +7,7 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 	//name of your gateway, for the admin side.
 	var $admin_name				 = '';
 	//public name of your gateway, for lists and such.
-	var $public_name				 = 'Free Order';
+	var $public_name				 = 'Kostenlose Bestellung';
 	//url for an image for your checkout method. Displayed on method form
 	var $method_img_url			 = '';
 	//url for an submit button image for your checkout method. Displayed on checkout form if set
@@ -31,9 +26,9 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 	 */
 	function on_creation() {
 		//set names here to be able to translate
-		$this->admin_name	 = __( 'Free Orders', 'mp' );
-		$public_name		 = $this->get_setting( 'name', __( 'Free Order', 'mp' ) );
-		$this->public_name	 = empty( $public_name ) ? __( 'Free Order', 'mp' ) : $public_name;
+		$this->admin_name	 = __( 'Kostenlose Bestellung', 'mp' );
+		$public_name		 = $this->get_setting( 'name', __( 'Kostenlose Bestellung', 'mp' ) );
+		$this->public_name	 = empty( $public_name ) ? __( 'Kostenlose Bestellung', 'mp' ) : $public_name;
 
 		add_filter( 'PSOURCE_Field_Checkbox_Group_Arguments_free_orders', array( &$this, 'PSOURCE_Field_Checkbox_Group_Arguments_free_orders' ), 10, 1 );
 		add_filter( 'PSOURCE_Field_Checkbox_checked', array( &$this, 'PSOURCE_Field_Checkbox_Checked_free_orders' ), 10, 2 );
@@ -86,9 +81,9 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 			'gateway_public_name'	 => $this->public_name,
 			'gateway_private_name'	 => $this->admin_name,
 			'gateway_plugin_name'	 => $this->plugin_name,
-			'method'				 => __( 'Free Order', 'mp' ),
+			'method'				 => __( 'Kostenlose Bestellung', 'mp' ),
 			'status'				 => array(
-				$timestamp => __( 'Paid', 'mp' ),
+				$timestamp => __( 'Bezahlt', 'mp' ),
 			),
 			'total'					 => $cart->total(),
 			'currency'				 => mp_get_setting( 'currency' ),
@@ -144,9 +139,9 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => $this->generate_metabox_id(),
 			'page_slugs'	 => array( 'store-settings-payments', 'store-settings_page_store-settings-payments' ),
-			'title'			 => sprintf( __( '%s Settings', 'mp' ), $this->admin_name ),
+			'title'			 => sprintf( __( '%s Einstellungen', 'mp' ), $this->admin_name ),
 			'option_name'	 => 'mp_settings',
-			'desc'			 => __( "This gateway is automatically activated if order totalling 0 and it can't be disabled", 'mp' ),
+			'desc'			 => __( "Dieses Gateway wird automatisch aktiviert, wenn die Bestellung 0 beträgt, und kann nicht deaktiviert werden", 'mp' ),
 		/* 'conditional'	 => array(
 		  'name'	 => 'gateways[allowed][' . $this->plugin_name . ']',
 		  'value'	 => 1,
@@ -156,37 +151,37 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 
 		$metabox->add_field( 'checkbox', array(
 			'name'			 => $this->get_field_name( 'automatic_payment_status_paid' ),
-			'label'			 => array( 'text' => __( 'Payment Status', 'mp' ) ),
-			'message'		 => __( 'Yes', 'mp' ),
+			'label'			 => array( 'text' => __( 'Zahlungsstatus', 'mp' ) ),
+			'message'		 => __( 'Ja', 'mp' ),
 			'value'			 => 'yes',
 			'default_value'	 => 'yes',
-			'desc'			 => __( 'If enabled, all free orders will be automatically marked as paid.', 'mp' ),
+			'desc'			 => __( 'Wenn aktiviert, werden alle kostenlosen Bestellungen automatisch als bezahlt markiert.', 'mp' ),
 		) );
 
 		$metabox->add_field( 'text', array(
 			'name'			 => $this->get_field_name( 'name' ),
 			'default_value'	 => $this->public_name,
-			'label'			 => array( 'text' => __( 'Method Name', 'mp' ) ),
-			'desc'			 => __( 'Enter a public name for this payment method that is displayed to users - No HTML', 'mp' ),
+			'label'			 => array( 'text' => __( 'Methodenname', 'mp' ) ),
+			'desc'			 => __( 'Gib einen öffentlichen Namen für diese Zahlungsmethode ein, der den Benutzern angezeigt wird - Kein HTML', 'mp' ),
 			'save_callback'	 => array( 'strip_tags' ),
 		) );
 
 		$metabox->add_field( 'wysiwyg', array(
 			'name'	 => $this->get_field_name( 'instruction' ),
-			'label'	 => array( 'text' => __( 'Payment Information', 'mp' ) ),
-			'desc'	 => __( 'This is the information to display on the payments screen.', 'mp' ),
+			'label'	 => array( 'text' => __( 'Zahlungsinformationen', 'mp' ) ),
+			'desc'	 => __( 'Dies sind die Informationen, die auf dem Zahlungsbildschirm angezeigt werden.', 'mp' ),
 		) );
 
 		$metabox->add_field( 'wysiwyg', array(
 			'name'	 => $this->get_field_name( 'confirmation' ),
-			'label'	 => array( 'text' => __( 'Confirmation User Information', 'mp' ) ),
-			'desc'	 => __( 'This is the free order information to display on the order confirmation screen. TOTAL will be replaced with the order total.', 'mp' ),
+			'label'	 => array( 'text' => __( 'Bestätigungsinformationen für Benutzer', 'mp' ) ),
+			'desc'	 => __( 'Dies sind die Informationen für kostenlose Bestellungen, die auf dem Bestätigungsbildschirm angezeigt werden. TOTAL wird durch den Gesamtbetrag der Bestellung ersetzt.', 'mp' ),
 		) );
 
 		$metabox->add_field( 'textarea', array(
 			'name'			 => $this->get_field_name( 'email' ),
-			'label'			 => array( 'text' => __( 'Order Confirmation Email', 'mp' ) ),
-			'desc'			 => __( 'This is the email text to send to those who have made free order checkouts. You should include your free order instructions / information here. It overrides the default order checkout email. These codes will be replaced with order details: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. No HTML allowed.', 'mp' ),
+			'label'			 => array( 'text' => __( 'Bestätigungs-E-Mail für Bestellungen', 'mp' ) ),
+			'desc'			 => __( 'Dies ist der E-Mail-Text, der an diejenigen gesendet wird, die kostenlose Bestellungen aufgegeben haben. Sie sollten hier Ihre Anweisungen / Informationen für kostenlose Bestellungen einfügen. Es überschreibt die Standard-E-Mail für die Bestellbestätigung. Diese Codes werden durch Bestelldetails ersetzt: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. Kein HTML erlaubt.', 'mp' ),
 			'custom'		 => array( 'rows' => 10 ),
 			'save_callback'	 => array( 'strip_tags' ),
 		) );
@@ -194,4 +189,4 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 
 }
 
-mp_register_gateway_plugin( 'MP_Gateway_FREE_Orders', 'free_orders', __( 'Free Orders', 'mp' ) );
+mp_register_gateway_plugin( 'MP_Gateway_FREE_Orders', 'free_orders', __( 'Kostenlose Bestellung', 'mp' ) );

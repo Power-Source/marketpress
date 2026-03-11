@@ -202,6 +202,7 @@ function addCustomValidation() {
 
             $.post( ajaxurl, {
                 "action": "psource_metabox_save_state",
+                "nonce":  PSOURCE_Metaboxes.nonce,
                 "closed": $postbox.hasClass( 'closed' ),
                 "id": $postbox.attr( 'id' )
             } );

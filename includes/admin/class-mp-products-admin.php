@@ -875,11 +875,15 @@ class MP_Products_Screen {
 	}
 
 	public function save_inventory_threshhold() {
-//check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'status_message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
+		}
+
+		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
 
 		$output = '';
 
-		if ( mp_update_setting( 'inventory_threshhold', mp_get_post_value( 'inventory_threshhold' ) ) ) {
+		if ( mp_update_setting( 'inventory_threshhold', absint( mp_get_post_value( 'inventory_threshhold' ) ) ) ) {
 			$response_array = array(
 				'status'         => 'success',
 				'status_message' => __( 'Option saved successfully.', 'mp' )
@@ -969,6 +973,10 @@ class MP_Products_Screen {
 	public function edit_variation_post_data() {
 		$post_id = mp_get_post_value( 'post_id' );
 		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
+
+		if ( ! current_user_can( 'edit_post', absint( $post_id ) ) ) {
+			wp_send_json_error( array( 'status_message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
+		}
 
 		$post_meta_errors = 0;
 
@@ -1100,6 +1108,10 @@ class MP_Products_Screen {
 
 		$post_id = mp_get_post_value( 'post_id' );
 		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
+
+		if ( ! current_user_can( 'edit_post', absint( $post_id ) ) ) {
+			wp_send_json_error( array( 'status_message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
+		}
 
 		if ( isset( $post_id ) && is_numeric( $post_id ) ) {
 

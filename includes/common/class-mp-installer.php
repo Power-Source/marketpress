@@ -350,6 +350,10 @@ class MP_Installer {
 	 * @action wp_ajax_mp_update_product_postmeta
 	 */
 	public function update_product_postmeta() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error();
+		}
+
 		if ( ! wp_verify_nonce( mp_get_post_value( '_wpnonce' ), 'mp_update_product_postmeta' ) ) {
 			wp_send_json_error();
 		}

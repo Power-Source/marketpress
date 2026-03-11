@@ -5,7 +5,7 @@ Requires at least: 3.7
 Requires PHP: 7.4
 Tested up to: 6.8.1
 ClassicPress: 2.6.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 
 Leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos und keine Erweiterungen erforderlich.
 
@@ -113,6 +113,13 @@ Es ist groß und leistungsstark, aber keine Sorge... Der MarketPress-Setup-Assis
 * Fix: Globale Kategorie- und Tag-Links im Multisite-Marktplatz verwenden jetzt dynamische Seiten-URLs statt starrer Pfade.
 * Fix: Seitenauswahlfelder im Netzwerk-Admin wurden auf die aktuelle Select-Implementierung angepasst.
 * Fix: Stabilitäts- und Syntaxkorrekturen in Multisite- und Store-Settings-Skripten.
+* Fix: AJAX-Endpoints im Admin wurden mit zusätzlichen Nonce- und Capability-Pruefungen abgesichert.
+* Fix: PHP8-Kompatibilitaet verbessert (u.a. `wp_get_sites()` ersetzt und `utf8_encode()` entfernt).
+* Fix: Gutschein-AJAX (Anwenden/Entfernen) wurde um Nonce-Validierung erweitert.
+* Fix: Addon- und Setup-Wizard-AJAX weiter gehaertet (u.a. Statistik-Capability-Check und Waehrungs-Preset-Nonce).
+* Fix: psource-metaboxes AJAX-Handler (save_state, fields_save) mit Nonce- und Capability-Pruefungen versehen.
+* Fix: Post-Select-Suche auf eingeloggte Benutzer mit edit_posts-Berechtigung beschraenkt.
+* Fix: Bestellstatus-Aenderung (ajax_change_order_status) erfordert nun edit_store_orders-Berechtigung.
 
 = 1.0.0 =
 

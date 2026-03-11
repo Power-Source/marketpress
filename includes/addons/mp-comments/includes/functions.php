@@ -152,9 +152,10 @@ class MP_Ratings_Functions {
         $comment_id = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
         $rating = isset($_POST['rating']) ? intval($_POST['rating']) : 0;
         $comment_text = isset($_POST['comment_text']) ? sanitize_textarea_field($_POST['comment_text']) : '';
+        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
         
         // Sicherheitscheck
-        if (!wp_verify_nonce($_POST['nonce'], 'edit_rating_' . $comment_id)) {
+        if ( empty($nonce) || !wp_verify_nonce($nonce, 'edit_rating_' . $comment_id) ) {
             wp_send_json_error(__('Sicherheitsüberprüfung fehlgeschlagen.', 'mp'));
             exit;
         }

@@ -56,18 +56,18 @@ class MP_Dashboard_Widgets {
 
 			wp_localize_script( 'mp-dashboard-widgets', 'mp_product_admin_i18n', array(
 				'ajaxurl'								 => admin_url( 'admin-ajax.php' ),
-				'creating_vatiations_message'			 => __( 'Creating variations, please wait...', 'mp' ),
+				'creating_vatiations_message'			 => __( 'Variationen werden erstellt, bitte warten...', 'mp' ),
 				'ajax_nonce'							 => $ajax_nonce,
-				'bulk_update_prices_multiple_title'		 => sprintf( __( 'Update prices for %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-				'bulk_update_prices_single_title'		 => sprintf( __( 'Update price for %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-				'bulk_update_inventory_multiple_title'	 => sprintf( __( 'Update inventory for %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-				'bulk_update_inventory_single_title'	 => sprintf( __( 'Update inventory for %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-				'bulk_delete_multiple_title'			 => sprintf( __( 'Delete %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-				'bulk_delete_single_title'				 => sprintf( __( 'Delete %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+				'bulk_update_prices_multiple_title'		 => sprintf( __( 'Preise für %s Produktvarianten aktualisieren', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+				'bulk_update_prices_single_title'		 => sprintf( __( 'Preis für %s Produktvariante aktualisieren', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+				'bulk_update_inventory_multiple_title'	 => sprintf( __( 'Inventar für %s Produktvarianten aktualisieren', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+				'bulk_update_inventory_single_title'	 => sprintf( __( 'Inventar für %s Produktvariante aktualisieren', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+				'bulk_delete_multiple_title'			 => sprintf( __( '%s Produktvarianten löschen', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+				'bulk_delete_single_title'				 => sprintf( __( '%s Produktvariante löschen', 'mp' ), '<span class="mp_variants_selected"></span>' ),
 				'date_format'							 => PSOURCE_Field_Datepicker::format_date_for_jquery( get_option( 'date_format' ) ),
-				'message_valid_number_required'			 => __( 'Valid number is required', 'mp' ),
-				'message_input_required'				 => __( 'Input is required', 'mp' ),
-				'saving_message'						 => __( 'Please wait...saving in progress...', 'mp' ),
+				'message_valid_number_required'			 => __( 'Eine gültige Nummer ist erforderlich', 'mp' ),
+				'message_input_required'				 => __( 'Eingabe ist erforderlich', 'mp' ),
+				'saving_message'						 => __( 'Bitte warten...Speichern läuft...', 'mp' ),
 				'placeholder_image'						 => mp_plugin_url( '/includes/admin/ui/images/img-placeholder.jpg' )
 			) );
 		}
@@ -112,13 +112,13 @@ class MP_Dashboard_Widgets {
 		if ( !current_user_can( apply_filters( 'mp_can_view_dashboard_widgets_capability_needed', 'manage_options' ) ) ) {
 			return;
 		}
-		wp_add_dashboard_widget( 'mp_store_report', __( 'Store Reports', 'mp' ), array( &$this, 'mp_store_report_display' ) );
-		wp_add_dashboard_widget( 'mp_store_management', __( 'Store Management', 'mp' ), array( &$this, 'mp_store_management_display' ) );
+		wp_add_dashboard_widget( 'mp_store_report', __( 'PS MarketPress-Berichte', 'mp' ), array( &$this, 'mp_store_report_display' ) );
+		wp_add_dashboard_widget( 'mp_store_management', __( 'Shop-Verwaltung', 'mp' ), array( &$this, 'mp_store_management_display' ) );
 
 		$out_of_stock_query = $this->mp_dashboard_low_stock_query();
 
 		$low_stock_count = $out_of_stock_query->found_posts;
-		wp_add_dashboard_widget( 'mp_low_stock', sprintf( __( 'Low Stock (<span class="low_stock_value">%s</span>)', 'mp' ), $low_stock_count ), array( &$this, 'mp_low_stock_display' ) );
+		wp_add_dashboard_widget( 'mp_low_stock', sprintf( __( 'Geringer Lagerbestand (<span class="low_stock_value">%s</span>)', 'mp' ), $low_stock_count ), array( &$this, 'mp_low_stock_display' ) );
 	}
 
 	public function mp_low_stock_display() {
@@ -131,9 +131,9 @@ class MP_Dashboard_Widgets {
 				<table class="wp-list-table widefat fixed striped posts">
 					<thead>
 						<tr>
-							<th scope="col" id="mp_product_name" class="manage-column column-tags"><?php _e( 'Product Name', 'mp' ); ?></th>
+							<th scope="col" id="mp_product_name" class="manage-column column-tags"><?php _e( 'Produktname', 'mp' ); ?></th>
 							<th scope="col" id="mp_variation_name" class="manage-column column-tags"><?php _e( 'Variation', 'mp' ); ?></th>
-							<th scope="col" id="mp_stock_level" class="manage-column column-tags"><?php _e( 'Stock Level', 'mp' ); ?></th>
+							<th scope="col" id="mp_stock_level" class="manage-column column-tags"><?php _e( 'Lagerbestand', 'mp' ); ?></th>
 						</tr>
 					</thead>
 
@@ -205,7 +205,8 @@ class MP_Dashboard_Widgets {
 		<div class="mp_dashboard_widget_inventory_threshhold_wrap">
 			<form id="inventory_threshhold_form" method="post">
 				<input type="hidden" name="action" value="save_inventory_threshhold">
-				<span class="mp-dashboard-section-title"><?php _e( 'Inventory Warning Threshold', 'mp' ); ?></span>
+				<input type="hidden" name="ajax_nonce" value="<?php echo esc_attr( wp_create_nonce( 'mp-ajax-nonce' ) ); ?>">
+				<span class="mp-dashboard-section-title"><?php _e( 'Schwellenwert für Bestandswarnungen', 'mp' ); ?></span>
 				<select name="inventory_threshhold" id="mp_dashboard_widget_inventory_threshhold">
 					<?php
 					for ( $i = 0; $i <= $max_inventory_threshhold; $i++ ) {
@@ -238,29 +239,29 @@ class MP_Dashboard_Widgets {
 		$seven_days	 = $wpdb->get_row( "SELECT count(p.ID) as count, sum(m.meta_value) as total, avg(m.meta_value) as average FROM $wpdb->posts p JOIN $wpdb->postmeta m ON p.ID = m.post_id WHERE p.post_type = 'mp_order' AND m.meta_key = 'mp_order_total' AND p.post_date >= '" . $seven_days_date . "' AND p.post_status != 'trash'" );
 		$thirty_days = $wpdb->get_row( "SELECT count(p.ID) as count, sum(m.meta_value) as total, avg(m.meta_value) as average FROM $wpdb->posts p JOIN $wpdb->postmeta m ON p.ID = m.post_id WHERE p.post_type = 'mp_order' AND m.meta_key = 'mp_order_total' AND p.post_date >= '" . $thirty_days_date . "' AND p.post_status != 'trash'" );
 		?>
-		<p><span><?php _e( "Welcome back! Here's a quick summary of your store's performance.", 'mp' ); ?></span></p>
+		<p><span><?php _e( "Willkommen zurück! Hier findest Du eine kurze Zusammenfassung der Leistung Deines Shops.", 'mp' ); ?></span></p>
 		<div class="main store-report">
-			<span class="mp-dashboard-section-title"><?php _e( 'Sales', 'mp' ); ?></span>
+			<span class="mp-dashboard-section-title"><?php _e( 'Verkäufe', 'mp' ); ?></span>
 			<div class="mp-dashboard-stats-wrapper">
 				<div class="mp-dashboard-square mp-dashboard-left">
-					<span class="mp-dashboard-square-title"><?php _e( 'Today', 'mp' ); ?></span>
+					<span class="mp-dashboard-square-title"><?php _e( 'Heute', 'mp' ); ?></span>
 					<span class="mp-dashboard-square-amount"><?php echo mp_format_currency( '', $today->total ); ?></span>
-					<span class="mp-dashboard-square-footer"><?php echo $today->count . __( ' Orders', 'mp' ); ?></span>
+					<span class="mp-dashboard-square-footer"><?php echo $today->count . __( ' Bestellungen', 'mp' ); ?></span>
 				</div>
 				<div class="mp-dashboard-square mp-dashboard-right">
-					<span class="mp-dashboard-square-title"><?php _e( 'Yesterday', 'mp' ); ?></span>
+					<span class="mp-dashboard-square-title"><?php _e( 'Gestern', 'mp' ); ?></span>
 					<span class="mp-dashboard-square-amount"><?php echo mp_format_currency( '', $yesterday->total ); ?></span>
-					<span class="mp-dashboard-square-footer"><?php echo $yesterday->count . __( ' Orders', 'mp' ); ?></span>
+					<span class="mp-dashboard-square-footer"><?php echo $yesterday->count . __( ' Bestellungen', 'mp' ); ?></span>
 				</div>
 				<div class="mp-dashboard-square mp-dashboard-left">
-					<span class="mp-dashboard-square-title"><?php _e( 'Last 7 Days', 'mp' ); ?></span>
+					<span class="mp-dashboard-square-title"><?php _e( 'Letzte 7 Tage', 'mp' ); ?></span>
 					<span class="mp-dashboard-square-amount"><?php echo mp_format_currency( '', $seven_days->total ); ?></span>
-					<span class="mp-dashboard-square-footer"><?php echo $seven_days->count . __( ' Orders', 'mp' ); ?></span>
+					<span class="mp-dashboard-square-footer"><?php echo $seven_days->count . __( ' Bestellungen', 'mp' ); ?></span>
 				</div>
 				<div class="mp-dashboard-square mp-dashboard-right">
-					<span class="mp-dashboard-square-title"><?php _e( 'Last 30 Days', 'mp' ); ?></span>
+					<span class="mp-dashboard-square-title"><?php _e( 'Letzte 30 Tage', 'mp' ); ?></span>
 					<span class="mp-dashboard-square-amount"><?php echo mp_format_currency( '', $thirty_days->total ); ?></span>
-					<span class="mp-dashboard-square-footer"><?php echo $thirty_days->count . __( ' Orders', 'mp' ); ?></span>
+					<span class="mp-dashboard-square-footer"><?php echo $thirty_days->count . __( ' Bestellungen', 'mp' ); ?></span>
 				</div>
 			</div>
 
@@ -273,19 +274,19 @@ class MP_Dashboard_Widgets {
 			$paid_orders		 = $count_posts->order_paid;
 			$low_stock_products	 = $out_of_stock_query->found_posts;
 			?>
-			<span class="mp-dashboard-section-title"><?php _e( 'Stock & Orders', 'mp' ); ?></span>
+			<span class="mp-dashboard-section-title"><?php _e( 'Lager & Bestellungen', 'mp' ); ?></span>
 
 			<div class="mp-dashboard-section-stock-orders">
-				<span class="mp-dashboard-stock-orders-title"><?php printf( _n( '%s order', '%s orders', $received_orders, 'mp' ), $received_orders ); ?></span>
-				<span class="mp-dashboard-stock-orders-subtitle"><?php _e( 'received', 'mp' ); ?></span>
+				<span class="mp-dashboard-stock-orders-title"><?php printf( _n( '%s Bestellung', '%s Bestellungen', $received_orders, 'mp' ), $received_orders ); ?></span>
+				<span class="mp-dashboard-stock-orders-subtitle"><?php _e( 'erhalten', 'mp' ); ?></span>
 			</div>
 			<div class="mp-dashboard-section-stock-orders">
-				<span class="mp-dashboard-stock-orders-title"><?php printf( _n( '%s order', '%s orders', $paid_orders, 'mp' ), $paid_orders ); ?></span>
-				<span class="mp-dashboard-stock-orders-subtitle"><?php _e( 'paid', 'mp' ); ?></span>
+				<span class="mp-dashboard-stock-orders-title"><?php printf( _n( '%s Bestellung', '%s Bestellungen', $paid_orders, 'mp' ), $paid_orders ); ?></span>
+				<span class="mp-dashboard-stock-orders-subtitle"><?php _e( 'bezahlt', 'mp' ); ?></span>
 			</div>
 			<div class="mp-dashboard-section-stock-orders">
-				<span class="mp-dashboard-stock-orders-title"><?php printf( _n( '<span class="low_stock_value">%s</span> product', '<span class="low_stock_value">%s</span> products', $low_stock_products, 'mp' ), $low_stock_products ); ?></span>
-				<span class="mp-dashboard-stock-orders-subtitle"><?php _e( 'low in stock', 'mp' ); ?></span>
+				<span class="mp-dashboard-stock-orders-title"><?php printf( _n( '<span class="low_stock_value">%s</span> Produkt', '<span class="low_stock_value">%s</span> Produkte', $low_stock_products, 'mp' ), $low_stock_products ); ?></span>
+				<span class="mp-dashboard-stock-orders-subtitle"><?php _e( 'wenig auf Lager', 'mp' ); ?></span>
 			</div>
 		</div>
 		<br clear="both" />
@@ -294,30 +295,30 @@ class MP_Dashboard_Widgets {
 
 	public function mp_store_management_display() {
 		?>
-		<p><span><?php _e( "Here's some quick links to manage your store and products.", 'mp' ); ?></span></p>
+		<p><span><?php _e( "Hier sind einige Schnellzugriffe, um Deinen Shop und Deine Produkte zu verwalten.", 'mp' ); ?></span></p>
 		<div class="main store-management">
 			<ul class="store-management-left">
-				<li><span><?php _e( 'Manage', 'mp' ); ?></span></li>
-				<li><a href="<?php echo admin_url( 'edit.php?post_type=mp_order' ); ?>"><?php _e( 'Orders', 'mp' ); ?></a></li>
+				<li><span><?php _e( 'Verwalten', 'mp' ); ?></span></li>
+				<li><a href="<?php echo admin_url( 'edit.php?post_type=mp_order' ); ?>"><?php _e( 'Bestellungen', 'mp' ); ?></a></li>
 				<?php
 				if ( MP_Addons::get_instance()->is_addon_enabled( 'MP_Coupons_Addon' ) ) {
 					?>
-					<li><a href="<?php echo admin_url( 'edit.php?post_type=mp_coupon' ); ?>"><?php _e( 'Coupons', 'mp' ); ?></a></li>
+					<li><a href="<?php echo admin_url( 'edit.php?post_type=mp_coupon' ); ?>"><?php _e( 'Gutscheine', 'mp' ); ?></a></li>
 				<?php } ?>
-				<li><a href="<?php echo admin_url( 'edit.php?post_type=' . MP_Product::get_post_type() ); ?>"><?php _e( 'Products', 'mp' ); ?></a></li>
-				<li><a href="<?php echo admin_url( 'edit-tags.php?taxonomy=product_category&post_type=' . MP_Product::get_post_type() ); ?>"><?php _e( 'Categories', 'mp' ); ?></a></li>
-				<li><a href="<?php echo admin_url( 'edit-tags.php?taxonomy=product_tag&post_type=' . MP_Product::get_post_type() ); ?>"><?php _e( 'Tags', 'mp' ); ?></a></li>
+				<li><a href="<?php echo admin_url( 'edit.php?post_type=' . MP_Product::get_post_type() ); ?>"><?php _e( 'Produkte', 'mp' ); ?></a></li>
+				<li><a href="<?php echo admin_url( 'edit-tags.php?taxonomy=product_category&post_type=' . MP_Product::get_post_type() ); ?>"><?php _e( 'Kategorien', 'mp' ); ?></a></li>
+				<li><a href="<?php echo admin_url( 'edit-tags.php?taxonomy=product_tag&post_type=' . MP_Product::get_post_type() ); ?>"><?php _e( 'Stichwörter', 'mp' ); ?></a></li>
 			</ul>
 			<ul class="store-management-right">
-				<li><span><?php _e( 'Configure', 'mp' ); ?></span></li>
-				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-presentation' ); ?>"><?php _e( 'Presentation', 'mp' ); ?></a></li>
-				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-notifications' ); ?>"><?php _e( 'Email Notifications', 'mp' ); ?></a></li>
-				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-shipping' ); ?>"><?php _e( 'Shipping Rates', 'mp' ); ?></a></li>
-				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-payments' ); ?>"><?php _e( 'Payment Gateways', 'mp' ); ?></a></li>
-				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-capabilities' ); ?>"><?php _e( 'User Capabilities', 'mp' ); ?></a></li>
-				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-addons' ); ?>"><?php _e( 'Add-ons', 'mp' ); ?></a></li>
+				<li><span><?php _e( 'Konfigurieren', 'mp' ); ?></span></li>
+				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-presentation' ); ?>"><?php _e( 'Präsentation', 'mp' ); ?></a></li>
+				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-notifications' ); ?>"><?php _e( '-Mail-Benachrichtigungen', 'mp' ); ?></a></li>
+				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-shipping' ); ?>"><?php _e( 'Versandkosten', 'mp' ); ?></a></li>
+				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-payments' ); ?>"><?php _e( 'Zahlungsgateways', 'mp' ); ?></a></li>
+				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-capabilities' ); ?>"><?php _e( 'Benutzerrechte', 'mp' ); ?></a></li>
+				<li><a href="<?php echo admin_url( 'admin.php?page=store-settings-addons' ); ?>"><?php _e( 'Erweiterungen', 'mp' ); ?></a></li>
 				<?php if ( function_exists( 'register_nav_menus' ) ) { ?>
-					<li><a href="<?php echo admin_url( 'nav-menus.php' ); ?>"><?php _e( 'Add Pages to Menu', 'mp' ); ?></a></li>
+					<li><a href="<?php echo admin_url( 'nav-menus.php' ); ?>"><?php _e( 'Seiten zum Menü hinzufügen', 'mp' ); ?></a></li>
 				<?php } ?>
 			</ul>
 		</div>

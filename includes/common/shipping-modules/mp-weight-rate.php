@@ -21,7 +21,7 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
    */
 	function on_creation() {
     //declare here for translation
-    $this->public_name = __( 'Weight Rate', 'mp' );
+    $this->public_name = __( 'Gewichtsrate', 'mp' );
     
 		add_filter( 'psource_field/get_value/shipping[weight_rate][rates]', array( &$this, 'get_rates_value' ), 10, 4 );
 		add_filter( 'psource_field/sanitize_for_db', array( &$this, 'sanitize_rates' ), 10, 3);
@@ -107,8 +107,8 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 				'store-settings_page_store-settings-shipping',
 				'store-setup-wizard'
 			),
-			'title' => sprintf( __( '%s Settings', 'mp' ), $this->public_name ),
-			'desc' => __( 'Be sure to enter a shipping price for every option or those customers may get free shipping. Don\'t worry about sorting as this will be done automatically upon saving.', 'mp' ),
+			'title' => sprintf( __( '%s Einstellungen', 'mp' ), $this->public_name ),
+			'desc' => __( 'Stelle sicher, dass Du für jede Option einen Versandpreis eingibst, da sonst Kunden möglicherweise kostenlosen Versand erhalten. Keine Sorge, das Sortieren erfolgt automatisch beim Speichern.', 'mp' ),
 			'option_name' => 'mp_settings',
 			'conditional' => array(
 				'action' => 'show',
@@ -123,8 +123,8 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 		if ( $layers instanceof PSOURCE_Field ) {
 			$layers->add_sub_field( 'text', array(
 				'name' => 'minweight',
-				'label' => array( 'text' => __( 'Cart Weight', 'mp' ) ),
-				'desc' => __( 'If cart weight is greater than or equal to this value then the rates from that row will be used during checkout.', 'mp' ),
+				'label' => array( 'text' => __( 'Warengewicht', 'mp' ) ),
+				'desc' => __( 'Wenn das Warengewicht größer oder gleich diesem Wert ist, werden die Versandkosten aus dieser Zeile während des Checkouts verwendet.', 'mp' ),
 				'validation' => array(
 					'required' => true,
 					'number' => true,
@@ -135,7 +135,7 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 			if ( 'US' == mp_get_setting( 'base_country') ) {
 				$layers->add_sub_field( 'text', array(
 					'name' => 'lower_48',
-					'label' => array( 'text' => __( 'Lower 48 States', 'mp' ) ),
+					'label' => array( 'text' => __( 'Untere 48 Staaten', 'mp' ) ),
 					'validation' => array(
 						'required' => true,
 						'number' => true,
@@ -144,7 +144,7 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 				) );
 				$layers->add_sub_field( 'text', array(
 					'name' => 'hi_ak',
-					'label' => array( 'text' => __( 'Hawaii and Alaska', 'mp' ) ),
+					'label' => array( 'text' => __( 'Hawaii und Alaska', 'mp' ) ),
 					'validation' => array(
 						'required' => true,
 						'number' => true,
@@ -153,7 +153,7 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 				) );
 				$layers->add_sub_field( 'text', array(
 					'name' => 'canada',
-					'label' => array( 'text' => __( 'Canada', 'mp' ) ),
+					'label' => array( 'text' => __( 'Kanada', 'mp' ) ),
 					'validation' => array(
 						'required' => true,
 						'number' => true,
@@ -163,7 +163,7 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 			} else {
 				$layers->add_sub_field( 'text', array(
 					'name' => 'in_country',
-					'label' => array( 'text' => __( 'In Country', 'mp' ) ),
+					'label' => array( 'text' => __( 'Im Land', 'mp' ) ),
 					'validation' => array(
 						'required' => true,
 						'number' => true,
@@ -174,7 +174,7 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 				if ( 'CA' == mp_get_setting( 'base_country') ) {
 					$layers->add_sub_field( 'text', array(
 						'name' => 'usa',
-						'label' => array( 'text' => __( 'United States', 'mp' ) ),
+						'label' => array( 'text' => __( 'Vereinigte Staaten', 'mp' ) ),
 						'validation' => array(
 							'required' => true,
 							'number' => true,
@@ -186,7 +186,7 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 				if ( in_array( mp_get_setting( 'base_country' ), mp()->eu_countries ) ) {
 					$layers->add_sub_field( 'text', array(
 						'name' => 'eu',
-						'label' => array( 'text' => __( 'European Union', 'mp' ) ),
+						'label' => array( 'text' => __( 'Europäische Union', 'mp' ) ),
 						'validation' => array(
 							'required' => true,
 							'number' => true,
@@ -289,4 +289,4 @@ class MP_Shipping_Weight_Rate extends MP_Shipping_API {
 }
 
 //register plugin - uncomment to register
-MP_Shipping_API::register_plugin( 'MP_Shipping_Weight_Rate', 'weight_rate', __('Weight Rate', 'mp') );
+MP_Shipping_API::register_plugin( 'MP_Shipping_Weight_Rate', 'weight_rate', __('Gewichtsrate', 'mp') );

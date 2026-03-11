@@ -60,9 +60,13 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 	 * @action wp_ajax_psource_search_posts
 	 */
 	public static function search_posts() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error( null, 403 );
+		}
+
 		add_filter( 'posts_search', array( __CLASS__, 'search_by_title_only' ), 500, 2 );
 
-		parse_str( $_GET[ 'query' ], $args );
+		parse_str( isset( $_GET['query'] ) ? sanitize_text_field( wp_unslash( $_GET['query'] ) ) : '', $args );
 
 		$args = array_replace_recursive( array(
 			'posts_per_page' => get_option( 'posts_per_page' ),

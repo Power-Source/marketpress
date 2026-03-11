@@ -44,12 +44,12 @@ class MP_Store_Settings_Notifications {
 		$metabox = new PSOURCE_Metabox(array(
 			'id' => 'mp-admin-settings-notifications',
 			'page_slugs' => array('store-settings-notifications', 'store-settings_page_store-settings-notifications'),
-			'title' => __('Admin Notification Settings', 'mp'),
+			'title' => __('Einstellungen für Admin-Benachrichtigungen', 'mp'),
 			'option_name' => 'mp_settings',
 		));
 		$metabox->add_field('text', array(
 			'name' => 'store_email',
-			'label' => array('text' => __('Notification Email', 'mp')),
+			'label' => array('text' => __('Benachrichtigungs-E-Mail', 'mp')),
 			'validation' => array(
 				'email' => 1,
 			),
@@ -57,14 +57,14 @@ class MP_Store_Settings_Notifications {
 		
 		$new_order = $metabox->add_field('complex', array(
 			'name' => 'email[admin_order]',
-			'label' => array('text' => __('New Order', 'mp')),
+			'label' => array('text' => __('Neue Bestellung', 'mp')),
 			'layout' => 'rows',
 		));
 		
 		if ( $new_order instanceof PSOURCE_Field ) {
 			$new_order->add_field('text', array(
 				'name' => 'subject',
-				'label' => array('text' => __('Subject', 'mp')),
+				'label' => array('text' => __('Betreff', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
@@ -82,14 +82,14 @@ class MP_Store_Settings_Notifications {
 		$customer_metabox = new PSOURCE_Metabox(array(
 			'id' => 'mp-customer-settings-notifications',
 			'page_slugs' => array('store-settings-notifications', 'store-settings_page_store-settings-notifications'),
-			'title' => __('Customer Notification Settings', 'mp'),
+			'title' => __('Einstellungen für Kundenbenachrichtigungen', 'mp'),
 			'option_name' => 'mp_settings',
 		));
 
 		$new_order_section = $customer_metabox->add_field('section', array(
 			'name' => 'new_order_section',
-			'title' => __('New Order', 'mp'),
-			'subtitle' => __('These codes will be replaced with order details: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. No HTML allowed.<br/>For orders placed with manual payment, emails set here will be overriden by the one configured in manual payments settings, under payments settings page', 'mp'),
+			'title' => __('Neue Bestellung', 'mp'),
+			'subtitle' => __('Diese Codes werden durch Bestelldetails ersetzt: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. Kein HTML erlaubt.<br/>Für Bestellungen mit manueller Zahlung werden die hier festgelegten E-Mails durch die in den manuellen Zahlungseinstellungen unter der Seite Zahlungseinstellungen konfigurierten E-Mails überschrieben.', 'mp'),
 			'before_field' => '<div id="new_order_tabs_wrapper">',
 		));
 
@@ -98,17 +98,17 @@ class MP_Store_Settings_Notifications {
 			'tabs' => array(
 				array(
 					"active"=> true,
-					"label"=> __('Physical orders', 'mp'),
+					"label"=> __('Physische Bestellungen', 'mp'),
 					"slug"=>"new_order_tab"
 				),
 				array(
 					"active" => false,
-					"label" => __( 'Digital downloads orders', 'mp' ),
+					"label" => __( 'Digitale Bestellungen', 'mp' ),
 					"slug" => "new_order_downloads_tab"
 				),
 				array(
 					"active" => false,
-					"label" => __( 'Mixed orders', 'mp' ),
+					"label" => __( 'Gemischte Bestellungen', 'mp' ),
 					"slug" => "new_order_mixed_tab",
 				),
 			),
@@ -121,14 +121,14 @@ class MP_Store_Settings_Notifications {
 
 		$new_order = $customer_metabox->add_field('complex', array(
 			'name' => 'email[new_order]',
-			'label' => array('text' => __('New Order', 'mp')),
+			'label' => array('text' => __('Neue Bestellung', 'mp')),
 			'layout' => 'rows',
 		));
 		
 		if ( $new_order instanceof PSOURCE_Field ) {
 			$new_order->add_field('text', array(
 				'name' => 'subject',
-				'label' => array('text' => __('Subject', 'mp')),
+				'label' => array('text' => __('Betreff', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
@@ -150,14 +150,14 @@ class MP_Store_Settings_Notifications {
 
 		$new_order_downloads = $customer_metabox->add_field('complex', array(
 			'name' => 'email[new_order_downloads]',
-			'label' => array('text' => __('New Order - Digital downloads only orders', 'mp')),
+			'label' => array('text' => __('Neue Bestellung - Nur digitale Bestellungen', 'mp')),
 			'layout' => 'rows',
 		));
 		
 		if ( $new_order_downloads instanceof PSOURCE_Field ) {
 			$new_order_downloads->add_field('text', array(
 				'name' => 'subject',
-				'label' => array('text' => __('Subject', 'mp')),
+				'label' => array('text' => __('Betreff', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
@@ -179,7 +179,7 @@ class MP_Store_Settings_Notifications {
 
 		$new_order_mixed = $customer_metabox->add_field('complex', array(
 			'name' => 'email[new_order_mixed]',
-			'label' => array('text' => __('New Order - Mixed', 'mp')),
+			'label' => array('text' => __('Neue Bestellung - Gemischte Bestellungen', 'mp')),
 			'layout' => 'rows',
 			'after_field' => '</div>', // close the #new_order_tabs_wrapper div
 		));
@@ -187,7 +187,7 @@ class MP_Store_Settings_Notifications {
 		if ( $new_order_mixed instanceof PSOURCE_Field ) {
 			$new_order_mixed->add_field('text', array(
 				'name' => 'subject',
-				'label' => array('text' => __('Subject', 'mp')),
+				'label' => array('text' => __('Betreff', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
@@ -204,8 +204,8 @@ class MP_Store_Settings_Notifications {
 
 		$order_shipped_section = $customer_metabox->add_field('section', array(
 			'name' => 'order_shipped_section',
-			'title' => __('Order Shipped', 'mp'),
-			'subtitle' => __('These codes will be replaced with order details: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. No HTML allowed.', 'mp'),
+			'title' => __('Bestellung versendet', 'mp'),
+			'subtitle' => __('Diese Codes werden durch Bestelldetails ersetzt: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. Kein HTML erlaubt.', 'mp'),
 			'before_field' => '<div id="order_shipped_tabs_wrapper">',
 		));
 
@@ -214,17 +214,17 @@ class MP_Store_Settings_Notifications {
 			'tabs' => array(
 				array(
 					"active"=> true,
-					"label"=> __('Physical orders', 'mp'),
+					"label"=> __('Physische Bestellungen', 'mp'),
 					"slug"=>"order_shipped_tab"
 				),
 				array(
 					"active" => false,
-					"label" => __( 'Digital downloads orders', 'mp' ),
+					"label" => __( 'Digitale Bestellungen', 'mp' ),
 					"slug" => "order_shipped_downloads_tab"
 				),
 				array(
 					"active" => false,
-					"label" => __( 'Mixed orders', 'mp' ),
+					"label" => __( 'Gemischte Bestellungen', 'mp' ),
 					"slug" => "order_shipped_mixed_tab",
 				),
 			),
@@ -237,14 +237,14 @@ class MP_Store_Settings_Notifications {
 
 		$order_shipped = $customer_metabox->add_field('complex', array(
 			'name' => 'email[order_shipped]',
-			'label' => array('text' => __('Order Shipped', 'mp')),
+			'label' => array('text' => __('Bestellung versendet', 'mp')),
 			'layout' => 'rows',
 		));
 		
 		if ( $order_shipped instanceof PSOURCE_Field ) {
 			$order_shipped->add_field('text', array(
 				'name' => 'subject',
-				'label' => array('text' => __('Subject', 'mp')),
+				'label' => array('text' => __('Betreff', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
@@ -266,14 +266,14 @@ class MP_Store_Settings_Notifications {
 
 		$order_shipped_downloads = $customer_metabox->add_field( 'complex', array(
 			'name' => 'email[order_shipped_downloads]',
-			'label' => array( 'text' => __( 'Order Shipped - Digital downloads only orders', 'mp' ) ),
+			'label' => array( 'text' => __( 'Bestellung versendet - Nur digitale Bestellungen', 'mp' ) ),
 			'layout' => 'rows',
 		) );
 		
 		if ( $order_shipped_downloads instanceof PSOURCE_Field ) {
 			$order_shipped_downloads->add_field( 'text', array(
 				'name' => 'subject',
-				'label' => array( 'text' => __( 'Subject', 'mp' ) ),
+				'label' => array( 'text' => __( 'Betreff', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 				),
@@ -295,7 +295,7 @@ class MP_Store_Settings_Notifications {
 
 		$order_shipped_mixed = $customer_metabox->add_field( 'complex', array(
 			'name' => 'email[order_shipped_mixed]',
-			'label' => array( 'text' => __( 'Order Shipped - Mixed orders (with both digital and physical products)', 'mp' ) ),
+			'label' => array( 'text' => __( 'Bestellung versendet - Gemischte Bestellungen (mit digitalen und physischen Produkten)', 'mp' ) ),
 			'layout' => 'rows',
 			'after_field' => '</div>', // close the #order_shipped_tabs_wrapper div
 		) );
@@ -303,7 +303,7 @@ class MP_Store_Settings_Notifications {
 		if ( $order_shipped_mixed instanceof PSOURCE_Field ) {
 			$order_shipped_mixed->add_field( 'text', array(
 				'name' => 'subject',
-				'label' => array( 'text' => __( 'Subject', 'mp' ) ),
+				'label' => array( 'text' => __( 'Betreff', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 				),
@@ -321,8 +321,8 @@ class MP_Store_Settings_Notifications {
 		// This field is outside the #order_shipped_tabs_wrapper div, so it won't be appended to the last tab
 		$customer_metabox->add_field('checkbox', array(
 			'name' => 'email_registration_email',
-			'message' => __('Yes', 'mp'),
-			'label' => array( 'text' => __('Notification to registration email instead of billing email?', 'mp')),
+			'message' => __('Ja', 'mp'),
+			'label' => array( 'text' => __('Benachrichtigung an Registrierungs-E-Mail anstelle der Rechnungs-E-Mail?', 'mp')),
 		));
 	}
 }

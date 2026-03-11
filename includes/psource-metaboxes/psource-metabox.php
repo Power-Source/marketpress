@@ -153,9 +153,14 @@ class PSOURCE_Metabox {
 	 * @action wp_ajax_psource_metabox_save_state
 	 */
 	public static function ajax_save_state() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_die( -1, 403 );
+		}
+		check_ajax_referer( 'psource_metabox_state_nonce', 'nonce' );
+
 		$option    = 'psource_metabox_states';
 		$data      = get_option( $option, array() );
-		$id        = isset( $_POST['id'] ) ? $_POST['id'] : null;
+		$id        = isset( $_POST['id'] ) ? sanitize_key( $_POST['id'] ) : null;
 		$is_closed = isset( $_POST['closed'] ) ? $_POST['closed'] : null;
 	
 		if ( is_null( $id ) || is_null( $is_closed ) ) {
@@ -360,6 +365,7 @@ class PSOURCE_Metabox {
 							url: '<?php echo $url ?>',
 							data: {
 								action: 'psource_fields_save',
+								nonce: '<?php echo esc_js( wp_create_nonce( 'psource_fields_save_nonce' ) ); ?>',
 								value: that.val(),
 								name: '<?php echo $field->get_name() ?>',
 								post_id: '<?php echo $post_id ?>'
@@ -382,6 +388,7 @@ class PSOURCE_Metabox {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
+		check_ajax_referer( 'psource_fields_save_nonce', 'nonce' );
 
 		$name            = isset( $_POST['name'] ) ? $_POST['name'] : 0;
 		$value           = isset( $_POST['value'] ) ? $_POST['value'] : 0;
@@ -625,6 +632,7 @@ class PSOURCE_Metabox {
 		wp_localize_script( 'psource-metaboxes-admin', 'PSOURCE_Metaboxes_Validation_Messages', $messages );
 		wp_localize_script( 'psource-metaboxes-admin', 'PSOURCE_Metaboxes', array(
 			'spinner_url'    => admin_url( 'images/spinner.gif' ),
+			'nonce'          => wp_create_nonce( 'psource_metabox_state_nonce' ),
 			'error'          => __( 'error', 'mp' ),
 			'errors'         => __( 'errors', 'mp' ),
 			'has'            => __( 'has', 'mp' ),

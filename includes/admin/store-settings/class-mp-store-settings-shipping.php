@@ -90,7 +90,7 @@ class MP_Store_Settings_Shipping {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => 'mp-settings-shipping-plugins',
 			'page_slugs'	 => array( 'store-settings-shipping', 'store-settings_page_store-settings-shipping' ),
-			'title'			 => __( 'General Shipping Settings', 'mp' ),
+			'title'			 => __( 'Allgemeine Versand-Einstellungen', 'mp' ),
 			'option_name'	 => 'mp_settings',
 			'order'			 => 1,
 		) );
@@ -98,21 +98,21 @@ class MP_Store_Settings_Shipping {
 		// Target Countries
 		$metabox->add_field( 'advanced_select', array(
 			'name'					 => 'shipping[allowed_countries]',
-			'label'					 => array( 'text' => __( 'Target Countries', 'mp' ) ),
-			'desc'					 => __( 'These are the countries that you will ship to.', 'mp' ),
-			'options'				 => mp_popular_country_list() + array( 'all_countries' => __( 'All Countries', 'mp' ) ) + mp_country_list(), //all_countries|disabled
-			'default_value'			 => array( 'all_countries' => __( 'All Countries', 'mp' ) ),
-			'placeholder'			 => __( 'Choose Countries', 'mp' ),
+			'label'					 => array( 'text' => __( 'Ziel-Länder', 'mp' ) ),
+			'desc'					 => __( 'Dies sind die Länder, in die Du versenden wirst.', 'mp' ),
+			'options'				 => mp_popular_country_list() + array( 'all_countries' => __( 'Alle Länder', 'mp' ) ) + mp_country_list(), //all_countries|disabled
+			'default_value'			 => array( 'all_countries' => __( 'Alle Länder', 'mp' ) ),
+			'placeholder'			 => __( 'Wähle Länder', 'mp' ),
 			'format_dropdown_header' => '
 				<ul class="select2-all-none">
-					<li class="select2-none">' . __( 'None', 'mp' ) . '</li>
-					<li class="select2-all">' . __( 'All', 'mp' ) . '</li>
+					<li class="select2-none">' . __( 'Keine', 'mp' ) . '</li>
+					<li class="select2-all">' . __( 'Alle', 'mp' ) . '</li>
 					<li class="select2-eu" data-countries="' . implode( ',', mp()->eu_countries ) . '">' . __( 'EU', 'mp' ) . '</li>
 				</ul>',
 		) );
 
 		// Shipping Methods
-		$options		 = array( 'none' => __( 'No Shipping', 'mp' ) );
+		$options		 = array( 'none' => __( 'Kein Versand', 'mp' ) );
 		$plugins		 = MP_Shipping_API::get_plugins();
 		$has_calculated	 = false;
 
@@ -126,12 +126,12 @@ class MP_Store_Settings_Shipping {
 		}
 
 		if ( $has_calculated ) {
-			$options[ 'calculated' ] = __( 'Calculated Options', 'mp' );
+			$options[ 'calculated' ] = __( 'Berechnete Optionen', 'mp' );
 		}
 
 		$metabox->add_field( 'radio_group', array(
 			'name'			 => 'shipping[method]',
-			'label'			 => array( 'text' => __( 'Shipping Method', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Versandmethode', 'mp' ) ),
 			'options'		 => $options,
 			'default_value'	 => 'none',
 		) );
@@ -146,8 +146,8 @@ class MP_Store_Settings_Shipping {
 
 		$metabox->add_field( 'checkbox_group', array(
 			'name'				 => 'shipping[calc_methods]',
-			'label'				 => array( 'text' => __( 'Select Shipping Options', 'mp' ) ),
-			'desc'				 => __( 'Select which calculated shipping methods the customer will be able to choose from.', 'mp' ),
+			'label'				 => array( 'text' => __( 'Berechnete Versandoptionen auswählen', 'mp' ) ),
+			'desc'				 => __( 'Wähle aus, welche berechneten Versandmethoden der Kunde auswählen kann.', 'mp' ),
 			'options'			 => $options,
 			'use_options_values' => true,
 			'conditional'		 => array(
@@ -160,12 +160,12 @@ class MP_Store_Settings_Shipping {
 		// Measurement System
 		$metabox->add_field( 'radio_group', array(
 			'name'			 => 'shipping[system]',
-			'label'			 => array( 'text' => __( 'Measurement System', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Maßeinheitensystem', 'mp' ) ),
 			'options'		 => array(
-				'english'	 => __( 'Pounds', 'mp' ),
-				'metric'	 => __( 'Kilograms', 'mp' ),
+				'english'	 => __( 'Pfund', 'mp' ),
+				'metric'	 => __( 'Kilogramm', 'mp' ),
 			),
-			'default_value'	 => 'english',
+			'default_value'	 => 'metric',
 		) );
 	}
 

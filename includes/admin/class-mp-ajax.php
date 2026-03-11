@@ -70,12 +70,23 @@ class MP_Ajax {
 	}
 
 	public function create_new_variation_draft() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
+		}
+
+		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
+
+		$parent_post_id = absint( mp_get_post_value( 'parent_post_id' ) );
+		if ( empty( $parent_post_id ) || ! current_user_can( 'edit_post', $parent_post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid parent product.', 'mp' ) ), 403 );
+		}
+
 		$variation_post_draft = array(
 			'post_title'	 => __( 'Variation Draft', 'mp' ),
 			'post_content'	 => '',
 			'post_status'	 => 'draft',
 			'post_type'		 => MP_Product::get_variations_post_type(),
-			'post_parent'	 => (int) $_POST[ 'parent_post_id' ],
+			'post_parent'	 => $parent_post_id,
 		);
 
 		$variation_post_draft_id = wp_insert_post( $variation_post_draft );
@@ -88,6 +99,12 @@ class MP_Ajax {
 	}
 
 	public function variation_popup() {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_die( esc_html__( 'Insufficient permissions.', 'mp' ) );
+		}
+
+		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
+
 		$variation_id_raw = isset( $_GET['variation_id'] ) ? absint( $_GET['variation_id'] ) : 0;
 		?>
 		<div id="mp_more_popup_<?php echo esc_attr( $variation_id_raw ); ?>" class="mp_more_popup">
@@ -409,6 +426,10 @@ class MP_Ajax {
 			die;
 		}
 
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			die;
+		}
+
 		$post_ids	 = mp_get_post_value( 'post_ids' );
 		$price		 = mp_get_post_value( 'price', '' );
 		$sale_price	 = mp_get_post_value( 'sale_price', '' );
@@ -417,7 +438,13 @@ class MP_Ajax {
 			die;
 		}
 
+		$post_ids = array_map( 'absint', $post_ids );
+
 		foreach ( $post_ids as $post_id ) {
+			if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+				continue;
+			}
+
 			update_post_meta( $post_id, 'regular_price', $price );
 			update_post_meta( $post_id, 'sale_price_amount', $sale_price );
 			
@@ -470,6 +497,10 @@ class MP_Ajax {
 	 */
 	public function create_store_page() {
 		check_admin_referer( 'mp_create_store_page' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
+		}
 
 		$type	 = mp_get_get_value( 'type' );
 		$post_id = mp_create_store_page( $type );
@@ -600,8 +631,10 @@ class MP_Ajax {
 	 */
 	public function mp_remove_custom_shipping_method() {
 		if ( !current_user_can( 'manage_options' ) ) {
-			return;
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
 		}
+
+		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
 
 		$id						 = mp_get_post_value( 'id' );
 		$custom_shipping_method	 = mp_get_setting( 'shipping->custom_method', array() );

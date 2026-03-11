@@ -656,7 +656,7 @@ jQuery( document ).ready( function( $ ) {
     } );
     $( document ).on( 'click', "a.open_ajax", function( e ) {
         $.colorbox( {
-            href: mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + ( $( this ).attr( 'data-popup-id' ) ),
+            href: mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + ( $( this ).attr( 'data-popup-id' ) ) + '&ajax_nonce=' + encodeURIComponent( mp_product_admin_i18n.ajax_nonce ),
             opacity: .7,
             inline: false,
             //width: 400,
@@ -683,12 +683,13 @@ jQuery( document ).ready( function( $ ) {
         $.post( url, {
             action: 'ajax_add_new_variant',
             parent_post_id: $( '#post_ID' ).val( ),
+            ajax_nonce: mp_product_admin_i18n.ajax_nonce,
         } ).done( function( data, status ) {
             var response = jQuery.parseJSON( data );
             if ( response ) {
                 if ( response.type == true ) {
                     $.colorbox( {
-                        href: mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + response.post_id + '&new_variation',
+                        href: mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + response.post_id + '&new_variation&ajax_nonce=' + encodeURIComponent( mp_product_admin_i18n.ajax_nonce ),
                         opacity: .7,
                         inline: false,
                         width: 400,

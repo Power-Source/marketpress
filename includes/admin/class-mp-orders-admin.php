@@ -839,6 +839,11 @@ class MP_Orders_Admin {
 	 * @action admin_ajax_mp_change_order_status
 	 */
 	public static function ajax_change_order_status() {
+		$order_cap = apply_filters( 'mp_orders_cap', 'edit_store_orders' );
+		if ( ! current_user_can( $order_cap ) ) {
+			wp_die( __( 'Insufficient permissions.', 'mp' ) );
+		}
+
 		$post_id      = mp_get_get_value( 'post_id' );
 		$order_id     = mp_get_get_value( 'order_id' );
 		$order_status = mp_get_get_value( 'order_status' );
@@ -977,6 +982,7 @@ class MP_Orders_Admin {
 		wp_enqueue_script( 'mp-admin-orders', mp_plugin_url( 'includes/admin/ui/js/admin-orders.js' ), false, MP_VERSION );
 
 		wp_localize_script( 'mp-admin-orders', 'mp_admin_orders', array(
+			'ajax_nonce'   => wp_create_nonce( 'mp-ajax-nonce' ),
 			'bulk_actions' => array(
 				'-1'             => __( 'Change Status', 'mp' ),
 				'order_received' => __( ' Received', 'mp' ),
