@@ -97,12 +97,13 @@ class MarketPress_Product_List extends WP_Widget {
 			while ( $custom_query->have_posts() ) : $custom_query->the_post();
 
 				$product = new MP_Product( $post->ID );
+				$product_url = $product->url( false );
 				echo '<div class="mp_product_item">';
 				echo '<div itemscope itemtype="http://schema.org/Product" ' . mp_product_class( false, array( 'mp_product' ), $post->ID ) . '>';
-				echo '<h3 class="mp_product_name entry-title" itemprop="name"><a href="' . get_permalink( $post->ID ) . '">' . esc_attr( $post->post_title ) . '</a></h3>';
+				echo '<h3 class="mp_product_name entry-title" itemprop="name"><a href="' . esc_url( $product_url ) . '">' . esc_attr( $post->post_title ) . '</a></h3>';
 
 				if ( $instance[ 'show_thumbnail' ] ) {
-					echo '<a class="mp_product_img_link" href="' . get_the_permalink( $post->ID ) . '">' . $product->image_custom( false, $instance[ 'size' ], array(
+					echo '<a class="mp_product_img_link" href="' . esc_url( $product_url ) . '">' . $product->image_custom( false, $instance[ 'size' ], array(
 						'show_thumbnail_placeholder' => isset( $instance[ 'show_thumbnail_placeholder' ] ) ? $instance[ 'show_thumbnail_placeholder' ] : false,
 						'class'						 => 'mp_product_image_list'
 					)

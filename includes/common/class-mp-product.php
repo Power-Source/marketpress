@@ -1132,7 +1132,7 @@ public $content_tabs = array();
 	 */
 	public function excerpt( $excerpt = null, $content = null, $excerpt_more = null ) {
 		if ( is_null( $excerpt_more ) ) {
-			$excerpt_more = ' <a class="mp_product_more_link" href="' . get_permalink( $this->ID ) . '">' . __( 'More Info &raquo;', 'mp' ) . '</a>';
+			$excerpt_more = ' <a class="mp_product_more_link" href="' . $this->url( false ) . '">' . __( 'More Info &raquo;', 'mp' ) . '</a>';
 		}
 
 		if ( is_null( $excerpt ) ) {
@@ -2038,7 +2038,7 @@ public $content_tabs = array();
 					}
 				}
 
-				$link       = get_permalink( $this->ID );
+				$link       = $this->url( false );
 				$link_class = ' class="mp_product_img_link"';
 				$img_align  = is_null( $align ) ? mp_get_setting( 'image_alignment_list' ) : $align;
 				break;
@@ -2095,7 +2095,7 @@ public $content_tabs = array();
 				}
 
 				//link
-				$link       = get_permalink( $post_id );
+				$link       = $this->url( false );
 				$link_class = ' class="mp_img_link"';
 				break;
 		}
@@ -2666,7 +2666,7 @@ public $content_tabs = array();
 
 		$count_pos = ( $pos = mp_get_setting( 'social->pinterest->show_pin_count' ) ) ? $pos : 'none';
 		$url       = add_query_arg( array(
-			'url'         => get_permalink( $this->ID ),
+			'url'         => $this->url( false ),
 			'description' => get_the_title( $this->ID ),
 		), '//www.pinterest.com/pin/create/button/' );
 
@@ -2726,8 +2726,7 @@ public $content_tabs = array();
 			}
 		}
 
-		$product = new MP_Product( $this->ID );
-		$url     = get_permalink( $this->ID );
+		$url     = $this->url( false );
 
 		$snippet = "<a href='https://twitter.com/share' class='twitter-share-button' data-url='" . $url . "' data-count='none'>" . __( 'Tweet', 'mp' ) . "</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>";
 		if ( $echo ) {
@@ -2798,8 +2797,7 @@ public $content_tabs = array();
 			}
 		}
 
-		$product = new MP_Product( $this->ID );
-		$url     = get_permalink( $this->ID );
+		$url     = $this->url( false );
 
 		//$snippet = apply_filters( 'mp_facebook_like_button_link', '<a target="_blank" href="' . $url . '" data-pin-do="buttonPin" data-pin-config="' . $count_pos . '"><img src="//assets.pinterest.com/images/pidgets/pin_it_button.png" /></a>', $this->ID, $context );
 

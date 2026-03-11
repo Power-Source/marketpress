@@ -504,6 +504,27 @@ if ( ! function_exists( '_mp3_global_products_html_widget' ) ) {
 	}
 }
 
+if ( ! function_exists( 'mp_global_replace_product_urls_in_html' ) ) {
+	/**
+	 * Replace legacy product URLs in generated snippet HTML with canonical global URL.
+	 *
+	 * @param string $html
+	 * @param array  $legacy_urls
+	 * @param string $product_url
+	 *
+	 * @return string
+	 */
+	function mp_global_replace_product_urls_in_html( $html, $legacy_urls, $product_url ) {
+		if ( empty( $html ) || empty( $legacy_urls ) || empty( $product_url ) ) {
+			return $html;
+		}
+
+		$replace_with = array_fill( 0, count( $legacy_urls ), $product_url );
+
+		return str_replace( $legacy_urls, $replace_with, $html );
+	}
+}
+
 if ( ! function_exists( '_mp3_global_products_html' ) ) {
 
 	function _mp3_global_products_html( $view, $custom_query, $args = array() ) {
@@ -532,6 +553,16 @@ if ( ! function_exists( '_mp3_global_products_html' ) ) {
 
 				$product = new MP_Product( $product_id );
 
+				$product_url = MP_Multisite::get_instance()->get_reliable_product_url( $blog_id, $product_id );
+				if ( ! $product_url ) {
+					$product_url = MP_Multisite::get_instance()->get_indexed_product_url( $blog_id, $product_id, $product->url( false ) );
+				}
+
+				$legacy_product_urls = array_unique( array_filter( array(
+					get_permalink( $product_id ),
+					$product->url( false ),
+				) ) );
+
 				$align = null;
 				if ( 'list' == mp_get_setting( 'list_view' ) ) {
 					$align = mp_get_setting( 'image_alignment_list' );
@@ -540,24 +571,30 @@ if ( ! function_exists( '_mp3_global_products_html' ) ) {
 					$img = '';
 				} else {
 					$img = $product->image( false, 'list', null, $align, mp_arr_get_value( 'show_thumbnail_placeholder', $args, true ) );
+					$img = mp_global_replace_product_urls_in_html( $img, $legacy_product_urls, $product_url );
 				}
+
+				$excerpt_more = ' <a class="mp_product_more_link" href="' . esc_url( $product_url ) . '">' . __( 'More Info &raquo;', 'mp' ) . '</a>';
 				$excerpt = '';
 				if ( mp_arr_get_value( 'context', $args ) == 'widget' ) {
 					if ( mp_arr_get_value( 'text', $args ) == 'excerpt' ) {
-						$excerpt = '<div class="mp_product_excerpt">' . $product->excerpt( $post->post_excerpt, $post->post_content ) . '</div><!-- end mp_product_excerpt -->';
+						$excerpt = '<div class="mp_product_excerpt">' . $product->excerpt( $post->post_excerpt, $post->post_content, $excerpt_more ) . '</div><!-- end mp_product_excerpt -->';
 					}
 
 					if ( mp_arr_get_value( 'text', $args ) == 'content' ) {
 						$excerpt = '<div class="mp_product_excerpt">' . $product->content() . '</div><!-- end mp_product_excerpt -->';
 					}
 				} else {
-					$excerpt = mp_get_setting( 'show_excerpts' ) ? '<div class="mp_product_excerpt"><p>' . $product->excerpt() . '</div></p><!-- end mp_product_excerpt -->' : '';
+					$excerpt = mp_get_setting( 'show_excerpts' ) ? '<div class="mp_product_excerpt"><p>' . $product->excerpt( null, null, $excerpt_more ) . '</div></p><!-- end mp_product_excerpt -->' : '';
 				}
 				$mp_product_list_content = apply_filters( 'mp_product_list_content', $excerpt, $product->ID );
 
 				$pinit   = $product->pinit_button( 'all_view' );
 				$fb      = $product->facebook_like_button( 'all_view' );
 				$twitter = $product->twitter_button( 'all_view' );
+				$pinit   = mp_global_replace_product_urls_in_html( $pinit, $legacy_product_urls, $product_url );
+				$fb      = mp_global_replace_product_urls_in_html( $fb, $legacy_product_urls, $product_url );
+				$twitter = mp_global_replace_product_urls_in_html( $twitter, $legacy_product_urls, $product_url );
 
 				$class   = array();
 				$class[] = ( strlen( $img ) > 0 ) ? 'mp_thumbnail' : '';
@@ -589,10 +626,6 @@ if ( ! function_exists( '_mp3_global_products_html' ) ) {
 					$img = '<div class="mp_product_images">' . $img . '</div>';
 				}
 
-				$product_url = MP_Multisite::get_instance()->get_reliable_product_url( $blog_id, $product_id );
-				if ( ! $product_url ) {
-					$product_url = MP_Multisite::get_instance()->get_indexed_product_url( $blog_id, $product_id, $product->url( false ) );
-				}
 				$button = '<a class="mp_button mp_link-buynow" href="' . esc_url( $product_url ) . '">' . __( 'Mehr Details & Shoppen', 'mp' ) . '</a>';
 
 				$html .= '
@@ -687,6 +720,16 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 				continue;
 			}
 
+			$product_url = MP_Multisite::get_instance()->get_reliable_product_url( $blog_id, $product_id );
+			if ( ! $product_url ) {
+				$product_url = MP_Multisite::get_instance()->get_indexed_product_url( $blog_id, $product_id, $product->url( false ) );
+			}
+
+			$legacy_product_urls = array_unique( array_filter( array(
+				get_permalink( $product_id ),
+				$product->url( false ),
+			) ) );
+
 			$align = null;
 
 			if ( 'list' == mp_get_setting( 'list_view' ) ) {
@@ -694,13 +737,18 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 			}
 
 			$img = $product->image( false, 'list', null, $align );
+			$img = mp_global_replace_product_urls_in_html( $img, $legacy_product_urls, $product_url );
 
-			$excerpt                 = mp_get_setting( 'show_excerpts' ) ? '<div class="mp_excerpt">' . $product->excerpt() . '</div>' : '';
+			$excerpt_more            = ' <a class="mp_product_more_link" href="' . esc_url( $product_url ) . '">' . __( 'More Info &raquo;', 'mp' ) . '</a>';
+			$excerpt                 = mp_get_setting( 'show_excerpts' ) ? '<div class="mp_excerpt">' . $product->excerpt( null, null, $excerpt_more ) . '</div>' : '';
 			$mp_product_list_content = apply_filters( 'mp_product_list_content', $excerpt, $product->ID );
 
 			$pinit   = $product->pinit_button( 'all_view' );
 			$fb      = $product->facebook_like_button( 'all_view' );
 			$twitter = $product->twitter_button( 'all_view' );
+			$pinit   = mp_global_replace_product_urls_in_html( $pinit, $legacy_product_urls, $product_url );
+			$fb      = mp_global_replace_product_urls_in_html( $fb, $legacy_product_urls, $product_url );
+			$twitter = mp_global_replace_product_urls_in_html( $twitter, $legacy_product_urls, $product_url );
 
 			$class   = array();
 			$class[] = ( strlen( $img ) > 0 ) ? 'mp_thumbnail' : '';
@@ -723,10 +771,6 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 
 			//$class = array_filter( $class, create_function( '$s', 'return ( ! empty( $s ) );' ) );
 			$class = array_filter( $class, function($s) {return ( ! empty( $s ) );} );
-			$product_url = MP_Multisite::get_instance()->get_reliable_product_url( $blog_id, $product_id );
-			if ( ! $product_url ) {
-				$product_url = MP_Multisite::get_instance()->get_indexed_product_url( $blog_id, $product_id, $product->url( false ) );
-			}
 
 
 			$html .= '
@@ -852,7 +896,7 @@ if ( ! function_exists( '_mp_global_tags_cloud' ) ) {
 				$html .= '<a href="' . mp_global_taxonomy_url( $row->slug, $taxonomy ) . '" class="tag-link tag-link-' . $row->term_id . '" title="">' . $row->name . '</a> ';
 			}
 		} else {
-			$html .= __( 'No Tags', 'mp' );
+			$html .= __( 'Keine Schlagwörter', 'mp' );
 		}
 		$html .= '</div>';
 

@@ -2509,7 +2509,7 @@ class MP_Cart {
 					$data[ $id ][] = array(
 						'SKU'              => $product->get_meta( 'sku' ),
 						'name'             => $product->title( false ),
-						'url'              => get_permalink( $id ),
+						'url'              => $product->url( false ),
 						'price'            => $product->get_price( 'lowest' ),
 						'quantity'         => $this->get_item_qty( $id ),
 						'download'         => $product->is_download(),
@@ -2520,7 +2520,7 @@ class MP_Cart {
 					$data[ $product_id ][ $id ] = array(
 						'SKU'              => $product->get_meta( 'sku' ),
 						'name'             => $product->title( false ),
-						'url'              => get_permalink( $id ),
+						'url'              => $product->url( false ),
 						'price'            => $product->get_price( 'lowest' ),
 						'quantity'         => $this->get_item_qty( $id ),
 						'download'         => $product->is_download(),

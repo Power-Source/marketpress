@@ -3202,9 +3202,10 @@ if ( ! function_exists( 'mp_product_title' ) ) :
 		global $mp;
 
 		$post = get_post( $product_id );
+		$product = new MP_Product( $product_id );
 
 		if ( $link ) {
-			$title = '<a href="' . get_permalink( $post->ID ) . '">' . $post->post_title . '</a>';
+			$title = '<a href="' . $product->url( false ) . '">' . $post->post_title . '</a>';
 		} else {
 			$title = $post->post_title;
 		}
