@@ -603,11 +603,11 @@ class MP_Orders_Admin {
 				$meta_id = 'mp_order_history';
 			}
 
-			$sql     = "SELECT * FROM " . $wpdb->usermeta . " WHERE meta_key='" .$meta_id. "'";
+			$sql     = $wpdb->prepare( "SELECT user_id, meta_value FROM {$wpdb->usermeta} WHERE meta_key = %s", $meta_id );
 			$results = $wpdb->get_results( $sql );
 			$user_id = 0;
 			foreach ( $results as $res ) {
-				$order_ids = unserialize( $res->meta_value );
+				$order_ids = @unserialize( (string) $res->meta_value, array( 'allowed_classes' => false ) );
 				if ( is_array( $order_ids ) ) {
 					foreach ( $order_ids as $id ) {
 						if ( $post->post_name == $id['id'] ) {

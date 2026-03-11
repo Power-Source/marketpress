@@ -172,7 +172,13 @@ class MP_Store_Settings_Import {
 				// TODO: add warning message that data will be replaced.
 				if ( ! empty( $_POST['mp-store-settings-text'] ) ) { // Input var okay.
 					global $wpdb;
-					$settings = base64_decode( $_POST['mp-store-settings-text'] );
+					$raw_settings = wp_unslash( $_POST['mp-store-settings-text'] );
+					$raw_settings = preg_replace( '/\s+/', '', $raw_settings );
+					$settings     = base64_decode( $raw_settings, true );
+
+					if ( false === $settings ) {
+						return;
+					}
 
 					$wpdb->query( $wpdb->prepare( "
 				UPDATE $wpdb->options
@@ -404,7 +410,14 @@ class MP_Store_Settings_Import {
  */
 function wxr_cdata( $str ) {
 	if ( ! seems_utf8( $str ) ) {
-		$str = utf8_encode( $str );
+		if ( function_exists( 'mb_convert_encoding' ) ) {
+			$str = mb_convert_encoding( $str, 'UTF-8', 'ISO-8859-1' );
+		} elseif ( function_exists( 'iconv' ) ) {
+			$converted = iconv( 'ISO-8859-1', 'UTF-8//IGNORE', $str );
+			if ( false !== $converted ) {
+				$str = $converted;
+			}
+		}
 	}
 	// $str = ent2ncr(esc_html($str));
 	$str = '<![CDATA[' . str_replace( ']]>', ']]]]><![CDATA[>', $str ) . ']]>';

@@ -450,10 +450,10 @@ class MP_Multisite {
 		$this->maybe_create_ms_tables();
 		//Delete all records on mp_terms table to fix issue with deleted categories / tags still exist
 		$this->truncate_index_table();
-		$blogs = wp_get_sites();
+		$blogs = get_sites( array( 'fields' => 'ids' ) );
 		$count = 0;
-		foreach ( $blogs as $blog ) {
-			switch_to_blog( $blog['blog_id'] );
+		foreach ( $blogs as $blog_id ) {
+			switch_to_blog( $blog_id );
 			$tmp = new WP_Query( array(
 				'post_type'   => MP_Product::get_post_type(),
 				'nopaging'    => true,
@@ -473,16 +473,17 @@ class MP_Multisite {
 					}
 
 					// ALTEN INDEX-EINTRAG LÖSCHEN!
-					$this->delete_index( $blog['blog_id'], $post->ID );
+					$this->delete_index( $blog_id, $post->ID );
 
 					// Immer neu anlegen:
-					$index_id = $this->add_index( $blog['blog_id'], $post );
+					$index_id = $this->add_index( $blog_id, $post );
 
 					//product indexed, now taxonomies & terms
-					$this->index_product_terms( $blog['blog_id'], $post );
+					$this->index_product_terms( $blog_id, $post );
 					$count ++;
 				}
 			}
+			restore_current_blog();
 		}
 
 		return array(
@@ -505,9 +506,9 @@ class MP_Multisite {
 
 		$categories = array();
 		$tags       = array();
-		$blogs      = wp_get_sites();
-		foreach ( $blogs as $blog ) {
-			switch_to_blog( $blog['blog_id'] );
+		$blogs      = get_sites( array( 'fields' => 'ids' ) );
+		foreach ( $blogs as $blog_id ) {
+			switch_to_blog( $blog_id );
 			$tmp = new WP_Query( array(
 				'post_type'   => MP_Product::get_post_type(),
 				'nopaging'    => true,
@@ -517,7 +518,7 @@ class MP_Multisite {
 				foreach ( $tmp->posts as $post ) {
 					$product = new MP_Product( $post->ID );
 					$data[]  = array(
-						'blog_id'        => $blog['blog_id'],
+						'blog_id'        => $blog_id,
 						'post'           => $post->to_array(),
 						'regular_price'  => $product->get_price( 'lowest' ),
 						'mp_sales_count' => $product->get_meta( 'mp_sales_count' ),
@@ -531,7 +532,7 @@ class MP_Multisite {
 			) );
 			foreach ( $cats as $cat ) {
 				$categories[] = array(
-					'blog_id' => $blog['blog_id'],
+					'blog_id' => $blog_id,
 					'term_id' => $cat->term_id,
 					'name'    => $cat->name,
 					'slug'    => $cat->slug,
@@ -545,13 +546,15 @@ class MP_Multisite {
 			) );
 			foreach ( $ts as $tag ) {
 				$tags[] = array(
-					'blog_id' => $blog['blog_id'],
+					'blog_id' => $blog_id,
 					'term_id' => $tag->term_id,
 					'name'    => $tag->name,
 					'slug'    => $tag->slug,
 					'count'   => $tag->count
 				);
 			}
+
+			restore_current_blog();
 		}
 
 		switch_to_blog( 1 );
