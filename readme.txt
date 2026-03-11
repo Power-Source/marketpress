@@ -1,4 +1,4 @@
-=== MarketPress - Reloaded  ===
+=== PS MarketPress ===
 Contributors: PSOURCE
 Tags: E-commerce, ecommerce, storefront, sell, store, shopping, cart, payment gateways, digital downloads, online store
 Requires at least: 3.7
@@ -7,29 +7,36 @@ Tested up to: 6.8.1
 ClassicPress: 2.6.0
 Stable tag: 1.0.1
 
-Leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos und keine Erweiterungen erforderlich.
+PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
 == Beschreibung ==
 
-MarketPress E-Commerce ist ein vollständig kostenloser Premium-Online-Shop für ClassicPress und Multisite.
+PS MarketPress ist eine umfassende E-Commerce-Lösung für ClassicPress und Multisite.
+Mit PS MarketPress verkaufst du physische Produkte, digitale Downloads und Varianten in einem zentralen, leistungsstarken Shop-System.
 
-Verkaufen Sie alles, von digitalen Downloads bis hin zu physischen Waren in allen Formen und Größen, bieten Sie Produktvariationen und sofortige Downloads von einem benutzerfreundlichen Online-Marktplatz an.
+= Multisite im Fokus =
 
-= Das einzige Premium- und vollständig kostenlose E-Commerce-Plugin =
+PS MarketPress ist besonders stark im Multisite-Einsatz:
+Du kannst ein Netzwerk aus Shops aufbauen, zentrale Vorgaben setzen und trotzdem jede Site flexibel betreiben.
+Ideal, wenn du ein Marketplace-Modell wie Etsy/eBay nachbauen oder mehrere Marken-Shops unter einem Dach verwalten willst.
 
-Es ist nicht erforderlich, Hunderte von Euro für den Kauf von Add-ons oder speziellen Lizenzen auszugeben. MarketPress vereint die Leistung von Dutzenden verschiedener Plugins in einem soliden eigenständigen E-Commerce-Produkt.
+= Komplett kostenlos, trotzdem Premium-Funktionen =
+
+Du brauchst keine zusätzlichen Lizenzen oder kostenpflichtigen Erweiterungen.
+PS MarketPress bündelt viele Funktionen, die sonst nur über mehrere separate Plugins verfügbar sind.
 
 = Funktionen = 
 
-Das Einrichten Ihres eigenen Online-Shops war noch nie so einfach wie mit MarketPress. Zu den Funktionen gehören:
+Deinen eigenen Online-Shop richtest du mit PS MarketPress schnell und übersichtlich ein. Zu den Funktionen gehören:
 
+* Besonders stark für Multisite-Setups mit mehreren Shops in einem Netzwerk
 * Ein vollständiges Paket mit 15 Zahlungsgateways
-* Wählen Sie aus 120 verschiedenen Währungen Ihre Standardwährung
+* Wähle aus 120 verschiedenen Währungen deine Standardwährung
 * Vollständig internationalisiert von der WPML-Crew
 * Verkaufen Sie reale Objekte oder digitale Downloads
 * Einfacher Checkout auf einer Seite
 * Einfache Einrichtung mit integriertem Assistenten
-* Legen Sie fest, wie oft ein Kunde eine Datei herunterladen kann, die er gekauft hat
+* Lege fest, wie oft ein Kunde eine gekaufte Datei herunterladen kann
 * Bereit für Steuern und Mehrwertsteuer
 * PDF-Rechnungen
 * Berechnete Versandmodule (UPS, USPS, Fedex, Abholung im Geschäft)
@@ -37,13 +44,12 @@ Das Einrichten Ihres eigenen Online-Shops war noch nie so einfach wie mit Market
 * Gutscheine, Rabatte und Affiliate-fähig
 * Vollständig integriert mit Google Universal Analytics E-Commerce-Tracking
 * Unbegrenzte Produktvariationen
-* Gutscheine und Sonderpreise
 * Lagerverfolgung und Benachrichtigungen pro Variation
 * Produktlimits pro Bestellung
 * AJAX-Warenkorb und Warenkorb-Widget
-* Leistungsstarke Shortcodes, die Sie überall verwenden können
+* Leistungsstarke Shortcodes, die du überall verwenden kannst
 * Shortcode-Schaltfläche im visuellen Editor des Beitrags
-* Verknüpfen Sie jedes Produkt mit einem externen Link
+* Verknüpfe jedes Produkt mit einem externen Link
 * Lagerverfolgung, Bestellverwaltung und Benachrichtigungen
 * Produkte automatisch ausblenden, wenn sie nicht mehr auf Lager sind
 * Ähnliche Produkte anzeigen
@@ -52,74 +58,50 @@ Das Einrichten Ihres eigenen Online-Shops war noch nie so einfach wie mit Market
 
 = Anpassen ohne Programmierkenntnisse = 
 
-MarketPress ist so konzipiert, dass es nahtlos mit jedem gut programmierten ClassicPress-Theme funktioniert.
+PS MarketPress ist so konzipiert, dass es nahtlos mit jedem gut programmierten ClassicPress-Theme funktioniert.
 
-* Shortcodes und integrierte Widgets ermöglichen es Ihnen, Elemente überall auf Ihrer Website anzuzeigen
+* Shortcodes und integrierte Widgets ermöglichen dir, Elemente überall auf deiner Website anzuzeigen
 * Enthält CSS-Stilvorlagen
 * Produkt-Thumbnails/Bilder mit Lightbox-Zoom
 
 Oder laden Sie eines unserer Upfront-Themes herunter, die integrierte MarketPress-Stile und einen leistungsstarken Drag-and-Drop-Frontend-Theme-Editor bieten.
 
-= Multisite- und BuddyPress-kompatibel = 
+= Multisite und BuddyPress =
 
-Richten Sie Ihr eigenes eBay- oder Etsy-ähnliches Netzwerk von Shops ein und nehmen Sie einen Prozentsatz von jedem Verkauf.
+Baue dir dein eigenes eBay- oder Etsy-ähnliches Netzwerk aus Shops auf und verdiene an Verkäufen im Netzwerk mit.
 
-Egal, ob Sie einen individuellen Online-Shop oder ein ganzes E-Commerce-Netzwerk für Shops einrichten möchten, MarketPress ist die ideale Lösung.
+Egal ob ein einzelner Shop oder ein komplettes E-Commerce-Netzwerk: Mit PS MarketPress bist du dafür sauber aufgestellt.
 
-★★★★★
-„Ich liebe dieses Plugin! Andere E-Commerce-Plugins waren einfach kompliziert. Ich habe MarketPress gestern eingerichtet und bin heute Morgen mit Verkäufen aufgewacht, die nahtlos abliefen!“ – <a href="https://wordpress.org/support/users/roseee">roseee</a>
+= Stark im PSOURCE-Ökosystem =
 
-★★★★★
-„Ich hätte nie gedacht, dass es möglich ist, aber hier bin ich und mache es. Ich habe ein Etsy-ähnliches Netzwerk mit MarketPress gestartet. Wirklich tolle Arbeit. Das geht nicht mit Woo!“ – <a href="https://wordpress.org/support/users/leedman/">leedman</a>
+PS MarketPress arbeitet mit vielen weiteren PSOURCE-Plugins zusammen und lässt sich dadurch flexibel erweitern.
 
-= Kostenlose Zahlungs-Gateways =
-Akzeptieren Sie Zahlungen mit einem der 15 integrierten beliebten Zahlungs-Gateways, darunter Stripe, PayPal und Authorize.net.
+Mit dem PSOURCE Manager kannst du noch mehr entdecken, bequem verwalten und neue Erweiterungen schneller einbinden:
+https://github.com/Power-Source/ps-update-manager/releases
 
-* 2Checkout
-* Authorize.net AIM
-* eWay Shared Payments
-* eWay Rapid 3.1 Payments
-* Manuelle Zahlungen
-* Mijireh
-* Mollie
-* Paymill
-* PayPal Express Checkout
-* PayPal PayFlow Pro
-* PIN
-* Simplify Commerce von MasterCard
-* Stripe
-* WePay
+So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich laufend weiter.
 
-= Versand leicht gemacht =
-Versenden Sie weltweit mit Zuversicht. Nutzen Sie Pauschalversand oder passen Sie die Logistik mit Tabellen- oder Gewichtstarifen an Ihre spezifischen Anforderungen an.
-
-= Google Analytics =
-MarketPress ist sowohl mit Google Universal Analytics als auch mit Google Analytics eCommerce kompatibel. Verfolgen Sie Verkäufe und Website-Aktivitäten, um Ihr Geschäft auszubauen.
-
-= Soziale Netzwerke =
-Werden Sie viral mit den integrierten Pinterest-, Facebook- und Twitter-Share-Buttons. MarketPress macht es Ihren Kunden leicht, Ihre Produkte mit Freunden und Familie zu teilen.
-
-= Automatischer Bestandsmanager =
-Wenn Ihnen eines Ihrer Produkte ausgeht, informiert Sie MarketPress, wann es Zeit ist, nachzubestellen – oder blendet Produkte automatisch aus, wenn sie nicht mehr verfügbar sind.
-
-= Setup-Assistent inklusive =
-Es ist groß und leistungsstark, aber keine Sorge... Der MarketPress-Setup-Assistent führt Sie Schritt für Schritt durch die Einrichtung Ihres Shops, sodass Sie sich keine Gedanken darüber machen müssen, was im Hintergrund passiert.
 
 == Changelog ==
 
 = 1.0.1 =
 
-* Fix: Netzwerk-Marktplatz-Produktlinks zeigen nun zuverlässig auf die korrekten Produktseiten der Subshops.
-* Fix: Globale Kategorie- und Tag-Links im Multisite-Marktplatz verwenden jetzt dynamische Seiten-URLs statt starrer Pfade.
-* Fix: Seitenauswahlfelder im Netzwerk-Admin wurden auf die aktuelle Select-Implementierung angepasst.
-* Fix: Stabilitäts- und Syntaxkorrekturen in Multisite- und Store-Settings-Skripten.
-* Fix: AJAX-Endpoints im Admin wurden mit zusätzlichen Nonce- und Capability-Pruefungen abgesichert.
-* Fix: PHP8-Kompatibilitaet verbessert (u.a. `wp_get_sites()` ersetzt und `utf8_encode()` entfernt).
-* Fix: Gutschein-AJAX (Anwenden/Entfernen) wurde um Nonce-Validierung erweitert.
-* Fix: Addon- und Setup-Wizard-AJAX weiter gehaertet (u.a. Statistik-Capability-Check und Waehrungs-Preset-Nonce).
-* Fix: psource-metaboxes AJAX-Handler (save_state, fields_save) mit Nonce- und Capability-Pruefungen versehen.
-* Fix: Post-Select-Suche auf eingeloggte Benutzer mit edit_posts-Berechtigung beschraenkt.
-* Fix: Bestellstatus-Aenderung (ajax_change_order_status) erfordert nun edit_store_orders-Berechtigung.
+* Neu: Konfigurierbare Kaufen-Button-Texte unter Darstellung für Standard-, Download-, Gratis- und Varianten-Zustände.
+* Fix: Netzwerk-Marktplatz-Produktlinks zeigen nun wieder auf die korrekten Produktseiten der Subshops.
+* Fix: Globale Kategorie- und Tag-Links im Multisite-Marktplatz verwenden nun dynamische Seiten-URLs statt starrer Pfade.
+* Fix: Seitenauswahlfelder im Netzwerk-Admin wurden auf die aktuelle Select-Implementierung umgestellt.
+* Fix: Multisite- und Store-Settings-Skripte wurden in Stabilität und Syntax korrigiert.
+* Fix: Admin-AJAX-Endpoints wurden mit zusätzlichen Nonce- und Capability-Prüfungen abgesichert.
+* Fix: Gutschein-AJAX für Anwenden und Entfernen wurde mit Nonce-Validierung abgesichert.
+* Fix: Addon- und Setup-Wizard-AJAX wurde weiter gehärtet, u.a. mit Statistik-Capability-Check und Nonce für das Währungs-Preset.
+* Fix: psource-metaboxes AJAX-Handler für save_state und fields_save wurden mit Nonce- und Capability-Prüfungen versehen.
+* Fix: Die Post-Select-Suche wurde auf eingeloggte Benutzer mit edit_posts-Berechtigung beschränkt.
+* Fix: Die Bestellstatus-Änderung über ajax_change_order_status erfordert nun edit_store_orders-Berechtigung.
+* Fix: Die Legacy-Terminmanager-Integration wurde an die aktuelle Hook- und Produktspalten-Struktur von MarketPress angepasst.
+* Fix: Produktlisten-Spalten für Terminmanager-/Appointments-Produkte rendern wieder korrekt, ohne doppelte Werte oder Fatal Errors.
+* Fix: Terminmanager-/Appointments-Produkte blenden in der Produktliste nur noch die Variationsspalte aus; SKU und Preis bleiben sichtbar.
+* Fix: Kompatibilitäts-Shims für externe Integrationen wurden wiederhergestellt, u.a. `Marketpress::$version` und `edit_products_custom_columns()`.
+* Fix: Die PHP-8-Kompatibilität wurde verbessert, u.a. durch Ersetzen von `wp_get_sites()` und Entfernen von `utf8_encode()`.
 
 = 1.0.0 =
 

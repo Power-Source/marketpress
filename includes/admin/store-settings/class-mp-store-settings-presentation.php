@@ -502,31 +502,31 @@ class MP_Store_Settings_Presentation {
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_addcart',
 			'label'         => array( 'text' => __( 'In den Warenkorb', 'mp' ) ),
-			'desc'          => __( 'Button-Text im Modus „Auf der Produktseite bleiben". Standard: „Add To Cart"', 'mp' ),
+			'desc'          => __( 'Button-Text im Modus „Auf der Produktseite bleiben". Standard: „In den Warenkorb"', 'mp' ),
 			'default_value' => '',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_buynow',
 			'label'         => array( 'text' => __( 'Jetzt Kaufen', 'mp' ) ),
-			'desc'          => __( 'Button-Text im Modus „Sofort zum Warenkorb weiterleiten". Standard: „Buy Now"', 'mp' ),
+			'desc'          => __( 'Button-Text im Modus „Sofort zum Warenkorb weiterleiten". Standard: „Jetzt kaufen"', 'mp' ),
 			'default_value' => '',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_choose_options',
 			'label'         => array( 'text' => __( 'Optionen wählen', 'mp' ) ),
-			'desc'          => __( 'Button-Text für Produkte mit Variationen (z.B. Größe, Farbe). Standard: „Choose Options"', 'mp' ),
+			'desc'          => __( 'Button-Text für Produkte mit Variationen (z.B. Größe, Farbe). Standard: „Wähle Optionen"', 'mp' ),
 			'default_value' => '',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_out_of_stock',
 			'label'         => array( 'text' => __( 'Nicht vorrätig', 'mp' ) ),
-			'desc'          => __( 'Anzeigetext wenn ein Produkt nicht auf Lager ist. Standard: „Out of Stock"', 'mp' ),
+			'desc'          => __( 'Anzeigetext wenn ein Produkt nicht auf Lager ist. Standard: „Ausverkauft"', 'mp' ),
 			'default_value' => '',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_external',
 			'label'         => array( 'text' => __( 'Externer Produkt-Link', 'mp' ) ),
-			'desc'          => __( 'Link-Text für externe Produkte (öffnen eine externe URL). Standard: „Buy Now »"', 'mp' ),
+			'desc'          => __( 'Link-Text für externe Produkte (öffnen eine externe URL). Standard: „Zum Anbieter »"', 'mp' ),
 			'default_value' => '',
 		) );
 
@@ -534,13 +534,13 @@ class MP_Store_Settings_Presentation {
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_download_addcart',
 			'label'         => array( 'text' => __( 'Bezahlter Download – „In den Warenkorb"-Modus', 'mp' ) ),
-			'desc'          => __( 'Button-Text für digitale Produkte (Typ: Digital, Preis > 0) im Addcart-Modus. Standard: „Buy &amp; Download"', 'mp' ),
+			'desc'          => __( 'Button-Text für digitale Produkte (Typ: Digital, Preis > 0) im Addcart-Modus. Standard: „Kaufen &amp; Herunterladen"', 'mp' ),
 			'default_value' => '',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_download_buynow',
 			'label'         => array( 'text' => __( 'Bezahlter Download – „Jetzt Kaufen"-Modus', 'mp' ) ),
-			'desc'          => __( 'Button-Text für digitale Produkte (Typ: Digital, Preis > 0) im Buynow-Modus. Standard: „Buy &amp; Download"', 'mp' ),
+			'desc'          => __( 'Button-Text für digitale Produkte (Typ: Digital, Preis > 0) im Buynow-Modus. Standard: „Kaufen &amp; Herunterladen"', 'mp' ),
 			'default_value' => '',
 		) );
 
@@ -548,13 +548,13 @@ class MP_Store_Settings_Presentation {
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_free',
 			'label'         => array( 'text' => __( 'Gratis-Produkt (nicht digital, Preis 0)', 'mp' ) ),
-			'desc'          => __( 'Button-Text für physische/virtuelle Produkte mit Preis 0. Standard: „Get Free"', 'mp' ),
+			'desc'          => __( 'Button-Text für physische/virtuelle Produkte mit Preis 0. Standard: „Kostenlos"', 'mp' ),
 			'default_value' => '',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'          => 'btn_text_free_download',
 			'label'         => array( 'text' => __( 'Gratis-Download (digital, Preis 0)', 'mp' ) ),
-			'desc'          => __( 'Button-Text für digitale Produkte mit Preis 0, z.B. „Jetzt herunterladen" oder „Gratis downloaden". Standard: „Free Download"', 'mp' ),
+			'desc'          => __( 'Button-Text für digitale Produkte mit Preis 0, z.B. „Jetzt herunterladen" oder „Gratis downloaden". Standard: „Kostenloser Download"', 'mp' ),
 			'default_value' => '',
 		) );
 	}

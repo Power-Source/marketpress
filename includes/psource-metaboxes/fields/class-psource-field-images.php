@@ -239,7 +239,7 @@ class PSOURCE_Field_Images extends PSOURCE_Field {
 
 		</div>
 		<div class="mp_images_select">
-			<a class="button psource-image-field-add" href="javascript:;"><?php _e( 'Add Images', 'psource_metaboxes' ); ?></a>
+			<a class="button psource-image-field-add" href="javascript:;"><?php _e( 'Bilder hinzufügen', 'psource_metaboxes' ); ?></a>
 			<input type="hidden" name="mp_product_images_indexes" id="mp_product_images_indexes" value="" />
 		</div>
 		<?php

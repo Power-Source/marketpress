@@ -841,7 +841,7 @@ class MP_Orders_Admin {
 	public static function ajax_change_order_status() {
 		$order_cap = apply_filters( 'mp_orders_cap', 'edit_store_orders' );
 		if ( ! current_user_can( $order_cap ) ) {
-			wp_die( __( 'Insufficient permissions.', 'mp' ) );
+			wp_die( __( 'Unzureichende Berechtigungen.', 'mp' ) );
 		}
 
 		$post_id      = mp_get_get_value( 'post_id' );
@@ -1026,7 +1026,7 @@ class MP_Orders_Admin {
 				$count_output = '';
 			}
 
-			$orders_page = add_submenu_page( 'edit.php?post_type=' . MP_Product::get_post_type(), __( 'Orders', 'mp' ), __( 'Orders', 'mp' ) . $count_output, $order_cap, 'edit.php?post_type=mp_order' );
+			$orders_page = add_submenu_page( 'edit.php?post_type=' . MP_Product::get_post_type(), __( 'Bestellungen', 'mp' ), __( 'Bestellungen', 'mp' ) . $count_output, $order_cap, 'edit.php?post_type=mp_order' );
 		}
 	}
 
@@ -1045,15 +1045,15 @@ class MP_Orders_Admin {
 		return array(
 			'cb'                 => '<input type="checkbox" />',
 			'mp_orders_status'   => __( 'Status', 'mp' ),
-			'mp_orders_id'       => __( 'Order ID', 'mp' ),
+			'mp_orders_id'       => __( 'Bestell-ID', 'mp' ),
 			'mp_invoice_number'  => __( 'Rechnungsnummer', 'mp' ), // <--- HIER eingefügt
-			'mp_orders_date'     => __( 'Order Date', 'mp' ),
-			'mp_orders_name'     => __( 'From', 'mp' ),
-			'mp_orders_items'    => __( 'Items', 'mp' ),
-			'mp_orders_shipping' => __( 'Shipping', 'mp' ),
-			'mp_orders_tax'      => __( 'Tax', 'mp' ),
-			'mp_orders_discount' => __( 'Discount', 'mp' ),
-			'mp_orders_total'    => __( 'Total', 'mp' ),
+			'mp_orders_date'     => __( 'Bestelldatum', 'mp' ),
+			'mp_orders_name'     => __( 'Von', 'mp' ),
+			'mp_orders_items'    => __( 'Artikel', 'mp' ),
+			'mp_orders_shipping' => __( 'Versand', 'mp' ),
+			'mp_orders_tax'      => __( 'Steuer', 'mp' ),
+			'mp_orders_discount' => __( 'Rabatt', 'mp' ),
+			'mp_orders_total'    => __( 'Gesamt', 'mp' ),
 		);
 	}
 
@@ -1079,23 +1079,23 @@ class MP_Orders_Admin {
 			case 'mp_orders_status' :
 				switch ( $post->post_status ) {
 					case 'order_received' :
-						$text = __( 'Received', 'mp' );
+						$text = __( 'Ausstehend', 'mp' );
 						break;
 
 					case 'order_paid' :
-						$text = __( 'Paid', 'mp' );
+						$text = __( 'Bezahlt', 'mp' );
 						break;
 
 					case 'order_shipped' :
-						$text = __( 'Shipped', 'mp' );
+						$text = __( 'Versand', 'mp' );
 						break;
 
 					case 'order_closed' :
-						$text = __( 'Closed', 'mp' );
+						$text = __( 'Abgeschlossen', 'mp' );
 						break;
 
 					case 'trash' :
-						$text = __( 'Trashed', 'mp' );
+						$text = __( 'Müll', 'mp' );
 						break;
 				}
 
@@ -1109,7 +1109,7 @@ class MP_Orders_Admin {
 
 				if ( isset( $actions ) ) {
 					$html .= '<ul class="mp_order_status_menu">';
-					$html .= '<li class="item">' . __( 'Flag as:', 'mp' ) . '</li>';
+					$html .= '<li class="item">' . __( 'Markieren als:', 'mp' ) . '</li>';
 
 					foreach ( $actions as $action => $label ) {
 						if ( $action == $post->post_status ) {
@@ -1134,7 +1134,7 @@ class MP_Orders_Admin {
 			//! Order ID
 			case 'mp_orders_id' :
 				$title = _draft_or_post_title( $post_id );
-				$html .= '<strong><a class="row-title" href="' . get_edit_post_link( $post_id ) . '" title="' . esc_attr( sprintf( __( 'View order &#8220;%s&#8221;', 'mp' ), $title ) ) . '">' . $title . '</a></strong>';
+				$html .= '<strong><a class="row-title" href="' . get_edit_post_link( $post_id ) . '" title="' . esc_attr( sprintf( __( 'Bestellung &#8220;%s&#8221; anzeigen', 'mp' ), $title ) ) . '">' . $title . '</a></strong>';
 				break;
 
 			//! Invoice Number
@@ -1151,7 +1151,7 @@ class MP_Orders_Admin {
 
 			//! Order From
 			case 'mp_orders_name' :
-				$html .= '<a href="javascript:;" title="' . __( 'Display billing/shipping info for this customer', 'mp' ) . '">' . $order->get_name() . '</a>';
+				$html .= '<a href="javascript:;" title="' . __( 'Rechnungs-/Versandinformationen für diesen Kunden anzeigen', 'mp' ) . '">' . $order->get_name() . '</a>';
 				$html .= '
 					<div style="display:none">
 						<div id="mp-customer-info-lb-' . $order->ID . '" class="mp-customer-info-lb" style="padding:10px 30px 30px;">' .

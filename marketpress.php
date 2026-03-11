@@ -145,6 +145,16 @@ class Marketpress {
 	public $plugin_title = null;
 
 	/**
+	 * Plugin version — exposed as public property for backwards compatibility
+	 * with third-party integrations that access $mp->version directly.
+	 * Use the MP_VERSION constant in new code instead.
+	 *
+	 * @since 1.0.1
+	 * @var string
+	 */
+	public $version = null;
+
+	/**
 	 * Gets the single instance of the class
 	 *
 	 * @since 1.0
@@ -415,6 +425,9 @@ class Marketpress {
 	 * @access private
 	 */
 	private function __construct() {
+		// Backwards-compatibility: expose version as instance property.
+		$this->version = MP_VERSION;
+
 		// Init variables.
 		$this->_init_vars();
 
@@ -1086,6 +1099,29 @@ class Marketpress {
 		 * @param array $this ->currencies An array of available currencies
 		 */
 		$this->currencies = apply_filters( 'mp_currencies', $this->currencies );
+	}
+
+	/**
+	 * Backwards-compatibility shim for third-party plugins (e.g. terminmanager
+	 * Appointments+ bridge) that call this method on the global $mp object.
+	 *
+	 * Prior to MP 2.8.8 this lived on the main class; it is now delegated to
+	 * MP_Products_Admin::product_columns_content().
+	 *
+	 * @since 1.0.1
+	 *
+	 * @param string   $column  Column slug passed by manage_product_posts_custom_column.
+	 * @param int|null $post_id Post ID (omitted in the old callback signature).
+	 */
+	public function edit_products_custom_columns( $column, $post_id = null ) {
+		if ( is_null( $post_id ) ) {
+			global $post;
+			$post_id = isset( $post->ID ) ? (int) $post->ID : 0;
+		}
+		$admin = MP_Products_Screen::get_instance();
+		if ( $admin && method_exists( $admin, 'product_columns_content' ) ) {
+			$admin->product_columns_content( $column, (int) $post_id );
+		}
 	}
 
 }

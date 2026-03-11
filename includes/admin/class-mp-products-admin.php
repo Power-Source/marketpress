@@ -495,11 +495,10 @@ class MP_Products_Screen {
 		?>
 		<fieldset id="bulk-edit-col-product-price" class="inline-edit-col-left" style="clear:left">
 			<div class="inline-edit-col clearfix">
-				<label class="alignleft"><span class="title"><?php _e( 'Price', 'mp' ); ?></span><span
-						class="input-text-wrap"><input type="text" name="product_price"
-													   style="width:100px"/></span></label>
+				<label class="alignleft"><span class="title"><?php _e( 'Preis', 'mp' ); ?></span><span
+						class="input-text-wrap"><input type="text" name="product_price" style="width:100px"/></span></label>
 				<label class="alignleft" style="margin-left:15px"><span
-						class="title"><?php _e( 'Sale Price', 'mp' ); ?></span><span class="input-text-wrap"><input
+						class="title"><?php _e( 'Angebotspreis', 'mp' ); ?></span><span class="input-text-wrap"><input
 							type="text" name="product_sale_price" style="width:100px"/></span></label>
 				<input type="hidden" name="bulk_edit_products_nonce"
 					   value="<?php echo wp_create_nonce( 'bulk_edit_products' ); ?>"/>
@@ -519,16 +518,16 @@ class MP_Products_Screen {
 	public function product_columns_head() {
 		return array(
 			'cb'                        => '<input type="checkbox" />',
-			'title'                     => __( 'Product Name', 'mp' ),
-			'product_variations'        => __( 'Variations', 'mp' ),
-			'featured'                  => __( 'Featured', 'mp' ),
+			'title'                     => __( 'Produktname', 'mp' ),
+			'product_variations'        => __( 'Variationen', 'mp' ),
+			'featured'                  => __( 'Empfohlen', 'mp' ),
 			'product_sku'               => __( 'SKU', 'mp' ),
-			'product_price'             => __( 'Price', 'mp' ),
-			'product_stock'             => __( 'Stock', 'mp' ),
-			'product_sales'             => __( 'Sales', 'mp' ),
-			'taxonomy-product_category' => __( 'Categories', 'mp' ),
+			'product_price'             => __( 'Preis', 'mp' ),
+			'product_stock'             => __( 'Lagerbestand', 'mp' ),
+			'product_sales'             => __( 'Verkäufe', 'mp' ),
+			'taxonomy-product_category' => __( 'Kategorien', 'mp' ),
 			'taxonomy-product_tag'      => __( 'Tags', 'mp' ),
-			'product_image'             => __( 'Img', 'mp' ),
+			'product_image'             => __( 'Bild', 'mp' ),
 		);
 	}
 
@@ -571,7 +570,7 @@ class MP_Products_Screen {
 				echo $image;
 				break;
 			case 'featured' :
-				echo $product->is_featured() ? __( 'Yes', 'mp' ) : __( 'No', 'mp' );
+				echo $product->is_featured() ? __( 'Ja', 'mp' ) : __( 'Nein', 'mp' );
 				break;
 			case 'product_variations' :
 				if ( $product->has_variations() ) {
@@ -637,17 +636,17 @@ class MP_Products_Screen {
 					<div id="quick-edit-product-content-' . $post_id . '">';
 						if ( ! $product->has_variations() ) {
 							echo '
-							<label class="alignleft"><span class="title">' . __( 'Price', 'mp' ) . '</span><span class="input-text-wrap"><input type="text" name="product_price" style="width:100px" value="' . $price['regular'] . '" /></span></label>';
+							<label class="alignleft"><span class="title">' . __( 'Preis', 'mp' ) . '</span><span class="input-text-wrap"><input type="text" name="product_price" style="width:100px" value="' . $price['regular'] . '" /></span></label>';
 							if( $product->on_sale() ) {
-								echo '<label class="alignleft" style="margin-left:15px"><span class="title">' . __( 'Sale Price', 'mp' ) . '</span><span class="input-text-wrap"><input type="text" name="product_sale_price" style="width:100px" value="' . $price['sale']['amount'] . '" /></span></label>
-								<em class="alignleft inline-edit-or"> –'. __( 'OR', 'mp' ) .'– </em>
+								echo '<label class="alignleft" style="margin-left:15px"><span class="title">' . __( 'Angebotspreis', 'mp' ) . '</span><span class="input-text-wrap"><input type="text" name="product_sale_price" style="width:100px" value="' . $price['sale']['amount'] . '" /></span></label>
+								<em class="alignleft inline-edit-or"> –'. __( 'ODER', 'mp' ) .'– </em>
 								<span class="alignleft inline-edit-or input-text-wrap"><input type="text" name="product_sale_percentage_discount" style="width:60px" value="' . $price['sale']['percentage'] . '" /></span>
-								<em class="alignleft inline-edit-or"> '. __( '% discount', 'mp' ) .' </em>';
+								<em class="alignleft inline-edit-or"> '. __( '% Rabatt', 'mp' ) .' </em>';
 							}
 						}
 						echo '
 						<div class="inline-edit-group">
-							<label class="alignleft"><span class="title">' . __( 'Featured', 'mp' ) . '</span><input type="checkbox" name="featured" value="featured" '. ( $product->is_featured() ? 'checked' : '' ) .'></label>
+							<label class="alignleft"><span class="title">' . __( 'Empfohlen', 'mp' ) . '</span><input type="checkbox" name="featured" value="featured" '. ( $product->is_featured() ? 'checked' : '' ) .'></label>
 						</div>
 						<input type="hidden" name="quick_edit_product_nonce" value="' . wp_create_nonce( 'quick_edit_product' ) . '" />
 					</div>
@@ -876,7 +875,7 @@ class MP_Products_Screen {
 
 	public function save_inventory_threshhold() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'status_message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
+			wp_send_json_error( array( 'status_message' => __( 'Unzureichende Berechtigungen.', 'mp' ) ), 403 );
 		}
 
 		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
@@ -975,7 +974,7 @@ class MP_Products_Screen {
 		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
 
 		if ( ! current_user_can( 'edit_post', absint( $post_id ) ) ) {
-			wp_send_json_error( array( 'status_message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
+			wp_send_json_error( array( 'status_message' => __( 'Unzureichende Berechtigungen.', 'mp' ) ), 403 );
 		}
 
 		$post_meta_errors = 0;
@@ -1110,7 +1109,7 @@ class MP_Products_Screen {
 		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
 
 		if ( ! current_user_can( 'edit_post', absint( $post_id ) ) ) {
-			wp_send_json_error( array( 'status_message' => __( 'Insufficient permissions.', 'mp' ) ), 403 );
+			wp_send_json_error( array( 'status_message' => __( 'Unzureichende Berechtigungen.', 'mp' ) ), 403 );
 		}
 
 		if ( isset( $post_id ) && is_numeric( $post_id ) ) {
@@ -1481,16 +1480,16 @@ WHERE $delete_where"
 	public function init_related_products_metabox() {
 		$metabox = new PSOURCE_Metabox( apply_filters( 'mp_metabox_array_mp-related-products-metabox', array(
 			'id'        => 'mp-related-products-metabox',
-			'title'     => __( 'Related Products', 'mp' ),
+			'title'     => __( 'Verwandte Produkte', 'mp' ),
 			'post_type' => MP_Product::get_post_type(),
 			'context'   => 'side',
-			'desc'      => __( 'If you would like, you can choose specific related products instead of using the ones generated by MarketPress', 'mp' ),
+			'desc'      => __( 'Wenn Du möchtest, kannst Du bestimmte verwandte Produkte auswählen, anstatt die von PS MarketPress generierten zu verwenden', 'mp' ),
 		) ) );
 
 		$metabox->add_field( 'post_select', apply_filters( 'mp_add_field_array_related_products', array(
 			'name'        => 'related_products',
 			'multiple'    => true,
-			'placeholder' => __( 'Choose Products', 'mp' ),
+			'placeholder' => __( 'Wähle Produkte', 'mp' ),
 			'query'       => array(
 				'post__not_in'   => array( get_the_ID() ),
 				'post_type'      => MP_Product::get_post_type(),
@@ -1508,14 +1507,14 @@ WHERE $delete_where"
 	public function init_featured_product_metabox() {
 		$metabox = new PSOURCE_Metabox( apply_filters( 'mp_metabox_array_mp-featured_product-metabox', array(
 			'id'        => 'mp-featured-product-metabox',
-			'title'     => __( 'Featured Product', 'mp' ),
+			'title'     => __( 'Empfohlenes Produkt', 'mp' ),
 			'post_type' => MP_Product::get_post_type(),
 			'context'   => 'side',
 		) ) );
 
 		$metabox->add_field( 'checkbox', apply_filters( 'mp_add_field_array_featured', array(
 			'name'    => 'featured',
-			'message' => __( 'Is Featured?', 'mp' ),
+			'message' => __( 'Ist empfohlen?', 'mp' ),
 		) ) );
 	}
 
@@ -1528,15 +1527,14 @@ WHERE $delete_where"
 	public function init_product_type_metabox() {
 		$metabox = new PSOURCE_Metabox( apply_filters( 'mp_metabox_array_mp-product-type-metabox', array(
 			'id'        => 'mp-product-type-metabox',
-			'title'     => sprintf( __( 'Product Kind %1$s(Physical Product, Digital, etc)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ),
+			'title'     => sprintf( __( 'Produkttyp %1$s(Physisches Produkt, Digital, etc)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ),
 			'post_type' => MP_Product::get_post_type(),
 			'context'   => 'normal',
 		) ) );
 
 		$product_kinds = array(
-			'physical' => __( 'Physical / Tangible Product', 'mp' ),
-			'digital'  => __( 'Digital Download', 'mp' ),
-//'external'	 => __( 'External / Affiliate Link', 'mp' ),
+			'physical' => __( 'Physisches/greifbares Produkt', 'mp' ),
+			'digital'  => __( 'Digitaler Download', 'mp' ),
 		);
 
 		$post_id = isset( $_GET['post'] ) ? $_GET['post'] : 0;
@@ -1544,7 +1542,7 @@ WHERE $delete_where"
 		$has_variations = get_post_meta( (int) $post_id, 'has_variations', false );
 
 		if ( ! $has_variations ) {
-			$product_kinds['external'] = __( 'External / Affiliate Link', 'mp' );
+			$product_kinds['external'] = __( 'Externer / Affiliate-Link', 'mp' );
 		}
 
 		$metabox->add_field( 'select', apply_filters( 'mp_add_field_array_product_type', array(
@@ -1567,7 +1565,7 @@ WHERE $delete_where"
 
 		$metabox = new PSOURCE_Metabox( apply_filters( 'mp_metabox_array_mp-product-price-inventory-variants-metabox', array(
 			'id'        => 'mp-product-price-inventory-variants-metabox',
-			'title'     => $has_variations ? __( 'Product Variations', 'mp' ) : sprintf( __( '%1$sPrice, Inventory & Variants%2$s %3$sSet price, manage inventory and create Product Variants (if appropriate for your product).%2$s', 'mp' ), '<span class="mp_meta_section_title">', '</span>', '<span class="mp_meta_bellow_desc">' ),
+			'title'     => $has_variations ? __( 'Produkt Variationen', 'mp' ) : sprintf( __( '%1$sPreis, Inventar & Varianten%2$s %3$sPreis festlegen, Inventar verwalten und Produktvarianten erstellen (falls für Ihr Produkt geeignet).%2$s', 'mp' ), '<span class="mp_meta_section_title">', '</span>', '<span class="mp_meta_bellow_desc">' ),
 			'post_type' => MP_Product::get_post_type(),
 			'context'   => 'normal',
 		) ) );
@@ -1576,15 +1574,15 @@ WHERE $delete_where"
 
 			$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_sku', array(
 				'name'        => 'sku',
-				'placeholder' => __( 'Enter SKU', 'mp' ),
-				'label'       => array( 'text' => sprintf( __( 'SKU %1$s(Stock Keeping Unit)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ) ),
+				'placeholder' => __( 'Gib die Artikelnummer (SKU) ein', 'mp' ),
+				'label'       => array( 'text' => sprintf( __( 'SKU %1$s(Lagerhaltungseinheit)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ) ),
 				'class'       => 'mp-product-field-40 mp-blank-bg'
 			) ) );
 
 			$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_regular_price', array(
 				'name'        => 'regular_price',
-				'label'       => array( 'text' => __( 'Price', 'mp' ) ),
-				'placeholder' => __( 'Enter Price', 'mp' ),
+				'label'       => array( 'text' => __( 'Preis', 'mp' ) ),
+				'placeholder' => __( 'Gib den Preis ein', 'mp' ),
 				'validation'  => array(
 					'required' => true,
 					'number'   => true,
@@ -1595,8 +1593,8 @@ WHERE $delete_where"
 
 			$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_per_order_limit', array(
 				'name'        => 'per_order_limit',
-				'label'       => array( 'text' => sprintf( __( 'Limit Per Order %1$s(limit the number of the item a shopper can buy per order)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ) ),
-				'placeholder' => __( 'Unlimited', 'mp' ),
+				'label'       => array( 'text' => sprintf( __( 'Limit Pro Bestellung %1$s(limitiere die Anzahl der Artikel, die ein Käufer pro Bestellung kaufen kann)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ) ),
+				'placeholder' => __( 'Unbegrenzt', 'mp' ),
 				'validation'  => array(
 					'number' => true,
 					'min'    => 0,
@@ -1611,12 +1609,12 @@ WHERE $delete_where"
 
 			$metabox->add_field( 'checkbox', apply_filters( 'mp_add_field_array_has_sale', array(
 				'name'    => 'has_sale',
-				'message' => __( 'Set up a Sale for this Product', 'mp' ),
+				'message' => __( 'Verkauf für dieses Produkt einrichten', 'mp' ),
 			) ) );
 
 			$sale_price = $metabox->add_field( 'complex', apply_filters( 'mp_add_field_array_sale_price', array(
 				'name'        => 'sale_price',
-				'label'       => array( 'text' => __( 'Sale Price', 'mp' ) ),
+				'label'       => array( 'text' => __( 'Angebotspreis', 'mp' ) ),
 				'conditional' => array(
 					'name'   => 'has_sale',
 					'value'  => 1,
@@ -1632,8 +1630,8 @@ WHERE $delete_where"
 			if ( $sale_price instanceof PSOURCE_Field ) {
 				$sale_price->add_field( 'text', apply_filters( 'mp_add_field_array_amount', array(
 					'name'        => 'amount',
-					'placeholder' => __( 'Enter Sale Price', 'mp' ),
-					'label'       => array( 'text' => __( 'Price', 'mp' ) ),
+					'placeholder' => __( 'Gib den Angebotspreis ein', 'mp' ),
+					'label'       => array( 'text' => __( 'Preis', 'mp' ) ),
 					'custom'      => array(//'data-msg-lessthan' => __( 'Value must be less than regular price', 'mp' ),
 					),
 					'validation'  => array(
@@ -1644,7 +1642,7 @@ WHERE $delete_where"
 				) ) );
 				$sale_price->add_field( 'text', apply_filters( 'mp_add_field_array_percentage', array(
 					'name'       => 'percentage',
-					'label'      => array( 'text' => __( '% discount', 'mp' ) ),
+					'label'      => array( 'text' => __( '% Rabatt', 'mp' ) ),
 					'validation' => array(
 						'number' => true,
 						'min'    => 1,
@@ -1653,17 +1651,17 @@ WHERE $delete_where"
 				) ) );
 				$sale_price->add_field( 'datepicker', apply_filters( 'mp_add_field_array_start_date', array(
 					'name'  => 'start_date',
-					'label' => array( 'text' => __( 'Start Date (if applicable)', 'mp' ) ),
+					'label' => array( 'text' => __( 'Startdatum (falls zutreffend)', 'mp' ) ),
 				) ) );
 				$sale_price->add_field( 'datepicker', apply_filters( 'mp_add_field_array_end_date', array(
 					'name'  => 'end_date',
-					'label' => array( 'text' => __( 'End Date (if applicable)', 'mp' ) ),
+					'label' => array( 'text' => __( 'Enddatum (falls zutreffend)', 'mp' ) ),
 				) ) );
 			}
 
 			$metabox->add_field( 'checkbox', apply_filters( 'mp_add_field_array_charge_tax', array(
 				'name'        => 'charge_tax',
-				'message'     => __( 'Charge Taxes (Special Rate)', 'mp' ),
+				'message'     => __( 'Steuern berechnen (Sondertarif)', 'mp' ),
 				'conditional' => array(
 					'name'   => 'product_type',
 					'value'  => array( 'physical', 'digital' ),
@@ -1686,10 +1684,10 @@ WHERE $delete_where"
 
 			$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_special_tax_rate', array(
 				'name'						 => 'special_tax_rate',
-				'label'						 => array( 'text' => __( 'Special Tax Rate', 'mp' ) ),
-				'placeholder'				 => __( 'Tax Rate', 'mp' ),
+				'label'						 => array( 'text' => __( 'Sondersteuersatz', 'mp' ) ),
+				'placeholder'				 => __( 'Steuersatz', 'mp' ),
 				'default_value'				 => '',
-				'desc'						 => __( 'If you would like this product to use a special tax rate, enter it here. If you omit the "%" symbol the rate will be calculated as a fixed amount for each of this product in the user\'s cart.', 'mp' ),
+				'desc'						 => __( 'Wenn Du möchtest, dass für dieses Produkt ein besonderer Steuersatz gilt, gib ihn hier ein. Wenn Du das „%“-Symbol weglässt, wird der Preis als fester Betrag für jedes dieser Produkte im Warenkorb des Benutzers berechnet.', 'mp' ),
 				/*'conditional'				 => array(
 					'name'	 => 'product_type',
 					'value'	 => array( 'physical', 'digital' ),
@@ -1700,7 +1698,7 @@ WHERE $delete_where"
 					'value'	 => 1,
 					'action' => 'show',
 				),
-				'custom_validation_message'	 => __( 'Please enter a valid tax rate', 'mp' ),
+				'custom_validation_message'	 => __( 'Bitte gib einen gültigen Steuersatz ein', 'mp' ),
 				'validation'				 => array(
 					'custom' => '[^0-9.%]',
 				),
@@ -1713,7 +1711,7 @@ WHERE $delete_where"
 
 			$metabox->add_field( 'checkbox', apply_filters( 'mp_add_field_array_charge_shipping', array(
 				'name'        => 'charge_shipping',
-				'message'     => __( 'Charge Shipping', 'mp' ),
+				'message'     => __( 'Versand berechnen', 'mp' ),
 				'conditional' => array(
 					'name'   => 'product_type',
 					'value'  => 'physical',
@@ -1723,7 +1721,7 @@ WHERE $delete_where"
 
 			$weight = $metabox->add_field( 'complex', apply_filters( 'mp_add_field_array_weight', array(
 				'name'        => 'weight',
-				'label'       => array( 'text' => __( 'Weight', 'mp' ) ),
+				'label'       => array( 'text' => __( 'Gewicht', 'mp' ) ),
 				'conditional' => array(
 					'name'   => 'charge_shipping',
 					'value'  => 1,
@@ -1739,8 +1737,8 @@ WHERE $delete_where"
 			if ( $weight instanceof PSOURCE_Field ) {
 				if ( 'metric' == mp_get_setting( 'shipping->system' ) ) {
 					$weight->add_field( 'text', apply_filters( 'mp_add_field_array_kilograms', array(
-						'name'       => 'pounds',
-						'label'      => array( 'text' => __( 'Kilograms', 'mp' ) ),
+						'name'       => 'kilograms',
+						'label'      => array( 'text' => __( 'Kilogramm', 'mp' ) ),
 						'validation' => array(
 							'number' => true,
 						),
@@ -1748,14 +1746,14 @@ WHERE $delete_where"
 				} else {
 					$weight->add_field( 'text', apply_filters( 'mp_add_field_array_pounds', array(
 						'name'       => 'pounds',
-						'label'      => array( 'text' => __( 'Pounds', 'mp' ) ),
+						'label'      => array( 'text' => __( 'Pfund', 'mp' ) ),
 						'validation' => array(
 							'number' => true,
 						),
 					) ) );
 					$weight->add_field( 'text', apply_filters( 'mp_add_field_array_ounces', array(
 						'name'       => 'ounces',
-						'label'      => array( 'text' => __( 'Ounces', 'mp' ) ),
+						'label'      => array( 'text' => __( 'Unzen', 'mp' ) ),
 						'validation' => array(
 							'number' => true,
 						),
@@ -1764,7 +1762,7 @@ WHERE $delete_where"
 
 				$weight->add_field( 'text', apply_filters( 'mp_add_field_array_extra_shipping_cost', array(
 					'name'          => 'extra_shipping_cost',
-					'label'         => array( 'text' => sprintf( __( 'Extra Shipping Cost %1$s(if applicable)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ) ),
+					'label'         => array( 'text' => sprintf( __( 'Zusätzliche Versandkosten %1$s(if applicable)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ) ),
 					'default_value' => '0.00',
 					'validation'    => array(
 						'number' => true,
@@ -1775,7 +1773,7 @@ WHERE $delete_where"
 
 			$metabox->add_field( 'checkbox', apply_filters( 'mp_add_field_array_inventory_tracking', array(
 				'name'        => 'inventory_tracking',
-				'message'     => __( 'Track Product Inventory', 'mp' ),
+				'message'     => __( 'Produktbestand verfolgen', 'mp' ),
 				'conditional' => array(
 					'name'   => 'product_type',
 					'value'  => array( 'physical', 'digital' ),
@@ -1801,7 +1799,7 @@ WHERE $delete_where"
 			if ( $inventory instanceof PSOURCE_Field ) {
 				$inventory->add_field( 'text', apply_filters( 'mp_add_field_array_inventory', array(
 					'name'        => 'inventory',
-					'label'       => array( 'text' => __( 'Quantity', 'mp' ) ),
+					'label'       => array( 'text' => __( 'Menge', 'mp' ) ),
 					/* 'conditional'	 => array(
 					  'action'	 => 'show',
 					  'operator'	 => 'AND',
@@ -1826,7 +1824,7 @@ WHERE $delete_where"
 
 				$inventory->add_field( 'checkbox', apply_filters( 'mp_add_field_array_out_of_stock_purchase', array(
 					'name'    => 'out_of_stock_purchase',
-					'message' => __( 'Allow this product to be purchased even if it\'s out of stock', 'mp' ),
+					'message' => __( 'Erlaube den Kauf dieses Produkts, auch wenn es nicht auf Lager ist', 'mp' ),
 					/* 'conditional'	 => array(
 					  'name'	 => 'product_type',
 					  'value'	 => 'physical',
@@ -1839,8 +1837,8 @@ WHERE $delete_where"
 				'name'          => 'has_variation',
 				'label'         => array( 'text' => '' ),
 				'options'       => array(
-					'no'  => __( 'This is a unique product without variations', 'mp' ),
-					'yes' => sprintf( __( 'This product has a multiple variations %1$s(e.g. Multiple colors, sizes)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ),
+					'no'  => __( 'Dies ist ein einzigartiges Produkt ohne Variationen', 'mp' ),
+					'yes' => sprintf( __( 'Dieses Produkt hat mehrere Variationen %1$s(z.B. Mehrere Farben, Größen)%2$s', 'mp' ), '<span class="mp_meta_small_desc">', '</span>' ),
 				),
 				'conditional'   => array(
 					'name'   => 'product_type',
@@ -1857,7 +1855,7 @@ WHERE $delete_where"
 				'name'    => 'variations_module',
 				'label'   => '',
 				//array( 'text' => sprintf( __( '%3$sProduct Variations%2$s', 'mp' ), '<span class="mp_variations_product_name">', '</span>', '<span class="mp_variations_title">' ) ),
-				'message' => __( 'Variations', 'mp' ),
+				'message' => __( 'Variationen', 'mp' ),
 				/* 'conditional'	 => array(
 				  'name'	 => 'has_variation',
 				  'value'	 => 'yes',
@@ -1869,8 +1867,8 @@ WHERE $delete_where"
 			$metabox->add_field( 'variations', apply_filters( 'mp_add_field_array_variations_module', array(
 				'name'        => 'variations_module',
 				'label'       => array( 'text' => sprintf( __( '%3$sAdd variations for%2$s %1$sProduct%2$s', 'mp' ), '<span class="mp_variations_product_name">', '</span>', '<span class="mp_variations_title">' ) ),
-				'message'     => __( 'Variations', 'mp' ),
-				'desc'        => __( 'Add variations for this product. e.g. If you are selling t-shirts, you can create Color & Size variations', 'mp' ),
+				'message'     => __( 'Variationen', 'mp' ),
+				'desc'        => __( 'Füge Variationen für dieses Produkt hinzu. z.B. Wenn Du T-Shirts verkaufst, kannst Du Farb- und Größenvariationen erstellen', 'mp' ),
 				'conditional' => array(
 					'name'   => 'has_variation',
 					'value'  => 'yes',
@@ -1885,9 +1883,9 @@ WHERE $delete_where"
 		$metabox->add_field( apply_filters( 'mp_product_file_url_type','file' ),
 			apply_filters( 'mp_add_field_array_file_url', array(
 				'name'         	=> 'file_url',
-				'label'        	=> array( 'text' => __( 'File URL', 'mp' ) ),
+				'label'        	=> array( 'text' => __( 'Datei-URL', 'mp' ) ),
 				//'placeholder'	 => __( 'Choose a file', 'mp' ),
-				'button_label' 	=> 'Select a file',
+				'button_label' 	=> __( 'Wähle eine Datei', 'mp' ),
 				'conditional'  	=> array(
 					'action'   	=> 'show',
 					'operator' 	=> 'AND',
@@ -1906,9 +1904,9 @@ WHERE $delete_where"
 
 		$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_external_url', array(
 			'name'         => 'external_url',
-			'label'        => array( 'text' => __( 'External Link', 'mp' ) ),
+			'label'        => array( 'text' => __( 'Externer Link', 'mp' ) ),
 			//'placeholder'	 => __( 'Choose a file', 'mp' ),
-			'button_label' => 'Insert a Link',
+			'button_label' => __( 'Füge einen Link ein', 'mp' ),
 			'conditional'  => array(
 				'action'   => 'show',
 				'operator' => 'AND',
@@ -1934,7 +1932,7 @@ WHERE $delete_where"
 	public function init_product_details_metabox() {
 		$metabox = new PSOURCE_Metabox( apply_filters( 'mp_metabox_array_mp-product-details-metabox', array(
 			'id'          => 'mp-product-details-metabox',
-			'title'       => __( 'Product Details', 'mp' ),
+			'title'       => __( 'Produktdetails', 'mp' ),
 			'post_type'   => MP_Product::get_post_type(),
 			'context'     => 'normal',
 			'conditional' => array(
@@ -1948,20 +1946,20 @@ WHERE $delete_where"
 			'name' => 'product_tabs',
 			'tabs' => array(
 				array(
-					'label'  => __( 'General', 'mp' ),
+					'label'  => __( 'Allgemein', 'mp' ),
 					'slug'   => 'general',
 					'active' => true,
 				),
 				array(
-					'label' => __( 'Price', 'mp' ),
+					'label' => __( 'Preis', 'mp' ),
 					'slug'  => 'price',
 				),
 				array(
-					'label' => __( 'Taxes', 'mp' ),
+					'label' => __( 'Steuern', 'mp' ),
 					'slug'  => 'taxes',
 				),
 				array(
-					'label' => __( 'Shipping', 'mp' ),
+					'label' => __( 'Versand', 'mp' ),
 					'slug'  => 'shipping',
 				),
 			),
@@ -1975,12 +1973,12 @@ WHERE $delete_where"
 
 		$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_sku', array(
 			'name'  => 'sku',
-			'label' => array( 'text' => __( 'SKU', 'mp' ) ),
+			'label' => array( 'text' => __( 'Lagerbestandseinheit (SKU)', 'mp' ) ),
 		) ) );
 
 		$metabox->add_field( 'checkbox', apply_filters( 'mp_add_field_array_inventory_tracking', array(
 			'name'        => 'inventory_tracking',
-			'label'       => array( 'text' => __( 'Track Inventory?', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Lagerstand verfolgen?', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'product_type',
 				'value'  => 'physical',
@@ -1990,8 +1988,8 @@ WHERE $delete_where"
 
 		$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_inventory', array(
 			'name'        => 'inventory',
-			'label'       => array( 'text' => __( 'Inventory Count', 'mp' ) ),
-			'desc'        => __( 'Enter the quantity that you have available to sell.', 'mp' ),
+			'label'       => array( 'text' => __( 'Bestandszählung', 'mp' ) ),
+			'desc'        => __( 'Gib die Menge ein, die zum Verkauf zur Verfügung steht.', 'mp' ),
 			'conditional' => array(
 				'action'   => 'show',
 				'operator' => 'AND',
@@ -2013,7 +2011,7 @@ WHERE $delete_where"
 
 		$metabox->add_field( 'file', apply_filters( 'mp_add_field_array_file_url', array(
 			'name'        => 'file_url',
-			'label'       => array( 'text' => __( 'File URL', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Datei-URL', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'product_type',
 				'value'  => 'digital',
@@ -2026,7 +2024,7 @@ WHERE $delete_where"
 
 		$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_external_url', array(
 			'name'          => 'external_url',
-			'label'         => array( 'text' => __( 'External URL', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Externe URL', 'mp' ) ),
 			'default_value' => 'http://',
 			'conditional'   => array(
 				'action'   => 'show',
@@ -2053,7 +2051,7 @@ WHERE $delete_where"
 
 		$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_regular_price', array(
 			'name'       => 'regular_price',
-			'label'      => array( 'text' => __( 'Regular Price', 'mp' ) ),
+			'label'      => array( 'text' => __( 'Regulärer Preis', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'product_type',
 				'value'  => array( 'physical', 'digital' ),
@@ -2068,15 +2066,15 @@ WHERE $delete_where"
 
 		$sale_price = $metabox->add_field( 'complex', apply_filters( 'mp_add_field_array_sale_price', array(
 			'name'  => 'sale_price',
-			'label' => array( 'text' => __( 'Sale Price', 'mp' ) ),
+			'label' => array( 'text' => __( 'Angebotspreis', 'mp' ) ),
 		) ) );
 
 		if ( $sale_price instanceof PSOURCE_Field ) {
 			$sale_price->add_field( 'text', apply_filters( 'mp_add_field_array_amount', array(
 				'name'       => 'amount',
-				'label'      => array( 'text' => __( 'Price', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Preis', 'mp' ) ),
 				'custom'     => array(
-					'data-msg-lessthan' => __( 'Value must be less than regular price', 'mp' ),
+					'data-msg-lessthan' => __( 'Der Wert muss unter dem regulären Preis liegen', 'mp' ),
 				),
 				'validation' => array(
 					'number'   => true,
@@ -2087,12 +2085,12 @@ WHERE $delete_where"
 
 			$sale_price->add_field( 'datepicker', apply_filters( 'mp_add_field_array_start_date', array(
 				'name'  => 'start_date',
-				'label' => array( 'text' => __( 'Start Date', 'mp' ) ),
+				'label' => array( 'text' => __( 'Startdatum', 'mp' ) ),
 			) ) );
 
 			$sale_price->add_field( 'datepicker', apply_filters( 'mp_add_field_array_end_date', array(
 				'name'  => 'end_date',
-				'label' => array( 'text' => __( 'End Date (if applicable)', 'mp' ) ),
+				'label' => array( 'text' => __( 'Enddatum (falls zutreffend)', 'mp' ) ),
 			) ) );
 		}
 
@@ -2105,15 +2103,15 @@ WHERE $delete_where"
 
 		$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_special_tax_rate', array(
 			'name'                      => 'special_tax_rate',
-			'label'                     => array( 'text' => __( 'Special Tax Rate', 'mp' ) ),
+			'label'                     => array( 'text' => __( 'Sondersteuersatz', 'mp' ) ),
 			'default_value'             => '',
-			'desc'                      => __( 'If you would like this product to use a special tax rate, enter it here. If you omit the "%" symbol the rate will be calculated as a fixed amount for each of this product in the user\'s cart.', 'mp' ),
+			'desc'                      => __( 'Wenn Du möchtest, dass dieses Produkt einen speziellen Steuersatz verwendet, gib ihn hier ein. Wenn Du das "%" Symbol weglässt, wird der Satz als fester Betrag für jedes dieser Produkte im Warenkorb des Benutzers berechnet.', 'mp' ),
 			'conditional'               => array(
 				'name'   => 'product_type',
 				'value'  => array( 'physical', 'digital' ),
 				'action' => 'show',
 			),
-			'custom_validation_message' => __( 'Please enter a valid tax rate', 'mp' ),
+			'custom_validation_message' => __( 'Bitte gib einen gültigen Steuersatz ein', 'mp' ),
 			'validation'                => array(
 				'custom' => '[^0-9.%]',
 			),
@@ -2127,7 +2125,7 @@ WHERE $delete_where"
 
 		$weight = $metabox->add_field( 'complex', apply_filters( 'mp_add_field_array_weight', array(
 			'name'        => 'weight',
-			'label'       => array( 'text' => __( 'Weight', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Gewicht', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'product_type',
 				'value'  => 'physical',
@@ -2138,7 +2136,7 @@ WHERE $delete_where"
 		if ( $weight instanceof PSOURCE_Field ) {
 			$weight->add_field( 'text', apply_filters( 'mp_add_field_array_pounds', array(
 				'name'       => 'pounds',
-				'label'      => array( 'text' => __( 'Pounds', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Pfund', 'mp' ) ),
 				'validation' => array(
 					'digits' => true,
 					'min'    => 0,
@@ -2147,7 +2145,7 @@ WHERE $delete_where"
 
 			$weight->add_field( 'text', apply_filters( 'mp_add_field_array_ounces', array(
 				'name'       => 'ounces',
-				'label'      => array( 'text' => __( 'Ounces', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Unzen', 'mp' ) ),
 				'validation' => array(
 					'digits' => true,
 					'min'    => 0,
@@ -2157,7 +2155,7 @@ WHERE $delete_where"
 
 		$metabox->add_field( 'text', apply_filters( 'mp_add_field_array_extra_shipping_cost', array(
 			'name'          => 'extra_shipping_cost',
-			'label'         => array( 'text' => __( 'Extra Shipping Cost', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Zusätzliche Versandkosten', 'mp' ) ),
 			'default_value' => '0.00',
 			'conditional'   => array(
 				'name'   => 'product_type',
@@ -2180,10 +2178,10 @@ WHERE $delete_where"
 	public function init_variations_metabox() {
 		$metabox = new PSOURCE_Metabox( apply_filters( 'mp_metabox_array_mp-product-variations-metabox', array(
 			'id'          => 'mp-product-variations-metabox',
-			'title'       => __( 'Variations', 'mp' ),
+			'title'       => __( 'Variationen', 'mp' ),
 			'post_type'   => MP_Product::get_post_type(),
 			'context'     => 'normal',
-			'desc'        => __( 'Create your product variations here. You can reorder variations by using the number to left of each variation, or delete one by clicking the "x" to the right of each variation. <strong>NOTE: The variation that shows up first in this list will be considered the "main variation". The details from this variation will be used in product listings.</strong>', 'mp' ),
+			'desc'        => __( 'Erstelle hier deine Produktvariationen. Du kannst die Variationen neu anordnen, indem du die Zahl links neben jeder Variation verwendest, oder eine Variation löschen, indem du auf das "x" rechts neben jeder Variation klickst. <strong>HINWEIS: Die Variation, die zuerst in dieser Liste angezeigt wird, wird als "Hauptvariation" betrachtet. Die Details dieser Variation werden in den Produktlisten verwendet.</strong>', 'mp' ),
 			'conditional' => array(
 				'name'   => 'has_variations',
 				'value'  => 1,
@@ -2194,7 +2192,7 @@ WHERE $delete_where"
 		$repeater = $metabox->add_field( 'repeater', apply_filters( 'mp_add_field_array_variations', array(
 			'name'          => 'variations',
 			'layout'        => 'rows',
-			'add_row_label' => __( 'Add Variation', 'mp' ),
+			'add_row_label' => __( 'Variation hinzufügen', 'mp' ),
 		) ) );
 
 		if ( $repeater instanceof PSOURCE_Field ) {
@@ -2202,24 +2200,24 @@ WHERE $delete_where"
 				'name' => 'tabs',
 				'tabs' => array(
 					array(
-						'label'  => __( 'General', 'mp' ),
+						'label'  => __( 'Allgemein', 'mp' ),
 						'slug'   => 'general',
 						'active' => true,
 					),
 					array(
-						'label' => __( 'Price', 'mp' ),
+						'label' => __( 'Preis', 'mp' ),
 						'slug'  => 'price',
 					),
 					array(
-						'label' => __( 'Taxes', 'mp' ),
+						'label' => __( 'Steuern', 'mp' ),
 						'slug'  => 'taxes',
 					),
 					array(
-						'label' => __( 'Shipping', 'mp' ),
+						'label' => __( 'Versand', 'mp' ),
 						'slug'  => 'shipping',
 					),
 					array(
-						'label' => __( 'Attributes', 'mp' ),
+						'label' => __( 'Attribute', 'mp' ),
 						'slug'  => 'attributes',
 					),
 				),
@@ -2246,12 +2244,12 @@ WHERE $delete_where"
 
 			$repeater->add_sub_field( 'image', apply_filters( 'mp_add_sub_field_array_image', array(
 				'name'  => 'image',
-				'label' => array( 'text' => __( 'Image', 'mp' ) ),
+				'label' => array( 'text' => __( 'Bild', 'mp' ) ),
 			) ) );
 
 			$repeater->add_sub_field( 'checkbox', apply_filters( 'mp_add_sub_field_array_inventory_tracking', array(
 				'name'        => 'inventory_tracking',
-				'label'       => array( 'text' => __( 'Track Inventory?', 'mp' ) ),
+				'label'       => array( 'text' => __( 'Bestand verfolgen?', 'mp' ) ),
 				'conditional' => array(
 					'name'   => 'product_type',
 					'value'  => 'physical',
@@ -2261,8 +2259,8 @@ WHERE $delete_where"
 
 			$repeater->add_sub_field( 'text', apply_filters( 'mp_add_sub_field_array_inventory', array(
 				'name'        => 'inventory',
-				'label'       => array( 'text' => __( 'Inventory Count', 'mp' ) ),
-				'desc'        => __( 'Enter the quantity that you have available to sell.', 'mp' ),
+				'label'       => array( 'text' => __( 'Bestand', 'mp' ) ),
+				'desc'        => __( 'Gib die Menge ein, die du zum Verkauf verfügbar hast.', 'mp' ),
 				'conditional' => array(
 					'action'   => 'show',
 					'operator' => 'AND',
@@ -2284,7 +2282,7 @@ WHERE $delete_where"
 
 			$repeater->add_sub_field( 'file', apply_filters( 'mp_add_sub_field_array_file_url', array(
 				'name'        => 'file_url',
-				'label'       => array( 'text' => __( 'File URL', 'mp' ) ),
+				'label'       => array( 'text' => __( 'Datei-URL', 'mp' ) ),
 				'conditional' => array(
 					'name'   => 'product_type',
 					'value'  => 'digital',
@@ -2297,13 +2295,13 @@ WHERE $delete_where"
 
 			$repeater->add_sub_field( 'wysiwyg', apply_filters( 'mp_add_sub_field_array_description', array(
 				'name'  => 'description',
-				'label' => array( 'text' => __( 'Description', 'mp' ) ),
-				'desc'  => __( 'If you would like the description to be different than the main product enter it here.', 'mp' ),
+				'label' => array( 'text' => __( 'Beschreibung', 'mp' ) ),
+				'desc'  => __( 'Wenn du möchtest, dass die Beschreibung von der Hauptproduktbeschreibung abweicht, gib sie hier ein.', 'mp' ),
 			) ) );
 
 			$repeater->add_sub_field( 'text', apply_filters( 'mp_add_sub_field_array_external_url', array(
 				'name'          => 'external_url',
-				'label'         => array( 'text' => __( 'External URL', 'mp' ) ),
+				'label'         => array( 'text' => __( 'Externe URL', 'mp' ) ),
 				'default_value' => 'http://',
 				'conditional'   => array(
 					'name'   => 'product_type',
@@ -2323,7 +2321,7 @@ WHERE $delete_where"
 
 			$repeater->add_sub_field( 'text', apply_filters( 'mp_add_sub_field_array_regular_price', array(
 				'name'        => 'regular_price',
-				'label'       => array( 'text' => __( 'Regular Price', 'mp' ) ),
+				'label'       => array( 'text' => __( 'Regulärer Preis', 'mp' ) ),
 				'conditional' => array(
 					'name'   => 'product_type',
 					'value'  => array( 'physical', 'digital' ),
@@ -2337,7 +2335,7 @@ WHERE $delete_where"
 
 			$sale_price = $repeater->add_sub_field( 'complex', apply_filters( 'mp_add_sub_field_array_sale_price', array(
 				'name'        => 'sale_price',
-				'label'       => array( 'text' => __( 'Sale Price (if applicable)', 'mp' ) ),
+				'label'       => array( 'text' => __( 'Angebotspreis (falls zutreffend)', 'mp' ) ),
 				'conditional' => array(
 					'name'   => 'product_type',
 					'value'  => array( 'physical', 'digital' ),
@@ -2347,9 +2345,9 @@ WHERE $delete_where"
 
 			$sale_price->add_field( 'text', apply_filters( 'mp_add_field_array_amount', array(
 				'name'       => 'amount',
-				'label'      => array( 'text' => __( 'Price', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Preis', 'mp' ) ),
 				'custom'     => array(
-					'data-msg-lessthan' => __( 'Value must be less than regular price', 'mp' ),
+					'data-msg-lessthan' => __( 'Der Wert muss kleiner als der reguläre Preis sein', 'mp' ),
 				),
 				'validation' => array(
 					'number'   => true,
@@ -2360,12 +2358,12 @@ WHERE $delete_where"
 
 			$sale_price->add_field( 'datepicker', apply_filters( 'mp_add_field_array_start_date', array(
 				'name'  => 'start_date',
-				'label' => array( 'text' => __( 'Start Date', 'mp' ) ),
+				'label' => array( 'text' => __( 'Startdatum', 'mp' ) ),
 			) ) );
 
 			$sale_price->add_field( 'datepicker', apply_filters( 'mp_add_field_array_end_date', array(
 				'name'  => 'end_date',
-				'label' => array( 'text' => __( 'End Date (if applicable)', 'mp' ) ),
+				'label' => array( 'text' => __( 'Enddatum (falls zutreffend)', 'mp' ) ),
 			) ) );
 
 			// Shipping Tab
@@ -2376,7 +2374,7 @@ WHERE $delete_where"
 
 			$weight = $repeater->add_sub_field( 'complex', apply_filters( 'mp_add_sub_field_array_weight', array(
 				'name'        => 'weight',
-				'label'       => array( 'text' => __( 'Weight', 'mp' ) ),
+				'label'       => array( 'text' => __( 'Gewicht', 'mp' ) ),
 				'conditional' => array(
 					'name'   => 'product_type',
 					'value'  => 'physical',
@@ -2386,7 +2384,7 @@ WHERE $delete_where"
 
 			$weight->add_field( 'text', apply_filters( 'mp_add_field_array_pounds', array(
 				'name'       => 'pounds',
-				'label'      => array( 'text' => __( 'Pounds', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Pfund', 'mp' ) ),
 				'validation' => array(
 					'digits' => true,
 					'min'    => 0,
@@ -2395,7 +2393,7 @@ WHERE $delete_where"
 
 			$weight->add_field( 'text', apply_filters( 'mp_add_field_array_ounces', array(
 				'name'       => 'ounces',
-				'label'      => array( 'text' => __( 'Ounces', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Unzen', 'mp' ) ),
 				'validation' => array(
 					'digits' => true,
 					'min'    => 0,
@@ -2404,7 +2402,7 @@ WHERE $delete_where"
 
 			$repeater->add_sub_field( 'text', apply_filters( 'mp_add_sub_field_array_extra_shipping_cost', array(
 				'name'          => 'extra_shipping_cost',
-				'label'         => array( 'text' => __( 'Extra Shipping Cost', 'mp' ) ),
+				'label'         => array( 'text' => __( 'Zusätzliche Versandkosten', 'mp' ) ),
 				'default_value' => '0.00',
 				'conditional'   => array(
 					'name'   => 'product_type',
@@ -2425,15 +2423,15 @@ WHERE $delete_where"
 
 			$repeater->add_sub_field( 'text', apply_filters( 'mp_add_sub_field_array_special_tax_rate', array(
 				'name'                      => 'special_tax_rate',
-				'label'                     => array( 'text' => __( 'Special Tax Rate', 'mp' ) ),
-				'desc'                      => __( 'If you would like this variation to use a special tax rate, enter it here. If you omit the "%" symbol the rate will be calculated as a fixed amount for each of this product in the user\'s cart.', 'mp' ),
+				'label'                     => array( 'text' => __( 'Sondersteuersatz', 'mp' ) ),
+				'desc'                      => __( 'Wenn Du möchtest, dass diese Variante einen speziellen Steuersatz verwendet, gib ihn hier ein. Wenn Du das "%" Symbol weglässt, wird der Satz als fester Betrag für jedes Produkt im Warenkorb des Benutzers berechnet.', 'mp' ),
 				'default_value'             => '',
 				'conditional'               => array(
 					'name'   => 'product_type',
 					'value'  => array( 'physical', 'digital' ),
 					'action' => 'show',
 				),
-				'custom_validation_message' => __( 'Please enter a valid tax rate', 'mp' ),
+				'custom_validation_message' => __( 'Bitte gib einen gültigen Steuersatz ein', 'mp' ),
 				'validation'                => array(
 					'custom' => '[^0-9.%]',
 				),
@@ -2443,7 +2441,7 @@ WHERE $delete_where"
 			$repeater->add_sub_field( 'tab', apply_filters( 'mp_add_sub_field_array_tab_attributes', array(
 				'name' => 'tab_attributes',
 				'slug' => 'attributes',
-				'desc' => __( 'Each product variation needs to have product attributes assigned to it so the system knows how to differentiate one product variation from the other. It is <strong>important</strong> that you assign a category to this product before choosing any attributes.', 'mp' ),
+				'desc' => __( 'Jede Produktvariante muss Produktattribute zugewiesen haben, damit das System weiß, wie es eine Produktvariante von einer anderen unterscheiden kann. Es ist <strong>wichtig</strong>, dass Du eine Kategorie für dieses Produkt zuweist, bevor Du Attribute auswählst.', 'mp' ),
 			) ) );
 
 			$mp_product_atts = MP_Product_Attributes::get_instance();
@@ -2457,7 +2455,7 @@ WHERE $delete_where"
 					'name'        => $slug,
 					'label'       => array( 'text' => $att->attribute_name ),
 					'multiple'    => false,
-					'placeholder' => sprintf( __( 'Select a %s', 'mp' ), $att->attribute_name ),
+					'placeholder' => sprintf( __( 'Wähle ein %s', 'mp' ), $att->attribute_name ),
 					'conditional' => array(
 						'name'   => 'product_type',
 						'value'  => array( 'physical', 'digital' ),
@@ -2529,7 +2527,7 @@ WHERE $delete_where"
 	public function add_product_image_metabox() {
 		add_meta_box(
 			'postimagediv',
-			__( 'Product Image', 'mp' ),
+			__( 'Produktbild', 'mp' ),
 			'post_thumbnail_meta_box',
 			MP_Product::get_post_type(),
 			'side',
