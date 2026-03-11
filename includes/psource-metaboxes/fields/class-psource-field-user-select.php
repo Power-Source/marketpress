@@ -19,7 +19,7 @@ class PSOURCE_Field_User_Select extends PSOURCE_Field {
 	public function on_creation( $args ) {
 		$this->args = array_replace_recursive( array(
 			'multiple'				 => true,
-			'placeholder'			 => __( 'Select Some Users', 'mp' ),
+			'placeholder'				 => __( 'Benutzer auswählen', 'mp' ),
 			'format_dropdown_header' => '',
 		), $args );
 

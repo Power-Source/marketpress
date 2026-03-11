@@ -19,7 +19,7 @@ class PSOURCE_Field_Checkbox extends PSOURCE_Field {
 	public function on_creation( $args ) {
 		$this->args = array_replace_recursive( array(
 			'value'			 => 1,
-			'message'		 => __( 'Yes', 'psource_metaboxes' ),
+			'message'		 => __( 'Ja', 'mp' ),
 			'orientation'	 => '',
 		), $args );
 	}

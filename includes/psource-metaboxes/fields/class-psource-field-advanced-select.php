@@ -20,7 +20,7 @@ class PSOURCE_Field_Advanced_Select extends PSOURCE_Field {
 	public function on_creation( $args ) {
 		$this->args = array_replace_recursive( array(
 			'multiple'               => true,
-			'placeholder'            => __( 'Select Some Options', 'mp' ),
+			'placeholder'            => __( 'Optionen auswählen', 'mp' ),
 			'options'                => array(),
 			'is_tag'                 => false,
 			'format_dropdown_header' => '',

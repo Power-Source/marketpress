@@ -703,7 +703,7 @@ class PSOURCE_Field {
 	 * @param int $post_id
 	 */
 	public function display( $post_id ) {
-		wp_die( __( 'You must the PSOURCE_Field::display() method in your form field class', 'psource_metaboxes' ), E_USER_ERROR );
+		wp_die( __( 'Die Methode PSOURCE_Field::display() muss in der Formularfeld-Klasse implementiert werden.', 'mp' ), E_USER_ERROR );
 	}
 
 	/**

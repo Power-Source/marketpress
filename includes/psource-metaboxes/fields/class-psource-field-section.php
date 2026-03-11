@@ -15,7 +15,7 @@ class PSOURCE_Field_Section extends PSOURCE_Field {
 	 */
 	public function on_creation( $args ) {
 		$this->args = array_replace_recursive(array(
-			'title' => __('Section Title', 'psource_metaboxes'),
+			'title' => __('Abschnittstitel', 'mp'),
 			'subtitle' => '',
 		), $args);
 	}

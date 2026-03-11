@@ -15,8 +15,8 @@ class PSOURCE_Field_File extends PSOURCE_Field {
 	 */
 	public function on_creation( $args ) {
 		$this->args = array_replace_recursive(array(
-			'title' => __('Select the file that you would like to use.', 'psource_metaboxes'),
-			'button_label' => __('Select File', 'psource_metaboxes'),
+			'title' => __('Wähle die Datei aus, die du verwenden möchtest.', 'mp'),
+			'button_label' => __('Datei auswählen', 'mp'),
 		), $args);
 		
 		$this->args['custom']['data-media-title'] = $this->args['title'];
@@ -110,7 +110,7 @@ jQuery(document).ready(function($){
 		}
 		
 		$this->before_field(); ?>
-		<input type="text" <?php echo $this->parse_atts(); ?> value="<?php echo $value; ?>" /> <a class="button psource-field-file-select" href="#"><?php _e('Select File', 'psource_metaboxes'); ?></a>
+		<input type="text" <?php echo $this->parse_atts(); ?> value="<?php echo $value; ?>" /> <a class="button psource-field-file-select" href="#"><?php _e('Datei auswählen', 'mp'); ?></a>
 		<?php
 		$this->after_field();
 	}

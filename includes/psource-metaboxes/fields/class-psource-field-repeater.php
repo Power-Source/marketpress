@@ -27,7 +27,7 @@ class PSOURCE_Field_Repeater extends PSOURCE_Field {
 	public function on_creation( $args ) {
 		$this->args = array_replace_recursive(array(
 			'layout' => 'table',
-			'add_row_label' => __('Add Row', 'psource_metaboxes'),
+			'add_row_label' => __('Zeile hinzufügen', 'mp'),
 			   'draggable' => true,
 		), $args);
 	}
@@ -422,7 +422,7 @@ jQuery(document).ready(function($){
 	}
 	
 	$('.psource-subfields').on('click', '.psource-subfield-delete-group-link', function(event){
-		if ( confirm('<?php _e('Are you sure you want to delete this?', 'psource_metaboxes'); ?>') ) {
+		if ( confirm('<?php _e('Diesen Eintrag wirklich löschen?', 'mp'); ?>') ) {
 			var $this = $(this),
 					$subfieldGroup = $this.closest('.psource-subfield-group'),
 					$links = $('.psource-subfield-delete-group-link'),

@@ -84,6 +84,10 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.0.2 =
+
+* Fix: Die URL-Logik wurde für Produktlinks vereinheitlicht (Netzwerk-Marktplatz, Produktbilder, Excerpt-Links, Social-Buttons, Widgets und Cart-Export nutzen jetzt konsistent die dynamische Produkt-URL).
+
 = 1.0.1 =
 
 * Neu: Konfigurierbare Kaufen-Button-Texte unter Darstellung für Standard-, Download-, Gratis- und Varianten-Zustände.

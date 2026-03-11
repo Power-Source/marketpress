@@ -21,7 +21,7 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 		$this->args = array_replace_recursive( array(
 			'query'			 => array(),
 			'multiple'		 => false,
-			'placeholder'	 => __( 'Select Posts', 'mp' )
+			'placeholder'	 => __( 'Beiträge auswählen', 'mp' )
 		), $args );
 
 		$this->args[ 'class' ] .= ' psource-post-select';

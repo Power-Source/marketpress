@@ -19,7 +19,7 @@ class PSOURCE_Field_Taxonomy_Select extends PSOURCE_Field {
 	public function on_creation( $args ) {
 		$this->args = array_replace_recursive( array(
 			'multiple'				 => false,
-			'placeholder'			 => __( 'Select Posts', 'mp' ),
+			'placeholder'			 => __( 'Beiträge auswählen', 'mp' ),
 			'taxonomy'				 => '',
 			'format_dropdown_header' => '',
 		), $args );

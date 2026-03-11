@@ -286,7 +286,7 @@ class PSOURCE_Metabox {
 			'hook'               => 'psource_metabox/render_settings_metaboxes',
 			'show_submit_button' => true,
 			'ajax_save'          => false,
-			'submit_button_text' => __( 'Save Changes', 'psource_metaboxes' ),
+			'submit_button_text' => __( 'Änderungen speichern', 'mp' ),
 		), $args );
 
 		$this->args = apply_filters( 'psource_metabox/init_args', $this->args );
@@ -539,11 +539,11 @@ class PSOURCE_Metabox {
 	 */
 	public function admin_notices() {
 		if ( isset( $_GET['psource_metabox_settings_saved'] ) ) {
-			echo '<div class="updated"><p>' . __( 'Settings Saved', 'psource_metaboxes' ) . '</p></div>';
+			echo '<div class="updated"><p>' . __( 'Einstellungen gespeichert', 'mp' ) . '</p></div>';
 		}
 
 		if ( isset( $_GET['psource_metabox_settings_failed'] ) ) {
-			echo '<div class="error"><p>' . __( 'Due to prolonged inactivity on this page, one or more settings were not saved. Please try again.', 'psource_metaboxes' ) . '</p></div>';
+			echo '<div class="error"><p>' . __( 'Aufgrund langer Inaktivität auf dieser Seite wurden eine oder mehrere Einstellungen nicht gespeichert. Bitte versuche es erneut.', 'mp' ) . '</p></div>';
 		}
 	}
 
@@ -625,19 +625,19 @@ class PSOURCE_Metabox {
 		wp_enqueue_script( 'psource-metaboxes-admin', $this->class_url( 'ui/js/admin.js' ), array(), PSOURCE_METABOX_VERSION, true );
 
 		$messages = array(
-			'alphanumeric_error_msg' => __( 'Please enter only letters and numbers', 'psource_metaboxes' ),
-			'lessthan_error_msg'     => __( 'Value must be less than {0}', 'psource_metaboxes' ),
+			'alphanumeric_error_msg' => __( 'Bitte nur Buchstaben und Zahlen eingeben', 'mp' ),
+			'lessthan_error_msg'     => __( 'Der Wert muss kleiner als {0} sein', 'mp' ),
 		);
 
 		wp_localize_script( 'psource-metaboxes-admin', 'PSOURCE_Metaboxes_Validation_Messages', $messages );
 		wp_localize_script( 'psource-metaboxes-admin', 'PSOURCE_Metaboxes', array(
 			'spinner_url'    => admin_url( 'images/spinner.gif' ),
 			'nonce'          => wp_create_nonce( 'psource_metabox_state_nonce' ),
-			'error'          => __( 'error', 'mp' ),
-			'errors'         => __( 'errors', 'mp' ),
-			'has'            => __( 'has', 'mp' ),
-			'have'           => __( 'have', 'mp' ),
-			'form_error_msg' => __( 'Oops! The form contains %s1 which %s2 been highlighted below.', 'mp' ) . "\n" . __( 'Please fix the %s1 and then try submitting the form again.', 'mp' ),
+			'error'          => __( 'Fehler', 'mp' ),
+			'errors'         => __( 'Fehler', 'mp' ),
+			'has'            => __( 'hat', 'mp' ),
+			'have'           => __( 'haben', 'mp' ),
+			'form_error_msg' => __( 'Das Formular enthält %s1, die unten hervorgehoben %s2.', 'mp' ) . "\n" . __( 'Bitte korrigiere die %s1 und sende das Formular erneut ab.', 'mp' ),
 		) );
 	}
 

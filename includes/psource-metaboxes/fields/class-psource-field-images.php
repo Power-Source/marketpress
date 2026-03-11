@@ -97,7 +97,7 @@ class PSOURCE_Field_Images extends PSOURCE_Field {
 					return false;
 				} );
 
-				var buttonHtml = '<a class="button psource-image-field-add" href="javascript:;"><?php _e( 'Select Image', 'psource_metaboxes' ); ?></a>';
+				var buttonHtml = '<a class="button psource-image-field-add" href="javascript:;"><?php _e( 'Bild auswählen', 'mp' ); ?></a>';
 
 				/*
 				 * Delete image
@@ -122,10 +122,10 @@ class PSOURCE_Field_Images extends PSOURCE_Field {
 
 					var $this = $( this ),
 						frame = wp.media( {
-							"title": "<?php _e( 'Select image(s) that you would like to use for this product.', 'psource_metaboxes' ); ?>",
-							"multiple": true,
-							"library": { "type": "image" },
-							"button": { "text": "<?php _e( 'Select Image', 'psource_metaboxes' ); ?>" }
+						"title": "<?php _e( 'Wähle ein oder mehrere Bilder für dieses Produkt aus.', 'mp' ); ?>",
+						"multiple": true,
+						"library": { "type": "image" },
+						"button": { "text": "<?php _e( 'Bild auswählen', 'mp' ); ?>" }
 						} );
 
 					/*
@@ -158,10 +158,10 @@ class PSOURCE_Field_Images extends PSOURCE_Field {
 					var $this = $( this ),
 						$input = ( $this.hasClass( 'psource-image-field-edit' ) ) ? $this.parent().siblings( ':hidden' ) : $this.siblings( ':hidden' ),
 						frame = wp.media( {
-							"title": "<?php _e( 'Select the image that you would like to use for this product.', 'psource_metaboxes' ); ?>",
-							"multiple": false,
-							"library": { "type": "image" },
-							"button": { "text": "<?php _e( 'Select Image', 'psource_metaboxes' ); ?>" }
+						"title": "<?php _e( 'Wähle das Bild für dieses Produkt aus.', 'mp' ); ?>",
+						"multiple": false,
+						"library": { "type": "image" },
+						"button": { "text": "<?php _e( 'Bild auswählen', 'mp' ); ?>" }
 						} );
 
 					/*
@@ -239,7 +239,7 @@ class PSOURCE_Field_Images extends PSOURCE_Field {
 
 		</div>
 		<div class="mp_images_select">
-			<a class="button psource-image-field-add" href="javascript:;"><?php _e( 'Bilder hinzufügen', 'psource_metaboxes' ); ?></a>
+			<a class="button psource-image-field-add" href="javascript:;"><?php _e( 'Bilder hinzufügen', 'mp' ); ?></a>
 			<input type="hidden" name="mp_product_images_indexes" id="mp_product_images_indexes" value="" />
 		</div>
 		<?php

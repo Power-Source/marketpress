@@ -70,28 +70,28 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 			?>
 			<div class="tablenav top">
 				<div class="alignleft actions bulkactions">
-					<label for="bulk-action-selector-top" class="screen-reader-text"><?php _e( 'Select bulk action', 'mp' ); ?></label>
+					<label for="bulk-action-selector-top" class="screen-reader-text"><?php _e( 'Bulk-Aktion auswählen', 'mp' ); ?></label>
 					<select id="bulk-action-selector-top" class="variant_bulk_selected">
-						<option value="-1" selected="selected"><?php _e( 'Bulk Actions', 'mp' ); ?></option>
-						<option value="variant_update_images"><?php _e( 'Update Images', 'mp' ); ?></option>
-						<option value="variant_update_inventory"><?php _e( 'Update Inventory', 'mp' ); ?></option>
-						<option value="variant_update_prices"><?php _e( 'Update Prices', 'mp' ); ?></option>
-						<option value="variant_delete"><?php _e( 'Delete Variants', 'mp' ); ?></option>
+						<option value="-1" selected="selected"><?php _e( 'Bulk-Aktionen', 'mp' ); ?></option>
+						<option value="variant_update_images"><?php _e( 'Bilder aktualisieren', 'mp' ); ?></option>
+						<option value="variant_update_inventory"><?php _e( 'Lagerbestand aktualisieren', 'mp' ); ?></option>
+						<option value="variant_update_prices"><?php _e( 'Preise aktualisieren', 'mp' ); ?></option>
+						<option value="variant_delete"><?php _e( 'Varianten löschen', 'mp' ); ?></option>
 					</select>
-					<input type="button" name="" id="variant_bulk_doaction" class="button action" value="<?php echo esc_attr( __( 'Apply', 'mp' ) ); ?>">
+					<input type="button" name="" id="variant_bulk_doaction" class="button action" value="<?php echo esc_attr( __( 'Anwenden', 'mp' ) ); ?>">
 				</div>
 
 				<div class="variation-right-actions">
-					<input type="button" name="" id="variant_add" class="button action button-primary" value="<?php echo esc_attr( __( 'Add New Variation', 'mp' ) ); ?>">
+					<input type="button" name="" id="variant_add" class="button action button-primary" value="<?php echo esc_attr( __( 'Neue Variante hinzufügen', 'mp' ) ); ?>">
 				</div>
 				<br class="clear">
 			</div>
 
 			<span <?php echo $this->parse_atts(); ?>>
 				<div class="select_attributes_filter">
-					<span class="select_title"><?php _e( 'Select:', 'mp' ); ?> | </span>
-					<span class="select_all"><a href="#" class="select_all_link"><?php _e( 'All', 'mp' ); ?></a> | </span>
-					<span class="select_none"><a href="#" class="select_none_link"><?php _e( 'None', 'mp' ); ?></a> | </span>
+					<span class="select_title"><?php _e( 'Auswählen:', 'mp' ); ?> | </span>
+					<span class="select_all"><a href="#" class="select_all_link"><?php _e( 'Alle', 'mp' ); ?></a> | </span>
+					<span class="select_none"><a href="#" class="select_none_link"><?php _e( 'Keine', 'mp' ); ?></a> | </span>
 					<?php
 					$order = 1;
 					foreach ( $variation_attributes as $variation_attribute ) {
@@ -112,7 +112,7 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 							</th>
 
 							<th scope="col" id="title" class="manage-column">
-								<?php _e( 'Img.', 'mp' ); ?>
+								<?php _e( 'Bild', 'mp' ); ?>
 							</th>
 							<?php foreach ( array_keys( $variation_attributes ) as $variation_attribute ) { ?>
 								<th scope="col" class="manage-column">
@@ -123,15 +123,15 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 							<?php } ?>
 
 							<th scope="col" id="inventory" class="manage-column <?php echo $product_type == 'external' ? 'mp_hidden_content' : ''; ?>">
-								<?php _e( 'Inventory', 'mp' ); ?>
+								<?php _e( 'Lagerbestand', 'mp' ); ?>
 							</th>
 
 							<th scope="col" id="price" class="manage-column">
-								<?php _e( 'Price', 'mp' ); ?>
+								<?php _e( 'Preis', 'mp' ); ?>
 							</th>
 
 							<th scope="col" id="sale_price" class="manage-column">
-								<?php _e( 'Sale Price', 'mp' ); ?>
+								<?php _e( 'Rabattpreis', 'mp' ); ?>
 							</th>
 
 							<!--<th scope="col" id="sku" class="manage-column">
@@ -139,7 +139,7 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 							</th>-->
 
 							<th scope="col" id="sales" class="manage-column">
-								<?php _e( 'Sales', 'mp' ); ?>
+								<?php _e( 'Verkäufe', 'mp' ); ?>
 							</th>
 
 							<!--<th scope="col" id="variation_content" class="manage-column">
@@ -147,11 +147,11 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 							</th>-->
 
 							<th scope="col" id="more" class="manage-column">
-								<?php _e( 'More Info', 'mp' ); ?>
+								<?php _e( 'Mehr Infos', 'mp' ); ?>
 							</th>
 
 							<th scope="col" id="default-variation" class="manage-column">
-								<?php _e( 'Set Default', 'mp' ); ?>
+								<?php _e( 'Als Standard setzen', 'mp' ); ?>
 							</th>
 						</tr>
 					</thead>
@@ -262,7 +262,7 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 									<span class="hidden variation_name"><?php echo get_post_meta( $child->ID, 'name', true ); ?></span>
 								</td>
 								<td class="field_default_variation">
-									<a class="set-default" title="<?php esc_attr_e( 'Set as default variation.', 'mp' ) ?>" href="#" data-child-id="<?php echo esc_attr( $child->ID ); ?>" data-post-id="<?php echo esc_attr( $post_id ); ?>"><i class="fa fa-asterisk"></i></a>
+									<a class="set-default" title="<?php esc_attr_e( 'Als Standard-Variante festlegen.', 'mp' ) ?>" href="#" data-child-id="<?php echo esc_attr( $child->ID ); ?>" data-post-id="<?php echo esc_attr( $post_id ); ?>"><i class="fa fa-asterisk"></i></a>
 								</td>
 							</tr>
 						<?php } ?>
@@ -273,12 +273,12 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 			<div class="mp_hidden_content">
 				<div id="mp_bulk_price">
 					<div class="mp_popup_content">
-						<label><?php _e( 'Price', 'mp' ); ?></label>
-						<input type="text" name="mp_bulk_price" class="mp_bulk_price" value="" placeholder="<?php echo esc_attr( __( 'Insert the price i.e. 25 or 25.50', 'mp' ) ); ?>" required />
+						<label><?php _e( 'Preis', 'mp' ); ?></label>
+						<input type="text" name="mp_bulk_price" class="mp_bulk_price" value="" placeholder="<?php echo esc_attr( __( 'Preis eingeben, z. B. 25 oder 25,50', 'mp' ) ); ?>" required />
 					</div>
 					<div class="mp_popup_controls mp_price_controls">
-						<a href="" class="button button-primary save-bulk-form"><?php _e( 'Update', 'mp' ); ?></a>
-						<a href="" class="preview button cancel"><?php _e( 'Cancel', 'mp' ); ?></a>
+						<a href="" class="button button-primary save-bulk-form"><?php _e( 'Aktualisieren', 'mp' ); ?></a>
+						<a href="" class="preview button cancel"><?php _e( 'Abbrechen', 'mp' ); ?></a>
 					</div>
 				</div>
 
@@ -286,12 +286,12 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 
 				<div id="mp_bulk_inventory">
 					<div class="mp_popup_content">
-						<label><?php _e( 'Inventory', 'mp' ); ?></label>
-						<input type="text" name="mp_bulk_inventory" class="mp_bulk_inventory" value="" placeholder="<?php echo esc_attr( __( 'Insert quantity available. Empty for unlimited.', 'mp' ) ); ?>" required />
+						<label><?php _e( 'Lagerbestand', 'mp' ); ?></label>
+						<input type="text" name="mp_bulk_inventory" class="mp_bulk_inventory" value="" placeholder="<?php echo esc_attr( __( 'Verfügbare Menge eingeben. Leer lassen für unbegrenzt.', 'mp' ) ); ?>" required />
 					</div>
 					<div class="mp_popup_controls mp_inventory_controls">
-						<a href="" class="button button-primary save-bulk-form"><?php _e( 'Update', 'mp' ); ?></a>
-						<a href="" class="preview button cancel"><?php _e( 'Cancel', 'mp' ); ?></a>
+						<a href="" class="button button-primary save-bulk-form"><?php _e( 'Aktualisieren', 'mp' ); ?></a>
+						<a href="" class="preview button cancel"><?php _e( 'Abbrechen', 'mp' ); ?></a>
 					</div>
 				</div>
 
@@ -299,12 +299,12 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 
 				<div id="mp_bulk_delete">
 					<div class="mp_popup_content">
-						<label><?php _e( 'Confirmation', 'mp' ); ?></label>
-						<p><?php _e( 'You are about to delete selected variants. <br />If you want to continue please confirm.', 'mp' ); ?></p>
+						<label><?php _e( 'Bestätigung', 'mp' ); ?></label>
+						<p><?php _e( 'Du bist dabei, die ausgewählten Varianten zu löschen. <br />Zum Fortfahren bitte bestätigen.', 'mp' ); ?></p>
 					</div>
 					<div class="mp_popup_controls mp_delete_controls">
-						<a href="" class="button button-primary delete-bulk-form"><?php _e( 'Confirm', 'mp' ); ?></a>
-						<a href="" class="preview button cancel"><?php _e( 'Cancel', 'mp' ); ?></a>
+						<a href="" class="button button-primary delete-bulk-form"><?php _e( 'Bestätigen', 'mp' ); ?></a>
+						<a href="" class="preview button cancel"><?php _e( 'Abbrechen', 'mp' ); ?></a>
 					</div>
 				</div>
 
@@ -326,18 +326,18 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 								<td width="100%">
 									<div class="variation-row">
 										<div class="variation-first-col">
-											<div class="psource-field-label"><?php _e( 'Variation Name', 'mp' ); ?> <span class="mp_meta_small_desc"><?php _e( '(e.g. Color)', 'mp' ); ?></span></div>
+											<div class="psource-field-label"><?php _e( 'Variationsname', 'mp' ); ?> <span class="mp_meta_small_desc"><?php _e( '(z. B. Farbe)', 'mp' ); ?></span></div>
 											<?php
 											$product_taxonomies = MP_Product_Attributes_Admin::get_product_attributes_select( 'product_attributes_categories[]', 'id' );
 											?>
 											<!--<span class="variation_create_new_title"><?php _e( 'Or create new variation', 'mp' ); ?></span>-->
-											<a href="#" class="mp-variation-add-all button button-primary" style="display: none;"><?php _e( 'Add all values', 'mp' ); ?></a>
-											<input type="text" class="mp-variation-attribute-name" placeholder="<?php esc_attr_e( __( 'Type variation name', 'mp' ) ); ?>" name="variation_names[]" />
+											<a href="#" class="mp-variation-add-all button button-primary" style="display: none;"><?php _e( 'Alle Werte hinzufügen', 'mp' ); ?></a>
+											<input type="text" class="mp-variation-attribute-name" placeholder="<?php esc_attr_e( __( 'Variationsname eingeben', 'mp' ) ); ?>" name="variation_names[]" />
 										</div>
 
 										<div class="variation-second-col">
-											<div class="psource-field-label"><?php _e( 'Variation Values', 'mp' ); ?> <span class="mp_meta_small_desc"><?php _e( '(e.g. White, Grey, Red etc.)', 'mp' ); ?> - <strong><?php _e( 'Insert a value and press ENTER', 'mp' ); ?></strong></span></div>
-											<textarea name="variation_values[]" class="variation_values mp-variation-field-required" value="" placeholder="<?php esc_attr_e( __( 'Insert a value and press ENTER', 'mp' ) ); ?>"></textarea>
+											<div class="psource-field-label"><?php _e( 'Variationswerte', 'mp' ); ?> <span class="mp_meta_small_desc"><?php _e( '(z. B. Weiß, Grau, Rot usw.)', 'mp' ); ?> - <strong><?php _e( 'Wert eingeben und ENTER drücken', 'mp' ); ?></strong></span></div>
+											<textarea name="variation_values[]" class="variation_values mp-variation-field-required" value="" placeholder="<?php esc_attr_e( __( 'Wert eingeben und ENTER drücken', 'mp' ) ); ?>"></textarea>
 										</div>
 
 										<div class="variation-third-col">
@@ -353,8 +353,8 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 						<tfoot>
 							<tr>
 								<td width="10%" colspan="4">
-									<a class="add mp-add-new-variation button"><?php _e( 'Add Another Variant', 'mp' ); ?></span>
-										<a href="" id="mp_make_combinations" class='button button-primary create-variations-button'><?php _e( 'Create Variations', 'mp' ); ?></a>
+									<a class="add mp-add-new-variation button"><?php _e( 'Weitere Variante hinzufügen', 'mp' ); ?></span>
+										<a href="" id="mp_make_combinations" class='button button-primary create-variations-button'><?php _e( 'Varianten erstellen', 'mp' ); ?></a>
 								</td>
 							</tr>
 						</tfoot>

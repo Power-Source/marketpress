@@ -27,8 +27,8 @@ class PSOURCE_Field_File_List extends PSOURCE_Field {
 	 */
 	public function on_creation( $args ) {
         $this->args = array_replace_recursive(array(
-			'title'         => __( 'Select the file that you would like to use.', 'psource_metaboxes' ),
-			'button_label'  => __( 'Select File', 'psource_metaboxes' ),
+			'title'         => __( 'Wähle die Datei aus, die du verwenden möchtest.', 'mp' ),
+			'button_label'  => __( 'Datei auswählen', 'mp' ),
 		), $args);
 		
 		$this->args[ 'custom' ][ 'data-media-title' ]           = $this->args[ 'title' ];
@@ -155,7 +155,7 @@ class PSOURCE_Field_File_List extends PSOURCE_Field {
                     
                     ?>
                     <div class="file">
-                        <input type="text" <?php echo $this->parse_atts(); ?> value="<?php echo $value; ?>" /> <a class="button psource-field-file-select" href="#"><?php _e('Select File', 'psource_metaboxes'); ?></a><a href="#" class="button mp_file_action <?php echo $classes[0]; ?>-file"><span class="dashicons dashicons-<?php echo $classes[1]; ?>"></span></a>
+                        <input type="text" <?php echo $this->parse_atts(); ?> value="<?php echo $value; ?>" /> <a class="button psource-field-file-select" href="#"><?php _e('Datei auswählen', 'mp'); ?></a><a href="#" class="button mp_file_action <?php echo $classes[0]; ?>-file"><span class="dashicons dashicons-<?php echo $classes[1]; ?>"></span></a>
                     </div>
                     <?php
                     $index++;
@@ -163,7 +163,7 @@ class PSOURCE_Field_File_List extends PSOURCE_Field {
             } else {
             ?>
             <div class="file">
-		        <input type="text" <?php echo $this->parse_atts(); ?> value="<?php echo $values; ?>" /> <a class="button psource-field-file-select" href="#"><?php _e('Select File', 'psource_metaboxes'); ?></a><a href="#" class="button mp_file_action add-file"><span class="dashicons dashicons-plus"></span></a>
+		        <input type="text" <?php echo $this->parse_atts(); ?> value="<?php echo $values; ?>" /> <a class="button psource-field-file-select" href="#"><?php _e('Datei auswählen', 'mp'); ?></a><a href="#" class="button mp_file_action add-file"><span class="dashicons dashicons-plus"></span></a>
             </div>
             <?php } ?>
 		</div>

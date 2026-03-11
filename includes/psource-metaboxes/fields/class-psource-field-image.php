@@ -43,7 +43,7 @@ class PSOURCE_Field_Image extends PSOURCE_Field {
 		?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function( $ ) {
-				var buttonHtml = '<a class="button psource-image-field-select" href="javascript:;"><?php _e( 'Select Image', 'psource_metaboxes' ); ?></a>';
+				var buttonHtml = '<a class="button psource-image-field-select" href="javascript:;"><?php _e( 'Bild auswählen', 'mp' ); ?></a>';
 
 				/*
 				 * When adding a new group to the repeater field reset the image preview back to a button
@@ -74,10 +74,10 @@ class PSOURCE_Field_Image extends PSOURCE_Field {
 					var $this = $( this ),
 						$input = ( $this.hasClass( 'psource-image-field-edit' ) ) ? $this.parent().siblings( ':hidden' ) : $this.siblings( ':hidden' ),
 						frame = wp.media( {
-							"title": "<?php _e( 'Select the image that you would like to use for this variation.', 'psource_metaboxes' ); ?>",
-							"multiple": false,
-							"library": { "type": "image" },
-							"button": { "text": "<?php _e( 'Select Image', 'psource_metaboxes' ); ?>" }
+						"title": "<?php _e( 'Wähle das Bild für diese Variante aus.', 'mp' ); ?>",
+						"multiple": false,
+						"library": { "type": "image" },
+						"button": { "text": "<?php _e( 'Bild auswählen', 'mp' ); ?>" }
 						} );
 
 					/*
@@ -139,7 +139,7 @@ class PSOURCE_Field_Image extends PSOURCE_Field {
 			<div class="psource-image-field-preview"><a class="psource-image-field-edit psource-image-field-select dashicons dashicons-edit" href="#"></a><a class="psource-image-field-delete dashicons dashicons-trash" href="#"></a><img src="<?php echo $img_url[ 0 ]; ?>" alt="" /></div>
 			<?php else :
 			?>
-			<a class="button psource-image-field-select" href="javascript:;"><?php _e( 'Select Image', 'psource_metaboxes' ); ?></a>
+			<a class="button psource-image-field-select" href="javascript:;"><?php _e( 'Bild auswählen', 'mp' ); ?></a>
 		<?php endif; ?>
 
 		<input type="hidden" <?php echo $this->parse_atts(); ?> value="<?php echo $value; ?>" />

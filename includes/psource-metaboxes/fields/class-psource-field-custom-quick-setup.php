@@ -37,25 +37,25 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 			?>
 			<div class="mp_quick_setup_step mp_quick_setup_step-1">
 				<div class="mp_content">
-					<img class="mp_quick_setup_image-welcome mp_image" src="<?php echo mp_plugin_url( 'includes/admin/ui/images/mp_quick_setup-welcome.png' ); ?>" alt="<?php _e('MarketPress - Quick Setup', 'mp'); ?>" height="158" width="158">
-					<h3 class="mp_title"><?php _e( 'Welcome to MarketPress - Quick Setup', 'mp' ); ?></h3>
-					<p><?php _e( 'MarketPress adds a full online store to your website, with heaps of configuration options and addons <br>to suit your needs. It\'s really easy to get going, and only takes a few minutes to setup!', 'mp' ); ?></p>
+					<img class="mp_quick_setup_image-welcome mp_image" src="<?php echo mp_plugin_url( 'includes/admin/ui/images/mp_quick_setup-welcome.png' ); ?>" alt="<?php _e('PS MarketPress – Schnelleinrichtung', 'mp'); ?>" height="158" width="158">
+					<h3 class="mp_title"><?php _e( 'Willkommen bei PS MarketPress – Schnelleinrichtung', 'mp' ); ?></h3>
+					<p><?php _e( 'PS MarketPress fügt deiner Website einen vollständigen Online-Shop hinzu, mit vielen Konfigurationsoptionen und Add-ons. Die Einrichtung ist einfach und dauert nur wenige Minuten!', 'mp' ); ?></p>
 					<!--<p><?php // _e( 'MarketPress adds a full online store to your website. It\'s really easy to get gogin, and only takes a few minutes to setup!', 'mp' );        ?></p>-->
-					<p><?php _e( 'Once you\'ve completed this quick setup wizard you\'ll have a fully working online store - exciting! Start <br>by creating the <strong>default store pages</strong> for the online store such as the cart, checkout and store pages.', 'mp' ); ?></p>
+					<p><?php _e( 'Wenn du diesen Assistenten abgeschlossen hast, hast du einen voll funktionsfähigen Online-Shop! Beginne <br>mit der Erstellung der <strong>Standard-Shop-Seiten</strong> wie Warenkorb, Kasse und Shop-Übersicht.', 'mp' ); ?></p>
 				</div><!-- end mp_content -->
 
 				<?php if ( get_option( 'mp_needs_pages', 1 ) == 1 && current_user_can( 'manage_options' ) ) { ?>
 					<div class="mp_callout">
-						<a href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'install_mp_pages' => 'true' ), 'admin.php' ) ); ?>" class="button-primary mp_button"><?php _e( 'Install store pages', 'mp' ); ?></a>
+						<a href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'install_mp_pages' => 'true' ), 'admin.php' ) ); ?>" class="button-primary mp_button"><?php _e( 'Shop-Seiten installieren', 'mp' ); ?></a>
 					</div><!-- end mp_callout -->
 
 					<div class="mp_skip_step">
-						<a class="mp_link mp_link-skip-step" href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'quick_setup_step' => 'skip' ), 'admin.php' ) ); ?>"><?php _e( 'Skip this step, I\'ll do this manually', 'mp' ); ?></a>
+						<a class="mp_link mp_link-skip-step" href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'quick_setup_step' => 'skip' ), 'admin.php' ) ); ?>"><?php _e( 'Diesen Schritt überspringen, ich mache das manuell', 'mp' ); ?></a>
 					</div><!-- end mp_skip_step -->
 				<?php } else {
 					?>
 					<div class="mp_callout">
-						<a href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'quick_setup_step' => '2' ), 'admin.php' ) ); ?>" class="button-primary mp_button"><?php _e( 'Continue', 'mp' ); ?></a>
+						<a href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'quick_setup_step' => '2' ), 'admin.php' ) ); ?>" class="button-primary mp_button"><?php _e( 'Weiter', 'mp' ); ?></a>
 					</div>
 				<?php }
 				?>
@@ -66,18 +66,18 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 			?>
 			<div class="mp_quick_setup_step mp_quick_setup_step-2 mp_quick_setup_step-has-tabs">
 				<div class="mp_content">
-					<h3 class="mp_title"><?php _e( 'Welcome to MarketPress - Quick Setup', 'mp' ); ?></h3>
-					<p><?php _e( 'Choose where you want to sell your stuff and what currency. Easy!', 'mp' ); ?></p>
+					<h3 class="mp_title"><?php _e( 'Willkommen bei PS MarketPress – Schnelleinrichtung', 'mp' ); ?></h3>
+					<p><?php _e( 'Wähle, wo du verkaufen möchtest und in welcher Währung. Ganz einfach!', 'mp' ); ?></p>
 				</div><!-- end mp_content -->
 
 				<div class="mp_content-tabs">
 					<div id="mp-quick-setup-tabs" class="mp_quick_setup_tabs">
 
 						<ul class="mp_tabs_labels">
-							<li class="mp_tab_label"><a class="mp_tab_label_link" href="#mp-quick-setup-tab-locations"><span class="dashicons-before dashicons-admin-site mp_icon mp_icon-inline mp_icon-rounded"></span> <?php _e( 'Locations', 'mp' ); ?></a></li>
-							<li class="mp_tab_label"><a class="mp_tab_label_link" href="#mp-quick-setup-tab-currency-and-tax"><span class="dashicons-before dashicons-tag mp_icon mp_icon-inline mp_icon-rounded"></span> <?php _e( 'Currency & Tax', 'mp' ); ?></a></li>
-							<li class="mp_tab_label"><a class="mp_tab_label_link" href="#mp-quick-setup-tab-metric-system"><span class="dashicons-before dashicons-cart mp_icon mp_icon-inline mp_icon-rounded"></span> <?php _e( 'Metric System', 'mp' ); ?></a></li>
-							<li class="mp_tab_label"><a class="mp_tab_label_link" href="#mp-quick-setup-tab-payment-gateway"><span class="dashicons-before dashicons-feedback mp_icon mp_icon-inline mp_icon-rounded"></span> <?php _e( 'Payment Gateway', 'mp' ); ?></a></li>
+							<li class="mp_tab_label"><a class="mp_tab_label_link" href="#mp-quick-setup-tab-locations"><span class="dashicons-before dashicons-admin-site mp_icon mp_icon-inline mp_icon-rounded"></span> <?php _e( 'Standorte', 'mp' ); ?></a></li>
+							<li class="mp_tab_label"><a class="mp_tab_label_link" href="#mp-quick-setup-tab-currency-and-tax"><span class="dashicons-before dashicons-tag mp_icon mp_icon-inline mp_icon-rounded"></span> <?php _e( 'Währung & Steuer', 'mp' ); ?></a></li>
+							<li class="mp_tab_label"><a class="mp_tab_label_link" href="#mp-quick-setup-tab-metric-system"><span class="dashicons-before dashicons-cart mp_icon mp_icon-inline mp_icon-rounded"></span> <?php _e( 'Maßeinheiten', 'mp' ); ?></a></li>
+							<li class="mp_tab_label"><a class="mp_tab_label_link" href="#mp-quick-setup-tab-payment-gateway"><span class="dashicons-before dashicons-feedback mp_icon mp_icon-inline mp_icon-rounded"></span> <?php _e( 'Zahlungsgateway', 'mp' ); ?></a></li>
 						</ul><!-- end mp_tabs_labels -->
 
 						<div class="mp_tabs_content">
@@ -85,33 +85,33 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 							<div id="mp-quick-setup-tab-locations" class="mp_tab">
 								<div class="mp_tab_content">
 									<div id="mp-content-locations" class="mp_tab_content_locations mp_content_col mp_content_col-one-third">
-										<p class="mp_tab_content_label"><strong><?php _e( 'Locations', 'mp' ); ?></strong></p>
-										<p><?php _e( 'Where is your online store based?', 'mp' ); ?></p>
+										<p class="mp_tab_content_label"><strong><?php _e( 'Standorte', 'mp' ); ?></strong></p>
+										<p><?php _e( 'Wo ist dein Online-Shop ansässig?', 'mp' ); ?></p>
 									</div><!-- end mp_tab_content_locations -->
 									<div id="mp-content-countries" class="mp_tab_content_countries mp_content_col mp_content_col-two-thirds">
 										<p class="mp_tab_content_label">&nbsp;</p>
-										<p><?php _e( 'And, which countries do you want to sell to?', 'mp' ); ?></p>
+										<p><?php _e( 'Und in welche Länder möchtest du verkaufen?', 'mp' ); ?></p>
 									</div><!-- end mp_tab_content_countries -->
 								</div><!-- end mp_tab_content -->
 								<div class="mp_tab_navigation">
-									<a href="#" class="button-secondary mp_button mp_button_tab_nav-next"><?php _e( 'Next', 'mp' ); ?></a>
+									<a href="#" class="button-secondary mp_button mp_button_tab_nav-next"><?php _e( 'Weiter', 'mp' ); ?></a>
 								</div><!-- end mp_tab_navigation -->
 							</div><!-- end mp-quick-setup-tab-locations -->
 
 							<div id="mp-quick-setup-tab-currency-and-tax" class="mp_tab">
 								<div class="mp_tab_content">
 									<div id="mp-content-currency" class="mp_tab_content_currency mp_content_col mp_content_col-one-half">
-										<p class="mp_tab_content_label"><?php _e( 'Currency', 'mp' ); ?></p>
-										<p><?php _e( 'What currency do you want to sell with?', 'mp' ); ?></p>
+										<p class="mp_tab_content_label"><?php _e( 'Währung', 'mp' ); ?></p>
+										<p><?php _e( 'In welcher Währung möchtest du verkaufen?', 'mp' ); ?></p>
 									</div><!-- end mp_tab_content_currency -->
 									<div id="mp-content-tax" class="mp_tab_content_tax mp_content_col mp_content_col-one-half">
-										<p class="mp_tab_content_label"><?php _e( 'Tax', 'mp' ); ?></p>
-										<p><?php _e( 'Do you want to apply tax for your products? <em>You can customize this for each product and variation</em>.', 'mp' ); ?></p>
+										<p class="mp_tab_content_label"><?php _e( 'Steuer', 'mp' ); ?></p>
+										<p><?php _e( 'Möchtest du Steuern auf deine Produkte anwenden? <em>Das lässt sich für jedes Produkt und jede Variante anpassen</em>.', 'mp' ); ?></p>
 									</div><!-- end mp_tab_content_tax -->
 								</div><!-- end mp_tab_content -->
 								<div class="mp_tab_navigation">
-									<a href="#" class="button-secondary mp_button mp_button_tab_nav-prev"><?php _e( 'Back', 'mp' ); ?></a>
-									<a href="#" class="button-secondary mp_button mp_button_tab_nav-next"><?php _e( 'Next', 'mp' ); ?></a>
+									<a href="#" class="button-secondary mp_button mp_button_tab_nav-prev"><?php _e( 'Zurück', 'mp' ); ?></a>
+									<a href="#" class="button-secondary mp_button mp_button_tab_nav-next"><?php _e( 'Weiter', 'mp' ); ?></a>
 								</div><!-- end mp_tab_navigation -->
 							</div><!-- end mp-quick-setup-tab-currency-and-tax -->
 
@@ -120,8 +120,8 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 
 									<div class="mp_tab_content_block">
 										<div id="mp-content-metric-system" class="mp_tab_content_metric_system">
-											<p class="mp_tab_content_label"><?php _e( 'Metric System', 'mp' ); ?></p>
-											<p><?php _e( 'And what metric system do you want to use?', 'mp' ); ?></p>
+											<p class="mp_tab_content_label"><?php _e( 'Maßeinheiten', 'mp' ); ?></p>
+											<p><?php _e( 'Welches Maßsystem möchtest du verwenden?', 'mp' ); ?></p>
 										</div><!-- end mp-content-metric-system -->
 									</div><!-- end mp_tab_content_block -->
 									
@@ -139,9 +139,9 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 
 								</div><!-- end mp_tab_content -->
 								<div class="mp_tab_navigation">
-									<a href="#" class="button-secondary mp_button mp_button_tab_nav-prev"><?php _e( 'Back', 'mp' ); ?></a>
-									<a href="#" class="button-secondary mp_button mp_button_tab_nav-next"><?php _e( 'Next', 'mp' ); ?></a>
-									<!--<a href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'quick_setup_step' => '3' ), 'admin.php' ) ); ?>" class="button-primary"><?php _e( 'Finish Setup', 'mp' ); ?></a>-->
+									<a href="#" class="button-secondary mp_button mp_button_tab_nav-prev"><?php _e( 'Zurück', 'mp' ); ?></a>
+									<a href="#" class="button-secondary mp_button mp_button_tab_nav-next"><?php _e( 'Weiter', 'mp' ); ?></a>
+									<!--<a href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'quick_setup_step' => '3' ), 'admin.php' ) ); ?>" class="button-primary"><?php _e( 'Einrichtung abschließen', 'mp' ); ?></a>-->
 								</div><!-- end mp_tab_navigation -->
 							</div><!-- mp-quick-setup-tab-metric-system -->
 							
@@ -156,8 +156,8 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 									</div><!-- end mp_tab_content_payment_gateway -->
 								</div><!-- end mp_tab_content -->
 								<div class="mp_tab_navigation">
-									<a href="#" class="button-secondary mp_button mp_button_tab_nav-prev"><?php _e( 'Back', 'mp' ); ?></a>
-									<input class="button-primary mp_button mp_button_tab_nav-finish" type="submit" name="submit_settings" value="<?php _e( 'Finish Setup', 'mp' ); ?>">
+									<a href="#" class="button-secondary mp_button mp_button_tab_nav-prev"><?php _e( 'Zurück', 'mp' ); ?></a>
+									<input class="button-primary mp_button mp_button_tab_nav-finish" type="submit" name="submit_settings" value="<?php _e( 'Einrichtung abschließen', 'mp' ); ?>">
 								</div>
 								<!-- end mp_tab_navigation -->
 							</div>
@@ -180,20 +180,20 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 			?>
 			<div class="mp_quick_setup_step mp_quick_setup_step-3">
 				<div class="mp_content">
-					<h3 class="mp_title"><?php _e( 'Woohoo! Your online store is up and running.', 'mp' ); ?></h3>
-					<p><?php _e( 'Your store is almost ready for its first customers, but first it needs some products. Get started by adding products below, or jump straight into further configuring your store’s settings.', 'mp' ); ?></p>
+					<h3 class="mp_title"><?php _e( 'Super! Dein Online-Shop ist bereit.', 'mp' ); ?></h3>
+					<p><?php _e( 'Dein Shop ist fast bereit für die ersten Kunden – er braucht nur noch Produkte. Füge jetzt Produkte hinzu oder konfiguriere deinen Shop weiter.', 'mp' ); ?></p>
 				</div><!-- end mp_content -->
 				<div class="mp_callout">
 					<div class="mp_content_col mp_content_col-one-half">
 						<span class="dashicons dashicons-welcome-write-blog mp_icon mp_icon-stack mp_icon-gray mp_icon-big"></span>
-						<p><?php _e( '<strong>Add your first product</strong> for sale and get familiar with adding products.', 'mp' ); ?></p>
-						<a href="<?php echo admin_url( 'post-new.php?post_type=product' ); ?>" class="button-primary mp_button mp_button-add-product"><?php _e( 'Add Product', 'mp' ); ?></a>
+						<p><?php _e( '<strong>Füge dein erstes Produkt</strong> hinzu und lerne, wie Produkte erstellt werden.', 'mp' ); ?></p>
+						<a href="<?php echo admin_url( 'post-new.php?post_type=product' ); ?>" class="button-primary mp_button mp_button-add-product"><?php _e( 'Produkt hinzufügen', 'mp' ); ?></a>
 					</div>
 
 					<div class="mp_content_col mp_content_col-one-half">
 						<span class="dashicons dashicons-admin-settings mp_icon mp_icon-stack mp_icon-gray mp_icon-big"></span>
-						<p><?php _e( '<strong>Configure</strong> shipping rates, emails and your store\'s appearance. ', 'mp' ); ?></p>
-						<a href="<?php echo admin_url( 'admin.php?page=store-settings' ); ?>" class="button-primary mp_button mp_button-configure-store"><?php _e( 'Configure Store', 'mp' ); ?></a>
+						<p><?php _e( '<strong>Konfiguriere</strong> Versandkosten, E-Mails und das Erscheinungsbild deines Shops.', 'mp' ); ?></p>
+						<a href="<?php echo admin_url( 'admin.php?page=store-settings' ); ?>" class="button-primary mp_button mp_button-configure-store"><?php _e( 'Shop konfigurieren', 'mp' ); ?></a>
 					</div>
 				</div><!-- end mp_callout -->
 			</div><!-- end mp_quick_setup_content_step-3 -->
