@@ -1404,13 +1404,13 @@ class MP_Cart {
 		// Display price
 		if ( $show_product_qty ) {
 			$html .= '
-						<span class="mp_mini_cart_item-attribute mp_mini_cart_item_attribute-qty"><strong>' . __( 'Quantity', 'mp' ) . ':</strong> <em>' . $qty . '</em></span>';
+						<span class="mp_mini_cart_item-attribute mp_mini_cart_item_attribute-qty"><strong>' . __( 'Menge', 'mp' ) . ':</strong> <em>' . $qty . '</em></span>';
 		}
 
 		// Display price
 		if ( $show_product_price ) {
 			$html .= '
-						<span class="mp_mini_cart_item-attribute mp_mini_cart_item_attribute-price"><strong>' . __( 'Price', 'mp' ) . ':</strong> <em>' . $product->display_price( false ) . '</em></span>';
+						<span class="mp_mini_cart_item-attribute mp_mini_cart_item_attribute-price"><strong>' . __( 'Preis', 'mp' ) . ':</strong> <em>' . $product->display_price( false ) . '</em></span>';
 		}
 
 		// Display attributes

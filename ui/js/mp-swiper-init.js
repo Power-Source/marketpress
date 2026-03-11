@@ -48,14 +48,18 @@ document.addEventListener('DOMContentLoaded', function() {
     instance.show();
   });
 });
-// Swiper-Bundle für Frontend einbinden
-// Dies ist ein Platzhalter für die Integration von Swiper in das MarketPress-Plugin.
-// Die Datei wird als Brücke dienen, um Swiper im Theme/Plugin zu laden und zu initialisieren.
+// Swiper is loaded globally via ui/swiper/swiper-bundle.min.js.
+var Swiper = window.Swiper;
 
-import Swiper from '../swiper/swiper-bundle.min.mjs';
-// ...existing code...
+if (typeof Swiper === 'undefined') {
+  console.error('MP Swiper init: window.Swiper is not available.');
+}
 
 window.initProductGallerySwiper = function(selector, options = {}) {
+  if (typeof Swiper === 'undefined') {
+    return null;
+  }
+
   return new Swiper(selector, {
     // Standardoptionen, können durch options überschrieben werden
     loop: true,

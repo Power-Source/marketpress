@@ -75,6 +75,18 @@ class MP_Public {
 		add_action( 'template_redirect', array( &$this, 'maybe_serve_download' ) );
 
 		add_filter( 'body_class', array( &$this, 'add_mp_body_class' ) );
+		add_action( 'wp_head', array( &$this, 'print_frontend_ajaxurl_global' ), 1 );
+	}
+
+	/**
+	 * Print legacy ajaxurl global early on frontend for compatibility.
+	 */
+	public function print_frontend_ajaxurl_global() {
+		if ( is_admin() ) {
+			return;
+		}
+
+		echo "<script>window.ajaxurl=window.ajaxurl||" . wp_json_encode( mp_get_ajax_url() ) . ";</script>\n";
 	}
 
 	public function add_mp_body_class( $classes ) {
@@ -381,13 +393,6 @@ class MP_Public {
 			   wp_enqueue_script( 'mp-swiper-init', mp_plugin_url( 'ui/js/mp-swiper-init.js' ), array('swiper-bundle'), MP_VERSION );
 			   // Colorbox script removed
 			   wp_enqueue_script( 'basiclightbox', mp_plugin_url( 'ui/js/basicLightbox.js' ), array(), '5.0.4' );
-			   // Modul-Attribut für Swiper-Init setzen
-			   add_filter( 'script_loader_tag', function( $tag, $handle, $src ) {
-				   if ( 'mp-swiper-init' === $handle ) {
-					   return str_replace( '<script ', '<script type="module" ', $tag );
-				   }
-				   return $tag;
-			   }, 10, 3 );
 		}
 
 		/*
@@ -405,6 +410,13 @@ class MP_Public {
 			'colorbox',
 			'hover-intent'
 		), MP_VERSION );
+
+		// Provide legacy global ajaxurl on frontend for third-party/theme inline scripts.
+		wp_add_inline_script(
+			'mp-frontend',
+			'window.ajaxurl = window.ajaxurl || ' . wp_json_encode( mp_get_ajax_url() ) . ';',
+			'before'
+		);
 		
 		$grid_with_js = apply_filters('mp-do_grid_with_js', true);
 		

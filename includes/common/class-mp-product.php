@@ -556,7 +556,7 @@ public $content_tabs = array();
 
 		$html .= '
 				<div class="mp_product_options_att"' . ( ( mp_get_setting( 'show_quantity' ) ) ? '' : ' style="display:none"' ) . '>
-					<strong class="mp_product_options_att_label">' . __( 'Quantity', 'mp' ) . '</strong>
+					<strong class="mp_product_options_att_label">' . __( 'Menge', 'mp' ) . '</strong>
 					<div class="mp_form_field mp_product_options_att_field">
 						'. $this->attribute_input_fields( true, false, $selected_variation ) .'
 					</div><!-- end mp_product_options_att_field -->
