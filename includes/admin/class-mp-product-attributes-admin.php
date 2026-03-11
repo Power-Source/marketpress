@@ -45,7 +45,7 @@ class MP_Product_Attributes_Admin {
 			$list_table->prepare_items();
 			?>
 			<div class="icon32"><img src="<?php echo mp_plugin_url( 'ui/images/settings.png' ); ?>" /></div>
-			<h2 class="mp-settings-title"><?php _e( 'Product Attributes', 'mp' ); ?> <a class="add-new-h2" href="<?php echo add_query_arg( array( 'action' => 'mp_add_product_attribute' ) ); ?>"><?php _e( 'Add Attribute', 'mp' ); ?></a></h2>
+			<h2 class="mp-settings-title"><?php _e( 'Produktattribute', 'mp' ); ?> <a class="add-new-h2" href="<?php echo add_query_arg( array( 'action' => 'mp_add_product_attribute' ) ); ?>"><?php _e( 'Attribut hinzufügen', 'mp' ); ?></a></h2>
 			<div class="clear"></div>
 			<div class="mp-settings">
 				<form method="get">
@@ -72,26 +72,26 @@ class MP_Product_Attributes_Admin {
 	public static function add_product_attribute_metaboxes() {
 		$metabox	 = new PSOURCE_Metabox( array(
 			'id'		 => 'mp-store-settings-product-attributes-add',
-			'title'		 => __( 'Add Product Attribute', 'mp' ),
+			'title'		 => __( 'Produktattribut hinzufügen', 'mp' ),
 			'page_slugs' => array( 'store-settings-productattributes' ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'		 => 'product_attribute_name',
-			'label'		 => array( 'text' => __( 'Attribute Name', 'mp' ) ),
-			'desc'		 => __( 'The name of the attribute (e.g. color, size, etc)', 'mp' ),
+			'label'		 => array( 'text' => __( 'Attributname', 'mp' ) ),
+			'desc'		 => __( 'Der Name des Attributs (z. B. Farbe, Größe, etc.)', 'mp' ),
 			'validation' => array(
 				'required' => true,
 			),
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'			 => 'product_attribute_terms_sort_by',
-			'label'			 => array( 'text' => __( 'Sort By', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Sortieren nach', 'mp' ) ),
 			'default_value'	 => 'ID',
-			'desc'			 => __( 'Select how the options will be sorted.', 'mp' ),
+			'desc'			 => __( 'Wähle, wie die Optionen sortiert werden sollen.', 'mp' ),
 			'options'		 => array(
 				'ID'	 => __( 'ID', 'mp' ),
-				'ALPHA'	 => __( 'Alphabetical', 'mp' ),
-				'CUSTOM' => __( 'Custom', 'mp' ),
+				'ALPHA'	 => __( 'Alphabetisch', 'mp' ),
+				'CUSTOM' => __( 'Benutzerdefiniert', 'mp' ),
 			),
 		) );
 		mp()->register_custom_types();
@@ -101,18 +101,18 @@ class MP_Product_Attributes_Admin {
 		) );
 				$metabox->add_field('advanced_select', array(
 					'name' => 'product_attribute_categories',
-					'label' => array('text' => __('Product Categories', 'mp')),
-					'placeholder' => __( 'Select Product Categories', 'mp' ),
-					'desc' => __( 'Select the product category/categories that this attribute should be available to. If you don\'t select any categories then this attribute will apply to all product categories.', 'mp' ),
+					'label' => array('text' => __('Produktkategorien', 'mp')),
+					'placeholder' => __( 'Produktkategorien auswählen', 'mp' ),
+					'desc' => __( 'Wähle die Produktkategorie(n) aus, für die dieses Attribut verfügbar sein soll. Wenn keine Kategorien ausgewählt werden, gilt dieses Attribut für alle Produktkategorien.', 'mp' ),
 					'options' => $cats,
 				));
 		$metabox->add_field( 'radio_group', array(
 			'name'			 => 'product_attribute_terms_sort_order',
-			'label'			 => array( 'text' => __( 'Sort Order', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Sortierreihenfolge', 'mp' ) ),
 			'default_value'	 => 'ASC',
 			'options'		 => array(
-				'ASC'	 => __( 'Ascending', 'mp' ),
-				'DESC'	 => __( 'Descending', 'mp' ),
+				'ASC'	 => __( 'Aufsteigend', 'mp' ),
+				'DESC'	 => __( 'Absteigend', 'mp' ),
 			),
 			'conditional'	 => array(
 				'name'	 => 'product_attribute_terms_sort_by',
@@ -124,16 +124,16 @@ class MP_Product_Attributes_Admin {
 		$repeater	 = $metabox->add_field( 'repeater', array(
 			'name'			 => 'product_attribute_terms',
 			'layout'		 => 'table',
-			'add_row_label'	 => __( 'Add Option', 'mp' ),
-			'label'			 => array( 'text' => __( 'Attribute Options', 'mp' ) ),
-			'desc'			 => __( 'Use the numbers on the left to sort. To delete - click the "X" to the right of each row.', 'mp' ),
+			'add_row_label'	 => __( 'Option hinzufügen', 'mp' ),
+			'label'			 => array( 'text' => __( 'Attributoptionen', 'mp' ) ),
+			'desc'			 => __( 'Verwende die Zahlen auf der linken Seite, um zu sortieren. Zum Löschen - klicke auf das "X" rechts von jeder Zeile.', 'mp' ),
 		) );
 
 		if ( $repeater instanceof PSOURCE_Field ) {
 			$repeater->add_sub_field( 'text', array(
 				'name'		 => 'name',
 				'label'		 => array( 'text' => __( 'Name', 'mp' ) ),
-				'desc'		 => __( 'Max 45 characters.', 'mp' ),
+				'desc'		 => __( 'Maximal 45 Zeichen.', 'mp' ),
 				'custom'	 => array( 'maxlength' => 45 ),
 				'validation' => array(
 					'required' => true,
@@ -142,12 +142,12 @@ class MP_Product_Attributes_Admin {
 			$repeater->add_sub_field( 'text', array(
 				'name'						 => 'slug',
 				'label'						 => array( 'text' => __( 'Slug', 'mp' ) ),
-				'desc'						 => __( 'If a slug is not entered, it will be generated automatically. Max 32 characters.', 'mp' ),
+				'desc'						 => __( 'Wenn kein Slug eingegeben wird, wird er automatisch generiert. Maximal 32 Zeichen.', 'mp' ),
 				'custom'					 => array( 'maxlength' => 32 ),
 				'validation'				 => array(
 					'custom' => '[a-z\-]',
 				),
-				'custom_validation_message'	 => __( 'Only lowercase letters and dashes (-) are allowed.', 'mp' ),
+				'custom_validation_message'	 => __( 'Nur Kleinbuchstaben und Bindestriche (-) sind erlaubt.', 'mp' ),
 			) );
 		}
 	}
@@ -160,8 +160,7 @@ class MP_Product_Attributes_Admin {
 		return $results;
 	}
 
-	public static function get_product_attributes_select( $name = '', $value_type = 'id', $id = '',
-													   $class = 'mp_product_attributes_select' ) {
+	public static function get_product_attributes_select( $name = '', $value_type = 'id', $id = '', $class = 'mp_product_attributes_select' ) {
 		$product_attributes = MP_Product_Attributes_Admin::get_product_attributes();
 		?>
 		<select name="<?php echo $name; ?>" <?php if ( !empty( $id ) ) { ?>id="<?php echo $id; ?>"<?php } ?> class="<?php echo $class; ?>">

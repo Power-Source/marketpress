@@ -12,7 +12,7 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 	//name of your gateway, for the admin side.
 	var $admin_name				 = '';
 	//public name of your gateway, for lists and such.
-	var $public_name				 = 'Manual Payment';
+	var $public_name				 = 'Manuelle Zahlung';
 	//url for an image for your checkout method. Displayed on method form
 	var $method_img_url			 = '';
 	//url for an submit button image for your checkout method. Displayed on checkout form if set
@@ -31,9 +31,9 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 	 */
 	function on_creation() {
 		//set names here to be able to translate
-		$this->admin_name	 = __( 'Manual Payments', 'mp' );
-		$public_name		 = $this->get_setting( 'name', __( 'Manual Payment', 'mp' ) );
-		$this->public_name	 = empty( $public_name ) ? __( 'Manual Payment', 'mp' ) : $public_name;
+		$this->admin_name	 = __( 'Manuelle Zahlungen', 'mp' );
+		$public_name		 = $this->get_setting( 'name', __( 'Manuelle Zahlung', 'mp' ) );
+		$this->public_name	 = empty( $public_name ) ? __( 'Manuelle Zahlung', 'mp' ) : $public_name;
 
 		add_filter( 'mp_order/notification_body/manual_payments', array( &$this, 'order_confirmation_email' ), 10, 2 );
 		add_filter( 'mp_order/confirmation_text/' . $this->plugin_name, array( &$this, 'order_confirmation_text' ), 10, 2 );
@@ -68,7 +68,7 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 		$payment_info[ 'status' ][ time() ]		 = __( 'Invoiced', 'mp' );
 		$payment_info[ 'total' ]				 = $cart->total();
 		$payment_info[ 'currency' ]				 = mp_get_setting( 'currency' );
-		$payment_info[ 'method' ]				 = __( 'Manual/Invoice', 'mp' );
+		$payment_info[ 'method' ]				 = __( 'Manuell/Rechnung', 'mp' );
 
 		$order = new MP_Order();
 		/*$order->save( array(
@@ -130,9 +130,9 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => $this->generate_metabox_id(),
 			'page_slugs'	 => array( 'store-settings-payments', 'store-settings_page_store-settings-payments' ),
-			'title'			 => sprintf( __( '%s Settings', 'mp' ), $this->admin_name ),
+			'title'			 => sprintf( __( '%s Einstellungen', 'mp' ), $this->admin_name ),
 			'option_name'	 => 'mp_settings',
-			'desc'			 => __( 'Record payments manually, such as by Cash, Check, or EFT.', 'mp' ),
+			'desc'			 => __( 'Zahlungen manuell erfassen, z. B. per Barzahlung, Scheck oder Überweisung.', 'mp' ),
 			'conditional'	 => array(
 				'name'	 => 'gateways[allowed][' . $this->plugin_name . ']',
 				'value'	 => 1,
@@ -142,24 +142,24 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 		$metabox->add_field( 'text', array(
 			'name'			 => $this->get_field_name( 'name' ),
 			'default_value'	 => $this->public_name,
-			'label'			 => array( 'text' => __( 'Method Name', 'mp' ) ),
-			'desc'			 => __( 'Enter a public name for this payment method that is displayed to users - No HTML', 'mp' ),
+			'label'			 => array( 'text' => __( 'Methodenname', 'mp' ) ),
+			'desc'			 => __( 'Gib einen öffentlichen Namen für diese Zahlungsmethode ein, der den Benutzern angezeigt wird - Kein HTML', 'mp' ),
 			'save_callback'	 => array( 'strip_tags' ),
 		) );
 		$metabox->add_field( 'wysiwyg', array(
 			'name'	 => $this->get_field_name( 'instruction' ),
-			'label'	 => array( 'text' => __( 'User Instructions', 'mp' ) ),
-			'desc'	 => __( 'These are the manual payment instructions to display on the payments screen.', 'mp' ),
+			'label'	 => array( 'text' => __( 'Benutzeranweisungen', 'mp' ) ),
+			'desc'	 => __( 'Dies sind die Anweisungen für manuelle Zahlungen, die auf dem Zahlungsbildschirm angezeigt werden.', 'mp' ),
 		) );
 		$metabox->add_field( 'wysiwyg', array(
 			'name'	 => $this->get_field_name( 'confirmation' ),
-			'label'	 => array( 'text' => __( 'Confirmation User Instructions', 'mp' ) ),
-			'desc'	 => __( 'These are the manual payment instructions to display on the order confirmation screen. TOTAL will be replaced with the order total and ORDERID will be replaced with Order ID.', 'mp' ),
+			'label'	 => array( 'text' => __( 'Bestätigungsinformationen für Benutzer', 'mp' ) ),
+			'desc'	 => __( 'Dies sind die Anweisungen für manuelle Zahlungen, die auf dem Bestätigungsbildschirm angezeigt werden. TOTAL wird durch den Gesamtbetrag der Bestellung ersetzt und ORDERID wird durch die Bestell-ID ersetzt.', 'mp' ),
 		) );
 		$metabox->add_field( 'textarea', array(
 			'name'			 => $this->get_field_name( 'email' ),
-			'label'			 => array( 'text' => __( 'Order Confirmation Email', 'mp' ) ),
-			'desc'			 => __( 'This is the email text to send to those who have made manual payment checkouts. You should include your manual payment instructions here. It overrides the default order checkout email. These codes will be replaced with order details: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. No HTML allowed.', 'mp' ),
+			'label'			 => array( 'text' => __( 'Bestätigungs-E-Mail für Bestellungen', 'mp' ) ),
+			'desc'			 => __( 'Dies ist der E-Mail-Text, der an diejenigen gesendet wird, die manuelle Zahlungen vorgenommen haben. Sie sollten hier Ihre Anweisungen für manuelle Zahlungen einfügen. Es überschreibt die Standard-E-Mail für die Bestellbestätigung. Diese Codes werden durch Bestelldetails ersetzt: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. Kein HTML erlaubt.', 'mp' ),
 			'custom'		 => array( 'rows' => 10 ),
 			'save_callback'	 => array( 'strip_tags' ),
 		) );
@@ -167,4 +167,4 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 
 }
 
-mp_register_gateway_plugin( 'MP_Gateway_ManualPayments', 'manual_payments', __( 'Manual Payments', 'mp' ) );
+mp_register_gateway_plugin( 'MP_Gateway_ManualPayments', 'manual_payments', __( 'Manuelle Zahlung', 'mp' ) );
