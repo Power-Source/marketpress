@@ -232,19 +232,19 @@ class MP_Store_Settings_General {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => 'mp-settings-general-advanced-settings',
 			'page_slugs'	 => array( 'store-settings-general' ),
-			'title'			 => __( 'Advanced Settings', 'mp' ),
+			'title'			 => __( 'Erweiterte Einstellungen', 'mp' ),
 			'option_name'	 => 'mp_settings',
 		) );
 
 		$metabox->add_field( 'radio_group', array(
 			'name'			 => 'product_post_type',
-			'label'			 => array( 'text' => __( 'Change product post type', 'mp' ) ),
-			'desc'		 => __( 'If you are experiencing conflicts with other e-commerce plugins change this setting. This will change the internal post type of all your products. <strong>Please note that changing this option may break 3rd party themes or plugins.</strong>', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'			 => array( 'text' => __( 'Produkt-Post-Typ ändern', 'mp' ) ),
+			'desc'		 => __( 'Wenn du Konflikte mit anderen E-Commerce-Plugins hast, ändere diese Einstellung. Dies ändert den internen Post-Typ aller deiner Produkte. <strong>Bitte beachte, dass das Ändern dieser Option 3rd-Party-Themes oder -Plugins beeinträchtigen kann.</strong>', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 			'default_value'	 => 'product',
 			'orientation'	 => 'horizontal',
 			'options'		 => array(
-				'product'	 => __( 'product (default)', 'mp' ),
+				'product'	 => __( 'Produkt (standard)', 'mp' ),
 				'mp_product'	 => 'mp_product',
 			),
 		) );
@@ -271,13 +271,13 @@ class MP_Store_Settings_General {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => 'mp-settings-general-downloads',
 			'page_slugs'	 => array( 'store-settings', 'toplevel_page_store-settings' ),
-			'title'			 => __( 'Download Settings', 'mp' ),
+			'title'			 => __( 'Download Einstellungen', 'mp' ),
 			'option_name'	 => 'mp_settings',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'		 => 'max_downloads',
-			'label'		 => array( 'text' => __( 'Maximum Downloads', 'mp' ) ),
-			'desc'		 => __( 'How many times may a customer download a file they have purchased? (It\'s best to set this higher than one in case they have any problems downloading)', 'mp' ),
+			'label'		 => array( 'text' => __( 'Maximale Downloads', 'mp' ) ),
+			'desc'		 => __( 'Wie oft darf ein Kunde eine Datei herunterladen, die er gekauft hat? (Es ist am besten, dies höher als eins zu setzen, falls es Probleme beim Herunterladen gibt)', 'mp' ),
 			'style'		 => 'width:50px;',
 			'validation' => array(
 				'required'	 => true,
@@ -286,8 +286,8 @@ class MP_Store_Settings_General {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'	 => 'use_alt_download_method',
-			'label'	 => array( 'text' => __( 'Use Alternative Download Method?', 'mp' ) ),
-			'desc'	 => __( 'If you\'re having issues downloading large files and have worked with your hosting provider to increase your memory limits, try enabling this - just keep in mind, it\'s not as secure!', 'mp' ),
+			'label'	 => array( 'text' => __( 'Alternative Download-Methode verwenden?', 'mp' ) ),
+			'desc'	 => __( 'Wenn du Probleme beim Herunterladen großer Dateien hast und mit deinem Hosting-Provider zusammengearbeitet hast, um deine Speicherlimits zu erhöhen, versuche dies zu aktivieren - beachte jedoch, dass es nicht so sicher ist!', 'mp' ),
 		) );
 	}
 
@@ -301,13 +301,13 @@ class MP_Store_Settings_General {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => 'mp-settings-general-misc',
 			'page_slugs'	 => array( 'store-settings', 'toplevel_page_store-settings' ),
-			'title'			 => __( 'Miscellaneous Settings', 'mp' ),
+			'title'			 => __( 'Verschiedene Einstellungen', 'mp' ),
 			'option_name'	 => 'mp_settings',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'		 => 'inventory_threshhold',
-			'label'		 => array( 'text' => __( 'Inventory Warning Threshold', 'mp' ) ),
-			'desc'		 => __( 'At what low stock count do you want to be warned for products you have enabled inventory tracking for?', 'mp' ),
+			'label'		 => array( 'text' => __( 'Lagerwarnschwelle', 'mp' ) ),
+			'desc'		 => __( 'Bei welchem niedrigen Lagerbestand möchten Sie für Produkte, für die Sie die Bestandsverfolgung aktiviert haben, gewarnt werden?', 'mp' ),
 			'style'		 => 'width:50px;',
 			'validation' => array(
 				'required'	 => true,
@@ -316,27 +316,27 @@ class MP_Store_Settings_General {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'inventory_remove',
-			'label'		 => array( 'text' => __( 'Hide Out of Stock Products?', 'mp' ) ),
-			'desc'		 => __( 'This will set the product to draft if inventory of all variations is gone.', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Ausverkaufte Produkte ausblenden?', 'mp' ) ),
+			'desc'		 => __( 'Dies setzt das Produkt auf Entwurf, wenn der Lagerbestand aller Varianten aufgebraucht ist.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'force_login',
-			'label'		 => array( 'text' => __( 'Force Login?', 'mp' ) ),
-			'desc'		 => __( 'Whether or not customers must be registered and logged in to checkout. (Not recommended: Enabling this can lower conversions)', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Login erzwingen?', 'mp' ) ),
+			'desc'		 => __( 'Ob Kunden registriert und eingeloggt sein müssen, um den Checkout abzuschließen. (Nicht empfohlen: Das Aktivieren kann die Konversionen senken)', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'disable_cart',
-			'label'		 => array( 'text' => __( 'Disable Cart?', 'mp' ) ),
-			'desc'		 => __( 'This option turns MarketPress into more of a product listing plugin, disabling shopping carts, checkout, and order management. This is useful if you simply want to list items you can buy in a store somewhere else, optionally linking the "Buy Now" buttons to an external site. Some examples are a car dealership, or linking to songs/albums in itunes, or linking to products on another site with your own affiliate links.', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Warenkorb deaktivieren?', 'mp' ) ),
+			'desc'		 => __( 'Diese Option verwandelt MarketPress eher in ein Produktlisten-Plugin, deaktiviert Einkaufswagen, Checkout und Bestellverwaltung. Dies ist nützlich, wenn Sie einfach nur Artikel auflisten möchten, die Sie irgendwo anders kaufen können, und optional die "Jetzt kaufen"-Schaltflächen auf eine externe Website verlinken. Einige Beispiele sind ein Autohaus oder das Verlinken zu Songs/Alben in iTunes oder das Verlinken zu Produkten auf einer anderen Website mit Ihren eigenen Affiliate-Links.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'       => 'show_orders',
-			'label'      => array( 'text' => __( 'Show admin Orders page?', 'mp' ) ),
-			'desc'		 => __( 'If unchecked your Orders admin page will be hidden', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'      => array( 'text' => __( 'Admin-Bestellseite anzeigen?', 'mp' ) ),
+			'desc'		 => __( 'Wenn deaktiviert, wird Ihre Admin-Bestellseite ausgeblendet', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 			'conditional' => array(
 				'name'   => 'disable_cart',
 				'value'  => '1',
@@ -345,48 +345,48 @@ class MP_Store_Settings_General {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'disable_minicart',
-			'label'		 => array( 'text' => __( 'Disable Mini Cart?', 'mp' ) ),
-			'desc'		 => __( 'This option hide floating Mini Cart in top right corner.', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Mini-Warenkorb deaktivieren?', 'mp' ) ),
+			'desc'		 => __( 'Diese Option blendet den schwebenden Mini-Warenkorb in der oberen rechten Ecke aus.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'          => 'show_product_image',
-			'label'         => array( 'text' => __( 'Show product image on Mini Cart?', 'mp' ) ),
-			'desc'          => __( 'Do you want to display the product image on floating Mini Cart.', 'mp' ),
-			'message'       => __( 'Yes', 'mp' ),
+			'label'         => array( 'text' => __( 'Produktbild im Mini-Warenkorb anzeigen?', 'mp' ) ),
+			'desc'          => __( 'Möchtest Du das Produktbild im schwebenden Mini-Warenkorb anzeigen?', 'mp' ),
+			'message'       => __( 'Ja', 'mp' ),
 			'default_value' => true,
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'          => 'show_product_qty',
-			'label'         => array( 'text' => __( 'Show product quantity on Mini Cart?', 'mp' ) ),
-			'desc'          => __( 'Do you want to display the product quantity on floating Mini Cart.', 'mp' ),
-			'message'       => __( 'Yes', 'mp' ),
+			'label'         => array( 'text' => __( 'Produktmenge im Mini-Warenkorb anzeigen?', 'mp' ) ),
+			'desc'          => __( 'Möchtest Du die Produktmenge im schwebenden Mini-Warenkorb anzeigen?', 'mp' ),
+			'message'       => __( 'Ja', 'mp' ),
 			'default_value' => true,
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'          => 'show_product_price',
-			'label'         => array( 'text' => __( 'Show product price on Mini Cart?', 'mp' ) ),
-			'desc'          => __( 'Do you want to display the product price on floating Mini Cart.', 'mp' ),
-			'message'       => __( 'Yes', 'mp' ),
+			'label'         => array( 'text' => __( 'Produktpreis im Mini-Warenkorb anzeigen?', 'mp' ) ),
+			'desc'          => __( 'Möchtest Du den Produktpreis im schwebenden Mini-Warenkorb anzeigen?', 'mp' ),
+			'message'       => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'			 => 'ga_ecommerce',
 			'label'			 => array( 'text' => __( 'Google Analytics Ecommerce Tracking', 'mp' ) ),
-			'desc'			 => __( 'If you already use Google Analytics for your website, you can track detailed ecommerce information by enabling this setting. Choose whether you are using the new asynchronous or old tracking code. Before Google Analytics can report ecommerce activity for your website, you must enable ecommerce tracking on the profile settings page for your website. Also keep in mind that some gateways do not reliably show the receipt page, so tracking may not be accurate in those cases. It is recommended to use the PayPal gateway for the most accurate data. <a target="_blank" href="http://analytics.blogspot.com/2009/05/how-to-use-ecommerce-tracking-in-google.html">More information &raquo;</a>', 'mp' ),
+			'desc'			 => __( 'Wenn Du bereits Google Analytics für Deine Webseite verwendest, kannst Du detaillierte E-Commerce-Informationen verfolgen, indem Du diese Einstellung aktivierst. Wähle, ob Du den neuen asynchronen oder den alten Tracking-Code verwenden möchtest. Bevor Google Analytics E-Commerce-Aktivitäten für Deine Website melden kann, musst Du das E-Commerce-Tracking auf der Profilseite Deiner Website aktivieren. Beachte auch, dass einige Gateways die Empfangsseite nicht zuverlässig anzeigen, sodass die Verfolgung in diesen Fällen möglicherweise nicht genau ist. Es wird empfohlen, das PayPal-Gateway für die genauesten Daten zu verwenden. <a target="_blank" href="http://analytics.blogspot.com/2009/05/how-to-use-ecommerce-tracking-in-google.html">Weitere Informationen &raquo;</a>', 'mp' ),
 			'default_value'	 => 'none',
 			'orientation'	 => 'horizontal',
 			'options'		 => array(
-				'none'		 => __( 'None', 'mp' ),
-				'new'		 => __( 'New', 'mp' ),
-				'old'		 => __( 'Old', 'mp' ),
+				'none'		 => __( 'Keine', 'mp' ),
+				'new'		 => __( 'Neu', 'mp' ),
+				'old'		 => __( 'Alt', 'mp' ),
 				'universal'	 => __( 'Universal', 'mp' ),
 			),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'special_instructions',
-			'label'		 => array( 'text' => __( 'Show Special Instructions Field?', 'mp' ) ),
-			'desc'		 => __( 'Enabling this field will display a textbox on the shipping checkout page for users to enter special instructions for their order. Useful for product personalization, etc.', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Spezielle Anweisungen anzeigen?', 'mp' ) ),
+			'desc'		 => __( 'Wenn dieses Feld aktiviert ist, wird auf der Versand-Checkout-Seite ein Textfeld angezeigt, in das Benutzer spezielle Anweisungen für ihre Bestellung eingeben können. Nützlich für Produktpersonalisierung usw.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 	}
 
@@ -426,10 +426,10 @@ class MP_Store_Settings_General {
 			'default_value'	 => '1',
 			'orientation'	 => 'horizontal',
 			'options'		 => array(
-				'1'	 => '<span class="mp-currency-symbol">' . mp_format_currency( mp_get_setting( 'currency', 'USD' ) ) . '</span>100',
-				'2'	 => '<span class="mp-currency-symbol">' . mp_format_currency( mp_get_setting( 'currency', 'USD' ) ) . '</span> 100',
-				'3'	 => '100<span class="mp-currency-symbol">' . mp_format_currency( mp_get_setting( 'currency', 'USD' ) ) . '</span>',
-				'4'	 => '100 <span class="mp-currency-symbol">' . mp_format_currency( mp_get_setting( 'currency', 'USD' ) ) . '</span>',
+				'1'	 => '<span class="mp-currency-symbol">' . mp_format_currency( mp_get_setting( 'currency', 'EUR' ) ) . '</span>100',
+				'2'	 => '<span class="mp-currency-symbol">' . mp_format_currency( mp_get_setting( 'currency', 'EUR' ) ) . '</span> 100',
+				'3'	 => '100<span class="mp-currency-symbol">' . mp_format_currency( mp_get_setting( 'currency', 'EUR' ) ) . '</span>',
+				'4'	 => '100 <span class="mp-currency-symbol">' . mp_format_currency( mp_get_setting( 'currency', 'EUR' ) ) . '</span>',
 			),
 		) );
 		
@@ -505,49 +505,49 @@ class MP_Store_Settings_General {
 
 		$metabox->add_field( 'text', array(
 			'name'	 => 'tax[label]',
-			'label'	 => array( 'text' => __( 'Tax Label', 'mp' ) ),
+			'label'	 => array( 'text' => __( 'Steuerbezeichnung', 'mp' ) ),
 			'style'	 => 'width:300px',
-			'desc'	 => __( 'The label shown for the tax line item in the cart. Taxes, VAT, GST, etc.', 'mp' ),
+			'desc'	 => __( 'Die Bezeichnung, die für die Steuerposition im Warenkorb angezeigt wird. Steuern, MwSt., GST usw.', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'tax[tax_shipping]',
-			'label'		 => array( 'text' => __( 'Apply Tax To Shipping Fees?', 'mp' ) ),
-			'desc'		 => __( 'Please see your local tax laws. Most areas charge tax on shipping fees.', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Steuer auf Versandkosten anwenden?', 'mp' ) ),
+			'desc'		 => __( 'Bitte beachte die örtlichen Steuergesetze. In den meisten Gebieten wird Steuer auf Versandkosten erhoben.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'tax[tax_inclusive]',
-			'label'		 => array( 'text' => __( 'Enter Prices Inclusive of Tax?', 'mp' ) ),
-			'desc'		 => __( 'Enabling this option allows you to enter and show all prices inclusive of tax, while still listing the tax total as a line item in shopping carts. Please see your local tax laws.', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Preise inklusive Steuer eingeben?', 'mp' ) ),
+			'desc'		 => __( 'Wenn diese Option aktiviert ist, kannst Du alle Preise inklusive Steuer eingeben und anzeigen, während die Steuer insgesamt als Position im Warenkorb aufgeführt wird. Bitte beachte die örtlichen Steuergesetze.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'tax[include_tax]',
-			'label'		 => array( 'text' => __( 'Show Price + Tax?', 'mp' ) ),
-			'desc'		 => __( 'Enabling this option will show Price + Tax, eg. if your price is 100 and your tax 20, your price will be 120', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Preis + Steuer anzeigen?', 'mp' ) ),
+			'desc'		 => __( 'Wenn diese Option aktiviert ist, wird Preis + Steuer angezeigt, z.B. wenn Dein Preis 100 und Deine Steuer 20 beträgt, wird Dein Preis 120 sein', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'tax[tax_label]',
-			'label'		 => array( 'text' => __( 'Display tax label?', 'mp' ) ),
-			'desc'		 => __( 'Enabling this option will display label `excl. tax` or `incl. tax` after price', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Steuerbezeichnung anzeigen?', 'mp' ) ),
+			'desc'		 => __( 'Wenn diese Option aktiviert ist, wird die Bezeichnung `exkl. Steuer` oder `inkl. Steuer` nach dem Preis angezeigt.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'tax[tax_digital]',
-			'label'		 => array( 'text' => __( 'Apply Tax to Digital Products?', 'mp' ) ),
-			'desc'		 => __( 'Please see your local tax laws. Note if this is enabled and a downloadable only cart, rates will be the default for your base location.', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Steuer auf digitale Produkte anwenden?', 'mp' ) ),
+			'desc'		 => __( 'Bitte beachte die örtlichen Steuergesetze. Wenn diese Option aktiviert ist und der Warenkorb nur herunterladbare Produkte enthält, werden die Steuersätze für Deinen Basisstandort verwendet.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		/*
 		$metabox->add_field( 'radio_group', array(
 			'name'			 => 'tax[tax_based]',
-			'label'			 => array( 'text' => __( 'Tax based on?', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Steuer basierend auf?', 'mp' ) ),
 			'default_value'	 => 'store_tax',
 			'orientation'	 => 'horizontal',
 			'options'		 => array(
-				'store_tax'	 => __( 'Apply tax based on store location', 'mp' ),
-				'user_tax'	 => __( 'Apply tax based on customer location', 'mp' ),
+				'store_tax'	 => __( 'Steuer basierend auf dem Standort des Geschäfts anwenden', 'mp' ),
+				'user_tax'	 => __( 'Steuer basierend auf dem Standort des Kunden anwenden', 'mp' ),
 			),
 			'conditional' => array(
 				'name'   => 'tax[tax_digital]',
@@ -568,25 +568,25 @@ class MP_Store_Settings_General {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => 'mp-settings-general-digital',
 			'page_slugs'	 => array( 'store-settings', 'toplevel_page_store-settings' ),
-			'title'			 => __( 'Digital Settings', 'mp' ),
+			'title'			 => __( 'Digitale Einstellungen', 'mp' ),
 			'option_name'	 => 'mp_settings',
 		) );
 		
 		$metabox->add_field( 'checkbox', array(
 			'name'		 => 'download_order_limit',
-			'label'		 => array( 'text' => __( 'Limit Digital Products Per-order?', 'mp' ) ),
-			'desc'		 => __( 'This will prevent multiples of the same downloadable product form being added to the cart.', 'mp' ),
-			'message'	 => __( 'Yes', 'mp' ),
+			'label'		 => array( 'text' => __( 'Limitiere digitale Produkte pro Bestellung?', 'mp' ) ),
+			'desc'		 => __( 'Dies verhindert, dass mehrere Exemplare desselben herunterladbaren Produkts in den Warenkorb gelegt werden.', 'mp' ),
+			'message'	 => __( 'Ja', 'mp' ),
 		) );
 		
 		$metabox->add_field( 'radio_group', array(
 			'name'			 => 'details_collection',
-			'label'			 => array( 'text' => __( 'Details Collection', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Benutzerinformationen sammeln', 'mp' ) ),
 			'default_value'	 => 'contact',
 			'orientation'	 => 'horizontal',
 			'options'		 => array(
-				'full'		 => __( 'Full billing info', 'mp' ),
-				'contact'		 => __( 'Only contact details', 'mp' ),
+				'full'		 => __( 'Vollständige Rechnungsinformationen', 'mp' ),
+				'contact'		 => __( 'Nur Kontaktdaten', 'mp' ),
 			),
 		) );
 		
@@ -602,15 +602,15 @@ class MP_Store_Settings_General {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => 'mp-settings-general-location',
 			'page_slugs'	 => array( 'store-settings', 'toplevel_page_store-settings' ),
-			'title'			 => __( 'Location Settings', 'mp' ),
+			'title'			 => __( 'Standorteinstellungen', 'mp' ),
 			'option_name'	 => 'mp_settings',
 		) );
 		$metabox->add_field( 'advanced_select', array(
 			'name'			 => 'base_country',
-			'placeholder'	 => __( 'Select a Country', 'mp' ),
+			'placeholder'	 => __( 'Wähle ein Land', 'mp' ),
 			'multiple'		 => false,
-			'label'			 => array( 'text' => __( 'Base Country', 'mp' ) ),
-			'options'		 => array( '' => __( 'Select A Country', 'mp' ) ) + mp_countries(),
+			'label'			 => array( 'text' => __( 'Basisland', 'mp' ) ),
+			'options'		 => array( '' => __( 'Wähle ein Land', 'mp' ) ) + mp_countries(),
 			'width'			 => 'element',
 			'default_value'  => 'DE', // Deutschland als Standard
 			'validation'	 => array(
@@ -627,9 +627,9 @@ class MP_Store_Settings_General {
 		$states = mp_get_states( mp_get_setting( 'base_country' ) );
 		$metabox->add_field( 'advanced_select', array(
 			'name'			 => 'base_province',
-			'placeholder'	 => __( 'Select a State/Province/Region', 'mp' ),
+			'placeholder'	 => __( 'Wähle ein Bundesland/Provinz/Region', 'mp' ),
 			'multiple'		 => false,
-			'label'			 => array( 'text' => __( 'Base State/Province/Region', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Basis Bundesland/Provinz/Region', 'mp' ) ),
 			'options'		 => $states,
 			'width'			 => 'element',
 			'conditional'	 => array(
@@ -645,7 +645,7 @@ class MP_Store_Settings_General {
 		$countries_without_postcode = array_keys( mp()->countries_no_postcode );
 		$metabox->add_field( 'text', array(
 			'name'			 => 'base_zip',
-			'label'			 => array( 'text' => __( 'Base Zip/Postal Code', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Standort Postleitzahl', 'mp' ) ),
 			'style'			 => 'width:150px;',
 			'custom'		 => array(
 				'minlength' => 3,
@@ -661,7 +661,7 @@ class MP_Store_Settings_General {
 		) );
 		$metabox->add_field( 'text', array(
 			'name'		 => 'zip_label',
-			'label'		 => array( 'text' => __( 'Zip/Postal Code Label', 'mp' ) ),
+			'label'		 => array( 'text' => __( 'Postleitzahl/PLZ Bezeichnung', 'mp' ) ),
 			'custom'	 => array(
 				'style' => 'width:300px',
 			),
@@ -675,37 +675,37 @@ class MP_Store_Settings_General {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'           => 'mp-settings-general-legal',
 			'page_slugs'   => array( 'store-settings', 'toplevel_page_store-settings' ),
-			'title'        => __( 'Legal Information', 'mp' ),
+			'title'        => __( 'Rechtliche Informationen', 'mp' ),
 			'option_name'  => 'mp_settings',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'  => 'legal[company_name]',
-			'label' => array( 'text' => __( 'Company Name', 'mp' ) ),
+			'label' => array( 'text' => __( 'Firmenname', 'mp' ) ),
 			'validation' => array( 'required' => true ),
 		) );
 		$metabox->add_field( 'textarea', array(
 			'name'  => 'legal[company_address]',
-			'label' => array( 'text' => __( 'Company Address', 'mp' ) ),
+			'label' => array( 'text' => __( 'Firmenadresse', 'mp' ) ),
 			'validation' => array( 'required' => true ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'  => 'legal[vat_id]',
-			'label' => array( 'text' => __( 'VAT ID', 'mp' ) ),
+			'label' => array( 'text' => __( 'USt-IdNr.', 'mp' ) ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'  => 'legal[tax_number]',
-			'label' => array( 'text' => __( 'Tax Number', 'mp' ) ),
+			'label' => array( 'text' => __( 'Steuernummer', 'mp' ) ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'legal[small_business]',
-			'label'   => array( 'text' => __( 'Small Business Regulation (§19 UStG)', 'mp' ) ),
-			'message' => __( 'I am a small business owner according to §19 UStG (no VAT shown)', 'mp' ),
+			'label'   => array( 'text' => __( 'Kleinunternehmerregelung (§19 UStG)', 'mp' ) ),
+			'message' => __( 'Ich bin Kleinunternehmer gemäß §19 UStG (keine Umsatzsteuer ausgewiesen)', 'mp' ),
 		) );
 		$metabox->add_field( 'textarea', array(
 			'name'  => 'legal[custom_note]',
-			'label' => array( 'text' => __( 'Custom Legal Note', 'mp' ) ),
-			'desc'  => __( 'Optional: Add a custom note for your invoices (e.g. Kleinunternehmerregelung)', 'mp' ),
-			'default_value' => __( 'I am a small business owner according to §19 UStG (no VAT shown)', 'mp' ),
+			'label' => array( 'text' => __( 'Benutzerdefinierte rechtliche Hinweise', 'mp' ) ),
+			'desc'  => __( 'Optional: Füge eine benutzerdefinierte Notiz für Deine Rechnungen hinzu (z.B. Kleinunternehmerregelung)', 'mp' ),
+			'default_value' => __( 'Ich bin Kleinunternehmer gemäß §19 UStG (keine Umsatzsteuer ausgewiesen)', 'mp' ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'  => 'legal[invoice_prefix]',

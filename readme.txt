@@ -107,6 +107,13 @@ Es ist groß und leistungsstark, aber keine Sorge... Der MarketPress-Setup-Assis
 
 == Changelog ==
 
+= 1.0.1 =
+
+* Fix: Netzwerk-Marktplatz-Produktlinks zeigen nun zuverlässig auf die korrekten Produktseiten der Subshops.
+* Fix: Globale Kategorie- und Tag-Links im Multisite-Marktplatz verwenden jetzt dynamische Seiten-URLs statt starrer Pfade.
+* Fix: Seitenauswahlfelder im Netzwerk-Admin wurden auf die aktuelle Select-Implementierung angepasst.
+* Fix: Stabilitäts- und Syntaxkorrekturen in Multisite- und Store-Settings-Skripten.
+
 = 1.0.0 =
 
 * Release

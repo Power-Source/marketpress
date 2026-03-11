@@ -137,7 +137,7 @@ class MP_Multisite {
 		}
 		wp_localize_script( 'mp-frontend', 'mp_global', array(
 			'cat_urls' => $cat_urls,
-			'cat_url'  => get_permalink( mp_get_network_setting( 'pages->networks_categories' ) )
+			'cat_url'  => get_permalink( mp_get_network_setting( 'pages->network_categories' ) )
 		) );
 	}
 
@@ -319,7 +319,7 @@ class MP_Multisite {
 			'post_author'       => $post->post_author,
 			'post_title'        => $post->post_title,
 			'post_content'      => strip_shortcodes( $post->post_content ),
-			'post_permalink'    => $product->url( false ),
+			'post_permalink'    => $this->get_canonical_product_url( $post->ID, $blog_id ),
 			'post_date'         => $post->post_date,
 			'post_date_gmt'     => $post->post_date_gmt,
 			'post_modified'     => $post->post_modified,
@@ -350,7 +350,7 @@ class MP_Multisite {
 			'post_author'       => $post->post_author,
 			'post_title'        => $post->post_title,
 			'post_content'      => strip_shortcodes( $post->post_content ),
-			'post_permalink'    => $product->url( false ),
+			'post_permalink'    => $this->get_canonical_product_url( $post->ID, $blog_id ),
 			'post_date'         => $post->post_date,
 			'post_date_gmt'     => $post->post_date_gmt,
 			'post_modified'     => $post->post_modified,
@@ -866,23 +866,138 @@ class MP_Multisite {
 	}
 
 	/**
-	 * Get the correct product url when global cart is enabled
+	 * Get a canonical product URL for a blog/product pair.
 	 *
-	 * When using switch_to_blog $wp_rewrite permastructs don't get updated so
-	 * this is required to get the correct product url.
+	 * @since 1.0
+	 * @access public
+	 */
+	protected function get_canonical_product_url( $product_id, $blog_id = null ) {
+		$current_blog_id = get_current_blog_id();
+
+		if ( null === $blog_id ) {
+			$blog_id = $current_blog_id;
+		}
+
+		if ( function_exists( 'get_blog_permalink' ) ) {
+			return get_blog_permalink( $blog_id, $product_id );
+		}
+
+		if ( $blog_id !== $current_blog_id ) {
+			switch_to_blog( $blog_id );
+		}
+
+		$url = get_permalink( $product_id );
+
+		if ( $blog_id !== $current_blog_id ) {
+			restore_current_blog();
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Resolve the canonical permalink for an indexed product.
 	 *
-	 * See https://core.trac.classicpress.org/ticket/20861 for more info.
+	 * If the stored permalink is stale, refresh it in the index so global product
+	 * listings gradually self-heal after deploy.
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public function get_indexed_product_url( $blog_id, $product_id, $fallback_url = '' ) {
+		global $wpdb;
+
+		$index         = $this->find_index( $blog_id, $product_id );
+		$canonical_url = $this->get_canonical_product_url( $product_id, $blog_id );
+
+		if ( ! empty( $canonical_url ) ) {
+			if ( $index && $index->post_permalink !== $canonical_url ) {
+				$wpdb->update(
+					$wpdb->base_prefix . 'mp_products',
+					array( 'post_permalink' => $canonical_url ),
+					array(
+						'post_id' => $product_id,
+						'blog_id' => $blog_id,
+					)
+				);
+			}
+
+			return $canonical_url;
+		}
+
+		if ( $index && ! empty( $index->post_permalink ) ) {
+			return $index->post_permalink;
+		}
+
+		return $fallback_url;
+	}
+
+	/**
+	 * Build a rewrite-independent product URL for a given blog/product.
+	 *
+	 * Using query args keeps links stable even when permastructs differ across
+	 * subsites or when rewrite state is stale in switched blog contexts.
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public function get_reliable_product_url( $blog_id, $product_id ) {
+		$current_blog_id = get_current_blog_id();
+
+		if ( $blog_id !== $current_blog_id ) {
+			switch_to_blog( $blog_id );
+		}
+
+		$post_type = get_post_type( $product_id );
+		if ( empty( $post_type ) ) {
+			$post_type = MP_Product::get_post_type();
+		}
+
+		$url = add_query_arg(
+			array(
+				'p'         => absint( $product_id ),
+				'post_type' => $post_type,
+			),
+			home_url( '/' )
+		);
+
+		if ( $blog_id !== $current_blog_id ) {
+			restore_current_blog();
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Get the correct product url when global cart is enabled.
+	 *
+	 * Prefer the canonical permalink stored in the multisite index so global
+	 * product links stay stable even when subsites use different product rewrite
+	 * structures.
 	 *
 	 * @since 1.0
 	 * @access public
 	 */
 	public function product_url( $url, $product ) {
+		$blog_id = get_current_blog_id();
+
 		if ( $product->is_variation() && $product->get_parent() !== false ) {
-			$url = trailingslashit( mp_store_page_url( 'products', false ) . $product->get_parent()->post_name ) . 'variation/' . $product->ID;
-		} else {
-			$url = trailingslashit( mp_store_page_url( 'products', false ) . $product->post_name );
+			$parent = $product->get_parent();
+			$parent_url = $this->get_reliable_product_url( $blog_id, $parent->ID );
+
+			if ( ! empty( $parent_url ) ) {
+				return trailingslashit( $parent_url ) . 'variation/' . $product->ID;
+			}
+
+			return $url;
 		}
-		return $url ;
+
+		$product_url = $this->get_reliable_product_url( $blog_id, $product->ID );
+		if ( ! empty( $product_url ) ) {
+			return $product_url;
+		}
+
+		return $url;
 	}
 
 	/**

@@ -92,7 +92,7 @@ class MP_Store_Settings_Presentation {
 								btn.classList.remove('working');
 								btn.outerHTML = resp.data.button_html;
 							} else {
-								alert('<?php _e( 'An error occurred while creating the store page. Please try again.', 'mp' ); ?>');
+								alert('<?php _e( 'Beim Erstellen der Store-Seite ist ein Fehler aufgetreten. Bitte versuche es erneut.', 'mp' ); ?>');
 								btn.classList.remove('working');
 							}
 						});
@@ -133,7 +133,7 @@ class MP_Store_Settings_Presentation {
 		$height = get_option( "{$size}_size_h" );
 		$crop   = get_option( "{$size}_crop" );
 
-		return "{$width} x {$height} (" . ( ( $crop ) ? __( 'cropped', 'mp' ) : __( 'uncropped', 'mp' ) ) . ')';
+		return "{$width} x {$height} (" . ( ( $crop ) ? __( 'beschnitten', 'mp' ) : __( 'nicht beschnitten', 'mp' ) ) . ')';
 	}
 
 	/**
@@ -171,9 +171,9 @@ class MP_Store_Settings_Presentation {
 				return '<a target="_blank" class="button mp-edit-page-button" href="' . add_query_arg( array(
 					'post'   => $post_id,
 					'action' => 'edit',
-				), get_admin_url( null, 'post.php' ) ) . '">' . __( 'Edit Page', 'mp' ) . '</a>';
+				), get_admin_url( null, 'post.php' ) ) . '">' . __( 'Seite bearbeiten', 'mp' ) . '</a>';
 			} else {
-				return '<a class="button mp-create-page-button" href="' . wp_nonce_url( get_admin_url( null, 'admin-ajax.php?action=mp_create_store_page&type=' . $type ), 'mp_create_store_page' ) . '">' . __( 'Create Page', 'mp' ) . '</a>';
+				return '<a class="button mp-create-page-button" href="' . wp_nonce_url( get_admin_url( null, 'admin-ajax.php?action=mp_create_store_page&type=' . $type ), 'mp_create_store_page' ) . '">' . __( 'Seite erstellen', 'mp' ) . '</a>';
 			}
 		}
 
@@ -190,51 +190,51 @@ class MP_Store_Settings_Presentation {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'          => 'mp-settings-presentation-pages-slugs',
 			'page_slugs'  => array( 'store-settings-presentation', 'store-settings_page_store-settings-presentation' ),
-			'title'       => __( 'Store Pages', 'mp' ),
+			'title'       => __( 'Shop-Seiten', 'mp' ),
 			'option_name' => 'mp_settings',
 		) );
 		$metabox->add_field( 'post_select', array(
 			'name'        => 'pages[store]',
-			'label'       => array( 'text' => __( 'Store Base', 'mp' ) ),
-			'desc'        => __( 'This page will be used as the root for your store.', 'mp' ),
+			'label'       => array( 'text' => __( 'Shop-Basis', 'mp' ) ),
+			'desc'        => __( 'Diese Seite wird als Basis für deinen Shop verwendet.', 'mp' ),
 			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
-			'placeholder' => __( 'Choose a Page', 'mp' ),
+			'placeholder' => __( 'Wähle eine Seite', 'mp' ),
 			'validation'  => array(
 				'required' => true,
 			),
 		) );
 		$metabox->add_field( 'post_select', array(
 			'name'        => 'pages[products]',
-			'label'       => array( 'text' => __( 'Products List', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Produktliste', 'mp' ) ),
 			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
-			'placeholder' => __( 'Choose a Page', 'mp' ),
+			'placeholder' => __( 'Wähle eine Seite', 'mp' ),
 			'validation'  => array(
 				'required' => true,
 			),
 		) );
 		$metabox->add_field( 'post_select', array(
 			'name'        => 'pages[cart]',
-			'label'       => array( 'text' => __( 'Shopping Cart', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Warenkorb', 'mp' ) ),
 			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
-			'placeholder' => __( 'Choose a Page', 'mp' ),
+			'placeholder' => __( 'Wähle eine Seite', 'mp' ),
 			'validation'  => array(
 				'required' => true,
 			),
 		) );
 		$metabox->add_field( 'post_select', array(
 			'name'        => 'pages[checkout]',
-			'label'       => array( 'text' => __( 'Checkout', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Kasse', 'mp' ) ),
 			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
-			'placeholder' => __( 'Choose a Page', 'mp' ),
+			'placeholder' => __( 'Wähle eine Seite', 'mp' ),
 			'validation'  => array(
 				'required' => true,
 			),
 		) );
 		$metabox->add_field( 'post_select', array(
 			'name'        => 'pages[order_status]',
-			'label'       => array( 'text' => __( 'Order Status', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Bestellstatus', 'mp' ) ),
 			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
-			'placeholder' => __( 'Choose a Page', 'mp' ),
+			'placeholder' => __( 'Wähle eine Seite', 'mp' ),
 			'validation'  => array(
 				'required' => true,
 			),
@@ -251,29 +251,29 @@ class MP_Store_Settings_Presentation {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'          => 'mp-settings-presentation-product-list',
 			'page_slugs'  => array( 'store-settings-presentation', 'store-settings_page_store-settings-presentation' ),
-			'title'       => __( 'Product List/Grid Settings', 'mp' ),
-			'desc'        => __( 'Settings related to the display of product lists/grids.', 'mp' ),
+			'title'       => __( 'Produktliste/Grid Einstellungen', 'mp' ),
+			'desc'        => __( 'Einstellungen zur Anzeige von Produktlisten/Grids.', 'mp' ),
 			'option_name' => 'mp_settings',
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'    => 'list_view',
-			'label'   => array( 'text' => __( 'Product Layout', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Produktlayout', 'mp' ) ),
 			'options' => array(
-				'list' => __( 'Display as list', 'mp' ),
-				'grid' => __( 'Display as grid', 'mp' ),
+				'list' => __( 'Als Liste anzeigen', 'mp' ),
+				'grid' => __( 'Als Grid anzeigen', 'mp' ),
 			),
 			'default_value' => 'list',
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'          => 'per_row',
-			'label'         => array( 'text' => __( 'How many products per row?', 'mp' ) ),
-			'desc'          => __( 'Set the number of products that show up in a grid row to best fit your theme', 'mp' ),
+			'label'         => array( 'text' => __( 'Wie viele Produkte pro Reihe?', 'mp' ) ),
+			'desc'          => __( 'Lege die Anzahl der Produkte fest, die in einer Grid-Reihe angezeigt werden, um dein Theme optimal anzupassen', 'mp' ),
 			'default_value' => 3,
 			'options'       => array(
-				1 => __( 'One', 'mp' ),
-				2 => __( 'Two', 'mp' ),
-				3 => __( 'Three', 'mp' ),
-				4 => __( 'Four', 'mp' ),
+				1 => __( 'Eins', 'mp' ),
+				2 => __( 'Zwei', 'mp' ),
+				3 => __( 'Drei', 'mp' ),
+				4 => __( 'Vier', 'mp' ),
 			),
 			'conditional'   => array(
 				'name'   => 'list_view',
@@ -283,29 +283,29 @@ class MP_Store_Settings_Presentation {
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'    => 'list_button_type',
-			'label'   => array( 'text' => __( 'Add To Cart Action', 'mp' ) ),
-			'desc'    => __( 'MarketPress supports two "flows" for adding products to the shopping cart. After adding a product to their cart, two things can happen:', 'mp' ),
+			'label'   => array( 'text' => __( 'In den Warenkorb Aktion', 'mp' ) ),
+			'desc'    => __( 'MarketPress unterstützt zwei "Flows" zum Hinzufügen von Produkten zum Warenkorb. Nach dem Hinzufügen eines Produkts zu ihrem Warenkorb können zwei Dinge passieren:', 'mp' ),
 			'options' => array(
-				'addcart' => __( 'Stay on current product page', 'mp' ),
-				'buynow'  => __( 'Redirect to cart page for immediate checkout', 'mp' ),
+				'addcart' => __( 'Auf der aktuellen Produktseite bleiben', 'mp' ),
+				'buynow'  => __( 'Zur Warenkorbseite für sofortigen Checkout weiterleiten', 'mp' ),
 			),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'show_thumbnail',
-			'label'   => array( 'text' => __( 'Show Product Thumbnail?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
+			'label'   => array( 'text' => __( 'Produktbild anzeigen?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
 		) );
 
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'show_thumbnail_placeholder',
-			'label'   => array( 'text' => __( 'Show default product placeholder thumbnail when product image is not available?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
+			'label'   => array( 'text' => __( 'Standard-Platzhalterbild anzeigen, wenn kein Produktbild verfügbar ist?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
 		) );
 
 		$metabox->add_field( 'file', array(
 			'name'        => 'thumbnail_placeholder',
-			'label'       => array( 'text' => __( 'Select default placeholder image thumbnail when product image is not available (if empty, plugin\'s built-in image will be used)', 'mp' ) ),
-			'message'     => __( 'Yes', 'mp' ),
+			'label'       => array( 'text' => __( 'Wähle ein Standard-Platzhalterbild aus, wenn kein Produktbild verfügbar ist (wenn leer, wird das eingebaute Bild des Plugins verwendet)', 'mp' ) ),
+			'message'     => __( 'Ja', 'mp' ),
 			'conditional' => array(
 				'name'   => 'show_thumbnail_placeholder',
 				'value'  => '1',
@@ -315,12 +315,12 @@ class MP_Store_Settings_Presentation {
 
 		$metabox->add_field( 'select', array(
 			'name'        => 'list_img_size',
-			'label'       => array( 'text' => __( 'Image Size', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Bildgröße', 'mp' ) ),
 			'options'     => array(
 				'thumbnail' => sprintf( __( 'Thumbnail - %s', 'mp' ), $this->get_image_size_label( 'thumbnail' ) ),
-				'medium'    => sprintf( __( 'Medium - %s', 'mp' ), $this->get_image_size_label( 'medium' ) ),
-				'large'     => sprintf( __( 'Large - %s', 'mp' ), $this->get_image_size_label( 'large' ) ),
-				'custom'    => __( 'Custom', 'mp' ),
+				'medium'    => sprintf( __( 'Mittel - %s', 'mp' ), $this->get_image_size_label( 'medium' ) ),
+				'large'     => sprintf( __( 'Groß - %s', 'mp' ), $this->get_image_size_label( 'large' ) ),
+				'custom'    => __( 'Benutzerdefiniert', 'mp' ),
 			),
 			'conditional' => array(
 				'name'   => 'show_thumbnail',
@@ -330,7 +330,7 @@ class MP_Store_Settings_Presentation {
 		) );
 		$custom_size = $metabox->add_field( 'complex', array(
 			'name'        => 'list_img_size_custom',
-			'label'       => array( 'text' => __( 'Custom Image Size', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Benutzerdefinierte Bildgröße', 'mp' ) ),
 			'conditional' => array(
 				'operator' => 'AND',
 				'action'   => 'show',
@@ -348,7 +348,7 @@ class MP_Store_Settings_Presentation {
 		if ( $custom_size instanceof PSOURCE_Field ) {
 			$custom_size->add_field( 'text', array(
 				'name'       => 'width',
-				'label'      => array( 'text' => __( 'Width', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Breite', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'digits'   => true,
@@ -357,7 +357,7 @@ class MP_Store_Settings_Presentation {
 			) );
 			$custom_size->add_field( 'text', array(
 				'name'       => 'height',
-				'label'      => array( 'text' => __( 'Height', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Höhe', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'digits'   => true,
@@ -368,12 +368,12 @@ class MP_Store_Settings_Presentation {
 
 		$metabox->add_field( 'radio_group', array(
 			'name'        => 'image_alignment_list',
-			'label'       => array( 'text' => __( 'Image Alignment', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Bildausrichtung', 'mp' ) ),
 			'options'     => array(
 				//'alignnone'		 => __( 'None', 'mp' ),
 				//'aligncenter'	 => __( 'Center', 'mp' ),
-				'alignleft'  => __( 'Left', 'mp' ),
-				'alignright' => __( 'Right', 'mp' ),
+				'alignleft'  => __( 'Links', 'mp' ),
+				'alignright' => __( 'Rechts', 'mp' ),
 			),
 			'default_value' => 'alignleft',
 			'conditional' => array(
@@ -391,12 +391,12 @@ class MP_Store_Settings_Presentation {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'show_excerpts',
-			'label'   => array( 'text' => __( 'Show Excerpts?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
+			'label'   => array( 'text' => __( 'Auszüge anzeigen?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'          => 'excerpts_length',
-			'label'         => array( 'text' => __( 'Excerpts Length', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Länge der Auszüge', 'mp' ) ),
 			'conditional'   => array(
 				'name'   => 'show_excerpts',
 				'value'  => '1',
@@ -410,12 +410,12 @@ class MP_Store_Settings_Presentation {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'paginate',
-			'label'   => array( 'text' => __( 'Paginate Products?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
+			'label'   => array( 'text' => __( 'Produkte paginieren?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'        => 'per_page',
-			'label'       => array( 'text' => __( 'Products Per Page', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Produkte pro Seite', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'paginate',
 				'value'  => '1',
@@ -428,30 +428,30 @@ class MP_Store_Settings_Presentation {
 		) );
 		$metabox->add_field( 'select', array(
 			'name'    => 'order_by',
-			'label'   => array( 'text' => __( 'Sort Products By', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Produkte sortieren nach', 'mp' ) ),
 			'options' => array(
-				'title'  => __( 'Product Name', 'mp' ),
-				'date'   => __( 'Publish Date', 'mp' ),
-				'ID'     => __( 'Product ID', 'mp' ),
-				'author' => __( 'Product Author', 'mp' ),
-				'sales'  => __( 'Number of Sales', 'mp' ),
-				'price'  => __( 'Product Price', 'mp' ),
-				'rand'   => __( 'Random', 'mp' ),
+				'title'  => __( 'Produktname', 'mp' ),
+				'date'   => __( 'Veröffentlichungsdatum', 'mp' ),
+				'ID'     => __( 'Produkt-ID', 'mp' ),
+				'author' => __( 'Produktautor', 'mp' ),
+				'sales'  => __( 'Anzahl der Verkäufe', 'mp' ),
+				'price'  => __( 'Produktpreis', 'mp' ),
+				'rand'   => __( 'Zufällig', 'mp' ),
 			),
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'    => 'order',
-			'label'   => array( 'text' => __( 'Sort Order', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Sortierreihenfolge', 'mp' ) ),
 			'options' => array(
-				'DESC' => __( 'Descending', 'mp' ),
-				'ASC'  => __( 'Ascending', 'mp' ),
+				'DESC' => __( 'Absteigend', 'mp' ),
+				'ASC'  => __( 'Aufsteigend', 'mp' ),
 			),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'hide_products_filter',
-			'label'   => array( 'text' => __( 'Hide Products Filter?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
-			'desc'    => __( 'If enabled, users won\'t be able to filter products per category and/or to order by release date/name/price.', 'mp' ),
+			'label'   => array( 'text' => __( 'Produktefilter ausblenden?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
+			'desc'    => __( 'Wenn aktiviert, können Benutzer Produkte nicht nach Kategorie filtern und/oder nach Veröffentlichungsdatum/Name/Preis sortieren.', 'mp' ),
 			'default_value' => 0
 		) );
 	}
@@ -460,14 +460,14 @@ class MP_Store_Settings_Presentation {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'          => 'mp-settings-miscellaneous-product-list',
 			'page_slugs'  => array( 'store-settings-presentation', 'store-settings_page_store-settings-presentation' ),
-			'title'       => __( 'Miscellaneous Settings', 'mp' ),
+			'title'       => __( 'Verschiedene Einstellungen', 'mp' ),
 			'desc'        => __( '', 'mp' ),
 			'option_name' => 'mp_settings',
 		) );
 
 		$metabox->add_field( 'text', array(
 			'name'          => 'per_page_order_history',
-			'label'         => array( 'text' => __( 'Order Status Entries Per Page', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Bestellstatuseinträge pro Seite', 'mp' ) ),
 			'default_value' => get_option( 'posts_per_page' ),
 			'validation'    => array(
 				'required' => true,
@@ -486,17 +486,17 @@ class MP_Store_Settings_Presentation {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'          => 'mp-settings-presentation-product-related',
 			'page_slugs'  => array( 'store-settings-presentation', 'store-settings_page_store-settings-presentation' ),
-			'title'       => __( 'Related Product Settings', 'mp' ),
+			'title'       => __( 'Einstellungen für verwandte Produkte', 'mp' ),
 			'option_name' => 'mp_settings',
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'related_products[show]',
-			'label'   => array( 'text' => __( 'Show Related Products?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
+			'label'   => array( 'text' => __( 'Verwandte Produkte anzeigen?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'        => 'related_products[show_limit]',
-			'label'       => array( 'text' => __( 'Related Product Limit', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Limit für verwandte Produkte', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'related_products[show]',
 				'value'  => '1',
@@ -509,11 +509,11 @@ class MP_Store_Settings_Presentation {
 		) );
 		$metabox->add_field( 'select', array(
 			'name'        => 'related_products[relate_by]',
-			'label'       => array( 'text' => __( 'Relate Products By', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Verwandte Produkte nach', 'mp' ) ),
 			'options'     => array(
-				'both'     => __( 'Category &amp; Tags', 'mp' ),
-				'category' => __( 'Category Only', 'mp' ),
-				'tags'     => __( 'Tags Only', 'mp' ),
+				'both'     => __( 'Kategorie &amp; Tags', 'mp' ),
+				'category' => __( 'Nur Kategorie', 'mp' ),
+				'tags'     => __( 'Nur Tags', 'mp' ),
 			),
 			'conditional' => array(
 				'name'   => 'related_products[show]',
@@ -523,11 +523,11 @@ class MP_Store_Settings_Presentation {
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'        => 'related_products[view]',
-			'label'       => array( 'text' => __( 'Related Products Layout', 'mp' ) ),
-			'message'     => __( 'Yes', 'mp' ),
+			'label'       => array( 'text' => __( 'Layout für verwandte Produkte', 'mp' ) ),
+			'message'     => __( 'Ja', 'mp' ),
 			'options'     => array(
-				'list' => __( 'Display as list', 'mp' ),
-				'grid' => __( 'Display as grid', 'mp' ),
+				'list' => __( 'Als Liste anzeigen', 'mp' ),
+				'grid' => __( 'Als Raster anzeigen', 'mp' ),
 			),
 			'default_value' => 'list',
 			'conditional' => array(
@@ -539,14 +539,14 @@ class MP_Store_Settings_Presentation {
 
 		$metabox->add_field( 'radio_group', array(
 			'name'          => 'related_products[per_row]',
-			'label'         => array( 'text' => __( 'How many products per row?', 'mp' ) ),
-			'desc'          => __( 'Set the number of products that show up in a grid row to best fit your theme', 'mp' ),
+			'label'         => array( 'text' => __( 'Wie viele Produkte pro Reihe?', 'mp' ) ),
+			'desc'          => __( 'Legen Sie die Anzahl der Produkte fest, die in einer Rasterreihe angezeigt werden, um Ihr Theme optimal anzupassen', 'mp' ),
 			'default_value' => 3,
 			'options'       => array(
-				1 => __( 'One', 'mp' ),
-				2 => __( 'Two', 'mp' ),
-				3 => __( 'Three', 'mp' ),
-				4 => __( 'Four', 'mp' ),
+				1 => __( 'Eins', 'mp' ),
+				2 => __( 'Zwei', 'mp' ),
+				3 => __( 'Drei', 'mp' ),
+				4 => __( 'Vier', 'mp' ),
 			),
 			'conditional'   => array(
 				'name'   => 'related_products[view]',
@@ -566,57 +566,57 @@ class MP_Store_Settings_Presentation {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'          => 'mp-settings-presentation-product-page',
 			'page_slugs'  => array( 'store-settings-presentation', 'store-settings_page_store-settings-presentation' ),
-			'title'       => __( 'Product Page Settings', 'mp' ),
-			'desc'        => __( 'Settings related to the display of individual product pages.', 'mp' ),
+			'title'       => __( 'Produktseiten-Einstellungen', 'mp' ),
+			'desc'        => __( 'Einstellungen zur Anzeige einzelner Produktseiten.', 'mp' ),
 			'option_name' => 'mp_settings',
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'    => 'product_button_type',
-			'label'   => array( 'text' => __( 'Add To Cart Action', 'mp' ) ),
-			'desc'    => __( 'MarketPress supports two "flows" for adding products to the shopping cart. After adding a product to their cart, two things can happen:', 'mp' ),
+			'label'   => array( 'text' => __( 'Aktion "In den Warenkorb"', 'mp' ) ),
+			'desc'    => __( 'MarketPress unterstützt zwei "Flows" für das Hinzufügen von Produkten zum Warenkorb. Nach dem Hinzufügen eines Produkts zu ihrem Warenkorb können zwei Dinge passieren:', 'mp' ),
 			'options' => array(
-				'addcart' => __( 'Stay on current product page', 'mp' ),
-				'buynow'  => __( 'Redirect to cart page for immediate checkout', 'mp' ),
+				'addcart' => __( 'Auf der aktuellen Produktseite bleiben', 'mp' ),
+				'buynow'  => __( 'Zur Warenkorbseite für sofortigen Checkout weiterleiten', 'mp' ),
 			),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'show_quantity',
-			'label'   => array( 'text' => __( 'Show Quantity Field?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
-			'desc'    => __( 'If enabled, users will be able to choose how many of the product they want to purchase before adding to their cart. If not checked, quantity could be change later on the cart page.', 'mp' ),
+			'label'   => array( 'text' => __( 'Mengenfeld anzeigen?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
+			'desc'    => __( 'Wenn aktiviert, können Benutzer auswählen, wie viele Produkte sie kaufen möchten, bevor sie sie in den Warenkorb legen. Wenn nicht aktiviert, kann die Menge später auf der Warenkorbseite geändert werden.', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'          => 'show_single_excerpt',
-			'label'         => array( 'text' => __( 'Show Excerpt?', 'mp' ) ),
-			'message'       => __( 'Yes', 'mp' ),
-			'desc'          => __( 'If enabled, description excerpt will be added above Add to cart.', 'mp' ),
+			'label'         => array( 'text' => __( 'Auszug anzeigen?', 'mp' ) ),
+			'message'       => __( 'Ja', 'mp' ),
+			'desc'          => __( 'Wenn aktiviert, wird der Beschreibungsauszug über dem "In den Warenkorb"-Button angezeigt.', 'mp' ),
 			'default_value' => 1,
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'show_single_categories',
-			'label'   => array( 'text' => __( 'Show Categories List?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
-			'desc'    => __( 'Show Categories List?', 'mp' ),
+			'label'   => array( 'text' => __( 'Kategorienliste anzeigen?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
+			'desc'    => __( 'Wenn aktiviert, wird die Kategorienliste auf der Produktseite angezeigt.', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'show_single_tags',
-			'label'   => array( 'text' => __( 'Show Tags List?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
-			'desc'    => __( 'Show Tags List?', 'mp' ),
+			'label'   => array( 'text' => __( 'Tags-Liste anzeigen?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
+			'desc'    => __( 'Wenn aktiviert, wird die Tags-Liste auf der Produktseite angezeigt.', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'show_img',
-			'label'   => array( 'text' => __( 'Show Product Image?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
+			'label'   => array( 'text' => __( 'Produktbild anzeigen?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
 		) );
 		$metabox->add_field( 'select', array(
 			'name'        => 'product_img_size',
-			'label'       => array( 'text' => __( 'Image Size', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Bildgröße', 'mp' ) ),
 			'options'     => array(
 				'thumbnail' => sprintf( __( 'Thumbnail - %s', 'mp' ), $this->get_image_size_label( 'thumbnail' ) ),
-				'medium'    => sprintf( __( 'Medium - %s', 'mp' ), $this->get_image_size_label( 'medium' ) ),
-				'large'     => sprintf( __( 'Large - %s', 'mp' ), $this->get_image_size_label( 'large' ) ),
-				'custom'    => __( 'Custom', 'mp' ),
+				'medium'    => sprintf( __( 'Mittel - %s', 'mp' ), $this->get_image_size_label( 'medium' ) ),
+				'large'     => sprintf( __( 'Groß - %s', 'mp' ), $this->get_image_size_label( 'large' ) ),
+				'custom'    => __( 'Benutzerdefiniert', 'mp' ),
 			),
 			'conditional' => array(
 				'name'   => 'show_img',
@@ -626,7 +626,7 @@ class MP_Store_Settings_Presentation {
 		) );
 		$custom_size = $metabox->add_field( 'complex', array(
 			'name'        => 'product_img_size_custom',
-			'label'       => array( 'text' => __( 'Custom Image Size', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Benutzerdefinierte Bildgröße', 'mp' ) ),
 			'conditional' => array(
 				'operator' => 'AND',
 				'action'   => 'show',
@@ -644,7 +644,7 @@ class MP_Store_Settings_Presentation {
 		if ( $custom_size instanceof PSOURCE_Field ) {
 			$custom_size->add_field( 'text', array(
 				'name'       => 'width',
-				'label'      => array( 'text' => __( 'Width', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Breite', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'digits'   => true,
@@ -653,7 +653,7 @@ class MP_Store_Settings_Presentation {
 			) );
 			$custom_size->add_field( 'text', array(
 				'name'       => 'height',
-				'label'      => array( 'text' => __( 'Height', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Höhe', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 					'digits'   => true,
@@ -664,12 +664,12 @@ class MP_Store_Settings_Presentation {
 
 		$metabox->add_field( 'radio_group', array(
 			'name'        => 'image_alignment_single',
-			'label'       => array( 'text' => __( 'Image Alignment', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Bildausrichtung', 'mp' ) ),
 			'options'     => array(
 				//'alignnone'		 => __( 'None', 'mp' ),
-				'alignleft'   => __( 'Left', 'mp' ),
-				'aligncenter' => __( 'Center', 'mp' ),
-				'alignright'  => __( 'Right', 'mp' ),
+				'alignleft'   => __( 'Links', 'mp' ),
+				'aligncenter' => __( 'Zentriert', 'mp' ),
+				'alignright'  => __( 'Rechts', 'mp' ),
 			),
 			'default_value' => 'alignleft',
 			'conditional' => array(
@@ -680,8 +680,8 @@ class MP_Store_Settings_Presentation {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'        => 'disable_large_image',
-			'label'       => array( 'text' => __( 'Disable Large Image Display?', 'mp' ) ),
-			'message'     => __( 'Yes', 'mp' ),
+			'label'       => array( 'text' => __( 'Großes Bild deaktivieren?', 'mp' ) ),
+			'message'     => __( 'Ja', 'mp' ),
 			'conditional' => array(
 				'name'   => 'show_img',
 				'value'  => '1',
@@ -690,9 +690,9 @@ class MP_Store_Settings_Presentation {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'        => 'show_lightbox',
-			'label'       => array( 'text' => __( 'Use Built-In Lightbox for Images?', 'mp' ) ),
-			'desc'        => __( 'If you are having conflicts with the lightbox library from your theme or another plugin you should uncheck this.', 'mp' ),
-			'message'     => __( 'Yes', 'mp' ),
+			'label'       => array( 'text' => __( 'Eingebaute Lightbox für Bilder verwenden?', 'mp' ) ),
+			'desc'        => __( 'Wenn Du Konflikte mit der Lightbox-Bibliothek Deines Themes oder eines anderen Plugins hast, solltest Du diese Option deaktivieren.', 'mp' ),
+			'message'     => __( 'Ja', 'mp' ),
 			'conditional' => array(
 				'operator' => 'AND',
 				'action'   => 'show',

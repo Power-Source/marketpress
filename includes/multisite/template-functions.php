@@ -10,7 +10,6 @@
  */
 function mp_global_tag_cloud( $echo = true, $limit = 45, $seperator = ' ', $include = 'both' ) {
 	global $wpdb;
-	$settings = get_site_option( 'mp_network_settings' );
 
 	//include categories as well
 	if ( $include == 'tags' ) {
@@ -37,9 +36,9 @@ function mp_global_tag_cloud( $echo = true, $limit = 45, $seperator = ' ', $incl
 		}
 
 		if ( $tag['type'] == 'product_category' ) {
-			$tag['link'] = get_home_url( mp_main_site_id(), $settings['slugs']['marketplace'] . '/' . $settings['slugs']['categories'] . '/' . $tag['slug'] . '/' );
+			$tag['link'] = mp_global_taxonomy_url( $tag['slug'], 'product_category' );
 		} else if ( $tag['type'] == 'product_tag' ) {
-			$tag['link'] = get_home_url( mp_main_site_id(), $settings['slugs']['marketplace'] . '/' . $settings['slugs']['tags'] . '/' . $tag['slug'] . '/' );
+			$tag['link'] = mp_global_taxonomy_url( $tag['slug'], 'product_tag' );
 		}
 
 		$sorted_tags[ $tag['name'] ] = $tag;
@@ -219,7 +218,7 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		//build SQL
 		$sql   = "SELECT SQL_CALC_FOUND_ROWS products.* FROM {$wpdb->base_prefix}mp_products products";
 		$join  = "";
-		$where = " WHERE post_status = 'publish' AND blog_public = 1";
+		$where = " WHERE post_status = 'publish'";
 		$group = "";
 
 		if ( ! empty( $args['category'] ) || ! empty( $args['tag'] ) ) {
@@ -590,7 +589,11 @@ if ( ! function_exists( '_mp3_global_products_html' ) ) {
 					$img = '<div class="mp_product_images">' . $img . '</div>';
 				}
 
-				$button = '<a class="mp_button mp_link-buynow" href="' . $product->url( false ) . '">' . __( 'Mehr Details & Shoppen', 'mp' ) . '</a>';
+				$product_url = MP_Multisite::get_instance()->get_reliable_product_url( $blog_id, $product_id );
+				if ( ! $product_url ) {
+					$product_url = MP_Multisite::get_instance()->get_indexed_product_url( $blog_id, $product_id, $product->url( false ) );
+				}
+				$button = '<a class="mp_button mp_link-buynow" href="' . esc_url( $product_url ) . '">' . __( 'Mehr Details & Shoppen', 'mp' ) . '</a>';
 
 				$html .= '
 				<div class="mp_product_item' . ( ( 'grid' == $view ) ? ' mp_product_item-col-' . $per_row : '' ) . '">
@@ -600,7 +603,7 @@ if ( ! function_exists( '_mp3_global_products_html' ) ) {
 
 							<div class="mp_product_meta">
 								<h3 class="mp_product_name entry-title" itemprop="name">
-									<a href="' . $product->url( false ) . '">' . $product->title( false ) . '</a>
+									<a href="' . esc_url( $product_url ) . '">' . $product->title( false ) . '</a>
 								</h3>
 								' . ( mp_arr_get_value( 'show_price', $args, -1 ) != 0 ? $product->display_price( false ) : null ) . '
 								' . $mp_product_list_content . '
@@ -720,6 +723,10 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 
 			//$class = array_filter( $class, create_function( '$s', 'return ( ! empty( $s ) );' ) );
 			$class = array_filter( $class, function($s) {return ( ! empty( $s ) );} );
+			$product_url = MP_Multisite::get_instance()->get_reliable_product_url( $blog_id, $product_id );
+			if ( ! $product_url ) {
+				$product_url = MP_Multisite::get_instance()->get_indexed_product_url( $blog_id, $product_id, $product->url( false ) );
+			}
 
 
 			$html .= '
@@ -729,7 +736,7 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 							' . $img . '
 							<div class="mp_product_content">
 								<h3 class="mp_product_name entry-title" itemprop="name">
-									<a href="' . $product->url( false ) . '">' . $product->title( false ) . '</a>
+									<a href="' . esc_url( $product_url ) . '">' . $product->title( false ) . '</a>
 								</h3>
 								' . $text . '
 								<div class="mp-social-shares">
@@ -743,7 +750,7 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 
 						<div class="mp_price_buy">
 							' . $product->display_price( false ) . '
-							<a class="mp-button mp_link_buynow" href="' . esc_url( $product->url( false ) ) . '">' . __( 'Jetzt kaufen &raquo;', 'mp' ) . '</a>
+							<a class="mp-button mp_link_buynow" href="' . esc_url( $product_url ) . '">' . __( 'Jetzt kaufen &raquo;', 'mp' ) . '</a>
 							' . apply_filters( 'mp_product_list_meta', '', $product->ID ) . '
 						</div>
 
@@ -885,10 +892,20 @@ if ( ! function_exists( 'mp_global_taxonomy_url' ) ) {
 				$type = 'network_tags';
 				break;
 		}
+
+		$main_site_id = function_exists( 'mp_main_site_id' ) ? mp_main_site_id() : 1;
 		$page_id = mp_get_network_setting( 'pages->' . $type );
-		switch_to_blog( 1 );
-		$url = site_url( trailingslashit( get_page_uri( $page_id ) . '/' . $slug ) );
-		restore_current_blog();
+		if ( ! $page_id ) {
+			return '#';
+		}
+
+		$base_url = get_blog_permalink( $main_site_id, $page_id );
+
+		if ( ! $base_url ) {
+			return '#';
+		}
+
+		$url = trailingslashit( $base_url ) . rawurlencode( $slug ) . '/';
 
 		return $url;
 	}
