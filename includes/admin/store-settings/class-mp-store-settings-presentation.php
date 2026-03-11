@@ -718,17 +718,17 @@ class MP_Store_Settings_Presentation {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'          => 'mp-settings-presentation-general',
 			'page_slugs'  => array( 'store-settings-presentation', 'store-settings_page_store-settings-presentation' ),
-			'title'       => __( 'General Settings', 'mp' ),
+			'title'       => __( 'Allgemeine Design-Einstellungen', 'mp' ),
 			'option_name' => 'mp_settings',
 		) );
 
 		$metabox->add_field( 'radio_group', array(
 			'name'    => 'store_theme',
-			'desc'    => sprintf( __( 'This option changes the built-in css styles for store pages. For a custom css style, save your css file with the <strong>/* MarketPress Style: Your CSS Theme Name Here */</strong> header line in the <strong>"%s"</strong> folder and it will appear in this list so you may select it. You should select "None" if you don\'t wish to use custom CSS styles or if you are using default theme templates or custom theme templates and css to make your own completely unique store design. For more information on custom theme templates click <a target="_blank" href="%s">here &raquo;</a>.', 'mp' ), trailingslashit( WP_CONTENT_DIR ) . 'marketpress-styles/', mp_plugin_url( 'ui/themes/Theming_MarketPress.txt' ) ),
+			'desc'    => sprintf( __( 'Diese Option ändert die eingebauten CSS-Stile für die Shop-Seiten. Für einen benutzerdefinierten CSS-Stil speichere Deine CSS-Datei mit der <strong>/* MarketPress Style: Dein CSS-Theme-Name hier */</strong> Kopfzeile im <strong>"%s"</strong> Ordner und sie wird in dieser Liste angezeigt, sodass Du sie auswählen kannst. Du solltest "Keine" auswählen, wenn Du keine benutzerdefinierten CSS-Stile verwenden möchtest oder wenn Du Standard-Theme-Vorlagen oder benutzerdefinierte Theme-Vorlagen und CSS verwenden, um Dein eigenes einzigartiges Shop-Design zu erstellen. Weitere Informationen zu benutzerdefinierten Theme-Vorlagen findest Du <a target="_blank" href="%s">hier &raquo;</a>.', 'mp' ), trailingslashit( WP_CONTENT_DIR ) . 'marketpress-styles/', mp_plugin_url( 'ui/themes/Theming_MarketPress.txt' ) ),
 			'label'   => array( 'text' => __( 'Store Style', 'mp' ) ),
 			'options' => mp_get_theme_list() + array(
-				'default' => __( 'Default - Using Default CSS-styles', 'mp' ),
-				'none' => __( 'None - Without Special CSS-styles', 'mp' ),
+				'default' => __( 'Standard - Verwende Standard-CSS-Stile', 'mp' ),
+				'none' => __( 'Keine - Ohne spezielle CSS-Stile', 'mp' ),
 				),
 			'width'   => '50%',
 		) );

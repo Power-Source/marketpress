@@ -44,7 +44,7 @@ class MP_Store_Settings_Addons {
 	$list_table = new MP_Addons_List_Table();
 	$list_table->prepare_items();	?>
 	<div class="icon32"><img src="<?php echo mp_plugin_url('ui/images/settings.png'); ?>" /></div>
-	<h2 class="mp-settings-title"><?php printf(__('Store Settings: Add Ons: %s', 'mp'), $addon_obj->label); ?></h2>
+	<h2 class="mp-settings-title"><?php printf(__('MarketPress Einstellungen: Add Ons: %s', 'mp'), $addon_obj->label); ?></h2>
 	<div class="clear"></div>
 	<div class="mp-settings">
 		<form method="post">
@@ -118,7 +118,7 @@ jQuery(document).ready(function($){
 	$list_table = new MP_Addons_List_Table();
 	$list_table->prepare_items();	?>
 	<div class="icon32"><img src="<?php echo mp_plugin_url('ui/images/settings.png'); ?>" /></div>
-	<h2 class="mp-settings-title"><?php _e('Store Settings: Add Ons', 'mp'); ?></h2>
+	<h2 class="mp-settings-title"><?php _e('MarketPress Einstellungen: Add Ons', 'mp'); ?></h2>
 	<div class="clear"></div>
 	<div class="mp-settings">
 		<form method="get">

@@ -15,7 +15,7 @@ Basic Styles:
       MarketPress Style: CUSTOMNAME
       */
       Including this header will cause your custom theme to show in the dropdown on the
-      Store Settings -> Presentation page so it may be selected.
+      MarketPress Einstellungen -> Presentation page so it may be selected.
   3. You can also optionally create a subdirectory for your css images in the /wp-content/marketpress-styles/ folder and
       link to images within it with relative urls like "image-folder/my-image.jpg".
       

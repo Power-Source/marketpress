@@ -114,7 +114,16 @@ class MP_Admin_Multisite {
 
 					$.getJSON($this.attr('href'), function (resp) {
 						if (resp.success) {
-							$select.attr('data-select2-value', resp.data.select2_value).mp_select2('val', resp.data.post_id).trigger('change');
+							var selectEl = $select[0];
+							var postId = String(resp.data.post_id);
+							var optionText = resp.data.select2_value.indexOf('->') > -1 ? resp.data.select2_value.split('->')[1] : resp.data.select2_value;
+							if (selectEl.slimSelect) {
+								var newData = selectEl.slimSelect.getData().concat({ value: postId, text: optionText });
+								selectEl.slimSelect.setData(newData);
+								selectEl.slimSelect.setSelected(postId);
+							} else {
+								$select.val(postId).trigger('change');
+							}
 							$this.isWorking(false).replaceWith(resp.data.button_html);
 							$('.mp-network-store-page-slug').html(resp.data.parent_slug);
 						} else {
@@ -622,7 +631,16 @@ class MP_Admin_Multisite {
 
 					$.getJSON($this.attr('href'), function (resp) {
 						if (resp.success) {
-							$select.attr('data-select2-value', resp.data.select2_value).mp_select2('val', resp.data.post_id).trigger('change');
+							var selectEl = $select[0];
+							var postId = String(resp.data.post_id);
+							var optionText = resp.data.select2_value.indexOf('->') > -1 ? resp.data.select2_value.split('->')[1] : resp.data.select2_value;
+							if (selectEl.slimSelect) {
+								var newData = selectEl.slimSelect.getData().concat({ value: postId, text: optionText });
+								selectEl.slimSelect.setData(newData);
+								selectEl.slimSelect.setSelected(postId);
+							} else {
+								$select.val(postId).trigger('change');
+							}
 							$this.isWorking(false).replaceWith(resp.data.button_html);
 						} else {
 							alert('<?php _e( 'Fehler beim erstellen der Seite, versuch es bitte noch einmal.', 'mp' ); ?>');

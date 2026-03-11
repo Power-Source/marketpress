@@ -105,10 +105,6 @@ Wenn Ihnen eines Ihrer Produkte ausgeht, informiert Sie MarketPress, wann es Zei
 = Setup-Assistent inklusive =
 Es ist groß und leistungsstark, aber keine Sorge... Der MarketPress-Setup-Assistent führt Sie Schritt für Schritt durch die Einrichtung Ihres Shops, sodass Sie sich keine Gedanken darüber machen müssen, was im Hintergrund passiert.
 
-Falls Sie beim Einstieg auf Probleme stoßen, ist <a href="https://cp-psource.github.io/marketpress/#usage">MarketPress</a> gut dokumentiert, und unser Support-Team steht Ihnen rund um die Uhr zur Verfügung, um alle Ihre Fragen zu beantworten.
-
-Also, worauf warten Sie noch? Starten Sie noch heute mit <a href="http://premium.psource.org/project/e-commerce/">MarketPress eCommerce</a>. Alles, was Sie brauchen, um Ihren Online-Shop zu starten und auszubauen.
-
 == Changelog ==
 
 = 1.0.0 =

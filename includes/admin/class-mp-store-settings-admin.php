@@ -40,7 +40,7 @@ private function __construct() {
     add_action( 'admin_footer', array( &$this, 'print_product_tag_scripts' ) );
     // Print scripts for setting the active admin menu item when on the product category page
     add_action( 'admin_footer', array( &$this, 'print_product_category_scripts' ) );
-    // Move product categories and tags to store settings menu
+    // Move product categories and tags to MarketPress Einstellungen menu
     add_action( 'parent_file', array( &$this, 'set_menu_item_parent' ) );
 
     if ( mp_get_get_value( 'action' ) == 'mp_add_product_attribute' || mp_get_get_value( 'action' ) == 'mp_edit_product_attribute' ) {
@@ -112,44 +112,44 @@ private function __construct() {
 	
 		$cap = apply_filters( 'mp_store_settings_cap', 'manage_store_settings' );
 	
-		add_menu_page( __( 'Shop Settings', 'mp' ), __( 'Shop Settings', 'mp' ), $cap, 'store-settings', null, 'dashicons-store', 99.33 );
-		add_submenu_page( 'store-settings', __( 'Store Settings: General', 'mp' ), __( 'General', 'mp' ), $cap, 'store-settings', array( &$this, 'display_settings_form' ) );
-		add_submenu_page( 'store-settings', __( 'Store Settings: Presentation', 'mp' ), __( 'Presentation', 'mp' ), $cap, 'store-settings-presentation', array( &$this, 'display_settings_form' ) );
-		add_submenu_page( 'store-settings', __( 'Store Settings: Notifications', 'mp' ), __( 'Notifications', 'mp' ), $cap, 'store-settings-notifications', array( &$this, 'display_settings_form' ) );
-		add_submenu_page( 'store-settings', __( 'Store Settings: Shipping', 'mp' ), __( 'Shipping', 'mp' ), $cap, 'store-settings-shipping', array( &$this, 'display_settings_form' ) );
-		add_submenu_page( 'store-settings', __( 'Store Settings: Payments', 'mp' ), __( 'Payments', 'mp' ), $cap, 'store-settings-payments', array( &$this, 'display_settings_form' ) );
-		add_submenu_page( 'store-settings', __( 'Store Settings: Product Attributes', 'mp' ), __( 'Product Attributes', 'mp' ), $cap, 'store-settings-productattributes', array( 'MP_Product_Attributes_Admin', 'display_product_attributes' ) );
+		add_menu_page( __( 'MarketPress', 'mp' ), __( 'MarketPress', 'mp' ), $cap, 'store-settings', null, 'dashicons-store', 99.33 );
+		add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Allgemein', 'mp' ), __( 'Allgemein', 'mp' ), $cap, 'store-settings', array( &$this, 'display_settings_form' ) );
+		add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Präsentation', 'mp' ), __( 'Präsentation', 'mp' ), $cap, 'store-settings-presentation', array( &$this, 'display_settings_form' ) );
+		add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Benachrichtigungen', 'mp' ), __( 'Benachrichtigungen', 'mp' ), $cap, 'store-settings-notifications', array( &$this, 'display_settings_form' ) );
+		add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Versand', 'mp' ), __( 'Versand', 'mp' ), $cap, 'store-settings-shipping', array( &$this, 'display_settings_form' ) );
+		add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Zahlungen', 'mp' ), __( 'Zahlungen', 'mp' ), $cap, 'store-settings-payments', array( &$this, 'display_settings_form' ) );
+		add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Produkteigenschaften', 'mp' ), __( 'Produkteigenschaften', 'mp' ), $cap, 'store-settings-productattributes', array( 'MP_Product_Attributes_Admin', 'display_product_attributes' ) );
 	
 		add_submenu_page(
 			'store-settings',
-			__( 'Store Settings: Product Categories', 'mp' ),
-			__( 'Product Categories', 'mp' ),
+			__( 'MarketPress Einstellungen: Produktkategorien', 'mp' ),
+			__( 'Produktkategorien', 'mp' ),
 			apply_filters( 'mp_manage_product_categories_cap', 'manage_product_categories' ),
 			'edit-tags.php?taxonomy=product_category&post_type=' . MP_Product::get_post_type()
 		);
 
 		add_submenu_page(
 			'store-settings',
-			__( 'Store Settings: Product Tags', 'mp' ),
-			__( 'Product Tags', 'mp' ),
+			__( 'MarketPress Einstellungen: Produkttags', 'mp' ),
+			__( 'Produkttags', 'mp' ),
 			apply_filters( 'mp_manage_product_tags_cap', 'manage_product_tags' ),
 			'edit-tags.php?taxonomy=product_tag&post_type=' . MP_Product::get_post_type()
 		);
 	
-		add_submenu_page( 'store-settings', __( 'Store Settings: Capabilities', 'mp' ), __( 'User Capabilities', 'mp' ), $cap, 'store-settings-capabilities', array( &$this, 'display_settings_form' ) );
+		add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Berechtigungen', 'mp' ), __( 'Berechtigungen', 'mp' ), $cap, 'store-settings-capabilities', array( &$this, 'display_settings_form' ) );
 	
 		// Importers (Redirect)
-		//add_submenu_page( 'store-settings', __( 'Store Settings: Importers', 'mp' ), __( 'Importers', 'mp' ), $cap, 'store-settings-importers', array( $this, 'redirect_to_importers' ) );
+		//add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Importierer', 'mp' ), __( 'Importierer', 'mp' ), $cap, 'store-settings-importers', array( $this, 'redirect_to_importers' ) );
 	
 		// Exporters (Redirect)
-		//add_submenu_page( 'store-settings', __( 'Store Settings: Exporters', 'mp' ), __( 'Exporters', 'mp' ), $cap, 'store-settings-exporters', array( $this, 'redirect_to_exporters' ) );
+		//add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Exportierer', 'mp' ), __( 'Exportierer', 'mp' ), $cap, 'store-settings-exporters', array( $this, 'redirect_to_exporters' ) );
 	
-		add_submenu_page( 'store-settings', __( 'Store Settings: Add Ons', 'mp' ), __( 'Add Ons', 'mp' ), $cap, 'store-settings-addons', array( MP_Store_Settings_Addons::get_instance(), 'display_settings' ) );
+		add_submenu_page( 'store-settings', __( 'MarketPress Einstellungen: Erweiterungen', 'mp' ), __( 'Erweiterungen', 'mp' ), $cap, 'store-settings-addons', array( MP_Store_Settings_Addons::get_instance(), 'display_settings' ) );
 	
 		$mp_needs_quick_setup = get_option( 'mp_needs_quick_setup', 1 );
 	
 		if ( $mp_needs_quick_setup == 'skip' || $mp_needs_quick_setup == 1 && current_user_can( 'manage_options' ) || ( isset( $_GET['quick_setup_step'] ) ) ) {
-			add_submenu_page( 'store-settings', __( 'Quick Setup', 'mp' ), __( 'Quick Setup', 'mp' ), $cap, 'store-setup-wizard', array( &$this, 'display_settings_form' ) );
+			add_submenu_page( 'store-settings', __( 'Schnelle Einrichtung', 'mp' ), __( 'Schnelle Einrichtung', 'mp' ), $cap, 'store-setup-wizard', array( &$this, 'display_settings_form' ) );
 		}
 	
 		if ( !PSOURCE_REMOVE_BRANDING ) {
@@ -243,11 +243,11 @@ private function __construct() {
 	 */
 	public function get_message_by_key( $key ) {
 		$messages = array(
-			'mp_product_attribute_added'	 => __( 'Product attribute added successfully.', 'mp' ),
-			'mp_product_attribute_updated'	 => __( 'Product attribute updated successfully.', 'mp' ),
+			'mp_product_attribute_added'	 => __( 'Produktattribut erfolgreich hinzugefügt.', 'mp' ),
+			'mp_product_attribute_updated'	 => __( 'Produktattribut erfolgreich aktualisiert.', 'mp' ),
 		);
 
-		return ( isset( $messages[ $key ] ) ) ? $messages[ $key ] : sprintf( __( 'An appropriate message for key "%s" could not be found.', 'mp' ), $key );
+		return ( isset( $messages[ $key ] ) ) ? $messages[ $key ] : sprintf( __( 'Eine passende Nachricht für den Schlüssel "%s" konnte nicht gefunden werden.', 'mp' ), $key );
 	}
 
 	/**
@@ -268,43 +268,43 @@ private function __construct() {
 		$page = isset($_GET['page']) ? $_GET['page'] : '';
 		switch ($page) {
 			case 'store-settings':
-				$title = __( 'Store Settings: General', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Allgemein', 'mp' );
 				break;
 			case 'store-settings-presentation':
-				$title = __( 'Store Settings: Presentation', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Darstellung', 'mp' );
 				break;
 			case 'store-settings-notifications':
-				$title = __( 'Store Settings: Notifications', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Benachrichtigungen', 'mp' );
 				break;
 			case 'store-settings-shipping':
-				$title = __( 'Store Settings: Shipping', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Versand', 'mp' );
 				break;
 			case 'store-settings-payments':
-				$title = __( 'Store Settings: Payments', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Zahlungen', 'mp' );
 				break;
 			case 'store-settings-shortcodes':
-				$title = __( 'Store Settings: Short Codes', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Shortcodes', 'mp' );
 				break;
 			case 'store-settings-importers':
-				$title = __( 'Store Settings: Importers', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Importe', 'mp' );
 				break;
 			case 'store-settings-exporters':
-				$title = __( 'Store Settings: Exporters', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Exporte', 'mp' );
 				break;
 			case 'store-settings-productattributes':
-				$title = __( 'Product Attributes', 'mp' );
+				$title = __( 'Produktattribute', 'mp' );
 				break;
 			case 'store-settings-capabilities':
-				$title = __( 'Store Settings: Capabilities', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Berechtigungen', 'mp' );
 				break;
 			case 'store-settings-import':
-				$title = __( 'Store Settings: Import/Export', 'mp' );
+				$title = __( 'MarketPress Einstellungen: Import/Export', 'mp' );
 				break;
 			case 'store-setup-wizard':
-				$title = __( 'Quick Setup', 'mp' );
+				$title = __( 'Schnelle Einrichtung', 'mp' );
 				break;
 			default:
-				$title = __( 'Store Settings', 'mp' );
+				$title = __( 'MarketPress Einstellungen', 'mp' );
 				break;
 		}
 		?>

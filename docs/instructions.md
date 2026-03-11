@@ -17,16 +17,16 @@ MarketPress - Quick Setup Complete
 Before we go and create a product here, we’ll want to touch on some aspects of the settings first.
 
 A stroll through the Store… Settings
-Our friend, the Store Settings tab, houses all of the settings for MarketPress:
+Our friend, the MarketPress Einstellungen tab, houses all of the settings for MarketPress:
 
-MarketPress - Store Settings
+MarketPress - MarketPress Einstellungen
 We provide inline documentation for all of the settings inside of MarketPress, but we’ll want to touch on a few points in particular, as we go through the setup of this new store.
 
 Digital Downloads
 
 If you’re planning on offering digital products in your store, you’ll want to review the “Download Settings” section inside of:
 
-Store Settings -> General
+MarketPress Einstellungen -> General
 
 MarketPress - Digital Download Settings
 From here, you can choose to:
@@ -40,7 +40,7 @@ If you’re already using Google Analytics on your site, you’ll be pleased to 
 
 The settings for this integration are also found inside of:
 
-Store Settings -> General
+MarketPress Einstellungen -> General
 
 MarketPress - Google Analytics Integration
 From there, you can configure MarketPress to work with the tracking code in use on your site (whether you’re using the old, new, or Universal tracking code).
@@ -49,11 +49,11 @@ Store Pages
 
 If you skipped the step earlier in the Quick Setup to create the store pages, you’ll really want to head over to the “Store Pages” section inside of:
 
-Store Settings -> Presentation
+MarketPress Einstellungen -> Presentation
 
 And get those pages set up. You can click the “Create Page” button for each store page, and MarketPress will automatically create a page for you:
 
-MarketPress - Store Settings - Create Store Pages
+MarketPress - MarketPress Einstellungen - Create Store Pages
 Product Attributes
 
 Also known as variations within MarketPress (which we’ll cover later), this section will allow you to create & modify various attributes for your products (e.g. Color, Size, Weight, etc).
@@ -184,7 +184,7 @@ MarketPress - Order Details
 Add Ons
 Found inside of:
 
-Store Settings -> Add Ons
+MarketPress Einstellungen -> Add Ons
 
 You’ll see the add ons available in MarketPress, which will vary depending on whether you’re running a normal ClassicPress site, or if you’re running a Multisite installation.
 
@@ -261,7 +261,7 @@ Simply install and configure Pro Sites on your network, setting up various Level
 
 Then, once you’ve done that, you’ll want to into the Dashboard for the main site, and head to:
 
-Store Settings -> Add Ons
+MarketPress Einstellungen -> Add Ons
 
 And enable the Pro Sites add-on from there.
 

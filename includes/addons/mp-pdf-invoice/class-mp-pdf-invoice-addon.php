@@ -69,11 +69,11 @@ class MP_PDF_Invoice_Addon {
 		//check does order exist
 		$order = new MP_Order( $order_id );
 		if ( $order->exists() == false ) {
-			die( __( "Order not exist!", "mp" ) );
+			die( __( "Bestellung existiert nicht!", "mp" ) );
 		}
 		//check nonce
 		if ( ! wp_verify_nonce( mp_get_get_value( 'wpnonce' ), $order->ID ) ) {
-			die( __( "Invalid Request", "mp" ) );
+			die( __( "Ungültige Anfrage", "mp" ) );
 		}
 		//check does order belong to right
 		if ( get_current_user_id() == $order->post_author || current_user_can( 'manage_options' ) ) {
@@ -100,13 +100,13 @@ class MP_PDF_Invoice_Addon {
 						$settings = mp_get_setting( 'pdf_invoice' );
 						$gen->generate_pdf( $order->get_id(), mp_get_get_value( 'type', MP_PDF_Invoice::PDF_INVOICE ), $settings['download'] == 'download' ? true : false );
 					} else {
-						die( __( "You can't download this order invoice", "mp" ) );
+						die( __( "Du kannst diese Bestellrechnung nicht herunterladen", "mp" ) );
 					}
 				} else {
-					die( __( "You can't download this order invoice", "mp" ) );
+					die( __( "Du kannst diese Bestellrechnung nicht herunterladen", "mp" ) );
 				}
 			} else {
-				die( __( "You can't download this order invoice", "mp" ) );
+				die( __( "Du kannst diese Bestellrechnung nicht herunterladen", "mp" ) );
 			}
 		}
 	}
@@ -192,50 +192,50 @@ class MP_PDF_Invoice_Addon {
 	public function view_settings() {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'          => 'mp-invoice-pdf-general-metabox',
-			'title'       => __( 'General Settings', 'mp' ),
+			'title'       => __( 'Allgemeine Einstellungen', 'mp' ),
 			'page_slugs'  => array( 'store-settings-addons' ),
 			'option_name' => 'mp_settings',
 		) );
 		$metabox->add_field( 'select', array(
 			'name'          => 'pdf_invoice[download]',
 			'options'       => array(
-				'download' => __( "Download the PDF", 'mp' ),
-				'new_tab'  => __( "Open the PDF in a new browser tab/window", 'mp' )
+				'download' => __( "PDF herunterladen", 'mp' ),
+				'new_tab'  => __( "PDF in einem neuen Browser-Tab/Fenster öffnen", 'mp' )
 			),
-			'label'         => array( 'text' => __( 'How do you want to view the PDF?', 'mp' ) ),
-			'default_value' => __( 'download', 'mp' ),
+			'label'         => array( 'text' => __( 'Wie möchtest Du das PDF anzeigen?', 'mp' ) ),
+			'default_value' => __( 'Herunterladen', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox_group', array(
 			'name'    => 'pdf_invoice[attach_to]',
 			'options' => array(
-				'admin_new_order'        => __( "Admin New Order email", "mp" ),
-				'customer_new_order'     => __( "Customer New Order email", "mp" ),
+				'admin_new_order'        => __( "Admin-E-Mail für neue Bestellung", "mp" ),
+				'customer_new_order'     => __( "Kunden-E-Mail für neue Bestellung", "mp" ),
 				//'admin_shipped_order'    => __( "Admin Order Shipped email", "mp" ),
-				'customer_shipped_order' => __( "Customer Order Shipped email", "mp" )
+				'customer_shipped_order' => __( "Kunden-E-Mail für versendete Bestellung", "mp" )
 			),
-			'label'   => array( 'text' => __( 'Attach invoice to', 'mp' ) )
+			'label'   => array( 'text' => __( 'Rechnung anhängen an', 'mp' ) )
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'pdf_invoice[quit_on_free]',
-			'label'   => array( 'text' => __( "Disable for free products", "mp" ) ),
-			'message' => __( "Disable automatic creation/attachment of invoices when only free products are ordered", "mp" )
+			'label'   => array( 'text' => __( "Deaktivieren für kostenlose Produkte", "mp" ) ),
+			'message' => __( "Automatische Erstellung/Anhängen von Rechnungen deaktivieren, wenn nur kostenlose Produkte bestellt werden", "mp" )
 		) );
 
 		$metabox   = new PSOURCE_Metabox( array(
 			'id'          => 'mp-invoice-pdf-template-metabox',
-			'title'       => __( 'Template Settings', 'mp' ),
+			'title'       => __( 'Template-Einstellungen', 'mp' ),
 			'page_slugs'  => array( 'store-settings-addons' ),
 			'option_name' => 'mp_settings',
 		) );
 		$templates = $this->scan_templates();
 		$metabox->add_field( 'select', array(
 			'name'    => 'pdf_invoice[template]',
-			'label'   => array( 'text' => __( "Choose a template", 'mp' ) ),
+			'label'   => array( 'text' => __( "Wähle eine Vorlage", 'mp' ) ),
 			'options' => $templates
 		) );
 		$metabox->add_field( 'file', array(
 			'name'  => 'pdf_invoice[template_logo]',
-			'label' => array( 'text' => __( "Shop header/logo", "mp" ) ),
+			'label' => array( 'text' => __( "Shop Header/Logo", "mp" ) ),
 		) );
 		
 		// Farbeinstellungen

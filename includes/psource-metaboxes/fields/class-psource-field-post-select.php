@@ -131,42 +131,21 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 	 */
 	       public function print_scripts() {
 		       ?>
-			   <script type="text/javascript">
-			   document.addEventListener('DOMContentLoaded', function() {
-				   document.querySelectorAll('select.psource-post-select').forEach(function(el) {
-					   var limit = parseInt(el.getAttribute('data-limit')) || 3;
-					   if (typeof TomSelect !== 'undefined') {
-						   if (!el.tomselect) {
-							   el.tomselect = new TomSelect(el, {
-								   maxItems: limit,
-								   valueField: 'id',
-								   labelField: 'title',
-								   searchField: 'title',
-								   plugins: ['remove_button'],
-								   create: false,
-								   load: function(query, callback) {
-									   if (!query.length) return callback();
-									   var url = (typeof marketpress_admin !== 'undefined' ? marketpress_admin.ajaxurl : ajaxurl);
-									   fetch(url + '?action=psource_field_post_select_search_posts&search_term=' + encodeURIComponent(query))
-										   .then(response => response.json())
-										   .then(json => {
-											   callback(json);
-										   }).catch(() => callback());
-								   },
-								   render: {
-									   option: function(item, escape) {
-										   return '<div>' + escape(item.title) + '</div>';
-									   },
-									   item: function(item, escape) {
-										   return '<div>' + escape(item.title) + '</div>';
-									   }
-								   }
-							   });
-						   }
-					   }
-				   });
-			   });
-			   </script>
+		       <script type="text/javascript">
+		       document.addEventListener('DOMContentLoaded', function() {
+			       document.querySelectorAll('select.psource-post-select').forEach(function(el) {
+				       if (typeof SlimSelect !== 'undefined' && !el.slimSelect) {
+					       el.slimSelect = new SlimSelect({
+						       select: el,
+						       placeholder: el.getAttribute('data-placeholder') || '',
+						       allowDeselect: true,
+						       showSearch: true,
+						       closeOnSelect: !el.hasAttribute('multiple'),
+					       });
+				       }
+			       });
+		       });
+		       </script>
 		       <?php
 		       parent::print_scripts();
 	       }
@@ -179,15 +158,29 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 	 * @param int $post_id
 	 */
 	public function display( $post_id ) {
-		$value   = $this->get_value( $post_id );
-		$ids     = is_array( $value ) ? $value : explode( ',', $value );
+		$value        = $this->get_value( $post_id );
+		$selected_ids = is_array( $value ) ? array_filter( array_map( 'intval', $value ) ) : array_filter( [ intval( $value ) ] );
+
+		$query_string = isset( $this->args['custom']['data-query'] ) ? $this->args['custom']['data-query'] : '';
+		$query_args   = [];
+		parse_str( $query_string, $query_args );
+		$query_args = array_replace_recursive( [
+			'posts_per_page'         => -1,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'orderby'                => 'title',
+			'order'                  => 'ASC',
+			'post_status'            => [ 'publish' ],
+		], $query_args );
+		$posts    = get_posts( $query_args );
+		$multiple = ! empty( $this->args['multiple'] );
+
 		$this->before_field();
-		$limit = isset($this->args['custom']['related_limit']) ? intval($this->args['custom']['related_limit']) : 3;
-		echo '<select class="psource-post-select" multiple="multiple" data-placeholder="' . esc_attr($this->args['custom']['data-placeholder']) . '" data-limit="' . $limit . '" style="width:100%">';
-		foreach ($ids as $id) {
-			if ($id && get_post($id)) {
-				echo '<option value="' . esc_attr($id) . '" selected>' . esc_html(get_the_title($id)) . '</option>';
-			}
+		echo '<select ' . $this->parse_atts() . ( $multiple ? ' multiple="multiple"' : '' ) . '>';
+		echo '<option value="">' . esc_html( $this->args['placeholder'] ) . '</option>';
+		foreach ( $posts as $post ) {
+			$sel = in_array( $post->ID, $selected_ids ) ? ' selected' : '';
+			echo '<option value="' . esc_attr( $post->ID ) . '"' . $sel . '>' . esc_html( $post->post_title ) . '</option>';
 		}
 		echo '</select>';
 		$this->after_field();

@@ -169,10 +169,10 @@ class MP_Store_Settings_General {
 						}
 					];
 
-					$currency.mp_select2( 'enable', false ).isWorking( true );
+					$currency.prop( 'disabled', true ).isWorking( true );
 
 					$.get( ajaxurl, $.param( data ) ).done( function( resp ) {
-						$currency.mp_select2( 'enable', true ).isWorking( false );
+						$currency.prop( 'disabled', false ).isWorking( false );
 
 						if ( resp.success ) {
 							$( '.mp-currency-symbol' ).html( resp.data );
@@ -204,12 +204,12 @@ class MP_Store_Settings_General {
 						action: "mp_update_states_dropdown"
 					};
 
-					$country.mp_select2( 'enable', false ).isWorking( true );
-					$state.mp_select2( 'enable', false );
+					$country.prop( 'disabled', true ).isWorking( true );
+					$state.prop( 'disabled', true );
 
 					$.post( ajaxurl, data ).done( function( resp ) {
-						$country.mp_select2( 'enable', true ).isWorking( false );
-						$state.mp_select2( 'enable', true );
+						$country.prop( 'disabled', false ).isWorking( false );
+						$state.prop( 'disabled', false );
 
 						if ( resp.success ) {
 							$state.html( resp.data.states );

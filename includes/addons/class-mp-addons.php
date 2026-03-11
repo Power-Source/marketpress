@@ -75,8 +75,12 @@ class MP_Addons {
 	 */
 	public function enable( $addons ) {
 		foreach ( (array) $addons as $addon ) {
-			$this->_addons_enabled[] = $addon;
 			$addon_obj = $this->get_addon( $addon );
+
+			if ( ! is_object( $addon_obj ) || empty( $addon_obj->path ) || ! is_string( $addon_obj->path ) ) {
+				continue;
+			}
+			$this->_addons_enabled[] = $addon;
 			
 			if( file_exists( $addon_obj->path ) )
                         {
