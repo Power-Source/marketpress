@@ -88,6 +88,7 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 * Fix: Installer-Migrationen für PHP 8 gehärtet: fehlende Legacy-Meta-Keys (`mp_price`, `mp_sale_price`, `mp_is_sale`) werden in `update_214()` nun defensiv geprüft, wodurch Warnungen wie "Undefined array key mp_price" entfallen.
 * Fix: Datenbank-Migration für `mp_term_relationships` korrigiert; der Index auf `term_id` wird jetzt mit gültigem Namen erzeugt, wodurch dbDelta-Fehler wie "Incorrect index name ''" vermieden werden.
+* Fix: PHP-8-Deprecation in `MP_Taxes::calculate()` behoben; der Parameter `$applied_rates` ist nun optional deklariert und erzeugt keine Warnung mehr für "optional parameter before required parameter".
 
 = 1.0.3 =
 

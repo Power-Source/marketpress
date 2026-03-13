@@ -39,7 +39,7 @@ class MP_Taxes {
 	 *
 	 * @return array
 	 */
-	public function calculate( $price, $inclusive_tax = false, $applied_rates ) {
+	public function calculate( $price, $inclusive_tax = false, $applied_rates = array() ) {
 		$taxes = array();
 		if ( $inclusive_tax ) {
 			$taxes = $this->calc_inclusive_taxes( $price, $applied_rates );
