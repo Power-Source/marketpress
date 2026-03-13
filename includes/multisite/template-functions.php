@@ -1,5 +1,27 @@
 <?php
 
+if ( ! function_exists( 'mp_global_terms_cache_version' ) ) {
+	function mp_global_terms_cache_version() {
+		if ( is_multisite() ) {
+			return (int) get_site_option( 'mp_global_terms_cache_version', 1 );
+		}
+
+		return (int) get_option( 'mp_global_terms_cache_version', 1 );
+	}
+}
+
+if ( ! function_exists( 'mp_invalidate_global_terms_cache' ) ) {
+	function mp_invalidate_global_terms_cache() {
+		$version = mp_global_terms_cache_version() + 1;
+
+		if ( is_multisite() ) {
+			update_site_option( 'mp_global_terms_cache_version', $version );
+		} else {
+			update_option( 'mp_global_terms_cache_version', $version );
+		}
+ 	}
+}
+
 /**
  * Display Global Products tag cloud.
  *
@@ -10,7 +32,7 @@
  */
 function mp_global_tag_cloud( $echo = true, $limit = 45, $seperator = ' ', $include = 'both' ) {
 	global $wpdb;
-	$cache_key = 'mp_global_tag_cloud_' . md5( $include . '|' . (int) $limit );
+	$cache_key = 'mp_global_tag_cloud_' . md5( mp_global_terms_cache_version() . '|' . $include . '|' . (int) $limit );
 	$tags      = get_transient( $cache_key );
 
 	//include categories as well

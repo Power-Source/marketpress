@@ -60,17 +60,27 @@ class MP_Shortcode_Builder {
 	public static function search_products() {
 		add_filter( 'posts_search', array( __CLASS__, 'search_by_title_only' ), 500, 2 );
 
+		$page = max( 1, absint( isset( $_GET['page'] ) ? $_GET['page'] : 1 ) );
+		$per_page = absint( isset( $_GET['per_page'] ) ? $_GET['per_page'] : 20 );
+		if ( $per_page < 10 ) {
+			$per_page = 10;
+		} elseif ( $per_page > 100 ) {
+			$per_page = 100;
+		}
+		$search_term = isset( $_GET['search_term'] ) ? sanitize_text_field( wp_unslash( $_GET['search_term'] ) ) : '';
+
 		$query	 = new WP_Query( array(
-			'paged'					 => isset( $_GET[ 'page' ] ) ? $_GET[ 'page' ] : false,
-			'posts_per_page'		 => -1,
-			's'						 => isset( $_GET[ 'search_term' ] ) ? $_GET[ 'search_term' ] : false,
+			'paged'					 => $page,
+			'posts_per_page'		 => $per_page,
+			's'						 => $search_term,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
+			'no_found_rows'			 => false,
 			'orderby'				 => 'title',
 			'order'					 => 'ASC',
 			'post_type'				 => MP_Product::get_post_type(),
 		) );
-		$data	 = array( 'posts' => array(), 'posts_per_page' => isset( $args[ 'posts_per_page' ] ) ? $args[ 'posts_per_page' ] : '-1', 'total' => $query->found_posts );
+		$data	 = array( 'posts' => array(), 'posts_per_page' => $per_page, 'total' => $query->found_posts );
 
 		while ( $query->have_posts() ) : $query->the_post();
 			$data[ 'posts' ][] = array( 'id' => get_the_ID(), 'text' => get_the_title() );

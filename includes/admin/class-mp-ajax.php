@@ -117,48 +117,65 @@ class MP_Ajax {
 
 				$product_attributes			 = MP_Product_Attributes_Admin::get_product_attributes();
 				$product_attributes_array	 = array();
+				$attribute_taxonomies		 = array();
+				foreach ( $product_attributes as $product_attribute ) {
+					$product_attributes_array[ $product_attribute->attribute_id ] = $product_attribute->attribute_name;
+					$attribute_taxonomies[] = 'product_attr_' . $product_attribute->attribute_id;
+				}
 
-				$args = array(
-					'post_parent'	 => $post_id,
-					'post_type'		 => MP_Product::get_variations_post_type(),
-					'posts_per_page' => -1,
-					'post_status'	 => 'publish',
-					'orderby'		 => 'ID',
-					'order'			 => 'ASC',
-				);
+				$variation_attributes				 = array();
+				$variation_attributes_remaining	 = array();
+				$used_taxonomy_ids				 = array();
 
-				$children = get_children( $args, OBJECT );
+				$children_ids = get_posts( array(
+					'post_parent'            => $post_id,
+					'post_type'              => MP_Product::get_variations_post_type(),
+					'posts_per_page'         => -1,
+					'post_status'            => 'publish',
+					'orderby'                => 'ID',
+					'order'                  => 'ASC',
+					'fields'                 => 'ids',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+				) );
 
-				$variation_attributes = array();
-				$variation_attributes_remaining = array();
+				if ( ! empty( $children_ids ) && ! empty( $attribute_taxonomies ) ) {
+					$children_terms = wp_get_object_terms( $children_ids, $attribute_taxonomies, array( 'fields' => 'all_with_object_id' ) );
 
-				$first_post_id = 0;
+					if ( ! is_wp_error( $children_terms ) ) {
+						foreach ( $children_terms as $child_term ) {
+							$attribute_id = (int) str_replace( 'product_attr_', '', $child_term->taxonomy );
 
-				foreach ( $children as $child ) {
-					if ( $first_post_id == 0 ) {
-						$first_post_id = $child->ID;
-					}
+							if ( ! isset( $product_attributes_array[ $attribute_id ] ) ) {
+								continue;
+							}
 
-					foreach ( $product_attributes as $product_attribute ) {
-						$product_attributes_array[ $product_attribute->attribute_id ] = $product_attribute->attribute_name;
-
-						$child_terms = get_the_terms( /* $variation_id */$child->ID, 'product_attr_' . $product_attribute->attribute_id );
-						
-						if ( isset( $child_terms[ 0 ]->term_id ) && $child_terms[ 0 ]->name ) {
-							$variation_attributes[ $product_attribute->attribute_id ][ $child_terms[ 0 ]->term_id ] = array( $product_attribute->attribute_id, $child_terms[ 0 ]->name );
-
-							$used_taxonomy_ids[] = 'product_attr_' . $product_attribute->attribute_id;
-						}
-						else{	
-							$variation_attributes_remaining[ $product_attribute->attribute_id ][ $child_terms[ 0 ]->term_id ] = array( $product_attribute->attribute_id, $child_terms[ 0 ]->name );
+							$variation_attributes[ $attribute_id ][ $child_term->term_id ] = array( $attribute_id, $child_term->name );
+							$used_taxonomy_ids[ $child_term->taxonomy ] = true;
 						}
 					}
 				}
 
-				foreach( $variation_attributes_remaining as $variation_attribute_remaining_key => $variation_attribute_remaining ){
+				foreach ( $product_attributes_array as $attribute_id => $attribute_name ) {
+					$attribute_taxonomy = 'product_attr_' . $attribute_id;
 
-					if( in_array( 'product_attr_' . $variation_attribute_remaining_key, $used_taxonomy_ids ) ) unset( $variation_attributes_remaining[ $variation_attribute_remaining_key ] );
+					if ( ! isset( $used_taxonomy_ids[ $attribute_taxonomy ] ) ) {
+						$variation_attributes_remaining[ $attribute_id ] = array();
+					}
+				}
 
+				$current_variation_terms_by_taxonomy = array();
+				if ( ! empty( $attribute_taxonomies ) ) {
+					$current_variation_terms = wp_get_object_terms( $variation_id, $attribute_taxonomies );
+
+					if ( ! is_wp_error( $current_variation_terms ) ) {
+						foreach ( $current_variation_terms as $current_term ) {
+							if ( ! isset( $current_variation_terms_by_taxonomy[ $current_term->taxonomy ] ) ) {
+								$current_variation_terms_by_taxonomy[ $current_term->taxonomy ] = $current_term;
+							}
+						}
+					}
 				}
 				?>
 				<form name="variation_popup" id="variation_popup">
@@ -215,8 +232,8 @@ class MP_Ajax {
 
 					<?php
 					foreach ( array_keys( $variation_attributes ) as $variation_attribute ) {
-						$child_term	 = get_the_terms( $variation_id, 'product_attr_' . $variation_attribute );
-						$child_term	 = isset( $child_term[ 0 ] ) ? $child_term[ 0 ] : '';
+						$taxonomy  = 'product_attr_' . $variation_attribute;
+						$child_term = isset( $current_variation_terms_by_taxonomy[ $taxonomy ] ) ? $current_variation_terms_by_taxonomy[ $taxonomy ] : '';
 						?>
 						<div class="mp-product-field-100 mp-variation-field">
 							<div class="psource-field-label"><?php echo $product_attributes_array[ $variation_attribute ]; ?><span class="required">*</span></div>
@@ -232,8 +249,8 @@ class MP_Ajax {
 					<h3><?php _e( 'Unbenutzte Attribute', 'mp' ); ?></h3>
 					<?php					
 					foreach ( array_keys( $variation_attributes_remaining ) as $variation_attribute ) {
-						$child_term	 = get_the_terms( $variation_id, 'product_attr_' . $variation_attribute );
-						$child_term	 = isset( $child_term[ 0 ] ) ? $child_term[ 0 ] : '';
+						$taxonomy  = 'product_attr_' . $variation_attribute;
+						$child_term = isset( $current_variation_terms_by_taxonomy[ $taxonomy ] ) ? $current_variation_terms_by_taxonomy[ $taxonomy ] : '';
 						?>
 						<div class="mp-product-field-100 mp-variation-field">
 							<div class="psource-field-label"><?php echo $product_attributes_array[ $variation_attribute ]; ?></div>

@@ -250,6 +250,10 @@ class MP_Multisite {
 		$this->add_index( get_current_blog_id(), get_post( $post_id ) );
 		$post = get_post( $post_id );
 		$this->index_product_terms( get_current_blog_id(), $post );
+
+		if ( function_exists( 'mp_invalidate_global_terms_cache' ) ) {
+			mp_invalidate_global_terms_cache();
+		}
 	}
 
 	/**
@@ -260,6 +264,10 @@ class MP_Multisite {
 	 */
 	public function delete_product( $post_id ) {
 		$this->delete_index( get_current_blog_id(), $post_id );
+
+		if ( function_exists( 'mp_invalidate_global_terms_cache' ) ) {
+			mp_invalidate_global_terms_cache();
+		}
 	}
 
 	/**
@@ -283,6 +291,10 @@ class MP_Multisite {
 		}
 		//update the terms
 		$this->index_product_terms( get_current_blog_id(), $post );
+
+		if ( function_exists( 'mp_invalidate_global_terms_cache' ) ) {
+			mp_invalidate_global_terms_cache();
+		}
 	}
 
 	/**
@@ -484,6 +496,10 @@ class MP_Multisite {
 				}
 			}
 			restore_current_blog();
+		}
+
+		if ( function_exists( 'mp_invalidate_global_terms_cache' ) ) {
+			mp_invalidate_global_terms_cache();
 		}
 
 		return array(
@@ -699,6 +715,10 @@ class MP_Multisite {
 	public function truncate_index_table() {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->base_prefix}mp_terms WHERE type = 'product_category' OR type = 'product_tag' " );
+
+		if ( function_exists( 'mp_invalidate_global_terms_cache' ) ) {
+			mp_invalidate_global_terms_cache();
+		}
 	}
 
 	/**
