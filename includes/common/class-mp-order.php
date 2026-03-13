@@ -191,9 +191,9 @@ public $ID = null;
 		global $wpdb;
 
 		if ( is_null( $this->ID ) ) {
-			if ( $_post = wp_cache_get( $this->_order_id, 'mp_order' ) ) {
+			if ( ! empty( $this->_order_id ) && ( $_post = wp_cache_get( $this->_order_id, 'mp_order' ) ) ) {
 				$this->_post = $_post;
-			} else {
+			} elseif ( ! empty( $this->_order_id ) ) {
 				$_post = $wpdb->get_row( $wpdb->prepare( "
 					SELECT *
 					FROM $wpdb->posts
@@ -219,7 +219,9 @@ public $ID = null;
 			$this->_exists   = true;
 			$this->ID        = $this->_post->ID;
 			$this->_order_id = $this->_post->post_name;
-			wp_cache_set( $this->_order_id, $this->_post, 'mp_order' );
+			if ( ! empty( $this->_order_id ) ) {
+				wp_cache_set( $this->_order_id, $this->_post, 'mp_order' );
+			}
 		}
 	}
 
@@ -770,36 +772,36 @@ public $ID = null;
 			$html .= '
 				<table class="form-table">
 					<tr>
-						<th scope="row">' . __( 'First Name', 'mp' ) . '</th>
+						<th scope="row">' . __( 'Vorname', 'mp' ) . '</th>
 						<td><input type="text" name="' . $prefix . '[first_name]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->first_name", '' ) ) . '" /></td>
 					</tr>
 					<tr>
-						<th scope="row">' . __( 'Last Name', 'mp' ) . '</th>
+						<th scope="row">' . __( 'Nachname', 'mp' ) . '</th>
 						<td><input type="text" name="' . $prefix . '[last_name]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->last_name", '' ) ) . '" /></td>
 					</tr>
 					<tr>
-						<th scope="row">' . __( 'Company', 'mp' ) . '</th>
+						<th scope="row">' . __( 'Firma', 'mp' ) . '</th>
 						<td><input type="text" name="' . $prefix . '[company_name]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->company_name", '' ) ) . '" /></td>
 					</tr>';
 			if( $product_type != 'digital' ) {
 				$html .= '
 					<tr>
-						<th scope="row">' . __( 'Address 1', 'mp' ) . '</th>
+						<th scope="row">' . __( 'Adresse 1', 'mp' ) . '</th>
 						<td><input type="text" name="' . $prefix . '[address1]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->address1", '' ) ) . '" /></td>
 					</tr>
 					<tr>
-						<th scope="row">' . __( 'Address 2', 'mp' ) . '</th>
+						<th scope="row">' . __( 'Adresse 2', 'mp' ) . '</th>
 						<td><input type="text" name="' . $prefix . '[address2]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->address2", '' ) ) . '" /></td>
 					</tr>
 					<tr>
-						<th scope="row">' . __( 'City', 'mp' ) . '</th>
+						<th scope="row">' . __( 'Stadt', 'mp' ) . '</th>
 						<td><input type="text" name="' . $prefix . '[city]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->city", '' ) ) . '" /></td>
 					</tr>';
 
 				if ( is_array( $states ) ) {
 					$html .= '
 						<tr>
-							<th scope="row">' . __( 'State', 'mp' ) . '</th>
+							<th scope="row">' . __( 'Bundesland', 'mp' ) . '</th>
 							<td>
 								<select class="mp-select2" name="' . $prefix . '[state]" style="width:100%">' . $state_options . '</select>
 								<img src="' . admin_url( 'images/wpspin_light.gif' ) . '" alt="" style="display:none">
@@ -813,7 +815,7 @@ public $ID = null;
 							<td><input type="text" name="' . $prefix . '[zip]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->zip", '' ) ) . '"></td>
 						</tr>
 						<tr>
-							<th scope="row">' . __( 'Country', 'mp' ) . '</th>
+							<th scope="row">' . __( 'Land', 'mp' ) . '</th>
 							<td><select class="mp-select2" name="' . $prefix . '[country]" style="width:100%">' . $country_options . '</select></td>
 						</tr>';
 
@@ -821,16 +823,16 @@ public $ID = null;
 
 			$html .= '
 					<tr>
-						<th scope="row">' . __( 'Phone', 'mp' ) . '</th>
+						<th scope="row">' . __( 'Telefon', 'mp' ) . '</th>
 						<td><input type="text" name="' . $prefix . '[phone]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->phone", '' ) ) . '"></td>
 					</tr>
 					<tr>
-						<th scope="row">' . __( 'Email', 'mp' ) . '</th>
+						<th scope="row">' . __( 'E-Mail', 'mp' ) . '</th>
 						<td><input type="text" name="' . $prefix . '[email]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->email", '' ) ) . '"></td>
 					</tr>';
 			if ( $instructions ) {
 				$html .= '<tr>
-						<th scope="row">' . __( 'Special Instructions', 'mp' ) . '</th>
+						<th scope="row">' . __( 'Spezielle Anweisungen', 'mp' ) . '</th>
 						<td><textarea name="' . $prefix . '[special_instructions]">' . esc_textarea( $instructions ) . '</textarea></td>
 					</tr>';
 			}
@@ -866,21 +868,21 @@ public $ID = null;
 		if ( $this->get_cart()->is_download_only() && mp_get_setting( 'details_collection' ) == "contact" ) {
 			$html .= '
 				<div class="mp_content_col mp_content_col-one-half">
-					<h4 class="mp_sub_title">' . __( 'Contact Details', 'mp' ) . '</h4>' .
+					<h4 class="mp_sub_title">' . __( 'Kontaktdaten', 'mp' ) . '</h4>' .
 					$this->get_address( 'billing', $editable, 'digital' ) .
 					'</div>';
 		} else {
 			$html .= '
 				<div class="mp_content_col mp_content_col-one-half">
-					<h4 class="mp_sub_title">' . __( 'Billing Address', 'mp' ) . '</h4>' .
+					<h4 class="mp_sub_title">' . __( 'Rechnungsadresse', 'mp' ) . '</h4>' .
 					$this->get_address( 'billing', $editable ) .
-					( ( $editable ) ? '<p><a class="button" id="mp-order-copy-billing-address" href="javascript:;">' . __( 'Copy billing address to shipping address', 'mp' ) . '</a>' : '' ) . '
+					( ( $editable ) ? '<p><a class="button" id="mp-order-copy-billing-address" href="javascript:;">' . __( 'Rechnungsadresse in Lieferadresse kopieren', 'mp' ) . '</a>' : '' ) . '
 					</div>';
 		}
 		if ( ! $this->get_cart()->is_download_only() ) {
 			$html .= '
 				<div class="mp_content_col mp_content_col-one-half">
-					<h4 class="mp_sub_title">' . __( 'Shipping Address', 'mp' ) . '</h4>' .
+					<h4 class="mp_sub_title">' . __( 'Lieferadresse', 'mp' ) . '</h4>' .
 					 $this->get_address( 'shipping', $editable ) . '';
 
 			$html .= '
@@ -977,7 +979,7 @@ public $ID = null;
 	 */
 	public function header( $echo = true ) {
 		$html = '
-			<h3 class="mp_order_head">' . __( 'Order #', 'mp' ) . ' ' . ( ( get_query_var( 'mp_order_id' ) ) ? $this->get_id() : '<a href="' . $this->tracking_url( false ) . '">' . $this->get_id() . '</a>' ) . '</h3>
+			<h3 class="mp_order_head">' . __( 'Bestellung #', 'mp' ) . ' ' . ( ( get_query_var( 'mp_order_id' ) ) ? $this->get_id() : '<a href="' . $this->tracking_url( false ) . '">' . $this->get_id() . '</a>' ) . '</h3>
 			<div class="mp_order_detail" id="mp-order-detail-' . $this->ID . '">';
 
 		// Currency
@@ -1003,7 +1005,7 @@ public $ID = null;
 		$received = ( $time = $this->get_meta( 'mp_received_time' ) ) ? mp_format_date( $time, true ) : false;
 
 		// Status
-		$status       = __( 'Received', 'mp' );
+		$status       = __( 'Empfangen', 'mp' );
 		$status_extra = '';
 		if ( $this->_post->post_status === 'order_received' ) {
 			$status = __( 'Ausstehend', 'mp' );
@@ -1033,14 +1035,14 @@ public $ID = null;
 
 		$tooltip_content = '
 			<div class="mp_tooltip_content_item">
-				<div class="mp_tooltip_content_item_label">' . __( 'Taxes:', 'mp' ) . '</div><!-- end mp_tooltip_content_item_label -->
+				<div class="mp_tooltip_content_item_label">' . __( 'Steuern:', 'mp' ) . '</div><!-- end mp_tooltip_content_item_label -->
 				<div class="mp_tooltip_content_item_value">' . $tax_total . '</div><!-- end mp_tooltip_content_item_value -->
 			</div><!-- end mp_tooltip_content_item -->';
 
 		if( ! $this->get_cart()->is_download_only() ) {
 			$tooltip_content .= '
 				<div class="mp_tooltip_content_item">
-					<div class="mp_tooltip_content_item_label">' . __( 'Shipping:', 'mp' ) . '</div><!-- end mp_tooltip_content_item_label -->
+					<div class="mp_tooltip_content_item_label">' . __( 'Versand:', 'mp' ) . '</div><!-- end mp_tooltip_content_item_label -->
 					<div class="mp_tooltip_content_item_value">' . $shipping_total . '</div><!-- end mp_tooltip_content_item_value -->
 				</div><!-- end mp_tooltip_content_item -->
 			';
@@ -1057,10 +1059,10 @@ public $ID = null;
 		$tooltip_content = apply_filters( 'mp_order/tooltip_content_total', $tooltip_content, $this );
 
 		$html .= '
-			<div class="mp_order_detail_item"><h5>' . __( 'Order Received', 'mp' ) . '</h5> <span>' . $received . '</span></div><!-- end mp_order_detail_item -->
-			<div class="mp_order_detail_item"><h5>' . __( 'Current Status', 'mp' ) . '</h5> <span>' . $status . '</span></div><!-- end mp_order_detail_item -->
+			<div class="mp_order_detail_item"><h5>' . __( 'Bestellung erhalten', 'mp' ) . '</h5> <span>' . $received . '</span></div><!-- end mp_order_detail_item -->
+			<div class="mp_order_detail_item"><h5>' . __( 'Aktueller Status', 'mp' ) . '</h5> <span>' . $status . '</span></div><!-- end mp_order_detail_item -->
 			<div class="mp_order_detail_item">
-				<h5>' . __( 'Total', 'mp' ) . '</h5>
+				<h5>' . __( 'Gesamt', 'mp' ) . '</h5>
 				<a href="javascript:;" class="mp_tooltip">' . mp_format_currency( $currency, $this->get_meta( 'mp_order_total', '' ) ) . '</a>
 				<div class="mp_tooltip_content">
 					' . $tooltip_content . '
@@ -1491,9 +1493,9 @@ public $ID = null;
 		// At this point, if method is custom and $url was empty and no filters has been added then $url should be equal at $tracking_number
 
 		if( $url == $tracking_number ) {
-			$link = '<span>' . sprintf(__( 'Shipped: tracking code: %s', 'mp' ), $tracking_number ) . '</a>';
+			$link = '<span>' . sprintf(__( 'Versandt: Sendungsverfolgungsnummer: %s', 'mp' ), $tracking_number ) . '</a>';
 		} else {
-			$link = '<a target="_blank" href="' . $url . '">' . __( 'Shipped: Track Shipment', 'mp' ) . '</a>';
+			$link = '<a target="_blank" href="' . $url . '">' . __( 'Versandt: Sendungsverfolgung', 'mp' ) . '</a>';
 		}
 
 		if ( $echo ) {

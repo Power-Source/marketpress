@@ -1408,20 +1408,20 @@ class MP_Checkout {
 
 		$html = '
 			<div class="mp_checkout_column">
-				<h3 class="mp_sub_title">' . __( 'Billing Address', 'mp' ) . '</h3>' .
+				<h3 class="mp_sub_title">' . __( 'Rechnungsadresse', 'mp' ) . '</h3>' .
 		$this->address_fields( 'billing', true ) . '
 			</div><!-- end mp_checkout_column -->';
 
 		if ( !mp_cart()->is_download_only() ) {
 			$html .= '
 				<div class="mp_checkout_column">
-					<h3 class="mp_sub_title">' . __( 'Shipping Address', 'mp' ) . '</h3>' .
+					<h3 class="mp_sub_title">' . __( 'Lieferadresse', 'mp' ) . '</h3>' .
 			$this->address_fields( 'shipping', true ) . '
 				</div><!-- end mp_checkout_column -->';
 		}
 
 		$html .= '
-			<h3 class="mp_sub_title">' . __( 'Cart', 'mp' ) . '</h3>' .
+			<h3 class="mp_sub_title">' . __( 'Warenkorb', 'mp' ) . '</h3>' .
 		mp_cart()->display( array(
 			'editable' => false
 		) );
@@ -1554,14 +1554,14 @@ class MP_Checkout {
 			$js = '<script type="text/javascript">
 try{
  pageTracker._addTrans(
-		"' . esc_js( $order->post_title ) . '",							 // order ID - required
-		"' . esc_js( get_bloginfo( 'blogname' ) ) . '",					 // affiliation or store name
-		"' . $order->get_meta( 'mp_order_total' ) . '",								 // total - required
-		"' . $order->get_meta( 'mp_tax_total' ) . '",									 // tax
-		"' . $order->get_meta( 'mp_shipping_total' ) . '",							 // shipping
+		"' . esc_js( $order->post_title ) . '",							 		// order ID - required
+		"' . esc_js( get_bloginfo( 'blogname' ) ) . '",					 		// affiliation or store name
+		"' . $order->get_meta( 'mp_order_total' ) . '",							// total - required
+		"' . $order->get_meta( 'mp_tax_total' ) . '",							// tax
+		"' . $order->get_meta( 'mp_shipping_total' ) . '",						// shipping
 		"' . esc_js( $order->get_meta( 'mp_shipping_info->city' ) ) . '",		// city
-		"' . esc_js( $order->get_meta( 'mp_shipping_info->state' ) ) . '",		 // state or province
-		"' . esc_js( $order->get_meta( 'mp_shipping_info->country' ) ) . '"	 // country
+		"' . esc_js( $order->get_meta( 'mp_shipping_info->state' ) ) . '",		// state or province
+		"' . esc_js( $order->get_meta( 'mp_shipping_info->country' ) ) . '"		// country
 	);';
 
 			foreach ( $products as $product ) {
@@ -1569,11 +1569,11 @@ try{
 				$meta = $product->get_meta( 'sku' );
 				$sku = !empty( $meta ) ? esc_attr( $product->get_meta( 'sku' ) ) : $product->ID;
 						$js .= 'pageTracker._addItem(
-				"' . esc_attr( $order->post_title ) . '", // order ID - necessary to associate item with transaction
-				"' . $sku . '",									 // SKU/code - required
-				"' . esc_attr( $product->title( false ) ) . '",			// product name
-				"' . $product->get_price( 'lowest' ) . '",						// unit price - required
-				"' . $cart->get_item_qty( $product->ID ) . '"					 // quantity - required
+				"' . esc_attr( $order->post_title ) . '", 			// order ID - necessary to associate item with transaction
+				"' . $sku . '",									 	// SKU/code - required
+				"' . esc_attr( $product->title( false ) ) . '",		// product name
+				"' . $product->get_price( 'lowest' ) . '",			// unit price - required
+				"' . $cart->get_item_qty( $product->ID ) . '"		// quantity - required
 			);';
 			}
 			$js .= 'pageTracker._trackTrans(); //submits transaction to the Analytics servers
@@ -1584,14 +1584,14 @@ try{
 
 			$js = '<script type="text/javascript">
 	_gaq.push(["_addTrans",
-		"' . esc_attr( $order->post_title ) . '",						 // order ID - required
-		"' . esc_attr( get_bloginfo( 'blogname' ) ) . '",				 // affiliation or store name
-		"' . $order->get_meta( 'mp_order_total' ) . '",								 // total - required
-		"' . $order->get_meta( 'mp_tax_total' ) . '",									 // tax
-		"' . $order->get_meta( 'mp_shipping_total' ) . '",							 // shipping
+		"' . esc_attr( $order->post_title ) . '",						 		// order ID - required
+		"' . esc_attr( get_bloginfo( 'blogname' ) ) . '",				 		// affiliation or store name
+		"' . $order->get_meta( 'mp_order_total' ) . '",							// total - required
+		"' . $order->get_meta( 'mp_tax_total' ) . '",							// tax
+		"' . $order->get_meta( 'mp_shipping_total' ) . '",						// shipping
 		"' . esc_attr( $order->get_meta( 'mp_shipping_info->city' ) ) . '",		// city
-		"' . esc_attr( $order->get_meta( 'mp_shipping_info->state' ) ) . '",		 // state or province
-		"' . esc_attr( $order->get_meta( 'mp_shipping_info->country' ) ) . '"	 // country
+		"' . esc_attr( $order->get_meta( 'mp_shipping_info->state' ) ) . '",	// state or province
+		"' . esc_attr( $order->get_meta( 'mp_shipping_info->country' ) ) . '"	// country
 	]);';
 
 			foreach ( $products as $product ) {
@@ -1599,12 +1599,12 @@ try{
 				$meta = $product->get_meta( 'sku' );
 				$sku = !empty( $meta ) ? esc_attr( $product->get_meta( 'sku' ) ) : $product->ID;
 						$js .= '_gaq.push(["_addItem",
-				"' . esc_attr( $order->post_title ) . '", // order ID - necessary to associate item with transaction
-				"' . $sku . '",									 // SKU/code - required
-				"' . esc_attr( $product->title( false ) ) . '",			// product name
-				"",												// category
-				"' . $product->get_price( 'lowest' ) . '",						// unit price - required
-				"' . $cart->get_item_qty( $product->ID ) . '"					 // quantity - required
+				"' . esc_attr( $order->post_title ) . '", 			// order ID - necessary to associate item with transaction
+				"' . $sku . '",									 	// SKU/code - required
+				"' . esc_attr( $product->title( false ) ) . '",		// product name
+				"",													// category
+				"' . $product->get_price( 'lowest' ) . '",			// unit price - required
+				"' . $cart->get_item_qty( $product->ID ) . '"		// quantity - required
 			]);';
 			}
 			$js .= '_gaq.push(["_trackTrans"]);
@@ -1616,14 +1616,14 @@ try{
 
 				$js = '<script type="text/javascript">
 		_gaq.push(["b._addTrans",
-			"' . esc_attr( $order->post_title ) . '",							 // order ID - required
-			"' . esc_attr( get_bloginfo( 'blogname' ) ) . '",					 // affiliation or store name
-			"' . $order->get_meta( 'mp_order_total' ) . '",									 // total - required
-			"' . $order->get_meta( 'mp_tax_total' ) . '",									 // tax
-			"' . $order->get_meta( 'mp_shipping_total' ) . '",								 // shipping
+			"' . esc_attr( $order->post_title ) . '",							 	// order ID - required
+			"' . esc_attr( get_bloginfo( 'blogname' ) ) . '",					 	// affiliation or store name
+			"' . $order->get_meta( 'mp_order_total' ) . '",							// total - required
+			"' . $order->get_meta( 'mp_tax_total' ) . '",							// tax
+			"' . $order->get_meta( 'mp_shipping_total' ) . '",						// shipping
 			"' . esc_attr( $order->get_meta( 'mp_shipping_info->city' ) ) . '",		// city
-			"' . esc_attr( $order->get_meta( 'mp_shipping_info->state' ) ) . '",		 // state or province
-			"' . esc_attr( $order->get_meta( 'mp_shipping_info->country' ) ) . '"	 // country
+			"' . esc_attr( $order->get_meta( 'mp_shipping_info->state' ) ) . '",	// state or province
+			"' . esc_attr( $order->get_meta( 'mp_shipping_info->country' ) ) . '"	// country
 		]);';
 
 				foreach ( $products as $product ) {
@@ -1631,12 +1631,12 @@ try{
 					$meta = $product->get_meta( 'sku' );
 					$sku = !empty( $meta ) ? esc_attr( $product->get_meta( 'sku' ) ) : $product->ID;
 							$js .= '_gaq.push(["b._addItem",
-					"' . esc_attr( $order->post_title ) . '", // order ID - necessary to associate item with transaction
-					"' . $sku . '",									 // SKU/code - required
-					"' . esc_attr( $product->title( false ) ) . '",			// product name
-					"",												// category
-					"' . $product->get_price( 'lowest' ) . '",						// unit price - required
-					"' . $cart->get_item_qty( $product->ID ) . '"					 // quantity - required
+					"' . esc_attr( $order->post_title ) . '", 			// order ID - necessary to associate item with transaction
+					"' . $sku . '",									 	// SKU/code - required
+					"' . esc_attr( $product->title( false ) ) . '",		// product name
+					"",													// category
+					"' . $product->get_price( 'lowest' ) . '",			// unit price - required
+					"' . $cart->get_item_qty( $product->ID ) . '"		// quantity - required
 				]);';
 				}
 				$js .= '_gaq.push(["b._trackTrans"]);
@@ -1651,9 +1651,9 @@ try{
 		ga("ecommerce:addTransaction", {
 				"id": "' . esc_attr( $order->post_title ) . '",						// Transaction ID. Required.
 				"affiliation": "' . esc_attr( get_bloginfo( 'blogname' ) ) . '",	// Affiliation or store name.
-				"revenue": "' . $order->get_meta( 'mp_order_total' ) . '",						// Grand Total.
-				"shipping": "' . $order->get_meta( 'mp_shipping_total' ) . '",					// Shipping.
-				"tax": "' . $order->get_meta( 'mp_tax_total' ) . '"							 		// Tax.
+				"revenue": "' . $order->get_meta( 'mp_order_total' ) . '",			// Grand Total.
+				"shipping": "' . $order->get_meta( 'mp_shipping_total' ) . '",		// Shipping.
+				"tax": "' . $order->get_meta( 'mp_tax_total' ) . '"					// Tax.
 			});';
 			//loop the items
 
@@ -1663,12 +1663,12 @@ try{
 				$meta = $product->get_meta( 'sku' );
 				$sku = !empty( $meta ) ? esc_attr( $product->get_meta( 'sku' ) ) : $product->ID;
 				$js .= 'ga("ecommerce:addItem", {
-					 "id": "' . esc_attr( $order->post_title ) . '", // Transaction ID. Required.
-					 "name": "' . esc_attr( $product->title( false ) ) . '",	 // Product name. Required.
-					 "sku": "' . $sku . '",								// SKU/code.
-					 "category": "",			 					// Category or variation.
-					 "price": "' . $product->get_price( 'lowest' ) . '",				 // Unit price.
-					 "quantity": "' . $cart->get_item_qty( $product->ID ) . '"		 // Quantity.
+					 "id": "' . esc_attr( $order->post_title ) . '", 			// Transaction ID. Required.
+					 "name": "' . esc_attr( $product->title( false ) ) . '",	// Product name. Required.
+					 "sku": "' . $sku . '",										// SKU/code.
+					 "category": "",			 								// Category or variation.
+					 "price": "' . $product->get_price( 'lowest' ) . '",		// Unit price.
+					 "quantity": "' . $cart->get_item_qty( $product->ID ) . '"	// Quantity.
 				});';
 			}
 

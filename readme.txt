@@ -94,6 +94,9 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Update: phenx/php-font-lib auf 0.5.6 und phenx/php-svg-lib auf 0.5.4 aktualisiert.
 * Update: masterminds/html5 auf 2.10.0 aktualisiert.
 * Fix: Verbleibende implizit-nullable PHP-8.4-Signaturen in dompdf FrameReflower-Klassen (Block, Inline, Table, TableCell, TableRow, TableRowGroup, Text, Page, ListBullet, NullFrameReflower, Image) und in phenx/php-font-lib direkt gepatcht.
+* Fix: Bestell-Metaboxen im Admin erzeugen keine Object-Cache-Notice mehr; `MP_Orders_Admin::add_meta_boxes()` übergibt nun das aktuelle Bestell-Postobjekt korrekt an `MP_Order`, und Cache-Zugriffe in `MP_Order::_get_post()` sind zusätzlich gegen leere Order-IDs abgesichert.
+* Verbesserung: PDF-Lieferscheine in allen drei Template-Varianten (`default`, `modern`, `minimalist`) komplett überarbeitet; klarere Kopfbereiche, saubere Adressblöcke, deutlich lesbarere Artikeltabellen und professionelleres Layout.
+* Fix: PDF-Lieferscheine verwenden keine extern geladenen Webfonts mehr; stattdessen kommt eine PDF-taugliche Standardschrift zum Einsatz, wodurch Darstellungsprobleme und unerwünschte Dompdf-Font-Artefakte vermieden werden.
 
 = 1.0.3 =
 

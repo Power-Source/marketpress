@@ -65,7 +65,7 @@ class MP_PDF_Invoice {
 				'type'     => $type
 			);
 			$http_params = apply_filters( 'mp_pdf_invoice_button_params', $http_params, $type, $order );
-			$html        = sprintf( '<a target="_blank" href="%s" class="button">%s</a>', add_query_arg( $http_params, admin_url( 'admin-ajax.php' ) ), $type == self::PDF_INVOICE ? __( "PDF Invoice", "mp" ) : __( "PDF Packing Slip", "mp" )
+			$html        = sprintf( '<a target="_blank" href="%s" class="button">%s</a>', add_query_arg( $http_params, admin_url( 'admin-ajax.php' ) ), $type == self::PDF_INVOICE ? __( "PDF Rechnung", "mp" ) : __( "PDF Lieferschein", "mp" )
 			);
 
 			return apply_filters( 'mp_pdf_invoice_button', $html, $http_params, $type, $order );

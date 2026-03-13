@@ -575,41 +575,41 @@ class MP_Coupons_Addon {
 	public function init_metaboxes() {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'        => 'mp-coupons-metabox',
-			'title'     => __( 'Coupon Settings', 'mp' ),
+			'title'     => __( 'Gutschein Einstellungen', 'mp' ),
 			'post_type' => 'mp_coupon',
 			'context'   => 'normal',
 		) );
 		$metabox->add_field( 'text', array(
 			'name'       => 'coupon_code',
-			'desc'       => __( 'Letters and Numbers only.', 'mp' ),
+			'desc'       => __( 'Nur Buchstaben und Zahlen.', 'mp' ),
 			'validation' => array( 'required' => true, 'alphanumeric' => true ),
 			'style'      => 'text-transform:uppercase',
-			'label'      => array( 'text' => __( 'Coupon Code', 'mp' ) ),
+			'label'      => array( 'text' => __( 'Gutscheincode', 'mp' ) ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'                      => 'discount',
-			'desc'                      => __( 'If you would like to give a percentage-based discount make sure to include the percent (%) symbol. Otherwise, the discount will be applied as a fixed amount off.', 'mp' ),
+			'desc'                      => __( 'Wenn Du einen prozentualen Rabatt gewähren möchtest, stelle sicher, dass das Prozentzeichen (%) enthalten ist. Andernfalls wird der Rabatt als fester Betrag angewendet.', 'mp' ),
 			'validation'                => array( 'required' => true, 'custom' => '[0-9%.]' ),
-			'custom_validation_message' => __( 'Value must either be a decimal number or a percentage', 'mp' ),
-			'label'                     => array( 'text' => __( 'Discount Amount', 'mp' ) ),
+			'custom_validation_message' => __( 'Der Wert muss entweder eine Dezimalzahl oder ein Prozentsatz sein', 'mp' ),
+			'label'                     => array( 'text' => __( 'Rabattbetrag', 'mp' ) ),
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'          => 'discount_type',
-			'label'         => array( 'text' => __( 'How should the discount amount be applied?', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Wie soll der Rabattbetrag angewendet werden?', 'mp' ) ),
 			'default_value' => 'item',
 			'options'       => array(
-				'item'     => __( 'Apply to each applicable item and quantity ordered', 'mp' ),
-				'subtotal' => __( 'Apply to each applicable item once per cart', 'mp' )
+				'item'     => __( 'Auf jeden anwendbaren Artikel und die bestellte Menge anwenden', 'mp' ),
+				'subtotal' => __( 'Auf jeden anwendbaren Artikel einmal pro Warenkorb anwenden', 'mp' )
 			),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'  => 'can_be_combined',
-			'label' => array( 'text' => __( 'Can this coupon be combined with other coupons?', 'mp' ) ),
+			'label' => array( 'text' => __( 'Kann dieser Gutschein mit anderen Gutscheinen kombiniert werden?', 'mp' ) ),
 		) );
 		$metabox->add_field( 'post_select', array(
 			'name'        => 'allowed_coupon_combos',
-			'label'       => array( 'text' => __( 'Select combinable coupons', 'mp' ) ),
-			'desc'        => __( 'Leave blank to allow all other coupons.', 'mp' ),
+			'label'       => array( 'text' => __( 'Wähle kombinierbare Gutscheine', 'mp' ) ),
+			'desc'        => __( 'Lass dieses Feld leer, um alle anderen Gutscheine zuzulassen.', 'mp' ),
 			'multiple'    => true,
 			'conditional' => array(
 				'name'   => 'can_be_combined',
@@ -622,9 +622,9 @@ class MP_Coupons_Addon {
 		) );
 		$metabox->add_field( 'text', array(
 			'name'       => 'max_uses',
-			'desc'       => __( 'Enter the maximum number of times this coupon can be used.', 'mp' ),
+			'desc'       => __( 'Gib die maximale Anzahl der Verwendungen dieses Gutscheins ein.', 'mp' ),
 			'class'      => 'digits',
-			'label'      => array( 'text' => __( 'Max Uses', 'mp' ) ),
+			'label'      => array( 'text' => __( 'Maximale Verwendungen', 'mp' ) ),
 			'validation' => array(
 				'digits' => true,
 				'min'    => 0,
@@ -634,14 +634,14 @@ class MP_Coupons_Addon {
 		//Allow for the user to define the minimum number of products the cart has to have
 		$metabox->add_field( 'checkbox', array(
 			'name'  => 'product_count_limited',
-			'label' => array( 'text' => __( 'Can this coupon be limited to a number of products in the cart?', 'mp' ) ),
+			'label' => array( 'text' => __( 'Kann dieser Gutschein auf eine bestimmte Anzahl von Produkten im Warenkorb beschränkt werden?', 'mp' ) ),
 		) );
 		
 		$metabox->add_field( 'text', array(
 			'name'       => 'min_products',
-			'desc'       => __( 'Enter the minimum number of products in the cart that this coupon can be used.', 'mp' ),
+			'desc'       => __( 'Gib die minimale Anzahl der Produkte im Warenkorb ein, die erforderlich ist, um diesen Gutschein zu verwenden.', 'mp' ),
 			'class'      => 'digits',
-			'label'      => array( 'text' => __( 'Mimimum number of products', 'mp' ) ),
+			'label'      => array( 'text' => __( 'Minimale Anzahl von Produkten', 'mp' ) ),
 			'validation' => array(
 				'digits' => true,
 				'min'    => 0,
@@ -656,25 +656,25 @@ class MP_Coupons_Addon {
 		//Option to only allow logged in users to use this
 		$metabox->add_field( 'radio_group', array(
 			'name'          => 'require_login',
-			'label'         => array( 'text' => __( 'Require Login', 'mp' ) ),
-			'desc'			=> __( 'Should this coupon only be available to logged in users?', 'mp' ),
+			'label'         => array( 'text' => __( 'Login erforderlich', 'mp' ) ),
+			'desc'			=> __( 'Soll dieser Gutschein nur für eingeloggte Benutzer verfügbar sein?', 'mp' ),
 			'default_value' => 'no',
 			'options'       => array(
-				'no'      => __( 'No', 'mp' ),
-				'yes' 	  => __( 'Yes', 'mp' )
+				'no'      => __( 'Nein', 'mp' ),
+				'yes' 	  => __( 'Ja', 'mp' )
 			),
 		) );
 
 		$metabox->add_field( 'radio_group', array(
 			'name'          => 'applies_to',
-			'label'         => array( 'text' => __( 'Applies To', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Gilt für', 'mp' ) ),
 			'orientation'   => 'horizontal',
 			'default_value' => 'all',
 			'options'       => array(
-				'all'      => __( 'All Products', 'mp' ),
-				'category' => __( 'Category', 'mp' ),
-				'product'  => __( 'Product', 'mp' ),
-				'user'     => __( 'User', 'mp' ),
+				'all'      => __( 'Alle Produkte', 'mp' ),
+				'category' => __( 'Kategorie', 'mp' ),
+				'product'  => __( 'Produkt', 'mp' ),
+				'user'     => __( 'Benutzer', 'mp' ),
 			),
 		) );
 
@@ -682,9 +682,9 @@ class MP_Coupons_Addon {
 			'name'        => 'product',
 			'validation'  => array( 'required' => true ),
 			'multiple'    => true,
-			'placeholder' => __( 'Select Products', 'mp' ),
+			'placeholder' => __( 'Produkte auswählen', 'mp' ),
 			'query'       => array( 'post_type' => MP_Product::get_post_type(), 'posts_per_page' => 20 ),
-			'label'       => array( 'text' => __( 'Product', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Produkt', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'applies_to',
 				'value'  => 'product',
@@ -696,9 +696,9 @@ class MP_Coupons_Addon {
 			'name'        => 'category',
 			'validation'  => array( 'required' => true ),
 			'multiple'    => true,
-			'placeholder' => __( 'Select Category', 'mp' ),
+			'placeholder' => __( 'Kategorie auswählen', 'mp' ),
 			'taxonomy'    => 'product_category',
-			'label'       => array( 'text' => __( 'Category', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Kategorie', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'applies_to',
 				'value'  => 'category',
@@ -709,7 +709,7 @@ class MP_Coupons_Addon {
 		$metabox->add_field( 'user_select', array(
 			'name'        => 'user',
 			'validation'  => array( 'required' => true ),
-			'label'       => array( 'text' => __( 'User', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Benutzer', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'applies_to',
 				'value'  => 'user',
@@ -722,10 +722,10 @@ class MP_Coupons_Addon {
 		$metabox->add_field( 'taxonomy_select', array(
 			'name'        => 'user_category',
 			'multiple'    => true,
-			'placeholder' => __( 'Select Category', 'mp' ),
-			'desc'		  => __( 'Optionally limit the user to some categories', 'mp' ),
+			'placeholder' => __( 'Kategorie auswählen', 'mp' ),
+			'desc'		  => __( 'Optional kann der Benutzer auf bestimmte Kategorien beschränkt werden.', 'mp' ),
 			'taxonomy'    => 'product_category',
-			'label'       => array( 'text' => __( 'Category', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Kategorie', 'mp' ) ),
 			'conditional' => array(
 				'name'   	=> 'applies_to',
 				'value'  	=> 'user',
@@ -738,19 +738,19 @@ class MP_Coupons_Addon {
 		$metabox->add_field( 'datepicker', array(
 			'name'          => 'start_date',
 			'validation'    => array( 'required' => true ),
-			'label'         => array( 'text' => __( 'Start Date', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Startdatum', 'mp' ) ),
 			'default_value' => date( 'Y-m-d' ),
 		) );
 
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'has_end_date',
-			'label'   => array( 'text' => __( 'Does coupon have an end date?', 'mp' ) ),
-			'message' => __( 'Yes', 'mp' ),
+			'label'   => array( 'text' => __( 'Hat der Gutschein ein Enddatum?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
 		) );
 
 		$metabox->add_field( 'datepicker', array(
 			'name'        => 'end_date',
-			'label'       => array( 'text' => __( 'End Date', 'mp' ) ),
+			'label'       => array( 'text' => __( 'Enddatum', 'mp' ) ),
 			'conditional' => array(
 				'name'   => 'has_end_date',
 				'value'  => '1',
@@ -775,12 +775,12 @@ class MP_Coupons_Addon {
 		) );
 		$metabox->add_field( 'text', array(
 			'name'          => 'coupons[form_title]',
-			'label'         => array( 'text' => __( 'Form Title', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Formular Titel', 'mp' ) ),
 			'default_value' => __( 'Hast du einen Gutscheincode?', 'mp' ),
 		) );
 		$metabox->add_field( 'wysiwyg', array(
 			'name'          => 'coupons[help_text]',
-			'label'         => array( 'text' => __( 'Help Text', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Hilfetext', 'mp' ) ),
 			'default_value' => __( 'Mehr als ein Code? Kein Problem! Bitte immer nur einen Code gleichzeitig eingeben.', 'mp' ),
 		) );
 	}
@@ -1186,12 +1186,12 @@ class MP_Coupons_Addon {
 		return array(
 			'cb'          => '<input type="checkbox">',
 			'title'       => __( 'Code', 'mp' ),
-			'discount'    => __( 'Discount', 'mp' ),
-			'used'        => __( 'Used', 'mp' ),
-			'remaining'   => __( 'Remaining Uses', 'mp' ),
-			'req_login'   => __( 'Requires Login', 'mp' ),
-			'valid_dates' => __( 'Valid Dates', 'mp' ),
-			'applies_to'  => __( 'Applies To', 'mp' ),
+			'discount'    => __( 'Rabatt', 'mp' ),
+			'used'        => __( 'Verwendet', 'mp' ),
+			'remaining'   => __( 'Verbleibende Verwendungen', 'mp' ),
+			'req_login'   => __( 'Login erforderlich', 'mp' ),
+			'valid_dates' => __( 'Gültige Daten', 'mp' ),
+			'applies_to'  => __( 'Gilt für', 'mp' ),
 		);
 	}
 
@@ -1283,8 +1283,8 @@ class MP_Coupons_Addon {
 			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'mp_coupons_nonce' ),
 			'messages' => array(
-				'required' => __( 'Please enter a code', 'mp' ),
-				'added'    => __( 'Coupon added successfully', 'mp' ),
+				'required' => __( 'Bitte gib einen Code ein.', 'mp' ),
+				'added'    => __( 'Gutschein erfolgreich hinzugefügt', 'mp' ),
 			),
 		) );
 	}
