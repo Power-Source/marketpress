@@ -5,7 +5,7 @@ Requires at least: 3.7
 Requires PHP: 7.4
 Tested up to: 6.8.1
 ClassicPress: 2.6.0
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -87,6 +87,17 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 = 1.0.3 =
 
 * Fix: Legacy-Datenbank-Upgrade-Trigger für die 1.x-Linie deaktiviert, damit die Meldung "MarketPress requires a database update" bei normalen Plugin-Updates nicht mehr wiederholt erscheint.
+* Security: Gast-Bestellstatus wurde gehärtet; nicht eingeloggte Zugriffe auf Bestelldetails erfordern nun die passende Gast-E-Mail-Prüfung statt nur der Bestellnummer.
+* Security: Öffentliche AJAX-Prüfungen für bestehende Benutzernamen/E-Mails wurden mit zusätzlicher Nonce-Validierung abgesichert.
+* Security: Mehrere Ausgabestellen für Bestell-/Adressdaten und Multisite-Taxonomieausgaben wurden korrekt escaped, um XSS-Risiken zu reduzieren.
+* Security: Multisite-Term-Abfrage wurde auf vorbereitete SQL-Parameter umgestellt.
+* Performance: Variations-Updatepfade im Admin wurden entlastet (zentraler Rebuild des Variationsnamens, weniger wiederholte Attribut-/Term-Abfragen).
+* Performance: Variations-Laden verwendet optimierte ID-basierte Abfragen und effizienteres Caching.
+* Performance: Variation-Popup und Varianten-Metaboxen wurden von N+1-Termabfragen auf Bulk-Termauflösung umgestellt.
+* Performance: Shortcode-Builder-Produktsuche wurde auf paginierte, begrenzte Ergebnisse umgestellt (statt ungebremster Vollabfrage).
+* Performance: Multisite-Tag-Cloud nutzt nun Version-basiertes Caching mit gezielter Invalidierung nach Index-/Term-Änderungen.
+* Performance: Multisite-Produktindexierung wurde auf batchweise Verarbeitung umgestellt, um Speicherlast bei großen Netzwerken zu reduzieren.
+* Performance: Post-Select-Feld in psource-metaboxes nutzt ein sinnvolles Standardlimit statt unbegrenzter Abfrage.
 
 = 1.0.2 =
 
