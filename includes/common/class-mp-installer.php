@@ -1231,7 +1231,7 @@ class MP_Installer {
 			`term_id` bigint(20) unsigned NOT NULL,
 			`public` boolean NOT NULL DEFAULT 1,
 			PRIMARY KEY ( `post_id` , `term_id` ),
-			KEY (`term_id`)
+			KEY `term_id` (`term_id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
 
 		dbDelta( $term_relationships_table );
@@ -1365,8 +1365,8 @@ class MP_Installer {
 			}
 
 			//fix price sort field if missing
-			if ( empty( $meta['mp_price_sort'] ) && is_array( $meta['mp_price'] ) ) {
-				if ( $meta['mp_is_sale'] && $meta['mp_sale_price'][0] ) {
+			if ( empty( $meta['mp_price_sort'] ) && isset( $meta['mp_price'] ) && is_array( $meta['mp_price'] ) ) {
+				if ( ! empty( $meta['mp_is_sale'] ) && ! empty( $meta['mp_sale_price'][0] ) ) {
 					$sort_price = $meta['mp_sale_price'][0];
 				} else {
 					$sort_price = $meta['mp_price'][0];

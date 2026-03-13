@@ -84,6 +84,11 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.0.4 =
+
+* Fix: Installer-Migrationen für PHP 8 gehärtet: fehlende Legacy-Meta-Keys (`mp_price`, `mp_sale_price`, `mp_is_sale`) werden in `update_214()` nun defensiv geprüft, wodurch Warnungen wie "Undefined array key mp_price" entfallen.
+* Fix: Datenbank-Migration für `mp_term_relationships` korrigiert; der Index auf `term_id` wird jetzt mit gültigem Namen erzeugt, wodurch dbDelta-Fehler wie "Incorrect index name ''" vermieden werden.
+
 = 1.0.3 =
 
 * Fix: Legacy-Datenbank-Upgrade-Trigger für die 1.x-Linie deaktiviert, damit die Meldung "MarketPress requires a database update" bei normalen Plugin-Updates nicht mehr wiederholt erscheint.
