@@ -1,0 +1,13 @@
+{
+    "name": "psource/marketpress-dompdf-bundle",
+    "description": "Bundled dompdf for mp-pdf-invoice addon",
+    "type": "project",
+    "license": "LGPL-2.1",
+    "require": {
+        "dompdf/dompdf": "^2.0"
+    },
+    "config": {
+        "vendor-dir": "vendor",
+        "optimize-autoloader": true
+    }
+}

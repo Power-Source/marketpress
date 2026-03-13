@@ -5,7 +5,7 @@ Requires at least: 3.7
 Requires PHP: 7.4
 Tested up to: 6.8.1
 ClassicPress: 2.6.0
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -89,6 +89,11 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Fix: Installer-Migrationen für PHP 8 gehärtet: fehlende Legacy-Meta-Keys (`mp_price`, `mp_sale_price`, `mp_is_sale`) werden in `update_214()` nun defensiv geprüft, wodurch Warnungen wie "Undefined array key mp_price" entfallen.
 * Fix: Datenbank-Migration für `mp_term_relationships` korrigiert; der Index auf `term_id` wird jetzt mit gültigem Namen erzeugt, wodurch dbDelta-Fehler wie "Incorrect index name ''" vermieden werden.
 * Fix: PHP-8-Deprecation in `MP_Taxes::calculate()` behoben; der Parameter `$applied_rates` ist nun optional deklariert und erzeugt keine Warnung mehr für "optional parameter before required parameter".
+* Update: Dompdf auf v2.0.8 aktualisiert (war v2.0.4); behebt mehrere PHP-8.4-Deprecations für implizit nullbare Parameter in FrameReflower- und FrameDecorator-Klassen sowie in `Options::__construct()`.
+* Update: Sabberworm php-css-parser auf v8.9.0 aktualisiert (war v8.4.0); behebt PHP-8.4-Deprecations in Parser, RuleSet und CSSList/Document.
+* Update: phenx/php-font-lib auf 0.5.6 und phenx/php-svg-lib auf 0.5.4 aktualisiert.
+* Update: masterminds/html5 auf 2.10.0 aktualisiert.
+* Fix: Verbleibende implizit-nullable PHP-8.4-Signaturen in dompdf FrameReflower-Klassen (Block, Inline, Table, TableCell, TableRow, TableRowGroup, Text, Page, ListBullet, NullFrameReflower, Image) und in phenx/php-font-lib direkt gepatcht.
 
 = 1.0.3 =
 
