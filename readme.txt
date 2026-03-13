@@ -5,7 +5,7 @@ Requires at least: 3.7
 Requires PHP: 7.4
 Tested up to: 6.8.1
 ClassicPress: 2.6.0
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -83,6 +83,10 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 
 == Changelog ==
+
+= 1.0.3 =
+
+* Fix: Legacy-Datenbank-Upgrade-Trigger für die 1.x-Linie deaktiviert, damit die Meldung "MarketPress requires a database update" bei normalen Plugin-Updates nicht mehr wiederholt erscheint.
 
 = 1.0.2 =
 

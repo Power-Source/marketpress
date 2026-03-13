@@ -35,13 +35,6 @@ class MP_Installer {
 	private function __construct() {
 		add_action( 'init', array( &$this, 'run' ) );
 		add_action( 'after_switch_theme', array( &$this, 'add_admin_store_caps' ) );
-		add_action( 'admin_notices', array( &$this, 'db_update_notice' ) );
-		add_action( 'admin_menu', array( &$this, 'add_menu_items' ), 99 );
-		add_action( 'wp_ajax_mp_update_product_postmeta', array( &$this, 'update_product_postmeta' ) );
-		add_action( 'admin_enqueue_scripts', array(
-			&$this,
-			'enqueue_db_update_scripts',
-		) );
 	}
 
 	/**
@@ -688,6 +681,9 @@ class MP_Installer {
 		$force_upgrade = mp_get_get_value( 'force_upgrade', 0 );
 		$force_version = mp_get_get_value( 'force_version', false );
 
+		// Legacy DB upgrade flow is retired in the 1.x line.
+		delete_option( 'mp_db_update_required' );
+
 		// Add "post_status" to $wpdb->mp_products table
 		$this->add_post_status_column();
 
@@ -717,18 +713,7 @@ class MP_Installer {
 				$this->update_2923();
 			}
 
-			//3.0 update
-			if ( version_compare( $old_version, '3.0.0.2', '<' ) || ( false !== $force_version && version_compare( $force_version, '3.0.0.2', '<' ) ) ) {
-				$settings = $this->update_3000( $settings );
-			}
-
-			//3.0.0.3 need data from 3.0
-			if ( ( version_compare( $old_version, '3.0.0.3', '<' ) || ( false !== $force_version && version_compare( $force_version, '3.0.0.3', '<' ) ) ) ) {
-				$settings = $this->update_3003( $settings );
-				update_option( 'mp_settings', $settings );
-				//we will remove the mp_db_update_required, so user can re run the wizard
-				update_option( 'mp_db_update_required', 1 );
-			}
+			// 3.0 migration steps intentionally disabled for PS MarketPress 1.x.
 
 			//3.0 update
 			if ( version_compare( $old_version, '3.0.0.8', '<' ) || ( false !== $force_version && version_compare( $force_version, '3.0.0.8', '<' ) ) ) {
@@ -761,6 +746,9 @@ class MP_Installer {
 
 		//add action to flush rewrite rules after we've added them for the first time
 		update_option( 'mp_flush_rewrites', 1 );
+
+		// Keep stale flags from older installs from re-showing legacy update notices.
+		delete_option( 'mp_db_update_required' );
 
 		update_option( 'mp_previous_version', $old_version );
 		update_option( 'mp_version', MP_VERSION );
