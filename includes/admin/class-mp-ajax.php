@@ -466,6 +466,10 @@ class MP_Ajax {
 	 * @action wp_ajax_nopriv_mp_check_if_email_exists
 	 */
 	public function check_if_email_exists() {
+		if ( ! wp_verify_nonce( mp_get_request_value( 'mp_public_nonce', '' ), 'mp-public-account-check' ) ) {
+			die( 'false' );
+		}
+
 		if ( email_exists( mp_get_request_value( 'email', '' ) ) ) {
 			die( 'false' );
 		}
@@ -481,6 +485,10 @@ class MP_Ajax {
 	 * @access wp_ajax_nopriv_mp_check_if_username_exists
 	 */
 	public function check_if_username_exists() {
+		if ( ! wp_verify_nonce( mp_get_request_value( 'mp_public_nonce', '' ), 'mp-public-account-check' ) ) {
+			die( 'false' );
+		}
+
 		if ( username_exists( mp_get_request_value( 'account_username', '' ) ) ) {
 			die( 'false' );
 		}
@@ -523,15 +531,29 @@ class MP_Ajax {
 	 * @action wp_ajax_mp_lookup_order, wp_ajax_nopriv_mp_lookup_order
 	 */
 	public function lookup_order() {
+		if ( ! wp_verify_nonce( mp_get_post_value( 'mp_lookup_order_nonce', '' ), 'mp_lookup_order' ) ) {
+			wp_send_json_error( array( 'error_message' => __( 'Ungültige Anfrage. Bitte lade die Seite neu und versuche es erneut.', 'mp' ) ) );
+		}
+
 		if ( $order_id = mp_get_post_value( 'order_id' ) ) {
 			$order = new MP_Order( $order_id );
 			if ( $order->exists() ) {
-
 				$redirect_url = trailingslashit( mp_store_page_url( 'order_status', false ) ) . $order->get_id();
-				
-				//non-logged in user
-				if ( $guest_email = mp_get_post_value( 'guest_email' ) ){
-					$redirect_url = trailingslashit( $redirect_url ) . md5( $guest_email );
+				$billing_email = sanitize_email( $order->get_meta( 'mp_billing_info->email', '' ) );
+				$is_guest_order = 'guest' === $order->get_meta( 'mp_user_kind', '' );
+
+				if ( is_user_logged_in() ) {
+					if ( $order->post_author != get_current_user_id() && ! current_user_can( apply_filters( 'mp_store_settings_cap', 'read_store_order' ) ) ) {
+						wp_send_json_error( array( 'error_message' => __( 'Ups... wir konnten keine Bestellungen mit dieser ID finden. Bitte überprüfe deine Bestell-ID und versuche es erneut.', 'mp' ) ) );
+					}
+				} else {
+					$guest_email = sanitize_email( mp_get_post_value( 'guest_email', '' ) );
+
+					if ( ! $is_guest_order || empty( $guest_email ) || empty( $billing_email ) || strtolower( $guest_email ) !== strtolower( $billing_email ) ) {
+						wp_send_json_error( array( 'error_message' => __( 'Ups... wir konnten keine Bestellungen mit dieser ID finden. Bitte überprüfe deine Bestell-ID und versuche es erneut.', 'mp' ) ) );
+					}
+
+					$redirect_url = trailingslashit( $redirect_url ) . md5( $order->get_meta( 'mp_billing_info->email', '' ) );
 				}
 
 				wp_send_json_success( array(

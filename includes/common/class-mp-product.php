@@ -786,33 +786,43 @@ public $content_tabs = array();
 
 		$identifier = $this->ID;
 		$transient_key = 'mp-get-variations-' . $identifier;
+		$cached_variations = get_transient( $transient_key );
 
-		//Check if variations data exist on transient, if not do the query and save result on transient
-		//if ( false === ( $this->_variations = get_transient( $transient_key ) ) ) {
-		if ( false == ( $this->_variations = get_transient( $transient_key ) ) ) {
-			$this->_variations = array();
-			$args = array(
-				'post_type'      => MP_Product::get_variations_post_type(),
-				'posts_per_page' => -1,
-				'orderby'        => 'menu_order',
-				'order'          => 'ASC',
-				'post_parent'    => $this->ID,
-			);
+		$this->_variations    = array();
+		$this->_variation_ids = array();
 
-			$query = new WP_Query( $args );
+		if ( is_array( $cached_variations ) && ! empty( $cached_variations ) && current( $cached_variations ) instanceof MP_Product ) {
+			$this->_variations = $cached_variations;
 
-			$this->_variation_ids = array();
+			foreach ( $this->_variations as $variation ) {
+				$this->_variation_ids[] = $variation->ID;
+			}
+		} elseif ( is_array( $cached_variations ) ) {
+			$this->_variation_ids = array_values( array_filter( array_map( 'absint', $cached_variations ) ) );
+		} else {
+			$this->_variation_ids = get_posts( array(
+				'post_type'              => MP_Product::get_variations_post_type(),
+				'posts_per_page'         => -1,
+				'orderby'                => 'menu_order',
+				'order'                  => 'ASC',
+				'post_parent'            => $this->ID,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			) );
 
-			while ( $query->have_posts() ) : $query->the_post();
-				$this->_variations[] = $variation = new MP_Product();
-			endwhile;
-
-			//Save variations data on a transient, transient key is 'mp-get-variations-{product_id}'
-			set_transient('mp-get-variations-' . $this->ID, $this->_variations, 12 * 60 * 60);
+			set_transient( $transient_key, $this->_variation_ids, 12 * 60 * 60 );
 		}
 
-		foreach ($this->_variations as $variation) {
-			$this->_variation_ids[] = $variation->ID;
+		if ( empty( $this->_variation_ids ) ) {
+			return $this->_variations;
+		}
+
+		if ( empty( $this->_variations ) ) {
+			foreach ( $this->_variation_ids as $variation_id ) {
+				$this->_variations[] = new MP_Product( $variation_id );
+			}
 		}
 
 		//WP will do an update_meta_cache query for each variations,
@@ -822,8 +832,6 @@ public $content_tabs = array();
 
 		// Resort _variations && _variation_ids arrays by putting default variation on the top.
 		$this->set_default_variation();
-
-		wp_reset_postdata();
 
 		return $this->_variations;
 	}

@@ -573,13 +573,13 @@ public $ID = null;
 					<?php $product = ( $variation_id != 0 ) ?  new MP_Product( $variation_id ) : new MP_Product( $product_id );?>
 					<div class="mp_cart_item" id="mp-cart-item-104">
 						<div class="mp_cart_item_content mp_cart_item_content-thumb"><img
-								src="<?php echo $product->image_url( false ) ?>"
+								src="<?php echo esc_url( $product->image_url( false ) ) ?>"
 								width="75" height="75" style="max-height: 75px;">
 						</div>
 						<!-- end mp_cart_item_content -->
 						<div class="mp_cart_item_content mp_cart_item_content-title">
 							<h2 class="mp_cart_item_title">
-								<a href="<?php echo $item['url'] ?>"><?php echo $item['name'] ?></a>
+								<a href="<?php echo esc_url( $item['url'] ) ?>"><?php echo esc_html( $item['name'] ) ?></a>
 							</h2>
 							<?php
 							$print_download_link = apply_filters( 'mp_order/print_download_link', $product->is_download() && mp_is_shop_page( 'order_status' ), $product, $product_id );
@@ -591,11 +591,11 @@ public $ID = null;
 								if ( is_array( $download_url ) ){
 									//If we have more than one product file, we loop and add each to a new line
 									foreach ( $download_url as $key => $value ){
-										echo '<a target="_blank" href="' . $value . '">' . sprintf( __( 'Download %1$s', 'mp' ),( $key+1 ) ) . '</a><br/>';
+										echo '<a target="_blank" href="' . esc_url( $value ) . '">' . sprintf( __( 'Download %1$s', 'mp' ), ( $key + 1 ) ) . '</a><br/>';
 									}
 
 								} else {
-									echo '<a target="_blank" href="' . $product->download_url( get_query_var( 'mp_order_id' ), false ) . '">' . __( 'Download', 'mp' ) . '</a>';
+									echo '<a target="_blank" href="' . esc_url( $product->download_url( get_query_var( 'mp_order_id' ), false ) ) . '">' . __( 'Download', 'mp' ) . '</a>';
 								}
 							}
 							?>
@@ -611,7 +611,7 @@ public $ID = null;
 						</div>
 						<!-- end mp_cart_item_content -->
 						<div
-							class="mp_cart_item_content mp_cart_item_content-qty"><?php echo $item['quantity'] ?>
+							class="mp_cart_item_content mp_cart_item_content-qty"><?php echo esc_html( $item['quantity'] ) ?>
 						</div>
 						<!-- end mp_cart_item_content --></div><!-- end mp_cart_item -->
 				<?php endforeach; ?>
@@ -695,30 +695,43 @@ public $ID = null;
 	public function get_address( $type, $editable = false, $product_type = false ) {
 		$states        = mp_get_states( $this->get_meta( "mp_{$type}_info->country" ) );
 		$all_countries = mp_countries();
+		$name          = esc_html( $this->get_name( $type ) );
+		$company_name  = $this->get_meta( "mp_{$type}_info->company_name", '' );
+		$address1      = $this->get_meta( "mp_{$type}_info->address1", '' );
+		$address2      = $this->get_meta( "mp_{$type}_info->address2", '' );
+		$city          = $this->get_meta( "mp_{$type}_info->city", '' );
+		$state         = $this->get_meta( "mp_{$type}_info->state", '' );
+		$zip           = $this->get_meta( "mp_{$type}_info->zip", '' );
+		$country       = $this->get_meta( "mp_{$type}_info->country", '' );
+		$phone         = $this->get_meta( "mp_{$type}_info->phone", '' );
+		$email         = $this->get_meta( "mp_{$type}_info->email", '' );
+		$instructions  = $this->get_meta( "mp_{$type}_info->special_instructions", '' );
+		$state_label   = ( $state && is_array( $states ) && isset( $states[ $state ] ) ) ? $states[ $state ] : '';
+		$country_label = ( $country && is_array( $all_countries ) && isset( $all_countries[ $country ] ) ) ? $all_countries[ $country ] : '';
 
 		if ( ! $editable ) {
 
 			if( $product_type == 'digital' ) {
 				$html = '' .
-					$this->get_name( $type ) . '<br />' .
-					( ( $company_name = $this->get_meta( "mp_{$type}_info->company_name", '' ) ) ? $company_name . '<br />' : '' ) .
-					( ( $phone = $this->get_meta( "mp_{$type}_info->phone", '' ) ) ? $phone . '<br />' : '' ) .
-					( ( $email = $this->get_meta( "mp_{$type}_info->email", '' ) ) ? '<a href="mailto:' . antispambot( $email ) . '">' . antispambot( $email ) . '</a><br />' : '' );
+					$name . '<br />' .
+					( $company_name ? esc_html( $company_name ) . '<br />' : '' ) .
+					( $phone ? esc_html( $phone ) . '<br />' : '' ) .
+					( $email ? '<a href="mailto:' . esc_attr( antispambot( $email ) ) . '">' . esc_html( antispambot( $email ) ) . '</a><br />' : '' );
 			} else {
 				$html = '' .
-					$this->get_name( $type ) . '<br />' .
-					( ( $company_name = $this->get_meta( "mp_{$type}_info->company_name", '' ) ) ? $company_name . '<br />' : '' ) .
-					$this->get_meta( "mp_{$type}_info->address1", '' ) . '<br />' .
-					( ( $address2 = $this->get_meta( "mp_{$type}_info->address2", '' ) ) ? $address2 . '<br />' : '' ) .
-					( ( $city = $this->get_meta( "mp_{$type}_info->city", '' ) ) ? $city : '' ) .
-					( ( ( $state = $this->get_meta( "mp_{$type}_info->state", '' ) ) && is_array( $states ) && isset( $states[$state] ) ) ? ', ' . $states[$state] . ' ' : ', ' ) .
-					( ( $zip = $this->get_meta( "mp_{$type}_info->zip", '' ) ) ? $zip . '<br />' : '' ) .
-					( ( ( $country = $this->get_meta( "mp_{$type}_info->country", '' ) ) && is_array( $all_countries ) && isset( $all_countries[$country] ) ) ? $all_countries[$country] . '<br />' : '' ) .
-					( ( $phone = $this->get_meta( "mp_{$type}_info->phone", '' ) ) ? $phone . '<br />' : '' ) .
-					( ( $email = $this->get_meta( "mp_{$type}_info->email", '' ) ) ? '<a href="mailto:' . antispambot( $email ) . '">' . antispambot( $email ) . '</a><br />' : '' );
+					$name . '<br />' .
+					( $company_name ? esc_html( $company_name ) . '<br />' : '' ) .
+					esc_html( $address1 ) . '<br />' .
+					( $address2 ? esc_html( $address2 ) . '<br />' : '' ) .
+					( $city ? esc_html( $city ) : '' ) .
+					( $state_label ? ', ' . esc_html( $state_label ) . ' ' : ', ' ) .
+					( $zip ? esc_html( $zip ) . '<br />' : '' ) .
+					( $country_label ? esc_html( $country_label ) . '<br />' : '' ) .
+					( $phone ? esc_html( $phone ) . '<br />' : '' ) .
+					( $email ? '<a href="mailto:' . esc_attr( antispambot( $email ) ) . '">' . esc_html( antispambot( $email ) ) . '</a><br />' : '' );
 			}
-						if ( $this->get_meta( 'mp_' . $type . '_info->special_instructions' ) ) {
-				$html .= wordwrap( $this->get_meta( "mp_{$type}_info->special_instructions" ) ) . '<br />';
+						if ( $instructions ) {
+				$html .= nl2br( esc_html( wordwrap( $instructions ) ) ) . '<br />';
 			}
 		} else {
 			$prefix = 'mp[' . $type . '_info]';
@@ -737,14 +750,18 @@ public $ID = null;
 			}
 
 			foreach ( $allowed_countries as $country ) {
-				$country_options .= '<option value="' . $country . '" ' . selected( $country, $this->get_meta( "mp_{$type}_info->country", '' ), false ) . '>' . $all_countries[ $country ] . '</option>' . "\n";
+				if ( ! isset( $all_countries[ $country ] ) ) {
+					continue;
+				}
+
+				$country_options .= '<option value="' . esc_attr( $country ) . '" ' . selected( $country, $this->get_meta( "mp_{$type}_info->country", '' ), false ) . '>' . esc_html( $all_countries[ $country ] ) . '</option>' . "\n";
 			}
 
 			// State dropdown
 			$state_options = '';
 			if ( is_array( $states ) ) {
 				foreach ( $states as $key => $val ) {
-					$state_options .= '<option value="' . $key . '" ' . selected( $key, $this->get_meta( "mp_{$type}_info->state", '' ), false ) . '>' . $val . '</option>' . "\n";
+					$state_options .= '<option value="' . esc_attr( $key ) . '" ' . selected( $key, $this->get_meta( "mp_{$type}_info->state", '' ), false ) . '>' . esc_html( $val ) . '</option>' . "\n";
 				}
 			}
 
@@ -754,29 +771,29 @@ public $ID = null;
 				<table class="form-table">
 					<tr>
 						<th scope="row">' . __( 'First Name', 'mp' ) . '</th>
-						<td><input type="text" name="' . $prefix . '[first_name]" value="' . $this->get_meta( "mp_{$type}_info->first_name", '' ) . '" /></td>
+						<td><input type="text" name="' . $prefix . '[first_name]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->first_name", '' ) ) . '" /></td>
 					</tr>
 					<tr>
 						<th scope="row">' . __( 'Last Name', 'mp' ) . '</th>
-						<td><input type="text" name="' . $prefix . '[last_name]" value="' . $this->get_meta( "mp_{$type}_info->last_name", '' ) . '" /></td>
+						<td><input type="text" name="' . $prefix . '[last_name]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->last_name", '' ) ) . '" /></td>
 					</tr>
 					<tr>
 						<th scope="row">' . __( 'Company', 'mp' ) . '</th>
-						<td><input type="text" name="' . $prefix . '[company_name]" value="' . $this->get_meta( "mp_{$type}_info->company_name", '' ) . '" /></td>
+						<td><input type="text" name="' . $prefix . '[company_name]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->company_name", '' ) ) . '" /></td>
 					</tr>';
 			if( $product_type != 'digital' ) {
 				$html .= '
 					<tr>
 						<th scope="row">' . __( 'Address 1', 'mp' ) . '</th>
-						<td><input type="text" name="' . $prefix . '[address1]" value="' . $this->get_meta( "mp_{$type}_info->address1", '' ) . '" /></td>
+						<td><input type="text" name="' . $prefix . '[address1]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->address1", '' ) ) . '" /></td>
 					</tr>
 					<tr>
 						<th scope="row">' . __( 'Address 2', 'mp' ) . '</th>
-						<td><input type="text" name="' . $prefix . '[address2]" value="' . $this->get_meta( "mp_{$type}_info->address2", '' ) . '" /></td>
+						<td><input type="text" name="' . $prefix . '[address2]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->address2", '' ) ) . '" /></td>
 					</tr>
 					<tr>
 						<th scope="row">' . __( 'City', 'mp' ) . '</th>
-						<td><input type="text" name="' . $prefix . '[city]" value="' . $this->get_meta( "mp_{$type}_info->city", '' ) . '" /></td>
+						<td><input type="text" name="' . $prefix . '[city]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->city", '' ) ) . '" /></td>
 					</tr>';
 
 				if ( is_array( $states ) ) {
@@ -792,8 +809,8 @@ public $ID = null;
 
 				$html .= '
 						<tr>
-							<th scope="row">' . mp_get_setting( 'zip_label' ) . '</th>
-							<td><input type="text" name="' . $prefix . '[zip]" value="' . $this->get_meta( "mp_{$type}_info->zip", '' ) . '"></td>
+							<th scope="row">' . esc_html( mp_get_setting( 'zip_label' ) ) . '</th>
+							<td><input type="text" name="' . $prefix . '[zip]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->zip", '' ) ) . '"></td>
 						</tr>
 						<tr>
 							<th scope="row">' . __( 'Country', 'mp' ) . '</th>
@@ -805,16 +822,16 @@ public $ID = null;
 			$html .= '
 					<tr>
 						<th scope="row">' . __( 'Phone', 'mp' ) . '</th>
-						<td><input type="text" name="' . $prefix . '[phone]" value="' . $this->get_meta( "mp_{$type}_info->phone", '' ) . '"></td>
+						<td><input type="text" name="' . $prefix . '[phone]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->phone", '' ) ) . '"></td>
 					</tr>
 					<tr>
 						<th scope="row">' . __( 'Email', 'mp' ) . '</th>
-						<td><input type="text" name="' . $prefix . '[email]" value="' . $this->get_meta( "mp_{$type}_info->email", '' ) . '"></td>
+						<td><input type="text" name="' . $prefix . '[email]" value="' . esc_attr( $this->get_meta( "mp_{$type}_info->email", '' ) ) . '"></td>
 					</tr>';
-			if ( $this->get_meta( 'mp_' . $type . '_info->special_instructions' ) ) {
+			if ( $instructions ) {
 				$html .= '<tr>
 						<th scope="row">' . __( 'Special Instructions', 'mp' ) . '</th>
-						<td><textarea name="' . $prefix . '[special_instructions]">' . $this->get_meta( "mp_{$type}_info->special_instructions", '' ) . '</textarea></td>
+						<td><textarea name="' . $prefix . '[special_instructions]">' . esc_textarea( $instructions ) . '</textarea></td>
 					</tr>';
 			}
 			$html .= '

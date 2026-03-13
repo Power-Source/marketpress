@@ -1151,7 +1151,7 @@ class MP_Orders_Admin {
 
 			//! Order From
 			case 'mp_orders_name' :
-				$html .= '<a href="javascript:;" title="' . __( 'Rechnungs-/Versandinformationen für diesen Kunden anzeigen', 'mp' ) . '">' . $order->get_name() . '</a>';
+				$html .= '<a href="javascript:;" title="' . esc_attr__( 'Rechnungs-/Versandinformationen für diesen Kunden anzeigen', 'mp' ) . '">' . esc_html( $order->get_name() ) . '</a>';
 				$html .= '
 					<div style="display:none">
 						<div id="mp-customer-info-lb-' . $order->ID . '" class="mp-customer-info-lb" style="padding:10px 30px 30px;">' .

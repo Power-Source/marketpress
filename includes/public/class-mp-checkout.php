@@ -1239,7 +1239,7 @@ class MP_Checkout {
 
 		$html .= '<div class="mp_checkout_field mp_checkout_column">
 				<label class="mp_form_label">' . __( 'Username', 'mp' ) . ' ' . $required_labels . '</label>
-				<input type="text" name="account_username" id="mp_account_username" ' . $required_fields . ' data-rule-remote="' . esc_url( admin_url( 'admin-ajax.php?action=mp_check_if_username_exists' ) ) . '" data-msg-remote="' . __( 'An account with this username already exists', 'mp' ) . '"></input>
+				<input type="text" name="account_username" id="mp_account_username" ' . $required_fields . ' data-rule-remote="' . esc_url( add_query_arg( array( 'action' => 'mp_check_if_username_exists', 'mp_public_nonce' => wp_create_nonce( 'mp-public-account-check' ) ), admin_url( 'admin-ajax.php' ) ) ) . '" data-msg-remote="' . __( 'An account with this username already exists', 'mp' ) . '"></input>
 			  </div><!-- end mp_checkout_field -->';
 
 		$html .= '<div class="mp_checkout_field mp_checkout_column">

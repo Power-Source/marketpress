@@ -10,6 +10,8 @@
  */
 function mp_global_tag_cloud( $echo = true, $limit = 45, $seperator = ' ', $include = 'both' ) {
 	global $wpdb;
+	$cache_key = 'mp_global_tag_cloud_' . md5( $include . '|' . (int) $limit );
+	$tags      = get_transient( $cache_key );
 
 	//include categories as well
 	if ( $include == 'tags' ) {
@@ -20,13 +22,17 @@ function mp_global_tag_cloud( $echo = true, $limit = 45, $seperator = ' ', $incl
 
 	$limit = intval( $limit );
 
-	$tags = $wpdb->get_results( "SELECT name, slug, type, count(post_id) as count FROM {$wpdb->base_prefix}mp_terms t LEFT JOIN {$wpdb->base_prefix}mp_term_relationships r ON t.term_id = r.term_id$where GROUP BY t.term_id ORDER BY count DESC LIMIT $limit", ARRAY_A );
+	if ( false === $tags ) {
+		$tags = $wpdb->get_results( "SELECT name, slug, type, count(post_id) as count FROM {$wpdb->base_prefix}mp_terms t LEFT JOIN {$wpdb->base_prefix}mp_term_relationships r ON t.term_id = r.term_id$where GROUP BY t.term_id ORDER BY count DESC LIMIT $limit", ARRAY_A );
+		set_transient( $cache_key, $tags, HOUR_IN_SECONDS );
+	}
 
 	if ( ! $tags ) {
 		return;
 	}
 
 	$tags = apply_filters( 'mp_global_tag_cloud_tags', $tags );
+	$sorted_tags = array();
 
 	//sort by name
 	foreach ( $tags as $tag ) {
@@ -76,8 +82,8 @@ function mp_global_tag_cloud( $echo = true, $limit = 45, $seperator = ' ', $incl
 		$count      = $counts[ $key ];
 		$real_count = $real_counts[ $key ];
 		$tag_link   = '#' != $tag['link'] ? esc_url( $tag['link'] ) : '#';
-		$tag_id     = isset( $tags[ $key ]['id'] ) ? $tags[ $key ]['id'] : $key;
-		$tag_name   = $tags[ $key ]['name'];
+		$tag_id     = isset( $tags[ $key ]['id'] ) ? absint( $tags[ $key ]['id'] ) : absint( $key );
+		$tag_name   = esc_html( $tags[ $key ]['name'] );
 		$a[]        = "<a href='$tag_link' class='tag-link-$tag_id' title='" . esc_attr( $real_count ) . ' ' . __( 'Produkt', 'mp' ) . "' style='font-size: " .
 		              ( 8 + ( ( $count - $min_count ) * $font_step ) )
 		              . "pt;'>$tag_name</a>";
@@ -873,8 +879,8 @@ if ( ! function_exists( '_mp_global_categories_list' ) ) {
 		if( ! empty( $results ) ) {
 			$html .= '<ul id="mp_category_list">';
 			foreach ( $results as $row ) {
-				$html .= '<li class="cat-item cat-item-' . $row->term_id . '">
-				<a href="' . mp_global_taxonomy_url( $row->slug, $taxonomy ) . '">' . $row->name . '</a>
+				$html .= '<li class="cat-item cat-item-' . absint( $row->term_id ) . '">
+				<a href="' . esc_url( mp_global_taxonomy_url( $row->slug, $taxonomy ) ) . '">' . esc_html( $row->name ) . '</a>
 				</li>';
 			}
 			$html .= '</ul>';
@@ -893,7 +899,7 @@ if ( ! function_exists( '_mp_global_tags_cloud' ) ) {
 		$html = '<div id="mp_tag_cloud">';
 		if( ! empty( $results ) ) {
 			foreach ( $results as $row ) {
-				$html .= '<a href="' . mp_global_taxonomy_url( $row->slug, $taxonomy ) . '" class="tag-link tag-link-' . $row->term_id . '" title="">' . $row->name . '</a> ';
+				$html .= '<a href="' . esc_url( mp_global_taxonomy_url( $row->slug, $taxonomy ) ) . '" class="tag-link tag-link-' . absint( $row->term_id ) . '" title="">' . esc_html( $row->name ) . '</a> ';
 			}
 		} else {
 			$html .= __( 'Keine Schlagwörter', 'mp' );
@@ -917,10 +923,20 @@ if ( ! function_exists( 'mp_global_term_exist' ) ) {
 			$slug = array( $slug );
 		}
 
-		if ( is_array( $slug ) ) {
-			$in = '(' . "'" . implode( "','", $slug ) . "'" . ')';
+		$slug = array_map( 'sanitize_title', $slug );
+		$slug = array_values( array_filter( $slug, 'strlen' ) );
+
+		if ( empty( $slug ) ) {
+			return null;
 		}
-		$sql = "SELECT * FROM {$wpdb->base_prefix}mp_terms WHERE `slug` IN $in AND type='$taxonomy'";
+
+		$placeholders = implode( ', ', array_fill( 0, count( $slug ), '%s' ) );
+		$args         = array_merge(
+			array( "SELECT * FROM {$wpdb->base_prefix}mp_terms WHERE `slug` IN ($placeholders) AND type = %s" ),
+			$slug,
+			array( sanitize_key( $taxonomy ) )
+		);
+		$sql = call_user_func_array( array( $wpdb, 'prepare' ), $args );
 
 		return $wpdb->get_row( $sql );
 	}

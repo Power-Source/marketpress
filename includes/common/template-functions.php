@@ -2128,6 +2128,7 @@ if ( ! function_exists( 'mp_order_lookup_form' ) ) :
 
 		$form = '
 			<form id="mp-order-lookup-form" class="mp_form mp_form-order-lookup" method="post" action="' . admin_url( 'admin-ajax.php?action=mp_lookup_order' ) . '">
+				' . wp_nonce_field( 'mp_lookup_order', 'mp_lookup_order_nonce', true, false ) . '
 				<div class="mp_form_content">' . $content . '</div>
 				<div class="mp_form_group">
 					<div class="mp_form_group_input">
@@ -2206,18 +2207,20 @@ if ( ! function_exists( 'mp_order_status' ) ) :
 		} else {
 			// Nicht eingeloggt
 			if ( ! is_null( $order_id ) ) {
-				// Zeige die Bestellung an, wenn die Order-ID bekannt ist
-				// (Die Order-ID ist schwer zu erraten und kann somit als Authentifizierung gelten)
 				$order = new MP_Order( $order_id );
-				error_log( 'mp_order_status: Gast-Zugriff - Order ID: ' . $order_id . ', existiert: ' . ( $order->exists() ? 'ja' : 'nein' ) );
 				
 				if ( $order->exists() ) {
-					// Prüfe ob dies eine Stripe-Zahlung ist die noch auf Bestätigung wartet
-					mp_stripe_verify_payment( $order );
-					
-					$html .= $order->details( false );
+					$billing_email_hash = md5( $order->get_meta( 'mp_billing_info->email', '' ) );
+					$normalized_billing_email_hash = md5( strtolower( trim( $order->get_meta( 'mp_billing_info->email', '' ) ) ) );
+					$guest_hash = is_string( $guest_email ) ? trim( $guest_email ) : '';
+
+					if ( 'guest' === $order->get_meta( 'mp_user_kind', '' ) && ( hash_equals( $billing_email_hash, $guest_hash ) || hash_equals( $normalized_billing_email_hash, $guest_hash ) ) ) {
+						mp_stripe_verify_payment( $order );
+						$html .= $order->details( false );
+					} else {
+						$html .= __( 'Hoppla! Wir konnten keine Bestellungen finden, die dieser Bestellnummer entsprechen. Bitte überprüfe die Bestellnummer und versuche es erneut.', 'mp' );
+					}
 				} else {
-					error_log( 'mp_order_status: Order existiert NICHT für ID: ' . $order_id );
 					$html .= __( 'Hoppla! Wir konnten keine Bestellungen finden, die dieser Bestellnummer entsprechen. Bitte überprüfe die Bestellnummer und versuche es erneut.', 'mp' );
 				}
 			}

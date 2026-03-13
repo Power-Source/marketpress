@@ -873,6 +873,38 @@ class MP_Products_Screen {
 		}
 	}
 
+	protected function get_variation_attribute_taxonomies() {
+		static $taxonomies = null;
+
+		if ( null !== $taxonomies ) {
+			return $taxonomies;
+		}
+
+		$taxonomies = array();
+
+		foreach ( MP_Product_Attributes::get_instance()->get() as $product_attribute ) {
+			$taxonomies[] = 'product_attr_' . $product_attribute->attribute_id;
+		}
+
+		return $taxonomies;
+	}
+
+	protected function rebuild_variation_name( $post_id ) {
+		$variation_name_parts = array();
+
+		foreach ( $this->get_variation_attribute_taxonomies() as $attribute_name ) {
+			$post_terms = wp_get_post_terms( $post_id, $attribute_name, array( 'fields' => 'names' ) );
+
+			if ( is_wp_error( $post_terms ) || empty( $post_terms ) ) {
+				continue;
+			}
+
+			$variation_name_parts[] = $post_terms[0];
+		}
+
+		update_post_meta( $post_id, 'name', sanitize_text_field( implode( ' ', $variation_name_parts ) ) );
+	}
+
 	public function save_inventory_threshhold() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'status_message' => __( 'Unzureichende Berechtigungen.', 'mp' ) ), 403 );
@@ -977,40 +1009,24 @@ class MP_Products_Screen {
 			wp_send_json_error( array( 'status_message' => __( 'Unzureichende Berechtigungen.', 'mp' ) ), 403 );
 		}
 
-		$post_meta_errors = 0;
+		$post_meta_errors   = 0;
+		$attributes_updated = false;
 
 		if ( isset( $post_id ) && is_numeric( $post_id ) ) {
 
 			foreach ( $_POST as $key => $val ) {
-				$variation_name = '';
-
 				if ( strpos( $key, 'product_attr' ) === 0 ) {
 					$insert_post_terms = wp_set_post_terms( $post_id, $this->term_id( $val, $key, true ), $key, false );
 					if ( is_wp_error( $insert_post_terms ) ) {
 						echo $insert_post_terms->get_error_message();
 					} else {
-						global $wpdb;
-
-						$product_atts     = MP_Product_Attributes::get_instance();
-						$table_name       = MP_Product_Attributes::get_instance()->get_table_name();
-						$table_name_terms = $wpdb->prefix . 'mp_product_attributes_terms';
-
-						$product_attributes = $wpdb->get_results(
-							"SELECT attribute_id FROM $table_name"
-						);
-
-						foreach ( $product_attributes as $product_attribute ) {
-							$attribute_name = 'product_attr_' . $product_attribute->attribute_id;
-							$post_terms     = wp_get_post_terms( $post_id, $attribute_name );
-
-							if ( is_array( $post_terms ) && count( $post_terms ) > 0 ) {
-								$variation_name = $variation_name . '' . $post_terms[0]->name . ' ';
-							}
-						}
-
-						update_post_meta( $post_id, 'name', sanitize_text_field( $variation_name ) );
+						$attributes_updated = true;
 					}
 				}
+			}
+
+			if ( $attributes_updated ) {
+				$this->rebuild_variation_name( $post_id );
 			}
 
 			/* $response_array = array(
@@ -1134,27 +1150,7 @@ class MP_Products_Screen {
 					if ( is_wp_error( $insert_post_terms ) ) {
 						echo $insert_post_terms->get_error_message();
 					} else {
-						global $wpdb;
-
-						$product_atts     = MP_Product_Attributes::get_instance();
-						$table_name       = MP_Product_Attributes::get_instance()->get_table_name();
-						$table_name_terms = $wpdb->prefix . 'mp_product_attributes_terms';
-
-						$product_attributes = $wpdb->get_results(
-							"SELECT attribute_id FROM $table_name"
-						);
-
-						$variation_name = '';
-
-						foreach ( $product_attributes as $product_attribute ) {
-							$attribute_name = 'product_attr_' . $product_attribute->attribute_id;
-							$post_terms     = wp_get_post_terms( $post_id, $attribute_name );
-							if ( is_array( $post_terms ) && count( $post_terms ) > 0 ) {
-								$variation_name = $variation_name . '' . $post_terms[0]->name . ' ';
-							}
-						}
-
-						update_post_meta( $post_id, 'name', sanitize_text_field( $variation_name ) );
+						$this->rebuild_variation_name( $post_id );
 					}
 					break;
 				case 'default_variation':
