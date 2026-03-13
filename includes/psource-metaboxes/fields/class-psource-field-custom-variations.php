@@ -45,6 +45,7 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 
 			$product_attributes			 = MP_Product_Attributes_Admin::get_product_attributes();
 			$product_attributes_array	 = array();
+			$attribute_taxonomies       = array();
 
 			$args = array(
 				'post_parent'	 => $post_id,
@@ -54,16 +55,34 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 			);
 
 			$children = get_children( $args, OBJECT );
+			$child_ids = wp_list_pluck( $children, 'ID' );
 
 			$variation_attributes = array();
+			$children_terms_by_object = array();
 
-			foreach ( $children as $child ) {
-				foreach ( $product_attributes as $product_attribute ) {
-					$product_attributes_array[ $product_attribute->attribute_id ] = $product_attribute->attribute_name;
+			foreach ( $product_attributes as $product_attribute ) {
+				$product_attributes_array[ $product_attribute->attribute_id ] = $product_attribute->attribute_name;
+				$attribute_taxonomies[] = 'product_attr_' . $product_attribute->attribute_id;
+			}
 
-					$child_terms = get_the_terms( $child->ID, 'product_attr_' . $product_attribute->attribute_id );
-					if ( isset( $child_terms[ 0 ]->term_id ) && $child_terms[ 0 ]->name ) {
-						$variation_attributes[ $product_attribute->attribute_id ][ $child_terms[ 0 ]->term_id ] = array( $product_attribute->attribute_id, $child_terms[ 0 ]->name );
+			if ( ! empty( $child_ids ) && ! empty( $attribute_taxonomies ) ) {
+				$children_terms = wp_get_object_terms( $child_ids, $attribute_taxonomies, array( 'fields' => 'all_with_object_id' ) );
+
+				if ( ! is_wp_error( $children_terms ) ) {
+					foreach ( $children_terms as $child_term ) {
+						$attribute_id = (int) str_replace( 'product_attr_', '', $child_term->taxonomy );
+
+						if ( ! isset( $children_terms_by_object[ $child_term->object_id ] ) ) {
+							$children_terms_by_object[ $child_term->object_id ] = array();
+						}
+
+						if ( ! isset( $children_terms_by_object[ $child_term->object_id ][ $child_term->taxonomy ] ) ) {
+							$children_terms_by_object[ $child_term->object_id ][ $child_term->taxonomy ] = $child_term;
+						}
+
+						if ( isset( $product_attributes_array[ $attribute_id ] ) ) {
+							$variation_attributes[ $attribute_id ][ $child_term->term_id ] = array( $attribute_id, $child_term->name );
+						}
 					}
 				}
 			}
@@ -182,13 +201,11 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 								<?php
 								$order = 1;
 								foreach ( array_keys( $variation_attributes ) as $variation_attribute ) {
+									$taxonomy = 'product_attr_' . $variation_attribute;
+									$child_term = isset( $children_terms_by_object[ $child->ID ][ $taxonomy ] ) ? $children_terms_by_object[ $child->ID ][ $taxonomy ] : '';
 									?>
 									<td class="field_editable" data-field-type="text">
-										<?php
-										$child_term	 = get_the_terms( $child->ID, 'product_attr_' . $variation_attribute );
-										$child_term	 = isset( $child_term[ 0 ] ) ? $child_term[ 0 ] : '';
-										?>
-										<span data-meta="<?php echo 'product_attr'; ?>" data-sub-meta="<?php echo 'product_attr_' . $variation_attribute; ?>" data-default="-" class="original_value field_subtype field_subtype_product_attribute variation_value variation_term_<?php echo isset( $child_term->term_id ) ? esc_attr( $child_term->term_id ) : ''; ?> <?php echo MP_Product_Attributes_Admin::get_product_attribute_color( $term_info[ 0 ], $order ); ?>" data-term-id="<?php echo isset( $child_term->term_id ) ? esc_attr( $child_term->term_id ) : ''; ?>" data-attribute-id="<?php echo esc_attr( $variation_attribute ); ?>"><?php echo is_object( $child_term ) ? esc_attr( $child_term->name ) : '-'; ?></span>
+										<span data-meta="<?php echo 'product_attr'; ?>" data-sub-meta="<?php echo 'product_attr_' . $variation_attribute; ?>" data-default="-" class="original_value field_subtype field_subtype_product_attribute variation_value variation_term_<?php echo isset( $child_term->term_id ) ? esc_attr( $child_term->term_id ) : ''; ?> <?php echo MP_Product_Attributes_Admin::get_product_attribute_color( $variation_attribute, $order ); ?>" data-term-id="<?php echo isset( $child_term->term_id ) ? esc_attr( $child_term->term_id ) : ''; ?>" data-attribute-id="<?php echo esc_attr( $variation_attribute ); ?>"><?php echo is_object( $child_term ) ? esc_attr( $child_term->name ) : '-'; ?></span>
 										<input type="hidden" class="editable_value" value="" />
 									</td>
 									<?php

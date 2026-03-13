@@ -463,38 +463,60 @@ class MP_Multisite {
 		//Delete all records on mp_terms table to fix issue with deleted categories / tags still exist
 		$this->truncate_index_table();
 		$blogs = get_sites( array( 'fields' => 'ids' ) );
+		$batch_size = apply_filters( 'mp_multisite_index_batch_size', 200 );
+		$batch_size = max( 20, absint( $batch_size ) );
 		$count = 0;
 		foreach ( $blogs as $blog_id ) {
 			switch_to_blog( $blog_id );
-			$tmp = new WP_Query( array(
-				'post_type'   => MP_Product::get_post_type(),
-				'nopaging'    => true,
-				'post_status' => 'publish'
-			) );
 			global $wpdb;
 
 			$blog_archived = get_blog_status( $wpdb->blogid, 'archived' );
 			$blog_mature   = get_blog_status( $wpdb->blogid, 'mature' );
 			$blog_spam     = get_blog_status( $wpdb->blogid, 'spam' );
 			$blog_deleted  = get_blog_status( $wpdb->blogid, 'deleted' );
-			if ( $tmp->post_count > 0 ) {
-				foreach ( $tmp->posts as $post ) {
-					if ( $post->post_status != 'publish' || $blog_archived || $blog_deleted || $blog_mature || $blog_spam ) {
-						//todo delete index
-						continue; // Diese Produkte überspringen!
-					}
 
-					// ALTEN INDEX-EINTRAG LÖSCHEN!
-					$this->delete_index( $blog_id, $post->ID );
-
-					// Immer neu anlegen:
-					$index_id = $this->add_index( $blog_id, $post );
-
-					//product indexed, now taxonomies & terms
-					$this->index_product_terms( $blog_id, $post );
-					$count ++;
-				}
+			if ( $blog_archived || $blog_deleted || $blog_mature || $blog_spam ) {
+				restore_current_blog();
+				continue;
 			}
+
+			$paged = 1;
+			do {
+				$tmp = new WP_Query( array(
+					'post_type'              => MP_Product::get_post_type(),
+					'post_status'            => 'publish',
+					'posts_per_page'         => $batch_size,
+					'paged'                  => $paged,
+					'fields'                 => 'ids',
+					'no_found_rows'          => false,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+				) );
+
+				if ( $tmp->post_count > 0 ) {
+					foreach ( $tmp->posts as $post_id ) {
+						$post = get_post( $post_id );
+
+						if ( ! $post || $post->post_status !== 'publish' ) {
+							continue;
+						}
+
+						// ALTEN INDEX-EINTRAG LÖSCHEN!
+						$this->delete_index( $blog_id, $post->ID );
+
+						// Immer neu anlegen:
+						$this->add_index( $blog_id, $post );
+
+						//product indexed, now taxonomies & terms
+						$this->index_product_terms( $blog_id, $post );
+						$count ++;
+					}
+				}
+
+				$paged ++;
+			} while ( $paged <= $tmp->max_num_pages );
+
+			wp_reset_postdata();
 			restore_current_blog();
 		}
 
@@ -520,27 +542,49 @@ class MP_Multisite {
 		_deprecated_function( 'deprecated from 3.0.0.3', '3.0.0.3' );
 		//build an index with the whole site
 
+		$data       = array();
 		$categories = array();
 		$tags       = array();
+		$batch_size = apply_filters( 'mp_multisite_index_batch_size', 200 );
+		$batch_size = max( 20, absint( $batch_size ) );
 		$blogs      = get_sites( array( 'fields' => 'ids' ) );
 		foreach ( $blogs as $blog_id ) {
 			switch_to_blog( $blog_id );
-			$tmp = new WP_Query( array(
-				'post_type'   => MP_Product::get_post_type(),
-				'nopaging'    => true,
-				'post_status' => 'publish'
-			) );
-			if ( $tmp->post_count > 0 ) {
-				foreach ( $tmp->posts as $post ) {
-					$product = new MP_Product( $post->ID );
-					$data[]  = array(
-						'blog_id'        => $blog_id,
-						'post'           => $post->to_array(),
-						'regular_price'  => $product->get_price( 'lowest' ),
-						'mp_sales_count' => $product->get_meta( 'mp_sales_count' ),
-					);
+
+			$paged = 1;
+			do {
+				$tmp = new WP_Query( array(
+					'post_type'              => MP_Product::get_post_type(),
+					'post_status'            => 'publish',
+					'posts_per_page'         => $batch_size,
+					'paged'                  => $paged,
+					'fields'                 => 'ids',
+					'no_found_rows'          => false,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+				) );
+
+				if ( $tmp->post_count > 0 ) {
+					foreach ( $tmp->posts as $post_id ) {
+						$post = get_post( $post_id );
+						if ( ! $post ) {
+							continue;
+						}
+
+						$product = new MP_Product( $post->ID );
+						$data[]  = array(
+							'blog_id'        => $blog_id,
+							'post'           => $post->to_array(),
+							'regular_price'  => $product->get_price( 'lowest' ),
+							'mp_sales_count' => $product->get_meta( 'mp_sales_count' ),
+						);
+					}
 				}
-			}
+
+				$paged ++;
+			} while ( $paged <= $tmp->max_num_pages );
+
+			wp_reset_postdata();
 			//now we need to process the taxonomy
 			$cats = get_terms( 'product_category', array(
 				//only get parent
@@ -575,19 +619,30 @@ class MP_Multisite {
 
 		switch_to_blog( 1 );
 		//got the index, we will need to drop the old index for new
-		$indexer = new WP_Query( array(
-			'post_type' => 'mp_ms_indexer',
-			'nopaging'  => true,
-			'fields'    => 'ids'
-		) );
+		$paged = 1;
+		do {
+			$indexer = new WP_Query( array(
+				'post_type'              => 'mp_ms_indexer',
+				'posts_per_page'         => $batch_size,
+				'paged'                  => $paged,
+				'fields'                 => 'ids',
+				'no_found_rows'          => false,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			) );
 
-		if ( $indexer->post_count > 0 ) {
-			foreach ( $indexer->posts as $p_id ) {
-				//after the wp_delete_post, it auto switch back to original blog, so we need to switch to 1
-				switch_to_blog( 1 );
-				wp_delete_post( $p_id, true );
+			if ( $indexer->post_count > 0 ) {
+				foreach ( $indexer->posts as $p_id ) {
+					//after the wp_delete_post, it auto switch back to original blog, so we need to switch to 1
+					switch_to_blog( 1 );
+					wp_delete_post( $p_id, true );
+				}
 			}
-		}
+
+			$paged ++;
+		} while ( $paged <= $indexer->max_num_pages );
+
+		wp_reset_postdata();
 
 		//stared to import
 		foreach ( $data as $row ) {

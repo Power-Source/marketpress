@@ -169,7 +169,7 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 		$query_args   = [];
 		parse_str( $query_string, $query_args );
 		$query_args = array_replace_recursive( [
-			'posts_per_page'         => -1,
+			'posts_per_page'         => 200,
 			'update_post_meta_cache' => false,
 			'update_post_term_cache' => false,
 			'orderby'                => 'title',
