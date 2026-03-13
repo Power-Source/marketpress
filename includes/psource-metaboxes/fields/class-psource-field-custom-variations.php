@@ -347,7 +347,7 @@ class PSOURCE_Field_Variations extends PSOURCE_Field {
 											<?php
 											$product_taxonomies = MP_Product_Attributes_Admin::get_product_attributes_select( 'product_attributes_categories[]', 'id' );
 											?>
-											<!--<span class="variation_create_new_title"><?php _e( 'Or create new variation', 'mp' ); ?></span>-->
+											<!--<span class="variation_create_new_title"><?php _e( 'Oder neue Variation erstellen', 'mp' ); ?></span>-->
 											<a href="#" class="mp-variation-add-all button button-primary" style="display: none;"><?php _e( 'Alle Werte hinzufügen', 'mp' ); ?></a>
 											<input type="text" class="mp-variation-attribute-name" placeholder="<?php esc_attr_e( __( 'Variationsname eingeben', 'mp' ) ); ?>" name="variation_names[]" />
 										</div>

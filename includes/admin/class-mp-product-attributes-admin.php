@@ -164,7 +164,7 @@ class MP_Product_Attributes_Admin {
 		$product_attributes = MP_Product_Attributes_Admin::get_product_attributes();
 		?>
 		<select name="<?php echo $name; ?>" <?php if ( !empty( $id ) ) { ?>id="<?php echo $id; ?>"<?php } ?> class="<?php echo $class; ?>">
-			<option value="-1"><?php _e( '- Create New Variation -', 'mp' ); ?></option>
+			<option value="-1"><?php _e( '- Neue Variation erstellen -', 'mp' ); ?></option>
 			<?php foreach ( $product_attributes as $product_attribute ) {
 				$tags = '';
 				if( $attribute_terms = MP_Product_Attributes_Admin::get_product_attribute_terms( $product_attribute->attribute_id ) ){

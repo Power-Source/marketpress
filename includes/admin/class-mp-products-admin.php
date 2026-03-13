@@ -1862,7 +1862,7 @@ WHERE $delete_where"
 		} else {
 			$metabox->add_field( 'variations', apply_filters( 'mp_add_field_array_variations_module', array(
 				'name'        => 'variations_module',
-				'label'       => array( 'text' => sprintf( __( '%3$sAdd variations for%2$s %1$sProduct%2$s', 'mp' ), '<span class="mp_variations_product_name">', '</span>', '<span class="mp_variations_title">' ) ),
+				'label'       => array( 'text' => sprintf( __( '%3$sFüge Variationen für%2$s %1$sProdukt%2$s', 'mp' ), '<span class="mp_variations_product_name">', '</span>', '<span class="mp_variations_title">' ) ),
 				'message'     => __( 'Variationen', 'mp' ),
 				'desc'        => __( 'Füge Variationen für dieses Produkt hinzu. z.B. Wenn Du T-Shirts verkaufst, kannst Du Farb- und Größenvariationen erstellen', 'mp' ),
 				'conditional' => array(
