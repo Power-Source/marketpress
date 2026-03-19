@@ -1,0 +1,97 @@
+.mp-capabilities-toolbar {
+    margin: 12px 0 16px;
+    padding: 12px 14px;
+    position: sticky;
+    top: 32px;
+    z-index: 10;
+    background: #f6f7f7;
+}
+
+.mp-capabilities-toolbar p {
+    margin: 0 0 8px;
+}
+
+.mp-capabilities-toolbar select {
+    min-width: 260px;
+}
+
+.mp-capabilities-summary {
+    margin-top: 8px;
+}
+
+#mp-capabilities-feedback {
+    margin: 8px 0 0;
+    padding: 4px 10px;
+}
+
+#mp-capabilities-feedback p {
+    margin: 4px 0;
+}
+
+.mp-capabilities-list {
+    margin: 6px 0 0 20px;
+}
+
+.mp-capabilities-list li {
+    margin: 2px 0;
+}
+
+.mp-capabilities-role-box {
+    transition: opacity 0.15s ease;
+}
+
+.mp-capabilities-sections {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.mp-capabilities-section {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 6px;
+    padding: 14px 16px;
+}
+
+.mp-capabilities-section h4 {
+    margin: 0 0 12px;
+    font-size: 13px;
+}
+
+.mp-capabilities-checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.mp-capability-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    line-height: 1.35;
+}
+
+.mp-capability-item input {
+    margin-top: 2px;
+}
+
+.mp-capability-item span {
+    display: inline-block;
+}
+
+.mp-capabilities-role-box .inside > .description {
+    margin-bottom: 0;
+}
+
+@media (max-width: 960px) {
+    .mp-capabilities-sections {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Legacy submit buttons je Metabox ausblenden */
+.meta-box-sortables p.submit {
+    display: none !important;
+}

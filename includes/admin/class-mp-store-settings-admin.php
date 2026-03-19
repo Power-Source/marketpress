@@ -319,19 +319,26 @@ private function __construct() {
 			<div class="mp-settings">
 				<form id="mp-main-form" method="post" action="<?php echo add_query_arg( array() ); ?>">
 					<?php
-					/**
-					 * Render PSOURCE Metabox settings
-					 *
-					 * @since 1.0
-					 */
-					do_action( 'psource_metabox/render_settings_metaboxes' );
+					if ( $page === 'store-settings-capabilities' ) {
+						// Custom renderer for capabilities page (without PSOURCE metabox UI).
+						if ( class_exists( 'MP_Store_Settings_Capabilities' ) ) {
+							MP_Store_Settings_Capabilities::get_instance()->render_custom_settings();
+						}
+					} else {
+						/**
+						 * Render PSOURCE Metabox settings
+						 *
+						 * @since 1.0
+						 */
+						do_action( 'psource_metabox/render_settings_metaboxes' );
 
-					/**
-					 * Render settings
-					 *
-					 * @since 1.0
-					 */
-					do_action( 'mp_render_settings/' . mp_get_current_screen()->id );
+						/**
+						 * Render settings
+						 *
+						 * @since 1.0
+						 */
+						do_action( 'mp_render_settings/' . mp_get_current_screen()->id );
+					}
 					?>
 				</form>
 			</div>
