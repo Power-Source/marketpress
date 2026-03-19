@@ -86,6 +86,7 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 = 1.0.4 =
 
+* Neu: Statistik-Addon erfasst jetzt auch Gratis-Downloads; jeder Download-Vorgang wird in der Tabelle `wp_mp_download_events` gespeichert (Felder: Order, Produkt, Nutzer, Betrag, `is_free`-Flag, Zeitstempel). Die Statistikübersicht zeigt Gratis-Downloads als zweites Chart-Dataset auf einer eigenen rechten Y-Achse sowie als eigene KPI-Kachel neben dem Gesamtumsatz.
 * Fix: Zielländer-Auswahl in den Versand-Einstellungen wiederhergestellt; das SlimSelect-Script-Handle `mp-slim-select` wurde korrekt registriert, und das `advanced_select`-Field rendert jetzt ein natives `<select multiple>`-Element statt eines versteckten Inputs (Rückstand aus dem Select2→SlimSelect-Umbau).
 * Fix: Installer-Migrationen für PHP 8 gehärtet: fehlende Legacy-Meta-Keys (`mp_price`, `mp_sale_price`, `mp_is_sale`) werden in `update_214()` nun defensiv geprüft, wodurch Warnungen wie "Undefined array key mp_price" entfallen.
 * Fix: Datenbank-Migration für `mp_term_relationships` korrigiert; der Index auf `term_id` wird jetzt mit gültigem Namen erzeugt, wodurch dbDelta-Fehler wie "Incorrect index name ''" vermieden werden.
