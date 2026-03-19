@@ -77,7 +77,7 @@ Egal ob ein einzelner Shop oder ein komplettes E-Commerce-Netzwerk: Mit PS Marke
 PS MarketPress arbeitet mit vielen weiteren PSOURCE-Plugins zusammen und lässt sich dadurch flexibel erweitern.
 
 Mit dem PSOURCE Manager kannst du noch mehr entdecken, bequem verwalten und neue Erweiterungen schneller einbinden:
-https://github.com/Power-Source/ps-update-manager/releases
+https://github.com/Power-Source/ps-update-manager/releases/latest
 
 So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich laufend weiter.
 

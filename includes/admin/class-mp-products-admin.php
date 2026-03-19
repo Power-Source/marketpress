@@ -2490,7 +2490,7 @@ WHERE $delete_where"
 	 */
 	function custom_placeholder_title( $placeholder, $post ) {
 		if ( $post->post_type == MP_Product::get_post_type() ) {
-			$placeholder = __( 'Enter your product name here', 'mp' );
+			$placeholder = __( 'Produktname eingeben', 'mp' );
 		}
 
 		return $placeholder;

@@ -1,37 +1,27 @@
 <?php
 /*
 Plugin Name: PS MarketPress
-Plugin URI:  https://power-source.github.io/marketpress/
+Plugin URI:  https://psource.eimen.net/wiki/ps-marketpress-dokumentation/
 Description: Das komplette ClassicPress E-Commerce-Plugin – funktioniert auch perfekt mit Multisite, um einen sozialen Marktplatz zu erstellen, auf dem Du eine Provision einbehalten kannst! Aktiviere das Plugin, passen Deine Einstellungen an und füge dann Produkte zu Deinem Shop hinzu.
 Version:     1.0.4
 Author:      PSOURCE
-Author URI:  https://github.com/Power-Source
+Author URI:  https://psource.eimen.net/
 Text Domain: mp
 PS Network: required
-
 @package Marketpress
 */
 
 /*
-Copyright 2016-2025 PSOURCE (https://github.com/Power-Source)
+Copyright 2016-2025 PSOURCE (https://psource.eimen.net/)
 This program is free software: you can redistribute it and/or modify
-
 it under the terms of the GNU General Public License as published by
-
 the Free Software Foundation, either version 3 of the License, or
-
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
-
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
-
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 

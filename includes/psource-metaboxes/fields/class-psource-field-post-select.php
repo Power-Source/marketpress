@@ -133,26 +133,45 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 	 * @since 1.0
 	 * @access public
 	 */
-	       public function print_scripts() {
-		       ?>
-		       <script type="text/javascript">
-		       document.addEventListener('DOMContentLoaded', function() {
-			       document.querySelectorAll('select.psource-post-select').forEach(function(el) {
-				       if (typeof SlimSelect !== 'undefined' && !el.slimSelect) {
-					       el.slimSelect = new SlimSelect({
-						       select: el,
-						       placeholder: el.getAttribute('data-placeholder') || '',
-						       allowDeselect: true,
-						       showSearch: true,
-						       closeOnSelect: !el.hasAttribute('multiple'),
-					       });
-				       }
-			       });
-		       });
-		       </script>
-		       <?php
-		       parent::print_scripts();
-	       }
+	public function print_scripts() {
+		?>
+		<script type="text/javascript">
+		(function() {
+			var initPostSelects = function(root) {
+				var scope = root || document;
+				var selects = scope.querySelectorAll('select.psource-post-select');
+				selects.forEach(function(el) {
+					// Native fallback still usable if SlimSelect is missing.
+					if (typeof SlimSelect === 'undefined' || el.slimSelect) {
+						return;
+					}
+
+					el.slimSelect = new SlimSelect({
+						select: el,
+						placeholder: el.getAttribute('data-placeholder') || '',
+						allowDeselect: !el.hasAttribute('multiple'),
+						showSearch: true,
+						closeOnSelect: !el.hasAttribute('multiple')
+					});
+				});
+			};
+
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', function() {
+					initPostSelects(document);
+				});
+			} else {
+				initPostSelects(document);
+			}
+
+			document.addEventListener('psource_repeater_field/after_add_field_group', function(e) {
+				initPostSelects(e && e.target ? e.target : document);
+			});
+		})();
+		</script>
+		<?php
+		parent::print_scripts();
+	}
 
 	/**
 	 * Displays the field
@@ -179,14 +198,31 @@ class PSOURCE_Field_Post_Select extends PSOURCE_Field {
 		$posts    = get_posts( $query_args );
 		$multiple = ! empty( $this->args['multiple'] );
 
+		if ( strpos( $this->args['class'], 'mp-post-select-native' ) === false ) {
+			$this->args['class'] .= ' mp-post-select-native';
+		}
+
+		if ( empty( $this->args['style'] ) ) {
+			$this->args['style'] = 'width:100%;';
+		}
+
+		$original_name = $this->args['name'];
+		if ( $multiple && substr( $this->args['name'], -2 ) !== '[]' ) {
+			$this->args['name'] .= '[]';
+		}
+
 		$this->before_field();
-		echo '<select ' . $this->parse_atts() . ( $multiple ? ' multiple="multiple"' : '' ) . '>';
-		echo '<option value="">' . esc_html( $this->args['placeholder'] ) . '</option>';
+		echo '<select ' . $this->parse_atts() . ( $multiple ? ' multiple="multiple" size="8"' : '' ) . '>';
+		if ( ! $multiple ) {
+			echo '<option value="">' . esc_html( $this->args['placeholder'] ) . '</option>';
+		}
 		foreach ( $posts as $post ) {
 			$sel = in_array( $post->ID, $selected_ids ) ? ' selected' : '';
 			echo '<option value="' . esc_attr( $post->ID ) . '"' . $sel . '>' . esc_html( $post->post_title ) . '</option>';
 		}
 		echo '</select>';
+
+		$this->args['name'] = $original_name;
 		$this->after_field();
 	}
 
