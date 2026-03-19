@@ -6,7 +6,14 @@
       var instance = {};
       var elem = document.createElement('div');
       elem.className = 'basicLightbox';
-      elem.innerHTML = html;
+      if (html instanceof Node) {
+        elem.appendChild(html);
+      } else {
+        // Sicheres Parsen: <template> führt keine Scripts aus
+        var _tpl = document.createElement('template');
+        _tpl.innerHTML = String(html);
+        elem.appendChild(_tpl.content.cloneNode(true));
+      }
       var closable = options.closable !== false;
       var onShow = typeof options.onShow === 'function' ? options.onShow : function(){};
       var onClose = typeof options.onClose === 'function' ? options.onClose : function(){};

@@ -288,8 +288,17 @@ var marketpress = { };
                     var img = link.querySelector('img');
                     var src = link.getAttribute('href') || (img ? img.src : null);
                     if (!src) return;
-                    var html = '<div class="mp-product-lightbox"><div class="mp-product-lightbox-close">&times;</div><img src="' + src + '" style="width:90vw;max-width:1200px;max-height:90vh;object-fit:contain;" /></div>';
-                    var instance = basicLightbox.create(html, {
+                    var _lbContainer = document.createElement('div');
+                    _lbContainer.className = 'mp-product-lightbox';
+                    var _lbClose = document.createElement('div');
+                    _lbClose.className = 'mp-product-lightbox-close';
+                    _lbClose.textContent = '\u00d7';
+                    var _lbImg = document.createElement('img');
+                    _lbImg.src = src;
+                    _lbImg.setAttribute('style', 'width:90vw;max-width:1200px;max-height:90vh;object-fit:contain;');
+                    _lbContainer.appendChild(_lbClose);
+                    _lbContainer.appendChild(_lbImg);
+                    var instance = basicLightbox.create(_lbContainer, {
                         closable: true,
                         onShow: function() {
                             var closeBtn = document.querySelector('.mp-product-lightbox-close');

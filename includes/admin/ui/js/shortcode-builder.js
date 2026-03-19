@@ -35,7 +35,7 @@
 		$('body').on('click', '.mp-shortcode-builder-button', function(){
 			var $form = $('#mp-shortcode-builder-form');
 			if ($form.length === 0) return;
-			shortcodeModalInstance = basicLightbox.create($form[0].outerHTML, {
+			shortcodeModalInstance = basicLightbox.create($form[0].cloneNode(true), {
 				onShow: function(instance) {
 					// Optional: Felder/Events im Modal reinitialisieren
 				}

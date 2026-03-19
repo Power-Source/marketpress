@@ -434,7 +434,18 @@ var mp_cart = { };
                 fetch(href)
                     .then(function(response) { return response.text(); })
                     .then(function(html) {
-                        var instance = basicLightbox.create('<div class="mp-product-options-lightbox"><div class="mp-product-lightbox-close">&times;</div>' + html + '</div>', {
+                        var _parser = new DOMParser();
+                        var _doc = _parser.parseFromString(html, 'text/html');
+                        var _lbWrap = document.createElement('div');
+                        _lbWrap.className = 'mp-product-options-lightbox';
+                        var _lbClose = document.createElement('div');
+                        _lbClose.className = 'mp-product-lightbox-close';
+                        _lbClose.textContent = '\u00d7';
+                        _lbWrap.appendChild(_lbClose);
+                        Array.from(_doc.body.childNodes).forEach(function(node) {
+                            _lbWrap.appendChild(document.importNode(node, true));
+                        });
+                        var instance = basicLightbox.create(_lbWrap, {
                             closable: true,
                             onShow: function() {
                                 var closeBtn = document.querySelector('.mp-product-lightbox-close');

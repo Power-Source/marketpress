@@ -14,19 +14,39 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     var clickedSrc = img ? img.getAttribute('src') : link.querySelector('img') ? link.querySelector('img').getAttribute('src') : null;
     var startIndex = images.indexOf(clickedSrc);
-    // Lightbox-HTML
-    var lightboxHtml = '<div class="mp-product-lightbox">' +
-      '<div class="mp-product-lightbox-close">&times;</div>' +
-      '<div class="swiper mp-product-lightbox-gallery" style="width:90vw;height:90vh;max-width:1200px;">' +
-      '<div class="swiper-wrapper">' +
-      images.map(function(url) { return '<div class="swiper-slide"><img src="'+url+'" style="width:100%;height:auto;max-height:80vh;object-fit:contain;" /></div>'; }).join('') +
-      '</div>' +
-      '<div class="swiper-pagination"></div>' +
-      '<div class="swiper-button-next"></div>' +
-      '<div class="swiper-button-prev"></div>' +
-      '</div>' +
-      '</div>';
-    var instance = basicLightbox.create(lightboxHtml, {
+    // Lightbox-DOM aufbauen (kein innerHTML mit externen Daten)
+    var _lbRoot = document.createElement('div');
+    _lbRoot.className = 'mp-product-lightbox';
+    var _lbClose = document.createElement('div');
+    _lbClose.className = 'mp-product-lightbox-close';
+    _lbClose.textContent = '\u00d7';
+    _lbRoot.appendChild(_lbClose);
+    var _swiperEl = document.createElement('div');
+    _swiperEl.className = 'swiper mp-product-lightbox-gallery';
+    _swiperEl.setAttribute('style', 'width:90vw;height:90vh;max-width:1200px;');
+    var _swiperWrapper = document.createElement('div');
+    _swiperWrapper.className = 'swiper-wrapper';
+    images.forEach(function(url) {
+      var _slide = document.createElement('div');
+      _slide.className = 'swiper-slide';
+      var _img = document.createElement('img');
+      _img.src = url;
+      _img.setAttribute('style', 'width:100%;height:auto;max-height:80vh;object-fit:contain;');
+      _slide.appendChild(_img);
+      _swiperWrapper.appendChild(_slide);
+    });
+    _swiperEl.appendChild(_swiperWrapper);
+    var _pagination = document.createElement('div');
+    _pagination.className = 'swiper-pagination';
+    _swiperEl.appendChild(_pagination);
+    var _btnNext = document.createElement('div');
+    _btnNext.className = 'swiper-button-next';
+    _swiperEl.appendChild(_btnNext);
+    var _btnPrev = document.createElement('div');
+    _btnPrev.className = 'swiper-button-prev';
+    _swiperEl.appendChild(_btnPrev);
+    _lbRoot.appendChild(_swiperEl);
+    var instance = basicLightbox.create(_lbRoot, {
       closable: true,
       onShow: function() {
         var closeBtn = document.querySelector('.mp-product-lightbox-close');
