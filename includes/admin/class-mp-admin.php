@@ -232,6 +232,21 @@ class MP_Admin {
 	 * @access public
 	 */
 	public function enqueue_styles_scripts() {
+		// SlimSelect registrieren (wird von psource-metaboxes fields benötigt)
+		wp_register_script(
+			'mp-slim-select',
+			mp_plugin_url( 'ui/slim-select/slimselect.min.js' ),
+			array(),
+			MP_VERSION,
+			true
+		);
+		wp_register_style(
+			'mp-slim-select',
+			mp_plugin_url( 'ui/slim-select/slimselect.min.css' ),
+			array(),
+			MP_VERSION
+		);
+
 								// basicLightbox einbinden
 								wp_enqueue_script(
 									'basiclightbox',

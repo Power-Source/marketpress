@@ -52,11 +52,19 @@ class MP_Store_Settings_Shipping {
 				$( document ).ready( function() {
 					// Select all European countries
 					$( 'li.select2-eu' ).on( 'click', function() {
-						var $this = $( this ),
-							$input = $( '[name="shipping[allowed_countries]"]' ),
-							euCountries = $this.attr( 'data-countries' );
+						var euCountries = $( this ).attr( 'data-countries' ).split( ',' );
+						var $select = $( 'select[name="shipping[allowed_countries][]"]' );
 
-						$input.val( euCountries ).trigger( 'change' );
+						$select.find( 'option' ).each( function() {
+							$( this ).prop( 'selected', euCountries.indexOf( $( this ).val() ) !== -1 );
+						} );
+
+						// SlimSelect-Instanz aktualisieren falls initialisiert
+						if ( $select.length && $select[0].slimSelect ) {
+							$select[0].slimSelect.setSelected( euCountries );
+						} else {
+							$select.trigger( 'change' );
+						}
 					} );
 
 					// Update weight/dimension labels

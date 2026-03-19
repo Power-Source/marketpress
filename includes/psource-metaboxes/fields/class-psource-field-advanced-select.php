@@ -90,6 +90,9 @@ class PSOURCE_Field_Advanced_Select extends PSOURCE_Field {
 	 * @param $post_id
 	 */
 	public function sanitize_for_db( $value, $post_id ) {
+		if ( is_array( $value ) ) {
+			$value = implode( ',', $value );
+		}
 		$value = trim( $value, ',' );
 
 		return parent::sanitize_for_db( $value, $post_id );
@@ -116,8 +119,19 @@ class PSOURCE_Field_Advanced_Select extends PSOURCE_Field {
 		$this->before_field();
 
 		if ( $this->args['multiple'] ) :
-			$this->args['custom']['data-options'] = implode( '||', $options );
-			echo '<input type="hidden" ' . $this->parse_atts() . ' value="' . implode( ',', $vals ) . '" />';
+			// Für PHP-Mehrfachauswahl den Namen mit [] ergänzen, damit alle Werte übertragen werden
+			$orig_name              = $this->args['name'];
+			$this->args['name']     = $orig_name . '[]';
+			?>
+			<select multiple <?php echo $this->parse_atts(); ?>>
+				<?php foreach ( $this->args['options'] as $val => $label ) :
+					$attr = empty( $val ) ? '' : ' value="' . esc_attr( $val ) . '"';
+					?>
+					<option<?php echo $attr; echo in_array( $val, $vals ) ? ' selected' : ''; ?>><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+			<?php
+			$this->args['name'] = $orig_name;
 		else :
 			?>
 			<select <?php echo $this->parse_atts(); ?>>

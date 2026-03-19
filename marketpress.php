@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: MarketPress
+Plugin Name: PS MarketPress
 Plugin URI:  https://power-source.github.io/marketpress/
 Description: Das komplette ClassicPress E-Commerce-Plugin – funktioniert auch perfekt mit Multisite, um einen sozialen Marktplatz zu erstellen, auf dem Du eine Provision einbehalten kannst! Aktiviere das Plugin, passen Deine Einstellungen an und füge dann Produkte zu Deinem Shop hinzu.
 Version:     1.0.4
