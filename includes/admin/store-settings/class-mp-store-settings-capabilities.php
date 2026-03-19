@@ -52,6 +52,7 @@ class MP_Store_Settings_Capabilities {
 
 		$cap_groups = $this->get_grouped_capability_options();
 		$first_role = key( $roles );
+		$saved_caps = mp_get_setting( 'caps', array() );
 		?>
 		<div class="mp-capabilities-toolbar notice notice-info inline">
 			<p>
@@ -74,6 +75,7 @@ class MP_Store_Settings_Capabilities {
 			<?php foreach ( $roles as $role_name => $role ) :
 				$role_obj = get_role( $role_name );
 				$style    = ( $role_name === $first_role ) ? '' : 'display:none;';
+				$role_caps = mp_arr_get_value( $role_name, $saved_caps, array() );
 			?>
 				<div id="mp-settings-capabilities-<?php echo esc_attr( $role_name ); ?>" class="postbox mp-capabilities-role-box" data-role="<?php echo esc_attr( $role_name ); ?>" style="<?php echo esc_attr( $style ); ?>">
 					<h3 class="hndle"><span><?php echo esc_html( sprintf( __( 'Berechtigungen fuer Rolle: %s', 'mp' ), $role['name'] ) ); ?></span></h3>
@@ -86,7 +88,8 @@ class MP_Store_Settings_Capabilities {
 									<h4><?php echo esc_html( $this->get_capability_group_title( $group_key ) ); ?></h4>
 									<div class="mp-capabilities-checkbox-grid">
 										<?php foreach ( $caps as $cap_key => $cap_label ) :
-											$checked = ( $role_obj && $role_obj->has_cap( $cap_key ) ) ? 'checked="checked"' : '';
+											$is_checked = (int) mp_arr_get_value( $cap_key, $role_caps, ( $role_obj && $role_obj->has_cap( $cap_key ) ) ? 1 : 0 );
+											$checked = $is_checked ? 'checked="checked"' : '';
 										?>
 											<label class="mp-capability-item" for="mp-cap-<?php echo esc_attr( $role_name . '-' . $cap_key ); ?>">
 												<input type="checkbox"
@@ -370,7 +373,7 @@ class MP_Store_Settings_Capabilities {
 		}
 
 		$role_name = sanitize_key( mp_get_post_value( 'role' ) );
-		$caps      = (array) mp_get_post_value( 'caps', array() );
+		$caps      = isset( $_POST['caps'] ) && is_array( $_POST['caps'] ) ? wp_unslash( $_POST['caps'] ) : array();
 		$roles     = $this->get_roles();
 
 		if ( empty( $role_name ) || ! isset( $roles[ $role_name ] ) ) {

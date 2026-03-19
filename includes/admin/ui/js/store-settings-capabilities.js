@@ -18,7 +18,7 @@ jQuery(function ($) {
             return;
         }
 
-        var $checks = $activeBox.find('.psource-checkbox-group input[type="checkbox"]');
+        var $checks = $activeBox.find('.mp-capability-item input[type="checkbox"]');
         var total = $checks.length;
         var active = 0;
         var labels = [];
@@ -76,7 +76,7 @@ jQuery(function ($) {
     function collectRoleCaps($box) {
         var caps = {};
 
-        $box.find('.psource-checkbox-group input[type="checkbox"]').each(function () {
+        $box.find('.mp-capability-item input[type="checkbox"]').each(function () {
             var $cb = $(this);
             var name = $cb.attr('name') || '';
             var match = name.match(/\[([^\]]+)\]$/);
@@ -108,7 +108,7 @@ jQuery(function ($) {
         }
     });
 
-    $boxes.on('change', '.psource-checkbox-group input[type="checkbox"]', function () {
+    $boxes.on('change', '.mp-capability-item input[type="checkbox"]', function () {
         var role = $selector.val();
         updateSummary(getBoxByRole(role));
     });
