@@ -5,7 +5,7 @@ Requires at least: 3.7
 Requires PHP: 7.4
 Tested up to: 6.8.1
 ClassicPress: 2.6.0
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -83,6 +83,17 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 
 == Changelog ==
+
+= 1.0.5 =
+
+* Fix: Checkout-AJAX in allen betroffenen Payment-Handlern gehaertet (`free_orders`, `manual_payments`, `paypal-express`, `payfast`, `authorizenet-aim`, `simplify`); Redirects brechen den AJAX-Response nicht mehr ab.
+* Fix: Checkout-Controller verarbeitet Gateway-Rueckgaben robuster und nutzt konsistente Cache-Handoff-Keys fuer Order/Redirect-URL.
+* Fix: Kostenlose digitale Produkte umgehen den Checkout jetzt komplett und starten direkt den Download.
+* Fix: Free-Download-Flow unterstuetzt jetzt sowohl String- als auch Array-`file_url`-Metadaten (inkl. Multi-File-Addon), wodurch Fatal Errors wie `ltrim(): Argument #1 must be of type string, array given` entfallen.
+* Verbesserung: Free-Download-Handler verarbeitet externe Download-Quellen (z.B. GitHub-Links) robuster und nutzt saubere Redirect-/Fallback-Logik.
+* Verbesserung: Mengenfeld wird auf digitalen Produktseiten automatisch ausgeblendet; fuer die interne Verarbeitung bleibt `product_quantity=1` erhalten.
+* Verbesserung: Inline-Status unter dem Free-Download-Button hinzugefuegt (Erfolg beim Start, Fehlermeldung bei nicht gefundener Datei).
+* Fix: Syntaxproblem im Gateway `authorizenet-aim` behoben (saubere Funktionsstruktur, keine Parse-Fehler mehr).
 
 = 1.0.4 =
 

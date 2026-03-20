@@ -578,8 +578,8 @@ class MP_Checkout {
 			// Fallback: Try to get order from cache
 			$order = wp_cache_get( 'order_object', 'mp' );
 			
-			// Check if there's a special redirect URL (e.g., for PayPal)
-			$redirect_url = wp_cache_get( 'order_paypal_redirect_url', 'mp' );
+			// Check if there's a special redirect URL (e.g., for external payment providers)
+			$redirect_url = wp_cache_get( 'order_redirect_url', 'mp' );
 			if ( ! $redirect_url && $order && is_object( $order ) && method_exists( $order, 'tracking_url' ) ) {
 				$redirect_url = $order->tracking_url( false );
 			}
@@ -590,20 +590,25 @@ class MP_Checkout {
 			}
 			
 			// Clean up cache
-			wp_cache_delete( 'order_paypal_redirect_url', 'mp' );
+			wp_cache_delete( 'order_redirect_url', 'mp' );
+			wp_cache_delete( 'order_object', 'mp' );
 			
-			// Prüfe ob Order erstellt wurde
-			if ( $order && is_object( $order ) && method_exists( $order, 'tracking_url' ) ) {
+			// Check if order was successfully created
+			if ( $order && is_object( $order ) ) {
 				wp_send_json_success( array( 'redirect_url' => $redirect_url ) );
 			} else {
-				// Fallback: Gehe zur Order-Status-Seite (das Gateway sollte bereits weitergeleitet haben)
-				wp_send_json_success( array( 'redirect_url' => $redirect_url ) );
+				// No order found - error
+				wp_send_json_error( array(
+					'errors' => array(
+						'general' => __( 'Order konnte nicht erstellt werden. Bitte versuchen Sie es erneut.', 'mp' ),
+					),
+				) );
 			}
 		}
 
 		wp_send_json_error( array(
 			'errors' => array(
-				'general' => __( 'An unknown error occurred. Please try again.', 'mp' ),
+				'general' => __( 'Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.', 'mp' ),
 			),
 		) );
 	}

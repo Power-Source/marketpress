@@ -1,0 +1,13 @@
+.mp_free_download_status {
+	margin-top: 8px;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.mp_free_download_status-success {
+	color: #1f7a1f;
+}
+
+.mp_free_download_status-error {
+	color: #b00020;
+}

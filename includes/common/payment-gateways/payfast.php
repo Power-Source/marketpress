@@ -229,6 +229,13 @@ class MP_Gateway_PayFast extends MP_Gateway_API {
 
         if ( $code != 200 || empty($resp_body) || !isset($resp_body->uuid) ) {
             $error_msg = isset($resp_body->message) ? $resp_body->message : __( 'Unbekannter Fehler bei der PayFast-Transaktion.', 'mp' );
+            if ( wp_doing_ajax() ) {
+                wp_send_json_error( array(
+                    'errors' => array(
+                        'general' => $error_msg,
+                    ),
+                ) );
+            }
             mp_checkout()->add_error( $error_msg, 'order-review-payment' );
             return;
         }
@@ -244,8 +251,15 @@ class MP_Gateway_PayFast extends MP_Gateway_API {
         $payment_info['transaction_id'] = $resp_body->uuid;
 
         $order = MP_Order::save($order_id, mp_cart()->get_cart_contents(), $shipping_info, $payment_info, true);
-        wp_redirect( $this->returnURL );
-        exit;
+        
+        // AJAX-safe: Bei AJAX externe URL im Cache speichern
+        if ( wp_doing_ajax() ) {
+            wp_cache_set( 'order_redirect_url', $this->returnURL, 'mp' );
+            wp_cache_set( 'order_object', $order, 'mp' );
+        } else {
+            wp_redirect( $this->returnURL );
+            exit;
+        }
     }
 
     /**

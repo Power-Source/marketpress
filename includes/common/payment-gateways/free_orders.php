@@ -97,9 +97,14 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 			'paid'			 => true
 		) );
 
-
-		wp_redirect( $order->tracking_url( false ) );
-		exit;
+		// AJAX-safe: Bei AJAX Order im Cache speichern (Checkout Handler verarbeitet es)
+		if ( wp_doing_ajax() ) {
+			wp_cache_set( 'order_object', $order, 'mp' );
+		} else {
+			// Bei normalem Request: direkter Redirect
+			wp_redirect( $order->tracking_url( false ) );
+			exit;
+		}
 	}
 
 	/**

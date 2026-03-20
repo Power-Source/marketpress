@@ -2496,7 +2496,8 @@ if ( ! function_exists( 'mp_product' ) ) {
 						foreach ( $values as $value ) {
 
 							if ( preg_match( '/http:|https:/', $value ) ) {
-								$img_url = array( esc_url( $value ) );
+								$img_url        = array( esc_url( $value ) );
+								$original_image = array( esc_url( $value ) );
 							} else {
 								//$img_url = wp_get_attachment_image_src( $value, $size );
 								$original_image = wp_get_attachment_image_src( $value, 'full' );
@@ -2511,14 +2512,15 @@ if ( ! function_exists( 'mp_product' ) ) {
 						if ( ! empty( $values[0] ) ) {
 
 							if ( preg_match( '/http:|https:/', $values[0] ) ) {
-								$img_url = array( esc_url( $values[0] ) );
+								$img_url        = array( esc_url( $values[0] ) );
+								$original_image = array( esc_url( $values[0] ) );
 							} else {
 								$original_image = wp_get_attachment_image_src( $values[0], 'full' );
 								$img_url        = mp_resize_image( $values[0], $original_image[0], $size );
 							}
 
 							if ( is_array($img_url) && !empty($img_url) ) {
-								$return .= '<li data-thumb="' . $img_url[0] . '" data-src="' . $original_image[0] . '"><img src="' . $img_url[0] . '"></li>';
+								$return .= '<div class="swiper-slide"><a href="' . esc_url( $original_image[0] ) . '" data-lg-size="1400-933"><img src="' . esc_url( $img_url[0] ) . '" /></a></div>';
 							}
 						}
 					}

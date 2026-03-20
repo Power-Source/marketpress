@@ -73,6 +73,14 @@ function on_creation() {
         $token = $this->get_access_token($base_url, $client_id, $client_secret);
 
         if (!$token) {
+            if ( wp_doing_ajax() ) {
+                wp_cache_delete( 'order_object', 'mp' );
+                wp_send_json_error( array(
+                    'errors' => array(
+                        'general' => __( 'Fehler beim Abrufen des PayPal Tokens.', 'mp' ),
+                    ),
+                ) );
+            }
             wp_die(__('Fehler beim Abrufen des PayPal Tokens.', 'mp'));
         }
 
@@ -80,17 +88,43 @@ function on_creation() {
         $order = $this->create_order_request($base_url, $token, $cart);
 
         if (!isset($order['id'])) {
+            if ( wp_doing_ajax() ) {
+                wp_cache_delete( 'order_object', 'mp' );
+                wp_send_json_error( array(
+                    'errors' => array(
+                        'general' => __( 'Fehler beim Erstellen der PayPal Bestellung.', 'mp' ),
+                    ),
+                ) );
+            }
             wp_die(__('Fehler beim Erstellen der PayPal Bestellung.', 'mp'));
         }
 
-        // 3. Umleiten zu PayPal Checkout
+        // 3. Umleiten zu PayPal Checkout - auch im AJAX-Kontext
         foreach ($order['links'] as $link) {
             if ($link['rel'] === 'approve') {
-                wp_redirect($link['href']);
-                exit;
+                // Speichere die externe Redirect-URL im Cache für AJAX-Requests
+                if ( wp_doing_ajax() ) {
+                    wp_cache_set( 'order_redirect_url', $link['href'], 'mp' );
+                    // Dummy Order im Cache speichern damit ajax_process_checkout weiß dass erfolgreich war
+                    $dummy_order = new stdClass();
+                    $dummy_order->ID = 0; // Wird noch nicht in DB gespeichert
+                    wp_cache_set( 'order_object', $dummy_order, 'mp' );
+                } else {
+                    wp_redirect($link['href']);
+                    exit;
+                }
+                return;
             }
         }
 
+        if ( wp_doing_ajax() ) {
+            wp_cache_delete( 'order_object', 'mp' );
+            wp_send_json_error( array(
+                'errors' => array(
+                    'general' => __( 'Keine Weiterleitungs-URL gefunden.', 'mp' ),
+                ),
+            ) );
+        }
         wp_die(__('Keine Weiterleitungs-URL gefunden.', 'mp'));
     }
 

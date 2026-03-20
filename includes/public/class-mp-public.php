@@ -52,6 +52,7 @@ class MP_Public {
 		add_action( 'wp_enqueue_scripts', array( &$this, 'frontend_styles' ) );
 		add_filter( 'comments_open', array( &$this, 'disable_comments_on_store_pages' ), 10, 2 );
 		add_action( 'wp', array( &$this, 'maybe_start_session' ) );
+		add_action( 'wp', array( &$this, 'maybe_serve_free_download' ) );
 		
 		// Kommentare-Metabox für Produkte entfernen, wenn das Addon nicht aktiviert ist
 		add_action( 'add_meta_boxes', array( &$this, 'maybe_remove_comments_metabox' ), 20 );
@@ -305,6 +306,18 @@ class MP_Public {
 	public function includes() {
 		require_once mp_plugin_dir( 'includes/public/class-mp-checkout.php' );
 		require_once mp_plugin_dir( 'includes/public/class-mp-short-codes.php' );
+		require_once mp_plugin_dir( 'includes/public/init-free-download.php' );
+	}
+
+	/**
+	 * Hook handler for free download serving
+	 * Delegates to MP_Free_Download if it exists
+	 */
+	public function maybe_serve_free_download() {
+		if ( ! class_exists( 'MP_Free_Download' ) ) {
+			return;
+		}
+		MP_Free_Download::get_instance()->handle_free_download();
 	}
 
 	public function products_order( $query ) {
@@ -364,6 +377,7 @@ class MP_Public {
 		wp_enqueue_style( 'dashicons' );
 		// wp_enqueue_style( 'mp-select2', mp_plugin_url( 'ui/select2/select2.css' ), false, MP_VERSION );
 		wp_enqueue_style( 'mp-base', mp_plugin_url( 'ui/css/marketpress.css' ), false, MP_VERSION );
+		wp_enqueue_style( 'mp-frontend', mp_plugin_url( 'ui/css/frontend.css' ), array( 'mp-base' ), MP_VERSION );
 
 		$store_theme = mp_get_setting( 'store_theme' );
 		if ( $store_theme == 'default' ) {
@@ -386,14 +400,13 @@ class MP_Public {
 	 */
 	public function frontend_scripts() {
 
-		if ( is_singular( MP_Product::get_post_type() ) ) {
-			   wp_enqueue_style( 'swiper-bundle', mp_plugin_url( 'ui/swiper/swiper-bundle.min.css' ), array(), MP_VERSION );
-			   wp_enqueue_style( 'mp-swiper-custom', mp_plugin_url( 'ui/css/mp-swiper-custom.css' ), array('swiper-bundle'), MP_VERSION );
-			   wp_enqueue_script( 'swiper-bundle', mp_plugin_url( 'ui/swiper/swiper-bundle.min.js' ), array(), MP_VERSION );
-			   wp_enqueue_script( 'mp-swiper-init', mp_plugin_url( 'ui/js/mp-swiper-init.js' ), array('swiper-bundle'), MP_VERSION );
-			   // Colorbox script removed
-			   wp_enqueue_script( 'basiclightbox', mp_plugin_url( 'ui/js/basicLightbox.js' ), array(), '5.0.4' );
-		}
+		// Swiper-/Lightbox-Assets auch ausserhalb von is_singular() laden,
+		// da Produkt-Templates per Shortcode auf beliebigen Seiten gerendert werden koennen.
+		wp_enqueue_style( 'swiper-bundle', mp_plugin_url( 'ui/swiper/swiper-bundle.min.css' ), array(), MP_VERSION );
+		wp_enqueue_style( 'mp-swiper-custom', mp_plugin_url( 'ui/css/mp-swiper-custom.css' ), array( 'swiper-bundle' ), MP_VERSION );
+		wp_enqueue_script( 'swiper-bundle', mp_plugin_url( 'ui/swiper/swiper-bundle.min.js' ), array(), MP_VERSION, true );
+		wp_enqueue_script( 'mp-swiper-init', mp_plugin_url( 'ui/js/mp-swiper-init.js' ), array( 'swiper-bundle' ), MP_VERSION, true );
+		wp_enqueue_script( 'basiclightbox', mp_plugin_url( 'ui/js/basicLightbox.js' ), array(), '5.0.4', true );
 
 		/*
 		 * Comment this to allow scripts to load on all pages for Global products widget

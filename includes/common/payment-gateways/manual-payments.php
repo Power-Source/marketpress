@@ -71,11 +71,6 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 		$payment_info[ 'method' ]				 = __( 'Manuell/Rechnung', 'mp' );
 
 		$order = new MP_Order();
-		/*$order->save( array(
-			'payment_info'	 => $payment_info,
-			'cart'			 => $cart,
-			'paid'			 => false,
-		) );*/
 
 		$order->save( array(
 			'cart'			 => $cart,
@@ -83,12 +78,11 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 			'paid'			 => false
 		) );
 
-		// Prüfe ob es ein AJAX-Request ist
+		// AJAX-safe: Bei AJAX Order im Cache speichern (Checkout Handler verarbeitet es)
 		if ( wp_doing_ajax() ) {
-			// Bei AJAX: Order im Cache speichern für die AJAX-Response
 			wp_cache_set( 'order_object', $order, 'mp' );
 		} else {
-			// Bei normalem Request: Weiterleiten
+			// Bei normalem Request: direkter Redirect
 			wp_redirect( $order->tracking_url( false ) );
 			exit;
 		}

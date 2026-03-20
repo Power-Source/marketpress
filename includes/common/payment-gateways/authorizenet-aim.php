@@ -306,14 +306,21 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 			$payment_info['currency'] = $this->currencyCode;
 			$payment_info['transaction_id'] = $trans->transId ?? '';
 
-			$order->save( array(
-				'cart' => $cart,
-				'payment_info' => $payment_info,
-				'paid' => true,
-			) );
+		$order = new MP_Order();
+		$order->save( array(
+			'cart' => $cart,
+			'payment_info' => $payment_info,
+			'paid' => true,
+		) );
+		
+		// AJAX-safe: Bei AJAX Order im Cache speichern
+		if ( wp_doing_ajax() ) {
+			wp_cache_set( 'order_object', $order, 'mp' );
+		} else {
 			wp_redirect( $order->tracking_url( false ) );
 			exit;
 		}
+	}
 
 	/**
 	 * Init settings metaboxes
@@ -322,7 +329,7 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 	 * @access public
 	 */
 	function init_settings_metabox() {
-		 $metabox = new PSOURCE_Metabox(array(
+		$metabox = new PSOURCE_Metabox(array(
 			'id' => $this->generate_metabox_id(),
 			'page_slugs' => array('store-settings-payments', 'store-settings_page_store-settings-payments'),
 			'title' => sprintf(__('%s Settings', 'mp'), $this->admin_name),

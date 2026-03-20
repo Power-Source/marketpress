@@ -219,6 +219,13 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 		$token = mp_get_post_value( 'simplify_token' );
 
 		if ( empty( $token ) ) {
+			if ( wp_doing_ajax() ) {
+				wp_send_json_error( array(
+					'errors' => array(
+						'general' => __( 'Die Kreditkarten-Tokenisierung ist fehlgeschlagen. Bitte erneut versuchen.', 'mp' ),
+					),
+				) );
+			}
 			mp_checkout()->add_error( __( 'Die Kreditkarten-Tokenisierung ist fehlgeschlagen. Bitte erneut versuchen.', 'mp' ), 'order-review-payment' );
 			return;
 		}
@@ -252,15 +259,36 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 					'cart' => $cart,
 					'paid' => true,
 				) );
-				wp_redirect( $order->tracking_url( false ) );
-				exit;
+				
+				// AJAX-safe: Bei AJAX Order im Cache speichern
+				if ( wp_doing_ajax() ) {
+					wp_cache_set( 'order_object', $order, 'mp' );
+				} else {
+					wp_redirect( $order->tracking_url( false ) );
+					exit;
+				}
 			} else {
 				$error_message = __( 'Die Zahlung konnte nicht abgeschlossen werden. Bitte Kreditkartendaten prüfen und erneut versuchen.', 'mp' );
+				if ( wp_doing_ajax() ) {
+					wp_send_json_error( array(
+						'errors' => array(
+							'general' => $error_message,
+						),
+					) );
+				}
 				mp_checkout()->add_error( $error_message, 'order-review-payment' );
 				return;
 			}
 		} catch ( Exception $e ) {
-			mp_checkout()->add_error( sprintf( __( 'Fehler bei der Kartenverarbeitung: <strong>%s</strong>. Bitte erneut versuchen.', 'mp'), $e->getMessage() ), 'order-review-payment' );
+			$error_message = sprintf( __( 'Fehler bei der Kartenverarbeitung: <strong>%s</strong>. Bitte erneut versuchen.', 'mp'), $e->getMessage() );
+			if ( wp_doing_ajax() ) {
+				wp_send_json_error( array(
+					'errors' => array(
+						'general' => $error_message,
+					),
+				) );
+			}
+			mp_checkout()->add_error( $error_message, 'order-review-payment' );
 			return;
 		}
 	}

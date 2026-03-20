@@ -554,8 +554,15 @@ public $content_tabs = array();
 			$selected_variation = false;
 		}
 
+		$is_download_product = $this->is_download();
+		if ( $selected_variation && is_object( $selected_variation ) ) {
+			$is_download_product = $selected_variation->is_download();
+		}
+
+		$show_quantity_field = mp_get_setting( 'show_quantity' ) && ! $is_download_product;
+
 		$html .= '
-				<div class="mp_product_options_att"' . ( ( mp_get_setting( 'show_quantity' ) ) ? '' : ' style="display:none"' ) . '>
+				<div class="mp_product_options_att"' . ( $show_quantity_field ? '' : ' style="display:none"' ) . '>
 					<strong class="mp_product_options_att_label">' . __( 'Menge', 'mp' ) . '</strong>
 					<div class="mp_form_field mp_product_options_att_field">
 						'. $this->attribute_input_fields( true, false, $selected_variation ) .'
@@ -587,9 +594,14 @@ public $content_tabs = array();
 			$product = new MP_Product( $this->ID );
 		}
 
-		$product_id = $product->ID;
-
 		$input_id = 'mp_product_options_att_quantity';
+
+		// Für Download-Produkte bleibt die Menge immer 1 und wird nicht sichtbar abgefragt.
+		if ( $product->is_download() ) {
+			return '<input id="' . $input_id . '" class="mp_form_input mp_form_input-qty" min="1" max="1" type="hidden" name="product_quantity" value="1">';
+		}
+
+		$product_id = $product->ID;
 
 		$per_order_limit = get_post_meta( $product_id, 'per_order_limit', true );
 
@@ -1023,6 +1035,34 @@ public $content_tabs = array();
 				$ext_text = __( 'Zum Anbieter &raquo;', 'mp' );
 			}
 			$button = '<a class="mp_link-buynow" href="' . esc_url( $url ) . '">' . esc_html( $ext_text ) . '</a>';
+		} elseif ( $is_digital && $is_free ) {
+			// KOSTENLOS + DOWNLOAD: Direkt zum Download (kein Warenkorb!)
+			$dl_url = add_query_arg( array(
+				'mp_action' => 'free_download',
+				'product_id' => $this->ID,
+				'mp_return' => rawurlencode( $this->url( false ) ),
+			), home_url( '/' ) );
+
+			$status_markup = '';
+			$status_product = absint( mp_get_get_value( 'mp_free_download_product' ) );
+			$status_type    = sanitize_key( mp_get_get_value( 'mp_free_download_status' ) );
+			$status_msg_raw = mp_get_get_value( 'mp_free_download_msg' );
+			$status_msg_raw = is_string( $status_msg_raw ) ? $status_msg_raw : '';
+			$status_msg     = sanitize_text_field( rawurldecode( wp_unslash( $status_msg_raw ) ) );
+
+			if ( $status_product === (int) $this->ID && in_array( $status_type, array( 'success', 'error' ), true ) ) {
+				if ( empty( $status_msg ) ) {
+					$status_msg = ( 'success' === $status_type )
+						? __( 'Download erfolgreich gestartet.', 'mp' )
+						: __( 'Fehler: Datei nicht gefunden.', 'mp' );
+				}
+
+				$status_markup = '<div class="mp_free_download_status mp_free_download_status-' . esc_attr( $status_type ) . '">' . esc_html( $status_msg ) . '</div>';
+			}
+
+			$button = '<a class="mp_button mp_button-free-download" data-product-id="' . esc_attr( $this->ID ) . '" href="' . esc_url( $dl_url ) . '">' . $get_btn_text( 'buynow' ) . '</a>';
+			$button .= '<div class="mp_free_download_status" style="display:none"></div>';
+			$button .= $status_markup;
 		} elseif ( ! mp_get_setting( 'disable_cart' ) ) {
 			$button = '<form id="mp-buy-product-' . $this->ID . '-form" class="mp_form mp_form-buy-product ' . ( $no_single ? 'mp_no_single' : '' ) . ' ' . ( $mp_buy_button ? 'mp_buy_button' : '' ) . '" method="post" data-ajax-url="' . mp_get_ajax_url( 'admin-ajax.php?action=mp_update_cart' ) . '" action="' . mp_cart_link( false, true ) . '">';
 

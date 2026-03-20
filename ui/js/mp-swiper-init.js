@@ -1,6 +1,10 @@
 // Lightbox-Logik für Produktbilder
 document.addEventListener('DOMContentLoaded', function() {
   if (!window.mpProductLightboxEnabled) return;
+  if (typeof window.basicLightbox === 'undefined') {
+    console.warn('MP Swiper init: basicLightbox is not available.');
+    return;
+  }
   var gallery = document.getElementById('mp-product-gallery');
   if (!gallery) return;
   gallery.addEventListener('click', function(e) {
@@ -46,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     _btnPrev.className = 'swiper-button-prev';
     _swiperEl.appendChild(_btnPrev);
     _lbRoot.appendChild(_swiperEl);
-    var instance = basicLightbox.create(_lbRoot, {
+    var instance = window.basicLightbox.create(_lbRoot, {
       closable: true,
       onShow: function() {
         var closeBtn = document.querySelector('.mp-product-lightbox-close');

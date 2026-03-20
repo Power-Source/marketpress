@@ -203,6 +203,25 @@ var marketpress = { };
             } );
         },
         /**
+         * Show inline status messages for free download button.
+         *
+         * @since 1.0
+         */
+        initFreeDownloadStatus: function() {
+            $( document ).on( 'click', '.mp_button-free-download', function() {
+                var $btn = $( this );
+                var $status = $btn.nextAll( '.mp_free_download_status' ).first();
+
+                if ( $status.length ) {
+                    $status
+                        .removeClass( 'mp_free_download_status-error mp_free_download_status-success' )
+                        .addClass( 'mp_free_download_status-success' )
+                        .text( 'Download erfolgreich gestartet.' )
+                        .show();
+                }
+            } );
+        },
+        /**
          * Initialize content tabs on the single product template
          *
          * @since 1.0
@@ -281,6 +300,10 @@ var marketpress = { };
          * @since 1.0
          */
         initImageLightbox: function() {
+            if ( typeof window.basicLightbox === 'undefined' ) {
+                return;
+            }
+
             // Vanilla JS: Öffnet basicLightbox für Produktbilder
             document.querySelectorAll('.mp_product_image_link.mp_lightbox').forEach(function(link) {
                 link.addEventListener('click', function(e) {
@@ -434,6 +457,7 @@ jQuery( document ).ready( function( ) {
     marketpress.initProductTabs( );
     marketpress.initToolTips( );
     marketpress.initOrderLookup( );
+    marketpress.initFreeDownloadStatus( );
     marketpress.initImageLightbox( );
     marketpress.initProductFiltersPagination( );
     marketpress.initGlobalProductFiltersPagination();
