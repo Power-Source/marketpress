@@ -557,6 +557,18 @@ class MP_Store_Settings_Presentation {
 			'desc'          => __( 'Button-Text für digitale Produkte mit Preis 0, z.B. „Jetzt herunterladen" oder „Gratis downloaden". Standard: „Kostenloser Download"', 'mp' ),
 			'default_value' => '',
 		) );
+		$metabox->add_field( 'text', array(
+			'name'          => 'price_text_free',
+			'label'         => array( 'text' => __( 'Preistext bei 0,00', 'mp' ) ),
+			'desc'          => __( 'Text für die Produkt-Preisanzeige bei Preis 0 (z.B. „Kostenlos", „Free", „Demo"). Leer lassen für Standard-Formatierung als Währung.', 'mp' ),
+			'default_value' => '',
+		) );
+		$metabox->add_field( 'text', array(
+			'name'          => 'price_text_free_shipping',
+			'label'         => array( 'text' => __( 'Versandtext bei 0,00', 'mp' ) ),
+			'desc'          => __( 'Text für die Versandanzeige bei Versandkosten 0 (z.B. „Kostenlos“, „Versand gratis"). Leer lassen für Standard-Formatierung als Währung.', 'mp' ),
+			'default_value' => __( 'Kostenloser Versand', 'mp' ),
+		) );
 	}
 
 	public function init_related_product_settings() {

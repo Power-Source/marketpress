@@ -331,8 +331,8 @@ public $ID = null;
 		$attachments = apply_filters( 'mp_order/sendmail_attachments', array(), $this, 'new_order_client' );
 		$this->_send_email_to_buyers( $subject, $msg, $attachments );
 
-		$subject = mp_filter_email( $this, stripslashes( mp_get_setting( 'email->admin_order->subject', __( 'New Order Notification: ORDERID', 'mp' ) ) ) );
-		$msg     = mp_filter_email( $this, nl2br( stripslashes( mp_get_setting( 'email->admin_order->text', __( "A new order (ORDERID) was created in your store:\n\n ORDERINFOSKU\n\n SHIPPINGINFO\n\n PAYMENTINFO\n\n", 'mp' ) ) ) ) );
+		$subject = mp_filter_email( $this, stripslashes( mp_get_setting( 'email->admin_order->subject', __( 'Neue Bestellbenachrichtigung: ORDERID', 'mp' ) ) ) );
+		$msg     = mp_filter_email( $this, nl2br( stripslashes( mp_get_setting( 'email->admin_order->text', __( "Eine neue Bestellung (ORDERID) wurde in Deinem Shop erstellt:\n\n ORDERINFOSKU\n\n SHIPPINGINFO\n\n PAYMENTINFO\n\n", 'mp' ) ) ) ) );
 
 		$subject = apply_filters( 'mp_order_notification_admin_subject', $subject, $this );
 
@@ -597,7 +597,7 @@ public $ID = null;
 									}
 
 								} else {
-									echo '<a target="_blank" href="' . esc_url( $product->download_url( get_query_var( 'mp_order_id' ), false ) ) . '">' . __( 'Download', 'mp' ) . '</a>';
+											echo '<a target="_blank" href="' . esc_url( $product->download_url( get_query_var( 'mp_order_id' ), false ) ) . '">' . __( 'Herunterladen', 'mp' ) . '</a>';
 								}
 							}
 							?>
@@ -995,7 +995,7 @@ public $ID = null;
 			$is_download_only = $cart->is_download_only();
 		} else {
 			$tax_total      = mp_format_currency( $currency, $this->get_meta( 'mp_tax_total', 0 ) );
-			$shipping_total = mp_format_currency( $currency, $this->get_meta( 'mp_shipping_total', 0 ) );
+			$shipping_total = mp_format_currency_with_free_text( $currency, $this->get_meta( 'mp_shipping_total', 0 ), 'price_text_free_shipping' );
 		}
 
 		// Currency
@@ -1063,7 +1063,7 @@ public $ID = null;
 			<div class="mp_order_detail_item"><h5>' . __( 'Aktueller Status', 'mp' ) . '</h5> <span>' . $status . '</span></div><!-- end mp_order_detail_item -->
 			<div class="mp_order_detail_item">
 				<h5>' . __( 'Gesamt', 'mp' ) . '</h5>
-				<a href="javascript:;" class="mp_tooltip">' . mp_format_currency( $currency, $this->get_meta( 'mp_order_total', '' ) ) . '</a>
+				<a href="javascript:;" class="mp_tooltip">' . mp_format_currency_with_free_text( $currency, $this->get_meta( 'mp_order_total', '' ) ) . '</a>
 				<div class="mp_tooltip_content">
 					' . $tooltip_content . '
 				</div><!-- end mp_tooltip_content -->

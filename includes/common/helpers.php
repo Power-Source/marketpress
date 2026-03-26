@@ -113,7 +113,7 @@ if ( ! function_exists( 'mp_filter_email' ) ) :
 						}
 						
 					} else {
-						$download_link = '<a href="' . $download_url . '">' . __( 'Download', 'mp' ) . '</a>';
+						$download_link = '<a href="' . $download_url . '">' . __( 'Herunterladen', 'mp' ) . '</a>';
 					}
 				}
 
@@ -140,9 +140,10 @@ if ( ! function_exists( 'mp_filter_email' ) ) :
 		}
 
 		// Shipping line
-		if ( $shipping_total = $order->get_meta( 'mp_shipping_total' ) ) {
-			if( ! mp_cart()->is_download_only()  ) {
-				$order_info .= '<strong>' . __( 'Versand:', 'mp' ) . '</strong> ' . ( ( 0 == $shipping_total ) ? __( 'KOSTENLOS', 'mp' ) : mp_format_currency( $currency, $shipping_total ) ) . "<br />\n";
+		$shipping_total = $order->get_meta( 'mp_shipping_total' );
+		if ( '' !== $shipping_total && null !== $shipping_total ) {
+			if ( ! mp_cart()->is_download_only() ) {
+				$order_info .= '<strong>' . __( 'Versand:', 'mp' ) . '</strong> ' . mp_format_currency_with_free_text( $currency, $shipping_total, 'price_text_free_shipping' ) . "<br />\n";
 			}
 		}
 
@@ -151,9 +152,10 @@ if ( ! function_exists( 'mp_filter_email' ) ) :
 			$order_info .= '<strong>' . esc_html( mp_get_setting( 'tax->label', __( 'Steuern', 'mp' ) ) ) . ':</strong> ' . mp_format_currency( $currency, $tax_total ) . "<br />\n";
 		}
 
-		// Total line
-		if ( $order_total = $order->get_meta( 'mp_order_total' ) ) {
-			$order_info .= '<strong>' . __( 'Gesamtsumme:', 'mp' ) . '</strong> ' . mp_format_currency( $currency, $order_total ) . "<br />\n";
+		// Total line (auch 0-Werte anzeigen)
+		$order_total = $order->get_meta( 'mp_order_total' );
+		if ( '' !== $order_total && null !== $order_total ) {
+			$order_info .= '<strong>' . __( 'Gesamtsumme:', 'mp' ) . '</strong> ' . mp_format_currency_with_free_text( $currency, $order_total ) . "<br />\n";
 		}
 
 		// Cart
@@ -253,7 +255,7 @@ if ( ! function_exists( 'mp_filter_email' ) ) :
 			$payment_info .= '<strong>' . __( 'Transaktions-ID:', 'mp' ) . '</strong> ' . $order->get_meta( 'mp_payment_info->transaction_id' ) . "<br />\n";
 		}
 
-		$payment_info .= '<strong>' . __( 'Gesamtzahlung:', 'mp' ) . '</strong> ' . mp_format_currency( $currency, $order->get_meta( 'mp_payment_info->total' ) ) . "<br /><br />\n";
+		$payment_info .= '<strong>' . __( 'Gesamtzahlung:', 'mp' ) . '</strong> ' . mp_format_currency_with_free_text( $currency, $order->get_meta( 'mp_payment_info->total' ) ) . "<br /><br />\n";
 
 		if ( $order->post_status == 'order_paid' || $order->post_status == 'order_shipped' ) {
 			$payment_info .= __( 'Deine Zahlung für diese Bestellung ist abgeschlossen.', 'mp' );
@@ -272,7 +274,7 @@ if ( ! function_exists( 'mp_filter_email' ) ) :
 	$tracking_url = $order->tracking_url( false );
 
 	// Total
-	$order_total = mp_format_currency( $currency, $order->get_meta( 'mp_payment_info->total' ) );
+	$order_total = mp_format_currency_with_free_text( $currency, $order->get_meta( 'mp_payment_info->total' ) );
 
 	$search_replace = array(
 		'ORDERID'      => $order->get_id(),

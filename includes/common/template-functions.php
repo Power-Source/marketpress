@@ -916,7 +916,7 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 
 			case 'checkout' :
 				$args = array(
-					'post_title'   => __( 'Checkout', 'mp' ),
+					'post_title'   => __( 'Kasse', 'mp' ),
 					'post_content' => '[mp_checkout]',
 					'post_parent'  => mp_get_setting( 'pages->store', 0 )
 				);
@@ -925,7 +925,7 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 			case 'order_status' :
 				$args = array(
 					'post_title'   => __( 'Bestellstatus', 'mp' ),
-					'post_content' => "[mp_order_lookup_form]<h2>" . __( 'Order Search', 'mp' ) . "</h2><p>" . __( 'Wenn Du eine Bestellnummer hast, kannst Du diese über das unten stehende Formular nachschlagen.', 'mp' ) . "</p>[/mp_order_lookup_form][mp_order_status]",
+					'post_content' => "[mp_order_lookup_form]<h2>" . __( 'Bestellung suchen', 'mp' ) . "</h2><p>" . __( 'Wenn Du eine Bestellnummer hast, kannst Du diese über das unten stehende Formular nachschlagen.', 'mp' ) . "</p>[/mp_order_lookup_form][mp_order_status]",
 					'post_parent'  => mp_get_setting( 'pages->store', 0 )
 				);
 				break;
@@ -1116,6 +1116,34 @@ if ( ! function_exists( 'mp_format_currency' ) ) :
 
 endif;
 
+
+if ( ! function_exists( 'mp_format_currency_with_free_text' ) ) :
+
+	/**
+	 * Formats an amount and allows replacing 0.00 with configured free text.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $currency Currency code.
+	 * @param float $amount Amount to format.
+	 * @param string $free_text_setting Setting key for the replacement text.
+	 *
+	 * @return string
+	 */
+	function mp_format_currency_with_free_text( $currency = '', $amount = 0, $free_text_setting = 'price_text_free' ) {
+		$amount = (float) $amount;
+
+		if ( abs( $amount ) < 0.00001 ) {
+			$free_text = trim( (string) mp_get_setting( $free_text_setting, '' ) );
+			if ( '' !== $free_text ) {
+				return esc_html( $free_text );
+			}
+		}
+
+		return mp_format_currency( $currency, $amount );
+	}
+
+endif;
 
 if ( ! function_exists( 'mp_format_date' ) ) :
 

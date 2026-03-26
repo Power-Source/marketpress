@@ -50,10 +50,10 @@ class MP_Installer {
 
 		wp_enqueue_script( 'mp-db-update', mp_plugin_url( 'includes/admin/ui/js/db-update.js' ), array( 'jquery' ), MP_VERSION );
 		wp_localize_script( 'mp-db-update', 'mp_db_update', array(
-			'error_text'  => __( 'An error occurred while updating. Please refresh this page and try again.', 'mp' ),
+			'error_text'  => __( 'Beim Aktualisieren ist ein Fehler aufgetreten. Bitte lade die Seite neu und versuche es erneut.', 'mp' ),
 			'progressbar' => array(
-				'label_text'    => __( 'Upgrading Database...Please Wait...', 'mp' ),
-				'complete_text' => __( 'Complete!', 'mp' ),
+				'label_text'    => __( 'Datenbank wird aktualisiert ... Bitte warten ...', 'mp' ),
+				'complete_text' => __( 'Fertig!', 'mp' ),
 			),
 		) );
 	}

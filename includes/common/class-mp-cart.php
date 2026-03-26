@@ -566,7 +566,7 @@ class MP_Cart {
 							}
 							
 						} else {
-							$column_html .= '<a target="_blank" href="' . $product->download_url( get_query_var( 'mp_order_id' ), false ) . '">' . __( 'Download', 'mp' ) . '</a>';
+							$column_html .= '<a target="_blank" href="' . $product->download_url( get_query_var( 'mp_order_id' ), false ) . '">' . __( 'Herunterladen', 'mp' ) . '</a>';
 						}
 					}
 					break;
@@ -694,7 +694,7 @@ class MP_Cart {
 
 		$line .= '
 				<div class="mp_cart_resume_item mp_cart_resume_item-product-total">
-					<span class="mp_cart_resume_item_label">' . __( 'Product Total', 'mp' ) . '</span>
+					<span class="mp_cart_resume_item_label">' . __( 'Produktsumme', 'mp' ) . '</span>
 					<span class="mp_cart_resume_item_amount">' . $this->product_original_total( true, true ) . '</span>
 				</div><!-- end mp_cart_resume_item_product-total -->';
 
@@ -714,7 +714,7 @@ class MP_Cart {
 
 			$shipping_line .= '
 				<div class="mp_cart_resume_item mp_cart_resume_item-shipping-total">
-					<span class="mp_cart_resume_item_label">' . ( ( $this->is_editable ) ? __( 'Estimated Shipping', 'mp' ) : __( 'Shipping', 'mp' ) ) . '</span>
+					<span class="mp_cart_resume_item_label">' . ( ( $this->is_editable ) ? __( 'Geschätzter Versand', 'mp' ) : __( 'Versand', 'mp' ) ) . '</span>
 					<span class="mp_cart_resume_item_amount">' . $this->shipping_total( true ) . '</span>
 				</div><!-- end mp_cart_resume_item-shipping-total -->';
 		}
@@ -749,7 +749,7 @@ class MP_Cart {
 
 		$line = '
 				<div class="mp_cart_resume_item mp_cart_resume_item-order-total">
-					<span class="mp_cart_resume_item_label">' . ( ( $this->is_editable ) ? __( 'Geschätzter Gesamtbetrag', 'mp' ) : __( 'Order Total', 'mp' ) ) . '</span>
+					<span class="mp_cart_resume_item_label">' . ( ( $this->is_editable ) ? __( 'Geschätzter Gesamtbetrag', 'mp' ) : __( 'Gesamtsumme', 'mp' ) ) . '</span>
 					<span class="mp_cart_resume_item_amount">' . $this->total( true ) . '</span>
 				</div><!-- end mp_cart_resume_item-order-total -->
 			</div><!-- end mp_cart-resume -->';
@@ -813,9 +813,9 @@ class MP_Cart {
 			$message = '<div class="mp_cart_empty">';
 			$message .= '<p class="mp_cart_empty_message">';
 			if ( $disable_cart == '1' ) {
-				$message .= __( 'The cart is disabled.', 'mp' );
+				$message .= __( 'Der Warenkorb ist deaktiviert.', 'mp' );
 			} else {
-				$message .= sprintf( __( 'There are no items in your cart - <a href="%s">go add some</a> !', 'mp' ), mp_store_page_url( 'products', false ) );
+				$message .= sprintf( __( 'Dein Warenkorb ist leer - <a href="%s">füge Produkte hinzu</a>!', 'mp' ), mp_store_page_url( 'products', false ) );
 			}
 			$message .= '</p><!-- end mp_cart_empty_message -->';
 			$message .= '</div><!-- end mp_cart_empty -->';
@@ -952,13 +952,13 @@ class MP_Cart {
 					<section id="mp-cart-meta" class="mp_cart_meta">' .
 			         $this->cart_meta( false, $editable );
 
-			$button_text     = __( 'Submit Order', 'mp' );
-			$button_alt_text = __( 'Continue &raquo;', 'mp' );
+			$button_text     = __( 'Bestellung absenden', 'mp' );
+			$button_alt_text = __( 'Weiter &raquo;', 'mp' );
 
 			if ( get_query_var( 'mp_confirm_order_step' ) ) {
-				$tooltip_text = __( '<strong>You are about to submit your order!</strong><br />Please review your order details before continuing. You will be charged immediately upon clicking "Submit Order".', 'mp' );
+				$tooltip_text = __( '<strong>Du bist dabei, Deine Bestellung abzusenden!</strong><br />Bitte prüfe Deine Bestelldaten, bevor Du fortfährst. Mit Klick auf „Bestellung absenden“ wird die Zahlung sofort ausgelöst.', 'mp' );
 			} else {
-				$tooltip_text = __( '<strong>Secure Checkout</strong><br />Shopping is always safe and secure.', 'mp' );
+				$tooltip_text = __( '<strong>Sichere Kasse</strong><br />Dein Einkauf ist jederzeit sicher.', 'mp' );
 			}
 
 			/**
@@ -971,7 +971,7 @@ class MP_Cart {
 			$tooltip_text = apply_filters( 'mp_cart/checkout_button/tooltip_text', $tooltip_text );
 
 			if ( $editable ) {
-				$button_text    = __( 'Checkout', 'mp' );
+				$button_text    = __( 'Zur Kasse', 'mp' );
 				$p_class        = 'mp-secure-checkout-tooltip-text';
 				$button_classes = array(
 					'mp_button',
@@ -1236,8 +1236,8 @@ class MP_Cart {
 		// Localize scripts
 		wp_localize_script( 'mp-cart', 'mp_cart_i18n', array(
 			'ajaxurl'                  => mp_get_ajax_url(),
-			'ajax_loader'              => '<span class="mp_ajax_loader"><img src="' . mp_plugin_url( 'ui/images/ajax-loader.gif' ) . '" alt=""> ' . __( 'Adding...', 'mp' ) . '</span>',
-			'cart_updated_error_limit' => __( 'Cart update notice: this item has a limit per order or you have reached the stock limit.', 'mp' ),
+			'ajax_loader'              => '<span class="mp_ajax_loader"><img src="' . mp_plugin_url( 'ui/images/ajax-loader.gif' ) . '" alt=""> ' . __( 'Wird hinzugefügt...', 'mp' ) . '</span>',
+			'cart_updated_error_limit' => __( 'Hinweis zum Warenkorb: Dieser Artikel hat ein Bestelllimit oder Du hast das Lagerlimit erreicht.', 'mp' ),
 			'is_cart_page'             => mp_is_shop_page( 'cart' )
 		) );
 	}
@@ -1293,7 +1293,7 @@ class MP_Cart {
 		</div><!-- end mp_mini_cart -->';
 
 		if ( ! mp_doing_ajax() ) {
-			$html .= '<span class="mp_ajax_loader" style="display:none"><img src="' . mp_plugin_url( 'ui/images/ajax-loader.gif' ) . '" alt=""> ' . __( 'Adding...', 'mp' ) . '</span>';
+			$html .= '<span class="mp_ajax_loader" style="display:none"><img src="' . mp_plugin_url( 'ui/images/ajax-loader.gif' ) . '" alt=""> ' . __( 'Wird hinzugefügt...', 'mp' ) . '</span>';
 		}
 
 		if ( $echo ) {
@@ -1348,17 +1348,17 @@ class MP_Cart {
 
 			if ( $context == "widget" ) {
 				$html .= '
-					<a class="mp_button mp_button-remove mp_button-widget-cart mp_button-widget-cart-empty" href="#">' . __( 'Empty Cart', 'mp' ) . '</a>
-					<a class="mp_button mp_button-checkout mp_button-widget-cart" href="' . mp_store_page_url( 'cart', false ) . '">' . __( 'Checkout', 'mp' ) . '</a>';
+					<a class="mp_button mp_button-remove mp_button-widget-cart mp_button-widget-cart-empty" href="#">' . __( 'Warenkorb leeren', 'mp' ) . '</a>
+					<a class="mp_button mp_button-checkout mp_button-widget-cart" href="' . mp_store_page_url( 'cart', false ) . '">' . __( 'Zur Kasse', 'mp' ) . '</a>';
 			} else {
 				$html .= '
-					<a class="mp_button mp_button-mini-cart" href="' . $this->cart_url() . '">' . __( 'View Cart', 'mp' ) . '</a>';
+					<a class="mp_button mp_button-mini-cart" href="' . $this->cart_url() . '">' . __( 'Warenkorb ansehen', 'mp' ) . '</a>';
 			}
 		} else {
 			$html .= '
 				<div class="mp_mini_cart_items-empty">
-					<p><strong>' . __( 'Your shopping cart is empty.', 'mp' ) . '</strong></p>
-					<p>' . __( 'Items/Products added to Cart will show here.', 'mp' ) . '</p>
+					<p><strong>' . __( 'Dein Warenkorb ist leer.', 'mp' ) . '</strong></p>
+					<p>' . __( 'Hier erscheinen die Artikel, die Du in den Warenkorb legst.', 'mp' ) . '</p>
 				</div><!-- end mp_mini_cart_items-empty -->';
 		}
 
@@ -1634,7 +1634,7 @@ class MP_Cart {
 		$total = mp_arr_get_value( 'product', $this->_total );
 
 		if ( $format ) {
-			return mp_format_currency( '', $total );
+			return mp_format_currency_with_free_text( '', $total );
 		} else {
 			return (float) round( $total, 2 );
 		}
@@ -1685,7 +1685,7 @@ class MP_Cart {
 		}
 
 		if ( $format ) {
-			return mp_format_currency( '', $total );
+			return mp_format_currency_with_free_text( '', $total );
 		} else {
 			return (float) round( $total, 2 );
 		}
@@ -1752,7 +1752,7 @@ class MP_Cart {
 		$total = mp_arr_get_value( 'product_original', $this->_total );
 
 		if ( $format ) {
-			return mp_format_currency( '', $total );
+			return mp_format_currency_with_free_text( '', $total );
 		} else {
 			return (float) round( $total, 2 );
 		}
@@ -1847,13 +1847,13 @@ class MP_Cart {
 					break;
 
 				case 'title' :
-					$column_html = '<small  class="mp_cart_deleted_item_title">' . sprintf( '<a href="%s">%s</a>', $product->url( false ), $product->title( false ) ) . ' ' .  __( 'was removed from Shopping Cart', 'mp' ) . '</small >';
+					$column_html = '<small  class="mp_cart_deleted_item_title">' . sprintf( '<a href="%s">%s</a>', $product->url( false ), $product->title( false ) ) . ' ' .  __( 'wurde aus dem Warenkorb entfernt', 'mp' ) . '</small >';
 
 					break;
 				case 'qty' :
 					if ( $this->is_editable ) {
 						$column_html .= '
-						<a class="mp_cart_item_remove_item" href="javascript:mp_cart.undoRemoveItem(' . $id . ')">' . __( 'Add again', 'mp' ) . '</a>';
+						<a class="mp_cart_item_remove_item" href="javascript:mp_cart.undoRemoveItem(' . $id . ')">' . __( 'Erneut hinzufügen', 'mp' ) . '</a>';
 					} else {
 						$column_html = $product->qty;
 					}
@@ -2081,7 +2081,7 @@ class MP_Cart {
 			return '&mdash;';
 		} else {
 			if ( $format ) {
-				return mp_format_currency( '', $shipping_total );
+				return mp_format_currency_with_free_text( '', $shipping_total, 'price_text_free_shipping' );
 			} else {
 				return round( $shipping_total, 2 );
 			}
@@ -2398,7 +2398,7 @@ class MP_Cart {
 		$total = mp_arr_get_value( 'total', $this->_total, 0 );
 
 		if ( $format ) {
-			return mp_format_currency( '', $total );
+			return mp_format_currency_with_free_text( '', $total );
 		} else {
 			return round( $total, 2 );
 		}
@@ -2438,11 +2438,11 @@ class MP_Cart {
 
 		$message = '';
 		if ( count( $this->_items_unavailable['deleted'] ) != 0 ) {
-			$message .= __( 'Some items in your cart are no longer available. We have removed these items from your cart automatically.', 'mp' ) . '\n\n';
+			$message .= __( 'Einige Artikel in Deinem Warenkorb sind nicht mehr verfügbar. Wir haben sie automatisch entfernt.', 'mp' ) . '\n\n';
 		}
 
 		if ( count( $this->_items_unavailable['stock_issue'] ) != 0 ) {
-			$message .= __( 'Some items in your cart have fallen below the quantity you currently have in your cart. We have adjusted the quantity in your cart automatically.', 'mp' );
+			$message .= __( 'Bei einigen Artikeln liegt der Bestand unter Deiner gewählten Menge. Wir haben die Mengen im Warenkorb automatisch angepasst.', 'mp' );
 		}
 		?>
 		<script type="text/javascript">

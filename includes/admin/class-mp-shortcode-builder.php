@@ -205,7 +205,7 @@ class MP_Shortcode_Builder {
 		?>
 		<div id="mp-shortcode-builder" style="display:none">
 			<form id="mp-shortcode-builder-form">
-				<h3><?php _e( 'E-Commerce-Shortcode hinzufuegen', 'mp' ); ?></h3>
+				<h3><?php _e( 'E-Commerce-Shortcode', 'mp' ); ?></h3>
 				<strong><?php _e( 'Was moechtest du tun?', 'mp' ); ?></strong><br />
 				<select name="shortcode">
 					<option value=""><?php _e( 'Aktion auswaehlen', 'mp' ); ?></option>
@@ -1491,7 +1491,7 @@ class MP_Shortcode_Builder {
 		}
 		if( $SC_Builder ) {
 		?>
-		<a href="javascript:;" class="button mp-shortcode-builder-button" title="<?php _e( 'E-Commerce-Shortcode hinzufuegen', 'mp' ); ?>"><span class="wp-media-buttons-icon dashicons dashicons-cart"></span> <?php _e( 'E-Commerce-Shortcode hinzufuegen', 'mp' ); ?></a>
+		<a href="javascript:;" class="button mp-shortcode-builder-button" title="<?php _e( 'E-Commerce-Shortcode', 'mp' ); ?>"><span class="wp-media-buttons-icon dashicons dashicons-cart"></span> <?php _e( 'E-Commerce-Shortcode', 'mp' ); ?></a>
 		<?php
 		}
 	}

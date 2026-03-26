@@ -10,9 +10,9 @@ if ( is_multisite() ) {
 
 		function __construct() {
 			$widget_ops = array( 'classname'   => 'mp_global_category_list_widget',
-			                     'description' => __( "Displays a network-wide HTML list of product categories from network MarketPress stores.", 'mp' )
+			                     'description' => __( "Zeigt dir eine netzwerkweite HTML-Liste mit Produktkategorien aus deinen MarketPress-Shops an.", 'mp' )
 			);
-			parent::__construct( 'mp_global_category_list_widget', __( 'Global Product Category List', 'mp' ), $widget_ops );
+			parent::__construct( 'mp_global_category_list_widget', __( 'Globale Produktkategorien-Liste', 'mp' ), $widget_ops );
 		}
 
 		function widget( $args, $instance ) {
@@ -21,7 +21,7 @@ if ( is_multisite() ) {
 			if ( ! empty( $instance['title'] ) ) {
 				$title = $instance['title'];
 			} else {
-				$title = __( 'Global Product Categories', 'mp' );
+				$title = __( 'Globale Produktkategorien', 'mp' );
 			}
 			$title = apply_filters( 'widget_title', $title, $instance, $this->id_base );
 
@@ -48,7 +48,7 @@ if ( is_multisite() ) {
 
 		function form( $instance ) {
 			$instance = wp_parse_args( (array) $instance, 
-			array( 'title'      => __( 'Global Product Categories', 'mp' ),
+			array( 'title'      => __( 'Globale Produktkategorien', 'mp' ),
 			                                                     'order_by'   => 'name',
 			                                                     'order'      => 'ASC',
 			                                                     'limit'      => 50,
@@ -57,7 +57,7 @@ if ( is_multisite() ) {
 			) );
 			extract( $instance );
 			?>
-			<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'mp' ) ?></label>
+			<p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Titel:', 'mp' ) ?></label>
 				<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>"
 				       name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php if ( isset ( $title ) ) {
 					echo esc_attr( $title );
@@ -65,22 +65,22 @@ if ( is_multisite() ) {
 
 			<p>
 				<label
-					for="<?php echo $this->get_field_id( 'order_by' ); ?>"><?php _e( 'Order Categories By:', 'mp' ) ?></label><br/>
+					for="<?php echo $this->get_field_id( 'order_by' ); ?>"><?php _e( 'Kategorien sortieren nach:', 'mp' ) ?></label><br/>
 				<select id="<?php echo $this->get_field_id( 'order_by' ); ?>"
 				        name="<?php echo $this->get_field_name( 'order_by' ); ?>">
 					<option value="name"<?php selected( $order_by, 'name' ) ?>><?php _e( 'Name', 'mp' ) ?></option>
 					<option
-						value="count"<?php selected( $order_by, 'count' ) ?>><?php _e( 'Product Count', 'mp' ) ?></option>
+						value="count"<?php selected( $order_by, 'count' ) ?>><?php _e( 'Produktanzahl', 'mp' ) ?></option>
 				</select><br/>
 				<label><input value="DESC" name="<?php echo $this->get_field_name( 'order' ); ?>"
-				              type="radio"<?php checked( $order, 'DESC' ) ?> /> <?php _e( 'Descending', 'mp' ) ?>
+				              type="radio"<?php checked( $order, 'DESC' ) ?> /> <?php _e( 'Absteigend', 'mp' ) ?>
 				</label>
 				<label><input value="ASC" name="<?php echo $this->get_field_name( 'order' ); ?>"
-				              type="radio"<?php checked( $order, 'ASC' ) ?> /> <?php _e( 'Ascending', 'mp' ) ?></label>
+				              type="radio"<?php checked( $order, 'ASC' ) ?> /> <?php _e( 'Aufsteigend', 'mp' ) ?></label>
 			</p>
 
 			<p>
-				<label for="<?php echo $this->get_field_id( 'limit' ); ?>"><?php _e( 'Number of Categories:', 'mp' ) ?>
+				<label for="<?php echo $this->get_field_id( 'limit' ); ?>"><?php _e( 'Anzahl Kategorien:', 'mp' ) ?>
 					<input id="<?php echo $this->get_field_id( 'limit' ); ?>"
 					       name="<?php echo $this->get_field_name( 'limit' ); ?>" type="text" size="3"
 					       value="<?php echo intval( $limit ); ?>"/></label><br/>
@@ -90,7 +90,7 @@ if ( is_multisite() ) {
 				<input type="checkbox" class="checkbox" id="<?php echo $this->get_field_id( 'show_count' ); ?>"
 				       name="<?php echo $this->get_field_name( 'show_count' ); ?>"<?php checked( $show_count ); ?> />
 				<label
-					for="<?php echo $this->get_field_id( 'show_count' ); ?>"><?php _e( 'Show product counts', 'mp' ); ?></label>
+					for="<?php echo $this->get_field_id( 'show_count' ); ?>"><?php _e( 'Produktanzahl anzeigen', 'mp' ); ?></label>
 			</p>
 			<?php
 		}

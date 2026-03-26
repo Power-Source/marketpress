@@ -257,10 +257,10 @@ if ( !class_exists( 'MP_Shipping_API' ) ) {
 		 * @return array
 		 */
 		protected function _free_shipping() {
-			mp_update_session_value( 'mp_shipping_info->shipping_sub_option', __( 'Free Shipping', 'mp' ) );
+			mp_update_session_value( 'mp_shipping_info->shipping_sub_option', __( 'Kostenloser Versand', 'mp' ) );
 			mp_update_session_value( 'mp_shipping_info->shipping_cost', 0 );
 			return array(
-				__( 'Free Shipping', 'mp' ) => __( 'Free Shipping - 0.00', 'mp' ),
+				__( 'Kostenloser Versand', 'mp' ) => __( 'Kostenloser Versand - 0,00', 'mp' ),
 			);
 		}
 
@@ -404,10 +404,10 @@ class MP_Shipping_Handler {
 	function extra_shipping_box( $content ) {
 		if ( self::$active_plugins && mp_get_setting( 'shipping->method' ) == 'calculated' ) {
 			$content .= '<thead><tr>';
-			$content .= '<th colspan="2">' . __( 'Choose a Shipping Method:', 'mp' ) . '</th>';
+			$content .= '<th colspan="2">' . __( 'Wähle eine Versandart:', 'mp' ) . '</th>';
 			$content .= '</tr></thead>';
 			$content .= '<tr>';
-			$content .= '<td align="right">' . __( 'Shipping Method:', 'mp' ) . '</td><td id="mp-shipping-select-td">';
+			$content .= '<td align="right">' . __( 'Versandart:', 'mp' ) . '</td><td id="mp-shipping-select-td">';
 			$content .= '<input type="hidden" name="action" value="mp-shipping-options" />';
 			$content .= '<select name="shipping_option" id="mp-shipping-select">';
 			$shipping_option = isset( $_SESSION[ 'mp_shipping_info' ][ 'shipping_option' ] ) ? $_SESSION[ 'mp_shipping_info' ][ 'shipping_option' ] : '';
@@ -429,7 +429,7 @@ class MP_Shipping_Handler {
 				$label .= ' - ' . $_SESSION[ 'mp_shipping_info' ][ 'shipping_sub_option' ];
 
 			$content .= '<tr>';
-			$content .= '<td align="right">' . __( 'Shipping Method:', 'mp' ) . '</td>';
+			$content .= '<td align="right">' . __( 'Versandart:', 'mp' ) . '</td>';
 			$content .= '<td>' . esc_attr( $label ) . '</td>';
 			$content .= '</tr>';
 		}

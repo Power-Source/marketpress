@@ -11,9 +11,9 @@ if ( is_multisite() ) {
 		function __construct() {
 			$widget_ops = array(
 				'classname'   => 'mp_widget mp_global_product_list_widget',
-				'description' => __( 'Shows a customizable global list of products from network MarketPress stores.', 'mp' )
+				'description' => __( 'Zeigt dir eine anpassbare globale Produktliste aus deinen MarketPress-Shops im Netzwerk.', 'mp' )
 			);
-			parent::__construct( 'mp_global_product_list_widget', __( 'Global Product List', 'mp' ), $widget_ops );
+			parent::__construct( 'mp_global_product_list_widget', __( 'Globale Produktliste', 'mp' ), $widget_ops );
 		}
 
 		function widget( $args, $instance ) {
@@ -69,7 +69,7 @@ if ( is_multisite() ) {
 
 		function form( $instance ) {
 			$instance = wp_parse_args( (array) $instance, array(
-				'title'          => __( 'Global Products', 'mp' ),
+				'title'          => __( 'Globale Produkte', 'mp' ),
 				'custom_text'    => '',
 				'per_page'       => 10,
 				'order_by'       => 'date',
@@ -84,75 +84,75 @@ if ( is_multisite() ) {
 			$show_thumbnail_placeholder = isset( $instance['show_thumbnail_placeholder'] ) ? (bool) $instance['show_thumbnail_placeholder'] : false;
 			$thumbnail_size             = isset( $instance['thumbnail_size'] ) ? $instance['thumbnail_size'] : false;
 			?>
-			<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Title:', 'mp' ) ?>
+			<p><label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php _e( 'Titel:', 'mp' ) ?>
 					<input class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"
 					       name="<?php echo esc_attr( $this->get_field_name( 'title' ) ); ?>" type="text"
 					       value="<?php echo esc_attr( $title ); ?>"/></label></p>
 			<p><label
-					for="<?php echo esc_attr( $this->get_field_id( 'custom_text' ) ); ?>"><?php _e( 'Custom Text:', 'mp' ) ?>
+					for="<?php echo esc_attr( $this->get_field_id( 'custom_text' ) ); ?>"><?php _e( 'Eigener Text:', 'mp' ) ?>
 					<br/>
 					<textarea class="widefat" id="<?php echo esc_attr( $this->get_field_id( 'custom_text' ) ); ?>"
 					          name="<?php echo esc_attr( $this->get_field_name( 'custom_text' ) ); ?>"><?php echo esc_attr( $custom_text ); ?></textarea></label>
 			</p>
 
-			<h3><?php _e( 'List Settings', 'mp' ); ?></h3>
+			<h3><?php _e( 'Listen-Einstellungen', 'mp' ); ?></h3>
 			<p>
 				<label
-					for="<?php echo esc_attr( $this->get_field_id( 'per_page' ) ); ?>"><?php _e( 'Number of Products:', 'mp' ) ?>
+					for="<?php echo esc_attr( $this->get_field_id( 'per_page' ) ); ?>"><?php _e( 'Anzahl Produkte:', 'mp' ) ?>
 					<input id="<?php echo esc_attr( $this->get_field_id( 'per_page' ) ); ?>"
 					       name="<?php echo esc_attr( $this->get_field_name( 'per_page' ) ); ?>" type="text" size="3"
 					       value="<?php echo esc_attr( $per_page ); ?>"/></label><br/>
 			</p>
 			<p>
 				<label
-					for="<?php echo esc_attr( $this->get_field_id( 'order_by' ) ); ?>"><?php _e( 'Order Products By:', 'mp' ) ?>
+					for="<?php echo esc_attr( $this->get_field_id( 'order_by' ) ); ?>"><?php _e( 'Produkte sortieren nach:', 'mp' ) ?>
 					<br/>
 					<select id="<?php echo esc_attr( $this->get_field_id( 'order_by' ) ); ?>"
 					        name="<?php echo esc_attr( $this->get_field_name( 'order_by' ) ); ?>">
 						<option
-							value="date"<?php selected( $order_by, 'date' ) ?>><?php _e( 'Publish Date', 'mp' ) ?></option>
+							value="date"<?php selected( $order_by, 'date' ) ?>><?php _e( 'Veroeffentlichungsdatum', 'mp' ) ?></option>
 						<option
-							value="title"<?php selected( $order_by, 'title' ) ?>><?php _e( 'Product Name', 'mp' ) ?></option>
+							value="title"<?php selected( $order_by, 'title' ) ?>><?php _e( 'Produktname', 'mp' ) ?></option>
 						<option
-							value="sales"<?php selected( $order_by, 'sales' ) ?>><?php _e( 'Number of Sales', 'mp' ) ?></option>
+							value="sales"<?php selected( $order_by, 'sales' ) ?>><?php _e( 'Anzahl Verkaeufe', 'mp' ) ?></option>
 						<option
-							value="price"<?php selected( $order_by, 'price' ) ?>><?php _e( 'Product Price', 'mp' ) ?></option>
+							value="price"<?php selected( $order_by, 'price' ) ?>><?php _e( 'Produktpreis', 'mp' ) ?></option>
 						<option
-							value="rand"<?php selected( $order_by, 'rand' ) ?>><?php _e( 'Random', 'mp' ) ?></option>
+							value="rand"<?php selected( $order_by, 'rand' ) ?>><?php _e( 'Zufaellig', 'mp' ) ?></option>
 					</select><br/>
 					<label><input value="DESC" name="<?php echo esc_attr( $this->get_field_name( 'order' ) ); ?>"
-					              type="radio"<?php checked( $order, 'DESC' ) ?> /> <?php _e( 'Descending', 'mp' ) ?>
+					              type="radio"<?php checked( $order, 'DESC' ) ?> /> <?php _e( 'Absteigend', 'mp' ) ?>
 					</label>
 					<label><input value="ASC" name="<?php echo esc_attr( $this->get_field_name( 'order' ) ); ?>"
-					              type="radio"<?php checked( $order, 'ASC' ) ?> /> <?php _e( 'Ascending', 'mp' ) ?>
+					              type="radio"<?php checked( $order, 'ASC' ) ?> /> <?php _e( 'Aufsteigend', 'mp' ) ?>
 					</label>
 			</p>
 			<p>
 				<label
-					for="<?php echo esc_attr( $this->get_field_id( 'category' ) ); ?>"><?php _e( 'Limit To Product Category:', 'mp' ) ?></label><br/>
+					for="<?php echo esc_attr( $this->get_field_id( 'category' ) ); ?>"><?php _e( 'Auf Produktkategorie begrenzen:', 'mp' ) ?></label><br/>
 				<input id="<?php echo esc_attr( $this->get_field_id( 'category' ) ); ?>"
 				       name="<?php echo esc_attr( $this->get_field_name( 'category' ) ); ?>" type="text"
 				       value="<?php echo esc_attr( isset( $category ) ? $category : '' ); ?>"
-				       title="<?php _e( 'Enter the Slug', 'mp' ); ?>" class="widefat"/>
+				       title="<?php _e( 'Slug eingeben', 'mp' ); ?>" class="widefat"/>
 			</p>
 			<p>
 				<label
-					for="<?php echo esc_attr( $this->get_field_id( 'tag' ) ); ?>"><?php _e( 'Limit To Product Tag:', 'mp' ) ?></label><br/>
+					for="<?php echo esc_attr( $this->get_field_id( 'tag' ) ); ?>"><?php _e( 'Auf Produkt-Tag begrenzen:', 'mp' ) ?></label><br/>
 				<input id="<?php echo esc_attr( $this->get_field_id( 'tag' ) ); ?>"
 				       name="<?php echo esc_attr( $this->get_field_name( 'tag' ) ); ?>" type="text"
 				       value="<?php echo esc_attr( isset( $tag ) ? $tag : '' ); ?>"
-				       title="<?php _e( 'Enter the Slug', 'mp' ); ?>" class="widefat"/>
+				       title="<?php _e( 'Slug eingeben', 'mp' ); ?>" class="widefat"/>
 			</p>
 
-			<h3><?php _e( 'Display Settings', 'mp' ); ?></h3>
+			<h3><?php _e( 'Anzeige-Einstellungen', 'mp' ); ?></h3>
 			<p>
 				<input type="checkbox" class="checkbox"
 				       id="<?php echo esc_attr( $this->get_field_id( 'show_thumbnail' ) ); ?>"
 				       name="<?php echo esc_attr( $this->get_field_name( 'show_thumbnail' ) ); ?>"<?php checked( $show_thumbnail ); ?> />
 				<label
-					for="<?php echo esc_attr( $this->get_field_id( 'show_thumbnail' ) ); ?>"><?php _e( 'Show Thumbnail', 'mp' ); ?></label><br/>
+					for="<?php echo esc_attr( $this->get_field_id( 'show_thumbnail' ) ); ?>"><?php _e( 'Vorschaubild anzeigen', 'mp' ); ?></label><br/>
 				<label
-					for="<?php echo esc_attr( $this->get_field_id( 'thumbnail_size' ) ); ?>"><?php _e( 'Thumbnail Size:', 'mp' ) ?>
+					for="<?php echo esc_attr( $this->get_field_id( 'thumbnail_size' ) ); ?>"><?php _e( 'Vorschaubild-Groesse:', 'mp' ) ?>
 					<input id="<?php echo esc_attr( $this->get_field_id( 'thumbnail_size' ) ); ?>"
 					       name="<?php echo esc_attr( $this->get_field_name( 'thumbnail_size' ) ); ?>" type="text"
 					       size="3" value="<?php echo esc_attr( $thumbnail_size ); ?>"/></label>
@@ -166,11 +166,11 @@ if ( is_multisite() ) {
 
 			<p>
 				<label
-					for="<?php echo esc_attr( $this->get_field_id( 'text' ) ); ?>"><?php _e( 'Content To Show:', 'mp' ) ?></label><br/>
+					for="<?php echo esc_attr( $this->get_field_id( 'text' ) ); ?>"><?php _e( 'Anzuzeigender Inhalt:', 'mp' ) ?></label><br/>
 				<select id="<?php echo esc_attr( $this->get_field_id( 'text' ) ); ?>"
 				        name="<?php echo esc_attr( $this->get_field_name( 'text' ) ); ?>">
-					<option value="none"<?php selected( $text, 'none' ) ?>><?php _e( 'None', 'mp' ) ?></option>
-					<option value="excerpt"<?php selected( $text, 'excerpt' ) ?>><?php _e( 'Excerpt', 'mp' ) ?></option>
+					<option value="none"<?php selected( $text, 'none' ) ?>><?php _e( 'Keiner', 'mp' ) ?></option>
+					<option value="excerpt"<?php selected( $text, 'excerpt' ) ?>><?php _e( 'Kurzbeschreibung', 'mp' ) ?></option>
 					<!--<option value="content"<?php /*selected( $text, 'content' ) */ ?>><?php /*_e( 'Content', 'mp' ) */ ?></option>-->
 				</select>
 			</p>
@@ -180,7 +180,7 @@ if ( is_multisite() ) {
 				       id="<?php echo esc_attr( $this->get_field_id( 'show_price' ) ); ?>"
 				       name="<?php echo esc_attr( $this->get_field_name( 'show_price' ) ); ?>"<?php checked( $show_price ); ?> />
 				<label
-					for="<?php echo esc_attr( $this->get_field_id( 'show_price' ) ); ?>"><?php _e( 'Show Price', 'mp' ); ?></label>
+					for="<?php echo esc_attr( $this->get_field_id( 'show_price' ) ); ?>"><?php _e( 'Preis anzeigen', 'mp' ); ?></label>
 			</p>
 
 			<?php
