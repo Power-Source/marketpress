@@ -260,16 +260,16 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 			$form	 = '
 			<input type="hidden" id="mp-cc-name" name="mp_cc_name" value="' . esc_attr( $name ) . '">
 			<div class="mp_checkout_field">
-				<label class="mp_form_label">' . __( 'Card Number', 'mp' ) . ' <span class="mp_field_required">*</span></label>
+				<label class="mp_form_label">' . __( 'Kartennummer', 'mp' ) . ' <span class="mp_field_required">*</span></label>
 				<input type="text" ' . (( $use_names ) ? 'name="mp_cc_num"' : 'id="mp-cc-num"' ) . ' pattern="\d*" autocomplete="cc-number" class="mp_form_input mp_form_input-cc-num mp-input-cc-num" data-rule-required="true" data-rule-cc-num="true">
 			</div>
 			<div class="mp_checkout_fields">
 				<div class="mp_checkout_column mp_checkout_field">
-					<label class="mp_form_label">' . __( 'Expiration', 'mp' ) . ' <span class="mp_field_required">*</span> <span class="mp_tooltip-help">' . __( 'Enter in <strong>MM/YYYY</strong> or <strong>MM/YY</strong> format', 'mp' ) . '</span></label>
+					<label class="mp_form_label">' . __( 'Ablaufdatum', 'mp' ) . ' <span class="mp_field_required">*</span> <span class="mp_tooltip-help">' . __( 'Bitte im Format <strong>MM/JJJJ</strong> oder <strong>MM/JJ</strong> eingeben', 'mp' ) . '</span></label>
 					<input type="text" ' . (( $use_names ) ? 'name="mp_cc_exp"' : 'id="mp-cc-exp"' ) . ' autocomplete="cc-exp" class="mp_form_input mp_form_input-cc-exp mp-input-cc-exp" data-rule-required="true" data-rule-cc-exp="true">
 				</div>
 				<div class="mp_checkout_column mp_checkout_field">
-					<label class="mp_form_label">' . __( 'Security Code ', 'mp' ) . ' <span class="mp_field_required">*</span> <span class="mp_tooltip-help"><img src="' . mp_plugin_url( 'ui/images/cvv_2.jpg' ) . '" alt="CVV2"></span></label>
+					<label class="mp_form_label">' . __( 'Sicherheitscode ', 'mp' ) . ' <span class="mp_field_required">*</span> <span class="mp_tooltip-help"><img src="' . mp_plugin_url( 'ui/images/cvv_2.jpg' ) . '" alt="CVV2"></span></label>
 					<input class="mp_form_input mp_form_input-cc-cvc mp-input-cc-cvc" type="text" ' . (( $use_names ) ? 'name="mp_cc_cvc"' : 'id="mp-cc-cvc"' ) . ' name="mp_cc_cvc" autocomplete="off" data-rule-required="true" data-rule-cc-cvc="true">
 				</div>
 			</div>';
@@ -376,7 +376,7 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 		 * @filter mp_checkout/confirm_order_html/{plugin_name}
 		 */
 		public function confirm_order_html( $html ) {
-			return sprintf( __( 'You have chosen to checkout using <strong>%s</strong>. Please confirm your order details and click "Submit Order" when finished.', 'mp' ), $this->public_name );
+			return sprintf( __( 'Du hast die Zahlung mit <strong>%s</strong> gewählt. Bitte prüfe Deine Bestelldaten und klicke danach auf „Bestellung absenden“.', 'mp' ), $this->public_name );
 		}
 
 		/**

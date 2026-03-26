@@ -16,7 +16,7 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 
 	function on_creation() {
 		$this->admin_name = __( 'Simplify', 'mp' );
-		$this->public_name = __( 'Credit Card', 'mp' );
+		$this->public_name = __( 'Kreditkarte', 'mp' );
 		$this->public_key = $this->get_setting( 'api_credentials->public_key' );
 		$this->private_key = $this->get_setting( 'api_credentials->private_key' );
 		$this->force_ssl = $this->get_setting( 'is_ssl' );
@@ -66,9 +66,9 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 		$metabox = new PSOURCE_Metabox(array(
 			'id' => $this->generate_metabox_id(),
 			'page_slugs' => array('store-settings-payments', 'store-settings_page_store-settings-payments'),
-			'title' => sprintf(__('%s Settings', 'mp'), $this->admin_name),
+			'title' => sprintf(__('%s Einstellungen', 'mp'), $this->admin_name),
 			'option_name' => 'mp_settings',
-			'desc' => __('Simplify helps merchants to accept online payments from Mastercard, Visa, American Express, Discover, JCB, and Diners Club cards. It\'s that simple. We offer a merchant account and payment gateway in a single, secure package so you can concentrate on what really matters to your business. Only supports USD currently.', 'mp'),
+			'desc' => __('Simplify hilft Dir, Online-Zahlungen mit Mastercard, Visa, American Express, Discover, JCB und Diners Club zu akzeptieren. Händlerkonto und Payment-Gateway kommen in einem sicheren Paket. Aktuell wird nur USD unterstützt.', 'mp'),
 			'conditional' => array(
 				'name' => 'gateways[allowed][' . $this->plugin_name . ']',
 				'value' => 1,
@@ -77,21 +77,21 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 		));
 		$creds = $metabox->add_field('complex', array(
 			'name' => $this->get_field_name('api_credentials'),
-			'label' => array('text' => __('API Credentials', 'mp')),
-			'desc' => __('Login to Simplify to <a target="_blank" href="https://www.simplify.com/commerce/app#/account/apiKeys">get your API credentials</a>. Enter your test credentials, then live ones when ready.', 'mp'),
+			'label' => array('text' => __('API-Zugangsdaten', 'mp')),
+			'desc' => __('Melde Dich bei Simplify an, um <a target="_blank" href="https://www.simplify.com/commerce/app#/account/apiKeys">Deine API-Zugangsdaten zu holen</a>. Trage zuerst Testdaten ein und später die Live-Daten.', 'mp'),
 		));
 		
 		if ( $creds instanceof PSOURCE_Field ) {
 			$creds->add_field('text', array(
 				'name' => 'public_key',
-				'label' => array('text' => __('Public Key', 'mp')),
+				'label' => array('text' => __('Öffentlicher Schlüssel', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
 			));
 			$creds->add_field('text', array(
 				'name' => 'private_key',
-				'label' => array('text' => __('Private Key', 'mp')),
+				'label' => array('text' => __('Privater Schlüssel', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
@@ -100,8 +100,8 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 		
 		$metabox->add_field('checkbox', array(
 			'name' => $this->get_field_name('is_ssl'),
-			'label' => array('text' => __('Force SSL?', 'mp')),
-			'desc' => __('When in live mode, although it is not required, Simplify recommends you have an SSL certificate.', 'mp'),
+			'label' => array('text' => __('SSL erzwingen?', 'mp')),
+			'desc' => __('Im Live-Modus ist es zwar nicht zwingend, aber Simplify empfiehlt ein SSL-Zertifikat.', 'mp'),
 		));
 	}
 	
@@ -155,7 +155,7 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 	/*
 	function process_payment( $cart, $billing_info, $shipping_info ) {
 		if ( mp_get_post_value( 'card_token' ) ) {
-			mp_checkout()->add_error( __( 'The Simplify Token was not generated correctly. Please go back and try again.', 'mp' ), 'order-review-payment' );
+			mp_checkout()->add_error( __( 'Der Simplify-Token wurde nicht korrekt erzeugt. Bitte gehe zurück und versuche es erneut.', 'mp' ), 'order-review-payment' );
 			return false;
 		}
 
@@ -175,7 +175,7 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 			$charge = Simplify_Payment::createPayment( array(
 				'amount' => ($total * 100),
 				'token' => $token,
-				'description' => sprintf( __( '%s Store Purchase - Order ID: %s, Email: %s', 'mp'), get_bloginfo( 'name' ), $order_id, mp_arr_get_value( 'email', $shipping_info ) ),
+				'description' => sprintf( __( '%s Shop-Kauf - Bestell-ID: %s, E-Mail: %s', 'mp'), get_bloginfo( 'name' ), $order_id, mp_arr_get_value( 'email', $shipping_info ) ),
 				'currency' => $this->currency
 			));
 
@@ -183,9 +183,9 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 				$payment_info = array();
 				$payment_info['gateway_public_name'] = $this->public_name;
 				$payment_info['gateway_private_name'] = $this->admin_name;
-				$payment_info['method'] = sprintf( __( '%1$s Card ending in %2$s - Expires %3$s', 'mp' ), $charge->card->type, $charge->card->last4, $charge->card->expMonth . '/' . $charge->card->expYear );
+				$payment_info['method'] = sprintf( __( '%1$s Karte endet auf %2$s - Gültig bis %3$s', 'mp' ), $charge->card->type, $charge->card->last4, $charge->card->expMonth . '/' . $charge->card->expYear );
 				$payment_info['transaction_id'] = $charge->id;
-				$payment_info['status'][ time() ] = __( 'Paid', 'mp' );
+				$payment_info['status'][ time() ] = __( 'Bezahlt', 'mp' );
 				$payment_info['total'] = $total;
 				$payment_info['currency'] = $this->currency;
 				
@@ -199,13 +199,13 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 				exit;
 			}
 			else{
-				$error_message = __( 'There was a problem finalizing your purchase. Please re-enter your credit card information and try again</a>', 'mp' );
+				$error_message = __( 'Beim Abschließen Deines Kaufs ist ein Problem aufgetreten. Bitte gib Deine Kreditkartendaten erneut ein und versuche es nochmal</a>', 'mp' );
 				$error_message = apply_filters( 'mp_gateway/simplify/error_message', $error_message );
 				mp_checkout()->add_error( $error_message, 'order-review-payment' );
 				return;
 			}
 		} catch ( Exception $e ) {
-			mp_checkout()->add_error( sprintf( __( 'There was an error processing your card: <strong>%s</strong>. Please re-enter your credit card info and try again</a>.', 'mp'), $e->getMessage() ), 'order-review-payment' );
+			mp_checkout()->add_error( sprintf( __( 'Beim Verarbeiten Deiner Karte ist ein Fehler aufgetreten: <strong>%s</strong>. Bitte gib Deine Kreditkartendaten erneut ein und versuche es nochmal</a>.', 'mp'), $e->getMessage() ), 'order-review-payment' );
 			return false;
 		}
 	}

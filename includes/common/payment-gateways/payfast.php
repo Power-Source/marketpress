@@ -282,14 +282,14 @@ class MP_Gateway_PayFast extends MP_Gateway_API {
         global $mp;
 
         if ($order->post_status == 'order_received') {
-          $content .= '<p>' . sprintf(__('Your payment via PayFast for this order totaling %s is not yet complete. Here is the latest status:', 'mp'), mp_format_currency('', $order->mp_payment_info['total'])) . '</p>';
+          $content .= '<p>' . sprintf(__('Deine Zahlung via PayFast für diese Bestellung über %s ist noch nicht abgeschlossen. Hier ist der aktuelle Status:', 'mp'), mp_format_currency('', $order->mp_payment_info['total'])) . '</p>';
             $statuses = $order->mp_payment_info['status'];
             krsort($statuses); //sort with latest status at the top
             $status = reset($statuses);
             $timestamp = key($statuses);
           $content .= '<p><strong>' . date(get_option('date_format') . ' - ' . get_option('time_format'), $timestamp) . ':</strong> ' . htmlentities($status) . '</p>';
         } else {
-          $content .= '<p>' . sprintf(__('Your payment via PayFast for this order totaling %s is complete. The transaction number is <strong>%s</strong>.', 'mp'), mp_format_currency('', $order->mp_payment_info['total']), $order->mp_payment_info['transaction_id']) . '</p>';
+          $content .= '<p>' . sprintf(__('Deine Zahlung via PayFast für diese Bestellung über %s ist abgeschlossen. Die Transaktionsnummer ist <strong>%s</strong>.', 'mp'), mp_format_currency('', $order->mp_payment_info['total']), $order->mp_payment_info['transaction_id']) . '</p>';
         }
         return $content;
     }
@@ -310,12 +310,12 @@ class MP_Gateway_PayFast extends MP_Gateway_API {
         global $mp;
     ?>
     <div id="mp_payfast" class="postbox">
-      <h3 class='hndle'><span><?php _e('PayFast Checkout Settings', 'mp'); ?></span></h3>
+      <h3 class='hndle'><span><?php _e('PayFast-Checkout-Einstellungen', 'mp'); ?></span></h3>
       <div class="inside">
-        <span class="description"><?php _e('PayFast is a payments processing service for South Africa. We make it safe for buyers to send money and easy for sellers to receive money. <a target="_blank" href="http://www.payfast.co.za">More Info &raquo;</a>', 'mp') ?></span>
+        <span class="description"><?php _e('PayFast ist ein Zahlungsdienst für Südafrika. Käufer können sicher bezahlen und Verkäufer unkompliziert Geld empfangen. <a target="_blank" href="http://www.payfast.co.za">Mehr Infos &raquo;</a>', 'mp') ?></span>
         <table class="form-table">
             <tr>
-                <th scope="row"><?php _e('PayFast Mode', 'mp') ?></th>
+                <th scope="row"><?php _e('PayFast-Modus', 'mp') ?></th>
                 <td>
                     <select name="mp[gateways][payfast][mode]">
                         <option value="test"<?php selected(mp_get_setting('gateways->payfast->mode'), 'test') ?>><?php _e('Test', 'mp') ?></option>
@@ -325,33 +325,33 @@ class MP_Gateway_PayFast extends MP_Gateway_API {
                 </td>
             </tr>
             <tr<?php echo ($mp->global_cart) ? ' style="display:none;"' : '';?>>
-                <th scope="row"><?php _e('PayFast Merchant Credentials', 'mp') ?></th>
+                <th scope="row"><?php _e('PayFast-Händlerzugangsdaten', 'mp') ?></th>
                 <td>
-                    <span class="description"><?php _e('You can find your credentials on your integration page.', 'mp')?></span>
-                    <p><label><?php _e('Merchant ID', 'mp') ?><br />
+                    <span class="description"><?php _e('Deine Zugangsdaten findest Du auf Deiner Integrationsseite.', 'mp')?></span>
+                    <p><label><?php _e('Händler-ID', 'mp') ?><br />
                             <input value="<?php echo esc_attr(mp_get_setting('gateways->payfast->merchantid')); ?>" size="30" name="mp[gateways][payfast][merchantid]" type="text" />
                     </label></p>
-                    <p><label><?php _e('Merchant Key', 'mp') ?><br />
+                    <p><label><?php _e('Händler-Schlüssel', 'mp') ?><br />
                         <input value="<?php echo esc_attr(mp_get_setting('gateways->payfast->merchantkey')); ?>" size="20" name="mp[gateways][payfast][merchantkey]" type="text" />
                     </label></p>
                 </td>
             </tr>
             <tr>
-                <th scope="row"><?php _e('PayFast Passphrase', 'mp') ?></th>
+                <th scope="row"><?php _e('PayFast-Passphrase', 'mp') ?></th>
                 <td>
-                    <span class="description"><?php _e('DO NOT INPUT A VALUE UNLESS YOU HAVE SET ONE IN THE SETTINGS SECTION OF YOUR PAYFAST SETTINGS.', 'mp')?></span>
+                    <span class="description"><?php _e('TRAG HIER NUR EINEN WERT EIN, WENN DU AUCH IN DEINEN PAYFAST-EINSTELLUNGEN EINE PASSPHRASE GESETZT HAST.', 'mp')?></span>
                     <p>
                         <input value="<?php echo esc_attr(mp_get_setting('gateways->payfast->passphrase')); ?>" size="20" name="mp[gateways][payfast][passphrase]" type="text" />
                     </p>
                 </td>
             </tr>
             <tr>
-                <th scope="row"><?php _e('Log Debugging Info?', 'mp') ?></th>
+                <th scope="row"><?php _e('Debug-Infos protokollieren?', 'mp') ?></th>
                 <td>
-                    <span class="description"><?php _e('This setting will log all PayFast communication to the "payfast.log" file.', 'mp')?></span>
+                    <span class="description"><?php _e('Diese Einstellung schreibt die komplette PayFast-Kommunikation in die Datei "payfast.log".', 'mp')?></span>
                     <p><select name="mp[gateways][payfast][debug]">
-                        <option value="yes"<?php selected(mp_get_setting('gateways->payfast->debug', 'yes')); ?>><?php _e('Yes', 'mp') ?></option>
-                        <option value="no"<?php selected(mp_get_setting('gateways->payfast->debug', 'no')); ?>><?php _e('No', 'mp') ?></option>
+                        <option value="yes"<?php selected(mp_get_setting('gateways->payfast->debug', 'yes')); ?>><?php _e('Ja', 'mp') ?></option>
+                        <option value="no"<?php selected(mp_get_setting('gateways->payfast->debug', 'no')); ?>><?php _e('Nein', 'mp') ?></option>
                     </select></p>
                 </td>
             </tr>
@@ -523,7 +523,7 @@ class MP_Gateway_PayFast extends MP_Gateway_API {
             {
                 case 'COMPLETE':
                     pflog('- Complete');
-                    $status = __('The payment has been completed, and the funds have been added successfully to your account balance.', 'mp');
+                        $status = __('Die Zahlung wurde abgeschlossen und der Betrag wurde Deinem Kontostand gutgeschrieben.', 'mp');
                     $payment_info = $order->mp_payment_info;
                     $payment_info['transaction_id'] = $pfData['pf_payment_id'];
                     $payment_info['method'] = "PayFast";
@@ -535,7 +535,7 @@ class MP_Gateway_PayFast extends MP_Gateway_API {
 
                 case 'FAILED':
                     pflog('- Failed');
-                    $status = __("The payment has failed. This happens only if the payment was made from your customer's bank account.", 'mp');
+                        $status = __("Die Zahlung ist fehlgeschlagen. Das passiert nur, wenn die Zahlung direkt vom Bankkonto Deines Kunden erfolgte.", 'mp');
                     $paid = false;
 
                     // Need to wait for "Completed" before processing
@@ -543,7 +543,7 @@ class MP_Gateway_PayFast extends MP_Gateway_API {
 
                 case 'PENDING':
                     pflog('- Pending');
-                    $status = __('The payment is pending.', 'mp');
+                        $status = __('Die Zahlung ist ausstehend.', 'mp');
                     $paid = false;
 
                     // Need to wait for "Completed" before processing

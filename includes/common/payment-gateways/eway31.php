@@ -268,7 +268,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 	function on_creation() {
 		//set names here to be able to translate
 		$this->admin_name = __('eWay Rapid 3.1 Payments (beta)', 'mp');
-		$this->public_name = __('Credit Card', 'mp');
+		$this->public_name = __('Kreditkarte', 'mp');
 		
 		$this->method_img_url = mp_plugin_url('images/credit_card.png');
 		$this->method_button_img_url = mp_plugin_url('images/cc-button.png');
@@ -560,7 +560,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
 						}
 					}
 				} else {
-					$error_msg = __( 'Zahlung fehlgeschlagen. Bitte überprüfen Sie Ihre Angaben.', 'mp' );
+					$error_msg = __( 'Zahlung fehlgeschlagen. Bitte überprüfe Deine Angaben.', 'mp' );
 				}
 				mp_checkout()->add_error( $error_msg, 'order-review-payment' );
 			}
@@ -610,7 +610,7 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
         $metabox = new PSOURCE_Metabox(array(
             'id' => $this->generate_metabox_id(),
             'page_slugs' => array('store-settings-payments', 'store-settings_page_store-settings-payments'),
-            'title' => sprintf(__('%s Settings', 'mp'), $this->admin_name),
+			'title' => sprintf(__('%s Einstellungen', 'mp'), $this->admin_name),
             'option_name' => 'mp_settings',
             'desc' => __('eWay Rapid 3.1 Payments ermöglicht Kreditkartenzahlungen direkt im Shop. Ein gültiges SSL-Zertifikat ist erforderlich.', 'mp'),
             'conditional' => array(
@@ -683,4 +683,4 @@ class MP_Gateway_eWay31 extends MP_Gateway_API {
     }
 }
 
-mp_register_gateway_plugin( 'MP_Gateway_eWay31', 'eway31', __('eWay Rapid 3.1 Payments (beta)', 'mp') );
+mp_register_gateway_plugin( 'MP_Gateway_eWay31', 'eway31', __('eWay Rapid 3.1 Zahlungen (Beta)', 'mp') );

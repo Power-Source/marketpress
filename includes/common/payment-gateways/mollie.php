@@ -70,9 +70,9 @@ class MP_Gateway_Mollie extends MP_Gateway_API {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => $this->generate_metabox_id(),
 			'page_slugs'	 => array( 'store-settings-payments', 'store-settings_page_store-settings-payments' ),
-			'title'			 => sprintf( __( '%s Settings', 'mp' ), $this->admin_name ),
+			'title'			 => sprintf( __( '%s Einstellungen', 'mp' ), $this->admin_name ),
 			'option_name'	 => 'mp_settings',
-			'desc'			 => sprintf( __( '%sMollie%s provides a fully PCI Compliant and secure way to collect payments via iDeal, Credit Card, Bancontact / Mister Cash, SOFORT Banking, Overbooking, Bitcoin, PayPal, paysafecard and AcceptEmail.', 'mp' ), '<a href="https://www.mollie.com/">', '</a>' ),
+			'desc'			 => sprintf( __( '%sMollie%s bietet eine vollständig PCI-konforme und sichere Möglichkeit, Zahlungen über iDeal, Kreditkarte, Bancontact / Mister Cash, SOFORT, Bitcoin, PayPal, paysafecard und AcceptEmail zu empfangen.', 'mp' ), '<a href="https://www.mollie.com/">', '</a>' ),
 			'conditional'	 => array(
 				'name'	 => 'gateways[allowed][' . $this->plugin_name . ']',
 				'value'	 => 1,
@@ -90,9 +90,9 @@ class MP_Gateway_Mollie extends MP_Gateway_API {
 
 		$metabox->add_field( 'advanced_select', array(
 			'name'		 => 'gateways[' . $this->plugin_name . '][currency]',
-			'label'		 => array( 'text' => __( 'Currency', 'mp' ) ),
+			'label'		 => array( 'text' => __( 'Währung', 'mp' ) ),
 			'multiple'	 => false,
-			'options'	 => array_merge( array( '' => __( 'Select One', 'mp' ) ), $this->currencies ),
+			'options'	 => array_merge( array( '' => __( 'Bitte auswählen', 'mp' ) ), $this->currencies ),
 			'width'		 => 'element',
 			'validation' => array(
 				'required' => true,
@@ -115,7 +115,7 @@ class MP_Gateway_Mollie extends MP_Gateway_API {
 	 * @param array $shipping_info. Contains shipping info and email in case you need it
 	 */
 	function payment_form( $cart, $shipping_info ) {
-		return __( 'You will be redirected to the Mollie site to finalize your payment.', 'mp' );
+		return __( 'Du wirst zur Mollie-Seite weitergeleitet, um Deine Zahlung abzuschließen.', 'mp' );
 	}
 
 	/**
@@ -139,7 +139,7 @@ class MP_Gateway_Mollie extends MP_Gateway_API {
 
 			$payment = $this->mollie->payments->create( array(
 				"amount"		 => $total,
-				"description"	 => __( 'Order: #', 'mp' ) . $order->get_id(),
+				"description"	 => __( 'Bestellung: #', 'mp' ) . $order->get_id(),
 				"redirectUrl"	 => $this->return_url . '?order_id=' . $order->get_id(),
 				"metadata"		 => array(
 					"order_id" => $order->get_id(),
@@ -156,7 +156,7 @@ class MP_Gateway_Mollie extends MP_Gateway_API {
 		} catch ( Mollie_API_Exception $e ) {
 			print_r($e->getMessage());
 			exit;
-			mp_checkout()->add_error( sprintf( __( 'API error: - "%s"', 'mp' ), htmlspecialchars( $e->getMessage() ), 'payment' ) );
+			mp_checkout()->add_error( sprintf( __( 'API-Fehler: "%s"', 'mp' ), htmlspecialchars( $e->getMessage() ), 'payment' ) );
 		}
 	}
 
@@ -197,7 +197,7 @@ class MP_Gateway_Mollie extends MP_Gateway_API {
 					'method'				 => __( 'Mollie', 'mp' ),
 					'transaction_id'		 => $payment->id,
 					'status'				 => array(
-						$timestamp => __( 'The payment request is under process', 'mp' ),
+						$timestamp => __( 'Die Zahlungsanfrage wird verarbeitet', 'mp' ),
 					),
 					'total'					 => $cart->total(),
 					'currency'				 => $this->currencyCode,
@@ -211,7 +211,7 @@ class MP_Gateway_Mollie extends MP_Gateway_API {
 					'paid'			 => false
 				) );
 
-				$status = __( 'The order has been received', 'mp' );
+				$status = __( 'Die Bestellung ist eingegangen', 'mp' );
 				$order->log_ipn_status( $payment->status . ': ' . $status );
 
 				if ( $payment->isPaid() ){

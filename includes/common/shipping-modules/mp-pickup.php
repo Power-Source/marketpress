@@ -21,7 +21,7 @@ class MP_Shipping_Pickup extends MP_Shipping_API {
 	 */
 	function on_creation() {
 		//declare here for translation
-		$this->public_name = __( 'Pickup', 'mp' );
+		$this->public_name = __( 'Abholung', 'mp' );
 
 		//filter the confirmation message
 		//add_filter( 'mp_checkout_shipping_field_readonly', array( &$this, 'show_instructions_confirm_page' ) );
@@ -57,7 +57,7 @@ class MP_Shipping_Pickup extends MP_Shipping_API {
 
 		if ( $used_pickup ) {
 			$settings = mp_get_setting( 'shipping' );
-			$html .= '<h3>' . __( 'Pickup Instructions', 'mp' ) . '</h3>' . ( $settings[ 'pickup' ][ 'pickup-instructions' ] );
+			$html .= '<h3>' . __( 'Abholhinweise', 'mp' ) . '</h3>' . ( $settings[ 'pickup' ][ 'pickup-instructions' ] );
 		}
 
 		echo $html;
@@ -73,7 +73,7 @@ class MP_Shipping_Pickup extends MP_Shipping_API {
 
 		if ( $used_pickup ) {
 			$settings = mp_get_setting( 'shipping' );
-			$text .= "\n\n" . __( 'Pickup Instructions', 'mp' );
+			$text .= "\n\n" . __( 'Abholhinweise', 'mp' );
 			$text .= "\n" . esc_attr( $settings[ 'pickup' ][ 'pickup-instructions' ] );
 		}
 
@@ -137,8 +137,8 @@ class MP_Shipping_Pickup extends MP_Shipping_API {
 				'store-settings_page_store-settings-shipping',
 				'store-setup-wizard'
 			),
-			'title'			 => sprintf( __( '%s Settings', 'mp' ), $this->public_name ),
-			'desc'			 => __( 'This option allows your customers to indicate that they will pick-up their order at your place of business.', 'mp' ),
+			'title'			 => sprintf( __( '%s Einstellungen', 'mp' ), $this->public_name ),
+			'desc'			 => __( 'Diese Option erlaubt Deinen Kunden, ihre Bestellung bei Dir vor Ort abzuholen.', 'mp' ),
 			'option_name'	 => 'mp_settings',
 			'conditional'	 => array(
 				'operator'	 => 'AND',
@@ -156,7 +156,7 @@ class MP_Shipping_Pickup extends MP_Shipping_API {
 		
 		$metabox->add_field( 'text', array(
 			'name'			 => $this->get_field_name( 'processing-fee' ),
-			'label'			 => array( 'text' => __( 'Pickup Fee', 'mp' ) . ' (' . mp_format_currency() . ')' ),
+			'label'			 => array( 'text' => __( 'Abholgebühr', 'mp' ) . ' (' . mp_format_currency() . ')' ),
 			'validation'	 => array(
 				'required'	 => true,
 				'number'	 => true,
@@ -167,13 +167,13 @@ class MP_Shipping_Pickup extends MP_Shipping_API {
 
 		$metabox->add_field( 'text', array(
 			'name'			 => $this->get_field_name( 'pickup-title' ),
-			'label'			 => array( 'text' => __( 'Method Title (visible for clients)', 'mp' ) ),
-			'default_value'	 => __( 'In Store', 'mp' )
+			'label'			 => array( 'text' => __( 'Methodentitel (sichtbar für Kunden)', 'mp' ) ),
+			'default_value'	 => __( 'Abholung im Laden', 'mp' )
 		) );
 
 		$metabox->add_field( 'WYSIWYG', array(
 			'name'	 => $this->get_field_name( 'pickup-instructions' ),
-			'label'	 => array( 'text' => __( 'Pickup Instructions', 'mp' ) ),
+			'label'	 => array( 'text' => __( 'Abholhinweise', 'mp' ) ),
 		) );
 	}
 
@@ -244,11 +244,11 @@ class MP_Shipping_Pickup extends MP_Shipping_API {
 	 * return array $shipping_options 
 	 */
 	function shipping_options( $cart, $address1, $address2, $city, $state, $zip, $country ) {
-		$shipping_options = array( 'in-store' => $this->get_setting( "pickup-title", __( 'In Store', 'mp' ) ) );
+		$shipping_options = array( 'in-store' => $this->get_setting( "pickup-title", __( 'Abholung im Laden', 'mp' ) ) );
 		return $shipping_options;
 	}
 
 }
 
 //register plugin - uncomment to register
-MP_Shipping_API::register_plugin( 'MP_Shipping_Pickup', 'pickup', __( 'Pickup', 'mp' ), true );
+MP_Shipping_API::register_plugin( 'MP_Shipping_Pickup', 'pickup', __( 'Abholung', 'mp' ), true );

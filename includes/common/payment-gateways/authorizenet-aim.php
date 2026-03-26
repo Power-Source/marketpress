@@ -47,7 +47,7 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 	function on_creation() {
 		//set names here to be able to translate
 		$this->admin_name = __('Authorize.net Checkout', 'mp');
-		$this->public_name = __('Credit Card', 'mp');
+		$this->public_name = __('Kreditkarte', 'mp');
 
 		$this->method_img_url = mp_plugin_url('images/credit_card.png');
 		$this->method_button_img_url = mp_plugin_url('images/cc-button.png');
@@ -199,7 +199,7 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 				 'gateway_private_name' => $this->admin_name,
 				 'method' => $payment->getMethod(),
 				 'status' => array(
-				 	$timestamp => ( $payment->isHeldForReview() ) ? __( 'Held For Review', 'mp' ) : __( 'Paid', 'mp' ),
+					$timestamp => ( $payment->isHeldForReview() ) ? __( 'Zur Prüfung zurückgestellt', 'mp' ) : __( 'Bezahlt', 'mp' ),
 				 ),
 				 'total' => $cart->total( false ),
 				 'currency' => $this->currencyCode,
@@ -211,7 +211,7 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 			exit;
 		} else {
 			$error = $payment->getResponseText();
-			mp_checkout()->add_error( sprintf( __( 'There was a problem finalizing your purchase. %s Please <a href="%s">go back and try again</a>.', 'mp'), $error, mp_store_page_url( 'checkout', false ) ), 'order-review-payment' , false );
+			mp_checkout()->add_error( sprintf( __( 'Beim Abschließen Deines Kaufs ist ein Problem aufgetreten. %s Bitte <a href="%s">gehe zurück und versuche es erneut</a>.', 'mp'), $error, mp_store_page_url( 'checkout', false ) ), 'order-review-payment' , false );
 		}
 		*/
 
@@ -332,9 +332,9 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 		$metabox = new PSOURCE_Metabox(array(
 			'id' => $this->generate_metabox_id(),
 			'page_slugs' => array('store-settings-payments', 'store-settings_page_store-settings-payments'),
-			'title' => sprintf(__('%s Settings', 'mp'), $this->admin_name),
+			'title' => sprintf(__('%s Einstellungen', 'mp'), $this->admin_name),
 			'option_name' => 'mp_settings',
-			'desc' => __('Authorize.net AIM is a customizable payment processing solution that gives the merchant control over all the steps in processing a transaction. An SSL certificate is required to use this gateway. USD is the only currency supported by this gateway.', 'mp'),
+			'desc' => __('Authorize.net AIM ist eine anpassbare Zahlungsabwicklung, bei der Du alle Schritte einer Transaktion kontrollierst. Für dieses Gateway ist ein SSL-Zertifikat erforderlich. Unterstützt wird nur USD.', 'mp'),
 			'conditional' => array(
 				'name' => 'gateways[allowed][' . $this->plugin_name . ']',
 				'value' => 1,
@@ -343,7 +343,7 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 		));
 		$metabox->add_field('radio_group', array(
 			'name' => 'gateways[' . $this->plugin_name . '][mode]',
-			'label' => array('text' => __('Mode', 'mp')),
+			'label' => array('text' => __('Modus', 'mp')),
 			'default_value' => 'sandbox',
 			'options' => array(
 				'sandbox' => __('Sandbox', 'mp'),
@@ -352,21 +352,21 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 		));
 		$creds = $metabox->add_field('complex', array(
 			'name' => 'gateways[' . $this->plugin_name . '][api_credentials]',
-			'label' => array('text' => __('API Credentials', 'mp')),
-			'desc' => __('You must login to Authorize.net merchant dashboard to obtain the API login ID and API transaction key. <a target="_blank" href="https://support.authorize.net/authkb/index?page=content&id=A576">Instructions &raquo;</a>', 'mp'),
+			'label' => array('text' => __('API-Zugangsdaten', 'mp')),
+			'desc' => __('Melde Dich im Authorize.net-Händlerbereich an, um API-Login-ID und API-Transaktionsschlüssel zu erhalten. <a target="_blank" href="https://support.authorize.net/authkb/index?page=content&id=A576">Anleitung &raquo;</a>', 'mp'),
 		));
 		
 		if ( $creds instanceof PSOURCE_Field ) {
 			$creds->add_field('text', array(
 				'name' => 'api_user',
-				'label' => array('text' => __('Login ID', 'mp')),
+				'label' => array('text' => __('Login-ID', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
 			));
 			$creds->add_field('text', array(
 				'name' => 'api_key',
-				'label' => array('text' => __('Transaction Key', 'mp')),
+				'label' => array('text' => __('Transaktionsschlüssel', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
@@ -375,9 +375,9 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 		
 		$metabox->add_field('advanced_select', array(
 			'name' => 'gateways[' . $this->plugin_name . '][currency]',
-			'label' => array('text' => __('Currency', 'mp')),
+			'label' => array('text' => __('Währung', 'mp')),
 			'multiple' => false,
-			'options' => array_merge(array('' => __('Select One', 'mp')), $this->currencies),
+			'options' => array_merge(array('' => __('Bitte auswählen', 'mp')), $this->currencies),
 			'width' => 'element',
 			'validation' => array(
 				'required' => true,
@@ -385,32 +385,32 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 		));
 		$metabox->add_field('section', array(
 			'name' => 'section_advanced_settings',
-			'title' => __('Advanced Settings', 'mp'),
-			'subtitle' => __('Optional settings to control advanced options', 'mp'),
+			'title' => __('Erweiterte Einstellungen', 'mp'),
+			'subtitle' => __('Optionale Einstellungen für erweiterte Optionen', 'mp'),
 		));
 		$metabox->add_field('text', array(
 			'name' => 'gateways[' . $this->plugin_name . '][delim_char]',
-			'label' => array('text' => __('Delimeter Character', 'mp')),
-			'desc' => __('Authorize.net default is ",". Otherwise, get this from your credit card processor. If the transactions are not going through, this character is most likely wrong.', 'mp'),
+			'label' => array('text' => __('Trennzeichen', 'mp')),
+			'desc' => __('Der Authorize.net-Standard ist ",". Andernfalls bekommst Du diesen Wert von Deinem Kreditkartenanbieter. Wenn Transaktionen fehlschlagen, ist dieses Zeichen meist die Ursache.', 'mp'),
 		));
 		$metabox->add_field('text', array(
 			'name' => 'gateways[' . $this->plugin_name . '][encap_char]',
-			'label' => array('text' => __('Encapsulation Character', 'mp')),
-			'desc' => __('Authorize.net default is blank. Otherwise, get this from your credit card processor. If the transactions are going through, but getting strange responses, this character is most likely wrong.', 'mp'),
+			'label' => array('text' => __('Begrenzungszeichen', 'mp')),
+			'desc' => __('Der Authorize.net-Standard ist leer. Andernfalls bekommst Du diesen Wert von Deinem Kreditkartenanbieter. Wenn Transaktionen durchgehen, aber seltsame Antworten liefern, ist dieses Zeichen meist falsch.', 'mp'),
 		));
 		$metabox->add_field('radio_group', array(
 			'name' => 'gateways[' . $this->plugin_name . '][email_customer]',
-			'label' => array('text' => __('Email Customer (on success)', 'mp')),
+			'label' => array('text' => __('Kunden per E-Mail informieren (bei Erfolg)', 'mp')),
 			'default_value' => 'yes',
 			'options' => array(
-				'yes' => __('Yes', 'mp'),
-				'no' => __('No', 'mp'),
+				'yes' => __('Ja', 'mp'),
+				'no' => __('Nein', 'mp'),
 			),
 		));
 		$metabox->add_field('text', array(
 			'name' => 'gateways[' . $this->plugin_name . '][header_email_receipt]',
-			'label' => array('text' => __('Customer Receipt Email Header', 'mp')),
-			'desc' => __('This text will appear as the header of the email receipt sent to the customer.', 'mp'),
+			'label' => array('text' => __('E-Mail-Kopf der Kundenquittung', 'mp')),
+			'desc' => __('Dieser Text erscheint als Kopf der E-Mail-Quittung an den Kunden.', 'mp'),
 			'conditional' => array(
 				'name' => 'gateways[' . $this->plugin_name . '][email_customer]',
 				'value' => 'yes',
@@ -419,8 +419,8 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 		));
 		$metabox->add_field('text', array(
 			'name' => 'gateways[' . $this->plugin_name . '][footer_email_receipt]',
-			'label' => array('text' => __('Customer Receipt Email Footer', 'mp')),
-			'desc' => __('This text will appear as the footer of the email receipt sent to the customer.', 'mp'),
+			'label' => array('text' => __('E-Mail-Fuß der Kundenquittung', 'mp')),
+			'desc' => __('Dieser Text erscheint als Fuß der E-Mail-Quittung an den Kunden.', 'mp'),
 			'conditional' => array(
 				'name' => 'gateways[' . $this->plugin_name . '][email_customer]',
 				'value' => 'yes',
@@ -429,23 +429,23 @@ class MP_Gateway_AuthorizeNet_AIM extends MP_Gateway_API {
 		));
 		$metabox->add_field('text', array(
 			'name' => 'gateways[' . $this->plugin_name . '][md5_hash]',
-			'label' => array('text' => __('Security: MD5 Hash', 'mp')),
-			'desc' => __('The payment gateway generated MD5 hash value that can be used to authenticate the transaction response. Not needed because responses are returned using an SSL connection.', 'mp'),
+			'label' => array('text' => __('Sicherheit: MD5-Hash', 'mp')),
+			'desc' => __('Der vom Gateway erzeugte MD5-Hash kann zur Authentifizierung der Transaktionsantwort genutzt werden. In der Regel nicht nötig, da Antworten über SSL übertragen werden.', 'mp'),
 		));
 		$metabox->add_field('radio_group', array(
 			'name' => 'gateways[' . $this->plugin_name . '][delim_data]',
-			'label' => array('text' => __('Delim Data', 'mp')),
-			'desc' => __('Request a delimited response from the payment gateway.', 'mp'),
+			'label' => array('text' => __('Antwort mit Trennzeichen', 'mp')),
+			'desc' => __('Fordert eine mit Trennzeichen formatierte Antwort vom Zahlungs-Gateway an.', 'mp'),
 			'default_value' => 'yes',
 			'options' => array(
-				'yes' => __('Yes', 'mp'),
-				'no' => __('No', 'mp'),
+				'yes' => __('Ja', 'mp'),
+				'no' => __('Nein', 'mp'),
 			),
 		));
 		$metabox->add_field('text', array(
 			'name' => 'gateways[' . $this->plugin_name . '][custom_api]',
-			'label' => array('text' => __('Custom API URL', 'mp')),
-			'desc' => __('Many other gateways have Authorize.net API emulators. To use one of these gateways input their API post url here.', 'mp'),
+			'label' => array('text' => __('Eigene API-URL', 'mp')),
+			'desc' => __('Viele andere Gateways bieten Authorize.net-API-Emulatoren. Um eines davon zu nutzen, trage hier die API-Post-URL ein.', 'mp'),
 			'validation' => array(
 				'url' => true,
 			),
@@ -457,4 +457,4 @@ if ( ! class_exists('MP_Gateway_Worker_AuthorizeNet_AIM' ) ) :
 endif;
 
 //register payment gateway plugin
-mp_register_gateway_plugin('MP_Gateway_AuthorizeNet_AIM', 'authorizenet_aim', __('Authorize.net AIM Checkout', 'mp'));
+mp_register_gateway_plugin('MP_Gateway_AuthorizeNet_AIM', 'authorizenet_aim', __('Authorize.net AIM-Checkout', 'mp'));

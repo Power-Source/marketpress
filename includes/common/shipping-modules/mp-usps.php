@@ -69,29 +69,29 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 		//Key is the enumeration for the USPS Services XML field
 		$this->services = array(
 			'Express Mail'                                         =>
-				new USPS_Service( 3, __( 'Express Mail', 'mp' ), __( '(1-2 days)', 'mp' ) ),
+				new USPS_Service( 3, __( 'Express Mail', 'mp' ), __( '(1-2 Tage)', 'mp' ) ),
 			'Express Mail Hold For Pickup'                         =>
-				new USPS_Service( 2, __( 'Express Mail Hold For Pickup', 'mp' ), __( '(1-2 days)', 'mp' ) ),
+				new USPS_Service( 2, __( 'Express Mail Hold For Pickup', 'mp' ), __( '(1-2 Tage)', 'mp' ) ),
 			'Express Mail Sunday/Holiday Delivery'                 =>
-				new USPS_Service( 3, __( 'Express Mail Sunday/Holiday Delivery', 'mp' ), __( '(1-2 days)', 'mp' ) ),
+				new USPS_Service( 3, __( 'Express Mail Sunday/Holiday Delivery', 'mp' ), __( '(1-2 Tage)', 'mp' ) ),
 			'Express Mail Flat Rate Boxes'                         =>
-				new USPS_Service( 55, __( 'Express Mail Flat Rate Boxes', 'mp' ), __( '(1-2 days)', 'mp' ), 50 ),
+				new USPS_Service( 55, __( 'Express Mail Flat Rate Boxes', 'mp' ), __( '(1-2 Tage)', 'mp' ), 50 ),
 			'Express Mail Flat Rate Boxes Hold For Pickup'         =>
-				new USPS_Service( 56, __( 'Express Mail Flat Rate Boxes Hold For Pickup', 'mp' ), __( '(1-2 days)', 'mp' ), 50 ),
+				new USPS_Service( 56, __( 'Express Mail Flat Rate Boxes Hold For Pickup', 'mp' ), __( '(1-2 Tage)', 'mp' ), 50 ),
 			'Express Mail Sunday/Holiday Delivery Flat Rate Boxes' =>
-				new USPS_Service( 57, __( 'Express Mail Sunday/Holiday Delivery Flat Rate Boxes', 'mp' ), __( '(1-2 days)', 'mp' ) ),
+				new USPS_Service( 57, __( 'Express Mail Sunday/Holiday Delivery Flat Rate Boxes', 'mp' ), __( '(1-2 Tage)', 'mp' ) ),
 			'Priority Mail'                                        =>
-				new USPS_Service( 1, __( 'Priority Mail', 'mp' ), __( '(2-4) days', 'mp' ) ),
+				new USPS_Service( 1, __( 'Priority Mail', 'mp' ), __( '(2-4 Tage)', 'mp' ) ),
 			'Priority Mail Large Flat Rate Box'                    =>
-				new USPS_Service( 22, __( 'Priority Mail Large Flat Rate Box', 'mp' ), __( '(2-4 days)', 'mp' ), 30 ),
+				new USPS_Service( 22, __( 'Priority Mail Large Flat Rate Box', 'mp' ), __( '(2-4 Tage)', 'mp' ), 30 ),
 			'Priority Mail Medium Flat Rate Box'                   =>
-				new USPS_Service( 17, __( 'Priority Mail Medium Flat Rate Box', 'mp' ), __( '(2-4 days)', 'mp' ), 20 ),
+				new USPS_Service( 17, __( 'Priority Mail Medium Flat Rate Box', 'mp' ), __( '(2-4 Tage)', 'mp' ), 20 ),
 			'Priority Mail Small Flat Rate Box'                    =>
-				new USPS_Service( 28, __( 'Priority Mail Small Flat Rate Box', 'mp' ), __( '(2-4 days)', 'mp' ), 3 ),
+				new USPS_Service( 28, __( 'Priority Mail Small Flat Rate Box', 'mp' ), __( '(2-4 Tage)', 'mp' ), 3 ),
 			'Padded Flat Rate Envelope'                            =>
-				new USPS_Service( 29, __( 'Priority Mail Padded Flat Rate Envelope', 'mp' ), __( '(2-4 days)', 'mp' ), 2 ),
+				new USPS_Service( 29, __( 'Priority Mail Padded Flat Rate Envelope', 'mp' ), __( '(2-4 Tage)', 'mp' ), 2 ),
 			'First-Class Mail Parcel'                              =>
-				new USPS_Service( 0, __( 'First-Class Mail Parcel', 'mp' ), __( '(2-4 days)', 'mp' ) ),
+				new USPS_Service( 0, __( 'First-Class Mail Parcel', 'mp' ), __( '(2-4 Tage)', 'mp' ) ),
 			'Media Mail'                                           =>
 				new USPS_Service( 6, __( 'Media Mail', 'mp' ), '' ),
 			'Library Mail'                                         =>
@@ -113,7 +113,7 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 			'Priority Mail International Small Flat Rate Boxes'             =>
 				new USPS_Service( 16, __( 'Priority Mail International Small Flat Rate Boxes', 'mp' ), '', 3 ),
 			'Priority Mail Express International Padded Flat Rate Envelope' =>
-				new USPS_Service( 27, __( 'Priority Mail Express International Padded Flat Rate Envelope', 'mp' ), __( '(3-5 days)', 'mp' ), 2 ),
+				new USPS_Service( 27, __( 'Priority Mail Express International Padded Flat Rate Envelope', 'mp' ), __( '(3-5 Tage)', 'mp' ), 2 ),
 			'First Class International Parcel'                              =>
 				new USPS_Service( 15, __( 'First Class International Parcel', 'mp' ) ),
 		);
@@ -164,8 +164,8 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 				'store-settings_page_store-settings-shipping',
 				'store-setup-wizard'
 			),
-			'title'       => sprintf( __( '%s Settings', 'mp' ), $this->public_name ),
-			'desc'        => __( 'Using this USPS Shipping calculator requires requesting an Ecommerce API Username and Password. Get your free set of credentials <a target="_blank" href="https://registration.shippingapis.com/">here &raquo;</a>. The password is no longer used for the API, just the username which you should enter below. The USPS test site has not yet been updated and currently doesn\'t work - you should just request activating your credentials with USPS and go live.', 'mp' ),
+			'title'       => sprintf( __( '%s Einstellungen', 'mp' ), $this->public_name ),
+			'desc'        => __( 'Für diesen USPS-Versandrechner brauchst Du einen Ecommerce-API-Benutzernamen und ein Passwort. Deine Zugangsdaten bekommst Du kostenlos <a target="_blank" href="https://registration.shippingapis.com/">hier &raquo;</a>. Für die API wird inzwischen nur noch der Benutzername verwendet, den Du unten einträgst. Die USPS-Testumgebung ist derzeit nicht aktuell und funktioniert meist nicht zuverlässig - aktiviere Deine Zugangsdaten am besten direkt für den Live-Betrieb.', 'mp' ),
 			'option_name' => 'mp_settings',
 			'conditional' => array(
 				'operator' => 'AND',
@@ -182,18 +182,18 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 		) );
 		$metabox->add_field( 'text', array(
 			'name'  => $this->get_field_name( 'api_username' ),
-			'label' => array( 'text' => __( 'Username', 'mp' ) ),
+			'label' => array( 'text' => __( 'Benutzername', 'mp' ) ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'  => $this->get_field_name( 'max_weight' ),
-			'label' => array( 'text' => __( 'Maximum Weight Per Package', 'mp' ) ),
+			'label' => array( 'text' => __( 'Maximales Gewicht pro Paket', 'mp' ) ),
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'    => $this->get_field_name( 'online' ),
-			'label'   => array( 'text' => __( 'Rates Request Type', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Tarifabfrage-Typ', 'mp' ) ),
 			'options' => array(
-				'online' => __( 'Online Rates', 'mp' ),
-				'retail' => __( 'Retail Rates', 'mp' ),
+				'online' => __( 'Online-Tarife', 'mp' ),
+				'retail' => __( 'Filialtarife', 'mp' ),
 			),
 		) );
 
@@ -203,14 +203,14 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 		}
 		$metabox->add_field( 'checkbox_group', array(
 			'name'    => $this->get_field_name( 'services' ),
-			'label'   => array( 'text' => __( 'Offered Domestic Services', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Angebotene nationale Services', 'mp' ) ),
 			'options' => $services,
 			'width'   => '50%',
 		) );
 
 		$metabox->add_field( 'text', array(
 			'name'  => $this->get_field_name( 'domestic_handling' ),
-			'label' => array( 'text' => __( 'Handling Charge per Domestic Shipment', 'mp' ) ),
+			'label' => array( 'text' => __( 'Bearbeitungsgebühr pro nationaler Sendung', 'mp' ) ),
 		) );
 
 		$services = array();
@@ -219,36 +219,36 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 		}
 		$metabox->add_field( 'checkbox_group', array(
 			'name'    => $this->get_field_name( 'intl_services' ),
-			'label'   => array( 'text' => __( 'Offered International Services', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Angebotene internationale Services', 'mp' ) ),
 			'options' => $services,
 			'width'   => '50%',
 		) );
 
 		$metabox->add_field( 'text', array(
 			'name'  => $this->get_field_name( 'intl_handling' ),
-			'label' => array( 'text' => __( 'Handling Charge per International Shipment', 'mp' ) ),
+			'label' => array( 'text' => __( 'Bearbeitungsgebühr pro internationaler Sendung', 'mp' ) ),
 		) );
 
 		$boxes = $metabox->add_field( 'repeater', array(
 			'name'          => $this->get_field_name( 'boxes' ),
-			'label'         => array( 'text' => __( 'Standard Boxes and Weight Limits', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Standardpakete und Gewichtsgrenzen', 'mp' ) ),
 			'default_value' => $this->default_boxes(),
-			'desc'          => __( 'Enter your standard box sizes as LengthxWidthxHeight (e.g. 12x8x6) For each box defined enter the maximum weight it can contain. <strong>Note: the shipping prices this plugin calculates are estimates. If they are consistently too low or too high, please check that the list of boxes above and the product weights are accurate and complete.</strong>', 'mp' ),
-			'add_row_label' => __( 'Add Box', 'mp' ),
+			'desc'          => __( 'Gib Deine Standard-Paketgrößen als LängexBreitexHöhe ein (z. B. 12x8x6). Für jedes Paket bitte das maximale Gewicht angeben. <strong>Hinweis: Die vom Plugin berechneten Versandkosten sind Schätzwerte. Wenn sie dauerhaft zu hoch oder zu niedrig sind, prüfe bitte die Paketliste und Produktgewichte auf Vollständigkeit und Korrektheit.</strong>', 'mp' ),
+			'add_row_label' => __( 'Paket hinzufügen', 'mp' ),
 		) );
 
 		if ( $boxes instanceof PSOURCE_Field ) {
 			$boxes->add_sub_field( 'text', array(
 				'name'  => 'name',
-				'label' => array( 'text' => __( 'Name', 'mp' ) ),
+				'label' => array( 'text' => __( 'Bezeichnung', 'mp' ) ),
 			) );
 			$boxes->add_sub_field( 'text', array(
 				'name'  => 'size',
-				'label' => array( 'text' => sprintf( __( 'Size (%s)', 'mp' ), mp_dimension_label() ) ),
+				'label' => array( 'text' => sprintf( __( 'Größe (%s)', 'mp' ), mp_dimension_label() ) ),
 			) );
 			$boxes->add_sub_field( 'text', array(
 				'name'  => 'weight',
-				'label' => array( 'text' => sprintf( __( 'Max Weight (%s)', 'mp' ), mp_weight_label() ) ),
+				'label' => array( 'text' => sprintf( __( 'Max. Gewicht (%s)', 'mp' ), mp_weight_label() ) ),
 			) );
 		}
 	}
@@ -437,10 +437,10 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 		}
 		//If whole shipment is zero weight then there's nothing to ship. Return Free Shipping
 		if ( $this->weight == 0 ) { //Nothing to ship
-			$_SESSION['mp_shipping_info']['shipping_sub_option'] = __( 'Free Shipping', 'mp' );
+			$_SESSION['mp_shipping_info']['shipping_sub_option'] = __( 'Kostenloser Versand', 'mp' );
 			$_SESSION['mp_shipping_info']['shipping_cost']       = 0;
 
-			return array( __( 'Free Shipping', 'mp' ) => __( 'Free Shipping - 0.00', 'mp' ) );
+			return array( __( 'Kostenloser Versand', 'mp' ) => __( 'Kostenloser Versand - 0,00', 'mp' ) );
 		}
 
 		// Got our totals  make sure we're in decimal pounds.
@@ -504,7 +504,7 @@ class MP_Shipping_USPS extends MP_Shipping_API_Calculated {
 	function after_mp_shipping_options( $html, $options ){
 		if( empty( $options) ){
 			$html .= '<span class="mp_usps_after_shipping_options no_options_available">';
-			$html .= __( 'There are no shipping services available for this type of package in your location.', 'mp' );
+			$html .= __( 'Für diese Paketart sind an Deinem Standort keine Versanddienste verfügbar.', 'mp' );
 			$html .= '</span>';
 		}
 

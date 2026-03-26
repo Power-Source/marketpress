@@ -153,7 +153,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
   function on_creation() {
     //set names here to be able to translate
     $this->admin_name = __('eWay Shared Payments', 'mp');
-    $this->public_name = __('Credit Card', 'mp');
+		$this->public_name = __('Kreditkarte', 'mp');
     $this->returnURL = mp_store_page_url( 'checkout-confirm', false );
   	$this->cancelURL = mp_store_page_url( 'checkout', false ) . "?eway-cancel=1";
 
@@ -250,7 +250,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 			libxml_use_internal_errors(true);
 			$xml = new SimpleXMLElement( $result) ;
 			if ( ! $xml ) {
-				mp_checkout()->add_error( '<li>' . __( 'There was a problem parsing the response from eWay. Please try again.', 'mp' ) . '</li>', 'order-review-payment' );
+				mp_checkout()->add_error( '<li>' . __( 'Beim Verarbeiten der eWay-Antwort ist ein Fehler aufgetreten. Bitte versuche es erneut.', 'mp' ) . '</li>', 'order-review-payment' );
 				return false;
 			}
 
@@ -258,7 +258,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 				wp_redirect( $xml->URI );
 				exit;
 			} else {
-				mp_checkout()->add_error( '<li>' . sprintf(__( 'There was a problem setting up the transaction with eWay: %s', 'mp' ), $xml->Error ) . '</li>', 'order-review-payment' );
+				mp_checkout()->add_error( '<li>' . sprintf(__( 'Beim Einrichten der Transaktion mit eWay ist ein Problem aufgetreten: %s', 'mp' ), $xml->Error ) . '</li>', 'order-review-payment' );
 			}
 		}
   }
@@ -272,7 +272,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
    * @param array $shipping_info. Contains shipping info and email in case you need it
 	 */
   public function payment_form( $cart, $shipping_info ) {
-    return __( 'You will be redirected to https://www.eway.com.au to finalize your payment.', 'mp' );
+		return __( 'Du wirst zu https://www.eway.com.au weitergeleitet, um Deine Zahlung abzuschließen.', 'mp' );
   }
     
   /**
@@ -294,7 +294,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 				libxml_use_internal_errors( true );
 				$xml = new SimpleXMLElement( $result );
 				if ( ! $xml ) {
-					mp_checkout()->add_error( '<li>' . __( 'There was a problem parsing the response from eWay. Please try again.', 'mp' ) . '</li>', 'order-review-payment' );
+					mp_checkout()->add_error( '<li>' . __( 'Beim Verarbeiten der eWay-Antwort ist ein Fehler aufgetreten. Bitte versuche es erneut.', 'mp' ) . '</li>', 'order-review-payment' );
 					return false;
 				}
 
@@ -303,9 +303,9 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 					$payment_info = array();
 					$payment_info['gateway_public_name'] = $this->public_name;
 					$payment_info['gateway_private_name'] = $this->admin_name;
-					$payment_info['method'] = __( 'Credit Card', 'mp' );
+					$payment_info['method'] = __( 'Kreditkarte', 'mp' );
 					$payment_info['transaction_id'] = (string) $xml->TrxnNumber;
-					$payment_info['status'][ $timestamp ] = sprintf( __( 'Paid - The card has been processed - %s', 'mp'), (string) $xml->TrxnResponseMessage );
+					$payment_info['status'][ $timestamp ] = sprintf( __( 'Bezahlt - Die Karte wurde verarbeitet - %s', 'mp'), (string) $xml->TrxnResponseMessage );
 					$payment_info['total'] = (string) $xml->ReturnAmount;
 					$payment_info['currency'] = $this->get_setting( 'Currency' );
 
@@ -319,7 +319,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 					wp_redirect( $order->tracking_url( false ) );
 					exit;
 				} else {
-					mp_checkout()->add_error( '<li>' . sprintf( __( 'There was a problem with your credit card information: %s', 'mp' ), $xml->TrxnResponseMessage ) . '</li>', 'order-review-payment' );
+					mp_checkout()->add_error( '<li>' . sprintf( __( 'Es gab ein Problem mit Deinen Kreditkartendaten: %s', 'mp' ), $xml->TrxnResponseMessage ) . '</li>', 'order-review-payment' );
 				}
 			}
 		}
@@ -357,9 +357,9 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
   	$metabox = new PSOURCE_Metabox(array(
 			'id' => $this->generate_metabox_id(),
 			'page_slugs' => array('store-settings-payments', 'store-settings_page_store-settings-payments'),
-			'title' => sprintf(__('%s Settings', 'mp'), $this->admin_name),
+			'title' => sprintf(__('%s Einstellungen', 'mp'), $this->admin_name),
 			'option_name' => 'mp_settings',
-			'desc' => __('The Hosted Page is a webpage hosted on eWAY\'s side eliminating the need for merchants to capture, transmit or store credit card numbers. At the checkout time the merchant automatically redirects the customer to the Hosted Page where they would enter their details and have the transaction processed. Upon completion of the transaction the customer is redirected back to the MarketPress checkout confirmation page.', 'mp'),
+			'desc' => __('Die Hosted Page wird von eWAY gehostet, sodass Du keine Kreditkartendaten erfassen, übertragen oder speichern musst. Beim Checkout wird der Kunde automatisch auf diese Seite weitergeleitet, gibt dort seine Daten ein und schließt die Transaktion ab. Danach wird er zur MarketPress-Bestellbestätigung zurückgeführt.', 'mp'),
 			'conditional' => array(
 				'name' => 'gateways[allowed][' . $this->plugin_name . ']',
 				'value' => 1,
@@ -368,7 +368,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 		));
 		$metabox->add_field('advanced_select', array(
 			'name' => $this->get_field_name('Currency'),
-			'label' => array('text' => __('Currency', 'mp')),
+			'label' => array('text' => __('Währung', 'mp')),
 			'default_value' => mp_get_setting('currency'),
 			'multiple' => false,
 			'width' => 'element',
@@ -376,9 +376,9 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 		));
 		$metabox->add_field('radio_group', array(
 			'name' => $this->get_field_name('mode'),
-			'label' => array('text' => __('Gateway Mode', 'mp')),
+			'label' => array('text' => __('Gateway-Modus', 'mp')),
 			'default_value' => 'sandbox',
-			'desc' => __('Note when testing in sandbox mode it will use the default eWay test API credentials. Also, please note that cart total needs to be a whole number (e.g. 10.00) in order to generate a successful transaction, otherwise the transaction will fail.', 'mp'),
+			'desc' => __('Hinweis: Im Sandbox-Modus werden die Standard-eWay-Testzugangsdaten verwendet. Außerdem muss der Warenkorb-Gesamtbetrag eine volle Zahl mit zwei Nachkommastellen sein (z. B. 10.00), sonst schlägt die Transaktion fehl.', 'mp'),
 			'options' => array(
 				'sandbox' => __('Sandbox', 'mp'),
 				'live' => __('Live', 'mp'),
@@ -386,20 +386,20 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 		));
 		$creds = $metabox->add_field('complex', array(
 			'name' => $this->get_field_name('api_credentials'),
-			'label' => array('text' => __('Live API Credentials', 'mp')),
+			'label' => array('text' => __('Live-API-Zugangsdaten', 'mp')),
 		));
 		
 		if ( $creds instanceof PSOURCE_Field ) {
 			$creds->add_field('text', array(
 				'name' => 'UserName',
-				'label' => array('text' => __('Username', 'mp')),
+				'label' => array('text' => __('Benutzername', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
 			));
 			$creds->add_field('text', array(
 				'name' => 'CustomerID',
-				'label' => array('text' => __('Customer ID', 'mp')),
+				'label' => array('text' => __('Kunden-ID', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
@@ -408,7 +408,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 		
 		$metabox->add_field('advanced_select', array(
 			'name' => $this->get_field_name('Language'),
-			'label' => array('text' => __('Hosted Payment Page Language', 'mp')),
+			'label' => array('text' => __('Sprache der gehosteten Zahlungsseite', 'mp')),
 			'default_value' => 'EN',
 			'multiple' => false,
 			'width' => 'element',
@@ -416,33 +416,33 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 		));
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('CompanyName'),
-			'label' => array('text' => __('Company Name', 'mp')),
-			'desc' => __('This will be displayed as the company the customer is purchasing from, including this is highly recommended.', 'mp'),
+			'label' => array('text' => __('Firmenname', 'mp')),
+			'desc' => __('Dieser Name wird als Verkäuferfirma angezeigt. Es wird dringend empfohlen, ihn anzugeben.', 'mp'),
 		));
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('PageTitle'),
-			'label' => array('text' => __('Page Title (optional)', 'mp')),
-			'desc' => __('This value is used to populate the browsers title bar at the top of the screen.', 'mp'),
+			'label' => array('text' => __('Seitentitel (optional)', 'mp')),
+			'desc' => __('Dieser Wert wird in der Titelleiste des Browsers angezeigt.', 'mp'),
 		));
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('PageDescription'),
-			'label' => array('text' => __('Page Description (optional)', 'mp')),
-			'desc' => __('This value is used to populate the browsers title bar at the top of the screen.', 'mp'),
+			'label' => array('text' => __('Seitenbeschreibung (optional)', 'mp')),
+			'desc' => __('Dieser Wert wird in der Titelleiste des Browsers angezeigt.', 'mp'),
 		));
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('PageFooter'),
-			'label' => array('text' => __('Page Footer (optional)', 'mp')),
-			'desc' => __('The page footer text can be customised and populated below the customer\'s order details. Useful for contact information.', 'mp'),
+			'label' => array('text' => __('Seitenfuß (optional)', 'mp')),
+			'desc' => __('Der Text im Seitenfuß kann angepasst werden und erscheint unter den Bestelldetails des Kunden. Praktisch für Kontaktdaten.', 'mp'),
 		));
 		$metabox->add_field('file', array(
 			'name' => $this->get_field_name('CompanyLogo'),
-			'label' => array('text' => __('Company Logo (optional)', 'mp')),
-			'desc' => __('The url of the image can be hosted on your website and pass the secure https:// path of the image to be displayed at the top of the website. This is the second image block on the webpage and is restricted to 960px X 65px. A default secure image is used if none is supplied.', 'mp'),
+			'label' => array('text' => __('Firmenlogo (optional)', 'mp')),
+			'desc' => __('Die Bild-URL kann auf Deiner Website liegen und sollte als sichere https://-Adresse angegeben werden. Das Bild erscheint oben auf der Seite (zweiter Bildbereich) und ist auf 960px x 65px begrenzt. Wenn nichts gesetzt ist, wird ein Standardbild verwendet.', 'mp'),
 		));
 		$metabox->add_field('file', array(
 			'name' => $this->get_field_name('PageBanner'),
-			'label' => array('text' => __('Company Logo (optional)', 'mp')),
-			'desc' => __('The url of the image can be hosted on your website and pass the secure https:// path of the image to be displayed at the top of the website. This is the second image block on the webpage and is restricted to 960px X 65px. A default secure image is used if none is supplied.', 'mp'),
+			'label' => array('text' => __('Firmenlogo (optional)', 'mp')),
+			'desc' => __('Die Bild-URL kann auf Deiner Website liegen und sollte als sichere https://-Adresse angegeben werden. Das Bild erscheint oben auf der Seite (zweiter Bildbereich) und ist auf 960px x 65px begrenzt. Wenn nichts gesetzt ist, wird ein Standardbild verwendet.', 'mp'),
 		));
 	}
 		
@@ -457,7 +457,7 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 
 	  $response = wp_remote_get( $url, $args );
 	  if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response) != 200 ) {
-	    mp_checkout()->add_error( '<li>' . __( 'There was a problem connecting to eWay. Please try again.', 'mp' ) . '</li>', 'order-review-payment' );
+	    mp_checkout()->add_error( '<li>' . __( 'Es gab ein Verbindungsproblem zu eWay. Bitte versuche es erneut.', 'mp' ) . '</li>', 'order-review-payment' );
 	    return false;
 	  } else {
 	    return $response['body'];

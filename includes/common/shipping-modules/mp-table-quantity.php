@@ -28,7 +28,7 @@ class MP_Shipping_Table_Quantity extends MP_Shipping_API {
    */
   function on_creation() {
     //declare here for translation
-    $this->public_name = __('Table Quantity', 'mp');
+	$this->public_name = __('Mengenstaffel', 'mp');
 	}
 
   /**
@@ -48,12 +48,12 @@ class MP_Shipping_Table_Quantity extends MP_Shipping_API {
 			});
     </script>
     <div id="mp_table_quantity" class="postbox">
-      <h3 class='hndle'><span><?php _e('Table Quantity Settings', 'mp'); ?></span></h3>
+      <h3 class='hndle'><span><?php _e('Mengenstaffel-Einstellungen', 'mp'); ?></span></h3>
       <div class="inside">
-        <span class="description"><?php _e('Be sure to enter a shipping price for every option or those customers may get free shipping. Each layer must be a higher quantity than the previous.', 'mp') ?></span>
+        <span class="description"><?php _e('Trag für jede Option einen Versandpreis ein, sonst könnten Kunden kostenlosen Versand bekommen. Jede Stufe muss eine höhere Menge als die vorherige haben.', 'mp') ?></span>
         <table class="form-table">
 					<tr>
-      		<td scope="row"><?php _e('Number of Bands:', 'mp');?>
+	      		<td scope="row"><?php _e('Anzahl der Stufen:', 'mp');?>
       			<select name="mp[shipping][table-quantity][rowcount]" id="mp-table-quantity-rows">
       				<?php for ( $k = 1; $k <= 20; $k++ )	{	?>
 							<option value="<?php echo $k; ?>" <?php selected($settings['shipping']['table-quantity']['rowcount'], $k); ?>><?php echo $k; ?></option>
@@ -63,18 +63,18 @@ class MP_Shipping_Table_Quantity extends MP_Shipping_API {
 					</tr>
 					<tr>
 						<th>
-						<?php _e('Each band must be a higher price than the one above it.', 'mp') ?>
+            <?php _e('Jede Stufe muss höher sein als die darüber.', 'mp') ?>
 						</th>
 					</tr>
 					<tr>
-						<td scope="row"><?php _e('If quantity is greater than:', 'mp'); ?> <input type="text" name="mp[shipping][table-quantity][0][minqty]" value="1" size="5" maxlength="10" disabled="disabled" />
-                                <?php _e('Shipping Cost: ', 'mp'); echo mp_format_currency(); ?><input on type="text" name="mp[shipping][table-quantity][0][shipping]" value="<?php echo ($settings['shipping']['table-quantity']['0']['shipping']) ? mp_display_currency($settings['shipping']['table-quantity']['0']['shipping']) : '0.00'; ?>" size="5" maxlength="10" />
+            <td scope="row"><?php _e('Wenn Menge größer als:', 'mp'); ?> <input type="text" name="mp[shipping][table-quantity][0][minqty]" value="1" size="5" maxlength="10" disabled="disabled" />
+                <?php _e('Versandkosten: ', 'mp'); echo mp_format_currency(); ?><input on type="text" name="mp[shipping][table-quantity][0][shipping]" value="<?php echo ($settings['shipping']['table-quantity']['0']['shipping']) ? mp_display_currency($settings['shipping']['table-quantity']['0']['shipping']) : '0.00'; ?>" size="5" maxlength="10" />
 						</td>
 					</tr>
 					<?php for ( $i = 1; $i < $settings['shipping']['table-quantity']['rowcount']; $i++ ) { ?>
 					<tr>
-                        <td scope="row"><?php _e('If quantity is greater than:', 'mp'); ?> <input type="text" name="mp[shipping][table-quantity][<?php echo $i; ?>][minqty]" value="<?php echo ($settings['shipping']['table-quantity'][$i]['minqty']) ? mp_display_currency($settings['shipping']['table-quantity'][$i]['minqty']) : ($settings['shipping']['table-quantity'][$i-1]['minqty'] + 1); ?>" size="5" maxlength="10" />
-                                <?php _e('Shipping Cost: ', 'mp'); echo mp_format_currency(); ?><input on type="text" name="mp[shipping][table-quantity][<?php echo $i; ?>][shipping]" value="<?php echo ($settings['shipping']['table-quantity'][$i]['shipping']) ? mp_display_currency($settings['shipping']['table-quantity'][$i]['shipping']) : '0.00'; ?>" size="5" maxlength="10" />
+            <td scope="row"><?php _e('Wenn Menge größer als:', 'mp'); ?> <input type="text" name="mp[shipping][table-quantity][<?php echo $i; ?>][minqty]" value="<?php echo ($settings['shipping']['table-quantity'][$i]['minqty']) ? mp_display_currency($settings['shipping']['table-quantity'][$i]['minqty']) : ($settings['shipping']['table-quantity'][$i-1]['minqty'] + 1); ?>" size="5" maxlength="10" />
+                <?php _e('Versandkosten: ', 'mp'); echo mp_format_currency(); ?><input on type="text" name="mp[shipping][table-quantity][<?php echo $i; ?>][shipping]" value="<?php echo ($settings['shipping']['table-quantity'][$i]['shipping']) ? mp_display_currency($settings['shipping']['table-quantity'][$i]['shipping']) : '0.00'; ?>" size="5" maxlength="10" />
 						</td>
 					</tr>
 					<?php } ?>

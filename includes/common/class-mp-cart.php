@@ -562,7 +562,7 @@ class MP_Cart {
 						if ( is_array( $download_url ) ){
 							//If we have more than one product file, we loop and add each to a new line
 							foreach ( $download_url as $key => $value ){
-								$column_html .= '<a target="_blank" href="' . $value . '">' . sprintf( __( 'Download %1$s', 'mp' ),( $key+1 ) ) . '</a><br/>';
+								$column_html .= '<a target="_blank" href="' . $value . '">' . sprintf( __( 'Download-Datei %1$s', 'mp' ),( $key+1 ) ) . '</a><br/>';
 							}
 							
 						} else {
@@ -589,7 +589,7 @@ class MP_Cart {
 							) );
 						}
 						$column_html .= '
-						<a class="mp_cart_item_remove_item" href="javascript:mp_cart.removeItem(' . $id . ')">' . __( 'Remove', 'mp' ) . '</a>';
+						<a class="mp_cart_item_remove_item" href="javascript:mp_cart.removeItem(' . $id . ')">' . __( 'Entfernen', 'mp' ) . '</a>';
 					} else {
 						$column_html = $product->qty;
 					}
@@ -732,7 +732,7 @@ class MP_Cart {
 		if ( 0 < $this->tax_total( false, true ) ) {
 			$line = '
 					<div class="mp_cart_resume_item mp_cart_resume_item-estimated-tax">
-						<span class="mp_cart_resume_item_label">' . ( ( $this->is_editable ) ? sprintf( __( 'Estimated %s', 'mp' ), mp_get_setting( 'tax->label' ) ) : mp_get_setting( 'tax->label' ) ) . '</span>
+						<span class="mp_cart_resume_item_label">' . ( ( $this->is_editable ) ? sprintf( __( 'Geschätzte %s', 'mp' ), mp_get_setting( 'tax->label' ) ) : mp_get_setting( 'tax->label' ) ) . '</span>
 						<span class="mp_cart_resume_item_amount">' . $this->tax_total( true, true ) . '</span>
 					</div><!-- end mp_cart_resume_item-estimated-tax -->';
 
@@ -1558,12 +1558,12 @@ class MP_Cart {
 
 		if ( $format ) {
 			if ( $numitems == 0 ) {
-				$snippet = '<span class="mp_mini_cart_count">0</span>' . '<span class="mp_mini_cart_count-title">' . __( 'items', 'mp' ) . '</span>';
+				$snippet = '<span class="mp_mini_cart_count">0</span>' . '<span class="mp_mini_cart_count-title">' . __( 'Artikel', 'mp' ) . '</span>';
 			} else {
 				if ( $numitems == 1 ) {
-					$snippet = '<span class="mp_mini_cart_count">1</span>' . '<span class="mp_mini_cart_count-title">' . __( 'item', 'mp' ) . '</span>';
+					$snippet = '<span class="mp_mini_cart_count">1</span>' . '<span class="mp_mini_cart_count-title">' . __( 'Artikel', 'mp' ) . '</span>';
 				} else {
-					$snippet = '<span class="mp_mini_cart_count">' . $numitems . '</span>' . '<span class="mp_mini_cart_count-title">' . __( 'items', 'mp' ) . '</span>';
+					$snippet = '<span class="mp_mini_cart_count">' . $numitems . '</span>' . '<span class="mp_mini_cart_count-title">' . __( 'Artikel', 'mp' ) . '</span>';
 				}
 			}
 		}

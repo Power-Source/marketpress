@@ -44,18 +44,18 @@ class MP_Shipping_UPS extends MP_Shipping_API_Calculated {
 
 		//US Domestic services
 		$this->services = array(
-			'Next Day Air'           => new UPS_Service('01', __('Next Day Air', 'mp'),           __('(Next Day)', 'mp')),
-			'2nd Day Air'            => new UPS_Service('02', __('2nd Day Air', 'mp'),            __('(2 Days)', 'mp')),
-			'Ground'                 => new UPS_Service('03', __('Ground', 'mp'),                 __('(1-5 Days)', 'mp')),
-			'3 Day Select'           => new UPS_Service('12', __('3 Day Select', 'mp'),           __('(3 Days)', 'mp')),
-			'Next Day Air Saver'     => new UPS_Service('13', __('Next Day Air Saver', 'mp'),     __('(1 Day)', 'mp')),
-			'Next Day Air Early AM'  => new UPS_Service('14', __('Next Day Air Early AM', 'mp'),  __('(1 Days)', 'mp')),
-			'2nd Day Air AM'         => new UPS_Service('59', __('2nd Day Air AM', 'mp'),         __('(2 Days)', 'mp')),
-			'Worldwide Express' 		 => new UPS_Service('07', __('Worldwide Express', 'mp'),      __('(1-3 Days)', 'mp')),
-			'Worldwide Expedited'    => new UPS_Service('08', __('Worldwide Expedited', 'mp'),    __('(2-5 Days)', 'mp') ),
-			'Standard'               => new UPS_Service('11', __('Standard', 'mp'),               __('(Scheduled)', 'mp') ),
-			'Worldwide Express Plus' => new UPS_Service('54', __('Worldwide Express Plus', 'mp'), __('(1-3 Days)', 'mp') ),
-			'Saver'                  => new UPS_Service('65', __('Saver', 'mp'),                  __('(1-5 Days)', 'mp') ),
+			'Next Day Air'           => new UPS_Service('01', __('Next Day Air', 'mp'),           __('(Nächster Tag)', 'mp')),
+			'2nd Day Air'            => new UPS_Service('02', __('2nd Day Air', 'mp'),            __('(2 Tage)', 'mp')),
+			'Ground'                 => new UPS_Service('03', __('Ground', 'mp'),                 __('(1-5 Tage)', 'mp')),
+			'3 Day Select'           => new UPS_Service('12', __('3 Day Select', 'mp'),           __('(3 Tage)', 'mp')),
+			'Next Day Air Saver'     => new UPS_Service('13', __('Next Day Air Saver', 'mp'),     __('(1 Tag)', 'mp')),
+			'Next Day Air Early AM'  => new UPS_Service('14', __('Next Day Air Early AM', 'mp'),  __('(1 Tag)', 'mp')),
+			'2nd Day Air AM'         => new UPS_Service('59', __('2nd Day Air AM', 'mp'),         __('(2 Tage)', 'mp')),
+			'Worldwide Express' 		 => new UPS_Service('07', __('Worldwide Express', 'mp'),      __('(1-3 Tage)', 'mp')),
+			'Worldwide Expedited'    => new UPS_Service('08', __('Worldwide Expedited', 'mp'),    __('(2-5 Tage)', 'mp') ),
+			'Standard'               => new UPS_Service('11', __('Standard', 'mp'),               __('(Planmäßig)', 'mp') ),
+			'Worldwide Express Plus' => new UPS_Service('54', __('Worldwide Express Plus', 'mp'), __('(1-3 Tage)', 'mp') ),
+			'Saver'                  => new UPS_Service('65', __('Saver', 'mp'),                  __('(1-5 Tage)', 'mp') ),
 		);
 		
 		//		//International Services
@@ -119,8 +119,8 @@ class MP_Shipping_UPS extends MP_Shipping_API_Calculated {
 				'store-settings_page_store-settings-shipping',
 				'store-setup-wizard'
 			),
-			'title' => sprintf(__('%s Settings', 'mp'), $this->public_name),
-			'desc' => __('In order to use UPS, you will need a UPS Developer Kit access key and the UPS user ID and password associated with the access key.  Set these up for free <a href="https://www.ups.com/upsdeveloperkit" target="_blank">here</a>. If this information is missing or incorrect, an error will appear during the checkout process and the buyer will not be able to complete the transaction.', 'mp'),
+			'title' => sprintf(__('%s Einstellungen', 'mp'), $this->public_name),
+			'desc' => __('Um UPS zu nutzen, brauchst Du einen UPS Developer-Kit-Access-Key sowie die dazugehörige UPS-Benutzer-ID und das Passwort. Du kannst das kostenlos <a href="https://www.ups.com/upsdeveloperkit" target="_blank">hier</a> einrichten. Wenn diese Angaben fehlen oder falsch sind, erscheint beim Checkout ein Fehler und der Käufer kann den Kauf nicht abschließen.', 'mp'),
 			'option_name' => 'mp_settings',
 			'conditional' => array(
 				'operator' => 'AND',
@@ -137,33 +137,33 @@ class MP_Shipping_UPS extends MP_Shipping_API_Calculated {
 		));
 		$metabox->add_field('checkbox', array(
 			'name' => $this->get_field_name('sandbox'),
-			'label' => array('text' => __('Use Sandbox Mode?', 'mp')),
+			'label' => array('text' => __('Sandbox-Modus nutzen?', 'mp')),
 		));
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('api_key'),
-			'label' => array('text' => __('Developer Kit Access Key', 'mp')),
+			'label' => array('text' => __('Developer-Kit-Access-Key', 'mp')),
 			'validation' => array(
 				'required' => true,
 			),
 		)); 
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('user_id'),
-			'label' => array('text' => __('User ID', 'mp')),
+			'label' => array('text' => __('Benutzer-ID', 'mp')),
 			'validation' => array(
 				'required' => true,
 			),
 		));
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('password'),
-			'label' => array('text' => __('Password', 'mp')),
+			'label' => array('text' => __('Passwort', 'mp')),
 			'validation' => array(
 				'required' => true,
 			),
 		));
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('shipper_number'),
-			'label' => array('text' => __('Shipper Number', 'mp')),
-			'desc' => __('Required if using negotiated rates', 'mp'),
+			'label' => array('text' => __('Versendernummer', 'mp')),
+			'desc' => __('Erforderlich, wenn ausgehandelte Tarife genutzt werden', 'mp'),
 		));
 		
 		$services = array();
@@ -173,18 +173,18 @@ class MP_Shipping_UPS extends MP_Shipping_API_Calculated {
 		
 		$metabox->add_field('checkbox_group', array(
 			'name' => $this->get_field_name('services'),
-			'label' => array('text' => __('Offered Services', 'mp')),
+			'label' => array('text' => __('Angebotene Services', 'mp')),
 			'options' => $services,
 		));
 		$metabox->add_field('radio_group', array(
 			'name' => $this->get_field_name('pickup_type'),
-			'label' => array('text' => __('Offered Services', 'mp')),
-			'desc' => __('For the most accurate rates, please select the appropriate pick up type for your business.', 'mp'),
-			'options' => array('01' => __('Daily Pickup', 'mp'), '03' => __('Customer Counter', 'mp'), '06' => __('One Time Pickup', 'mp')),
+			'label' => array('text' => __('Abholtyp', 'mp')),
+			'desc' => __('Für möglichst genaue Tarife wähle bitte den passenden Abholtyp für Dein Geschäft aus.', 'mp'),
+			'options' => array('01' => __('Tägliche Abholung', 'mp'), '03' => __('Kundenschalter', 'mp'), '06' => __('Einmalige Abholung', 'mp')),
 		));
 		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('domestic_handling'),
-			'label' => array('text' => __('Handling Charge Per Box Shipped', 'mp')),
+			'label' => array('text' => __('Bearbeitungsgebühr pro versendetem Paket', 'mp')),
 			'default_value' => '0.00',
 		));
 		
@@ -192,28 +192,28 @@ class MP_Shipping_UPS extends MP_Shipping_API_Calculated {
 			'name' => $this->get_field_name('boxes'),
 			'label' => array('text' => __('Standard Boxes and Weight Limits', 'mp')),
 			'default_value' => $this->default_boxes(),
-			'desc' => __('Enter your standard box sizes as LengthxWidthxHeight (e.g. 12x8x6) For each box defined enter the maximum weight it can contain. <strong>Note: the shipping prices this plugin calculates are estimates. If they are consistently too low or too high, please check that the list of boxes above and the product weights are accurate and complete.</strong>', 'mp'),
-			'add_row_label' => __('Add Box', 'mp'),
+			'desc' => __('Gib Deine Standard-Paketgrößen im Format LängexBreitexHöhe ein (z. B. 12x8x6). Für jedes Paket bitte das maximale Gewicht angeben. <strong>Hinweis: Die vom Plugin berechneten Versandkosten sind Schätzwerte. Wenn sie dauerhaft zu hoch oder zu niedrig sind, prüfe bitte die Paketliste und die Produktgewichte auf Vollständigkeit und Korrektheit.</strong>', 'mp'),
+			'add_row_label' => __('Paket hinzufügen', 'mp'),
 		));
 		
 		if ( $boxes instanceof PSOURCE_Field ) {
 			$boxes->add_sub_field('text', array(
 				'name' => 'name',
-				'label' => array('text' => __('Name', 'mp')),
+				'label' => array('text' => __('Bezeichnung', 'mp')),
 				'validation' => array(
 					'required' => true,
 				),
 			));
 			$boxes->add_sub_field('text', array(
 				'name' => 'size',
-				'label' => array('text' => sprintf( __( 'Size (%s)', 'mp' ), mp_dimension_label() ) ),
+				'label' => array('text' => sprintf( __( 'Größe (%s)', 'mp' ), mp_dimension_label() ) ),
 				'validation' => array(
 					'required' => true,
 				),
 			));
 			$boxes->add_sub_field('text', array(
 				'name' => 'weight',
-				'label' => array( 'text' => sprintf( __( 'Max Weight (%s)', 'mp' ), mp_weight_label() ) ),
+				'label' => array( 'text' => sprintf( __( 'Max. Gewicht (%s)', 'mp' ), mp_weight_label() ) ),
 				'validation' => array(
 					'required' => true,
 					'number' => true,

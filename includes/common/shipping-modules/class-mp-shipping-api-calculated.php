@@ -134,7 +134,7 @@ if ( ! class_exists( 'MP_Shipping_API_Calculated' ) ) {
 		 * @return string
 		 */
 		protected function _get_units_length() {
-			return ( mp_get_setting( 'shipping->system' ) == 'english' ) ? __( 'Inches', 'mp' ) : __( 'Centimeters', 'mp' );
+			return ( mp_get_setting( 'shipping->system' ) == 'english' ) ? __( 'Zoll', 'mp' ) : __( 'Zentimeter', 'mp' );
 		}
 
 		/**
@@ -143,7 +143,7 @@ if ( ! class_exists( 'MP_Shipping_API_Calculated' ) ) {
 		 * @return string
 		 */
 		protected function _get_units_weight() {
-			return ( mp_get_setting( 'shipping->system' ) == 'english' ) ? __( 'Pounds', 'mp' ) : __( 'Kilograms', 'mp' );
+			return ( mp_get_setting( 'shipping->system' ) == 'english' ) ? __( 'Pfund', 'mp' ) : __( 'Kilogramm', 'mp' );
 		}
 
 		/**

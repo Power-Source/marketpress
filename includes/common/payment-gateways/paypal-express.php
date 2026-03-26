@@ -156,7 +156,7 @@ function on_creation() {
                 'gateway_public_name'  => $this->public_name,
                 'gateway_private_name' => $this->admin_name,
                 'gateway_plugin_name'  => $this->plugin_name,
-                'status'               => array(time() => __('Paid', 'mp')),
+                'status'               => array(time() => __('Bezahlt', 'mp')),
                 'total'                => $body['purchase_units'][0]['payments']['captures'][0]['amount']['value'],
                 'currency'             => $body['purchase_units'][0]['payments']['captures'][0]['amount']['currency_code'],
                 'method'               => __('PayPal Express', 'mp'),
@@ -249,7 +249,7 @@ function on_creation() {
             $transaction_id = $order->payment_info['transaction_id'];
         }
 
-        return __('Thank you for your order. Your payment was successful.', 'mp');
+        return __('Danke für Deine Bestellung. Deine Zahlung war erfolgreich.', 'mp');
     }
 }
 

@@ -216,7 +216,7 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	 */
 	function payment_form($cart, $shipping_info) {
 		// Kein Formular nötig - Weiterleitung zu Stripe Checkout erfolgt beim Submit
-		$content = '<p>' . __('Sie werden zu Stripe weitergeleitet, um Ihre Zahlung sicher abzuschließen.', 'mp') . '</p>';
+		$content = '<p>' . __('Du wirst zu Stripe weitergeleitet, um Deine Zahlung sicher abzuschließen.', 'mp') . '</p>';
 		return $content;
 	}
 
@@ -230,9 +230,9 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'			 => $this->generate_metabox_id(),
 			'page_slugs'	 => array( 'store-settings-payments', 'store-settings_page_store-settings-payments' ),
-			'title'			 => sprintf( __( '%s Settings', 'mp' ), $this->admin_name ),
+			'title'			 => sprintf( __( '%s Einstellungen', 'mp' ), $this->admin_name ),
 			'option_name'	 => 'mp_settings',
-			'desc'			 => __( 'Stripe ermöglicht es Ihnen, Kreditkartenzahlungen sicher zu akzeptieren. Kunden werden zu Stripe weitergeleitet, um ihre Zahlung abzuschließen, und dann zurück zu Ihrer Website geleitet. Sie benötigen kein eigenes Händlerkonto. Stripe verarbeitet alle Zahlungen sicher und überweist das Geld direkt auf Ihr Bankkonto.', 'mp' ),
+			'desc'			 => __( 'Stripe ermöglicht Dir, Kreditkartenzahlungen sicher zu akzeptieren. Kunden werden zu Stripe weitergeleitet, um die Zahlung abzuschließen, und dann zurück auf Deine Website geleitet. Du brauchst kein eigenes Händlerkonto. Stripe verarbeitet alle Zahlungen sicher und überweist das Geld direkt auf Dein Bankkonto.', 'mp' ),
 			'conditional'	 => array(
 				'name'	 => 'gateways[allowed][' . $this->plugin_name . ']',
 				'value'	 => 1,
@@ -241,13 +241,13 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'	 => $this->get_field_name( 'is_ssl' ),
-			'label'	 => array( 'text' => __( 'Force SSL?', 'mp' ) ),
-			'desc'	 => __( 'When in live mode Stripe recommends you have an SSL certificate setup for the site where the checkout form will be displayed.', 'mp' ),
+			'label'	 => array( 'text' => __( 'SSL erzwingen?', 'mp' ) ),
+			'desc'	 => __( 'Im Live-Modus empfiehlt Stripe ein SSL-Zertifikat für die Seite, auf der das Checkout-Formular angezeigt wird.', 'mp' ),
 		) );
 		$creds	 = $metabox->add_field( 'complex', array(
 			'name'	 => $this->get_field_name( 'api_credentials' ),
-			'label'	 => array( 'text' => __( 'API Credentials', 'mp' ) ),
-			'desc'	 => __( 'You must login to Stripe to <a target="_blank" href="https://manage.stripe.com/#account/apikeys">get your API credentials</a>. You can enter your test credentials, then live ones when ready.', 'mp' ),
+			'label'	 => array( 'text' => __( 'API-Zugangsdaten', 'mp' ) ),
+			'desc'	 => __( 'Melde Dich bei Stripe an, um <a target="_blank" href="https://manage.stripe.com/#account/apikeys">Deine API-Zugangsdaten zu erhalten</a>. Erst Testdaten eintragen, dann bei Bedarf Live-Daten.', 'mp' ),
 		) );
 
 		if ( $creds instanceof PSOURCE_Field ) {
@@ -269,12 +269,12 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 
 		$metabox->add_field( 'advanced_select', array(
 			'name'			 => $this->get_field_name( 'currency' ),
-			'label'			 => array( 'text' => __( 'Currency', 'mp' ) ),
+			'label'			 => array( 'text' => __( 'Währung', 'mp' ) ),
 			'multiple'		 => false,
 			'width'			 => 'element',
 			'options'		 => $this->currencies,
 			'default_value'	 => mp_get_setting( 'currency' ),
-			'desc'			 => __( 'Selecting a currency other than that used for your store may cause problems at checkout.', 'mp' ),
+			'desc'			 => __( 'Die Auswahl einer anderen Währung als Deiner Shop-Währung kann beim Checkout zu Problemen führen.', 'mp' ),
 		) );
 	}
 

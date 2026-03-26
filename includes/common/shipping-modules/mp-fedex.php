@@ -50,22 +50,22 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 	 */
 	function get_services() {
 		$this->services = array(
-			'FIRST_OVERNIGHT'      => new FedEx_Service( 'FIRST_OVERNIGHT', __( 'First Overnight', 'mp' ), __( '(1 Day am)', 'mp' ) ),
-			'PRIORITY_OVERNIGHT'   => new FedEx_Service( 'PRIORITY_OVERNIGHT', __( 'Priority Overnight', 'mp' ), __( '(1 Day am )', 'mp' ) ),
-			'STANDARD_OVERNIGHT'   => new FedEx_Service( 'STANDARD_OVERNIGHT', __( 'Standard Overnight', 'mp' ), __( '(1 Day)', 'mp' ) ),
-			'FEDEX_2_DAY_AM'       => new FedEx_Service( 'FEDEX_2_DAY_AM', __( 'Fedex 2 Day AM', 'mp' ), __( '(2 Days am)', 'mp' ) ),
-			'FEDEX_2_DAY'          => new FedEx_Service( 'FEDEX_2_DAY', __( 'Fedex 2 Day', 'mp' ), __( '(2 Days)', 'mp' ) ),
-			'FEDEX_EXPRESS_SAVER'  => new FedEx_Service( 'FEDEX_EXPRESS_SAVER', __( 'Fedex Express Saver', 'mp' ), __( '(3 Days)', 'mp' ) ),
-			'FEDEX_GROUND'         => new FedEx_Service( 'FEDEX_GROUND', __( 'Fedex Ground', 'mp' ), __( '(1-7 Days)', 'mp' ) ),
-			'GROUND_HOME_DELIVERY' => new FedEx_Service( 'GROUND_HOME_DELIVERY', __( 'Ground Home Delivery', 'mp' ), __( '(1-5 Days)', 'mp' ) ),
-			'SMART_POST'           => new FedEx_Service( 'SMART_POST', __( 'Smart Post', 'mp' ), __( '(2-7 Days)', 'mp' ) ),
+			'FIRST_OVERNIGHT'      => new FedEx_Service( 'FIRST_OVERNIGHT', __( 'First Overnight', 'mp' ), __( '(1 Tag morgens)', 'mp' ) ),
+			'PRIORITY_OVERNIGHT'   => new FedEx_Service( 'PRIORITY_OVERNIGHT', __( 'Priority Overnight', 'mp' ), __( '(1 Tag morgens)', 'mp' ) ),
+			'STANDARD_OVERNIGHT'   => new FedEx_Service( 'STANDARD_OVERNIGHT', __( 'Standard Overnight', 'mp' ), __( '(1 Tag)', 'mp' ) ),
+			'FEDEX_2_DAY_AM'       => new FedEx_Service( 'FEDEX_2_DAY_AM', __( 'FedEx 2 Day AM', 'mp' ), __( '(2 Tage morgens)', 'mp' ) ),
+			'FEDEX_2_DAY'          => new FedEx_Service( 'FEDEX_2_DAY', __( 'FedEx 2 Day', 'mp' ), __( '(2 Tage)', 'mp' ) ),
+			'FEDEX_EXPRESS_SAVER'  => new FedEx_Service( 'FEDEX_EXPRESS_SAVER', __( 'FedEx Express Saver', 'mp' ), __( '(3 Tage)', 'mp' ) ),
+			'FEDEX_GROUND'         => new FedEx_Service( 'FEDEX_GROUND', __( 'FedEx Ground', 'mp' ), __( '(1-7 Tage)', 'mp' ) ),
+			'GROUND_HOME_DELIVERY' => new FedEx_Service( 'GROUND_HOME_DELIVERY', __( 'Ground Home Delivery', 'mp' ), __( '(1-5 Tage)', 'mp' ) ),
+			'SMART_POST'           => new FedEx_Service( 'SMART_POST', __( 'Smart Post', 'mp' ), __( '(2-7 Tage)', 'mp' ) ),
 		);
 
 		$this->intl_services = array(
-			'INTERNATIONAL_ECONOMY'               => new FedEx_Service( 'INTERNATIONAL_ECONOMY', __( 'International Economy', 'mp' ), __( '(5 Days)', 'mp' ) ),
-			'INTERNATIONAL_FIRST'                 => new FedEx_Service( 'INTERNATIONAL_FIRST', __( 'International First', 'mp' ), __( '(1-3 Days)', 'mp' ) ),
-			'INTERNATIONAL_PRIORITY'              => new FedEx_Service( 'INTERNATIONAL_PRIORITY', __( 'International Priority', 'mp' ), __( '(1-3 Days)', 'mp' ) ),
-			'EUROPE_FIRST_INTERNATIONAL_PRIORITY' => new FedEx_Service( 'EUROPE_FIRST_INTERNATIONAL_PRIORITY', __( 'Europe First International Priority', 'mp' ), __( '(Next Day)', 'mp' ) ),
+			'INTERNATIONAL_ECONOMY'               => new FedEx_Service( 'INTERNATIONAL_ECONOMY', __( 'International Economy', 'mp' ), __( '(5 Tage)', 'mp' ) ),
+			'INTERNATIONAL_FIRST'                 => new FedEx_Service( 'INTERNATIONAL_FIRST', __( 'International First', 'mp' ), __( '(1-3 Tage)', 'mp' ) ),
+			'INTERNATIONAL_PRIORITY'              => new FedEx_Service( 'INTERNATIONAL_PRIORITY', __( 'International Priority', 'mp' ), __( '(1-3 Tage)', 'mp' ) ),
+			'EUROPE_FIRST_INTERNATIONAL_PRIORITY' => new FedEx_Service( 'EUROPE_FIRST_INTERNATIONAL_PRIORITY', __( 'Europe First International Priority', 'mp' ), __( '(Nächster Tag)', 'mp' ) ),
 		);
 
 		return $this->services + $this->intl_services;
@@ -136,7 +136,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 		} else {
 			$fields[] = array(
 				'type'  => 'checkbox',
-				'label' => __( 'This is a residential address', 'mp' ),
+				'label' => __( 'Das ist eine Privatadresse', 'mp' ),
 				'name'  => mp_checkout()->field_name( 'residential', $type ),
 				'value' => 1,
 				'atts'  => array(
@@ -245,7 +245,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 				'store-settings_page_store-settings-shipping',
 				'store-setup-wizard'
 			),
-			'title'       => sprintf( __( '%s Settings', 'mp' ), $this->public_name ),
+			'title'       => sprintf( __( '%s Einstellungen', 'mp' ), $this->public_name ),
 			'option_name' => 'mp_settings',
 			'conditional' => array(
 				'operator' => 'AND',
@@ -262,11 +262,11 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'          => $this->get_field_name( 'mode' ),
-			'label'         => array( 'text' => __( 'Mode', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Modus', 'mp' ) ),
 			'default_value' => 'sandbox',
 			'options'       => array(
 				'sandbox'    => __( 'Sandbox', 'mp' ),
-				'production' => __( 'Production', 'mp' ),
+				'production' => __( 'Produktion', 'mp' ),
 			),
 		) );
 		$metabox->add_field( 'text', array(
@@ -278,7 +278,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 		) );
 		$metabox->add_field( 'text', array(
 			'name'       => $this->get_field_name( 'api_password' ),
-			'label'      => array( 'text' => __( 'API Password', 'mp' ) ),
+			'label'      => array( 'text' => __( 'API-Passwort', 'mp' ) ),
 			'validation' => array(
 				'required' => true,
 			),
@@ -296,34 +296,34 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 		) );
 		$metabox->add_field( 'radio_group', array(
 			'name'          => $this->get_field_name( 'dropoff' ),
-			'label'         => array( 'text' => __( 'Dropoff Type', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Abgabetyp', 'mp' ) ),
 			'default_value' => 'REGULAR_PICKUP',
 			'options'       => array(
-				'REGULAR_PICKUP'          => __( 'Regular Pickup', 'mp' ),
-				'BUSINESS_SERVICE_CENTER' => __( 'Business Service Center', 'mp' ),
-				'DROP_BOX'                => __( 'Drop Box', 'mp' ),
-				'REQUEST_COURIER'         => __( 'Request Courier', 'mp' ),
+				'REGULAR_PICKUP'          => __( 'Regelmäßige Abholung', 'mp' ),
+				'BUSINESS_SERVICE_CENTER' => __( 'Service-Center', 'mp' ),
+				'DROP_BOX'                => __( 'Abgabebox', 'mp' ),
+				'REQUEST_COURIER'         => __( 'Kurier anfordern', 'mp' ),
 				'STATION'                 => __( 'Station', 'mp' ),
 			),
 		) );
 		$metabox->add_field( 'advanced_select', array(
 			'name'     => $this->get_field_name( 'packaging' ),
-			'label'    => array( 'text' => __( 'Default Packaging', 'mp' ) ),
+			'label'    => array( 'text' => __( 'Standardverpackung', 'mp' ) ),
 			'multiple' => false,
 			'options'  => array(
-				'YOUR_PACKAGING' => __( 'Your Packaging', 'mp' ),
-				'FEDEX TUBE'     => __( 'Fedex Tube', 'mp' ),
-				'FEDEX_PAK'      => __( 'Fedex Pak', 'mp' ),
-				'FEDEX_ENVELOPE' => __( 'Fedex Envelope', 'mp' ),
-				'FEDEX_BOX'      => __( 'Fedex Box', 'mp' ),
-				'FEDEX_25KG_BOX' => __( 'Fedex 25kg Box', 'mp' ),
-				'FEDEX_10KG_BOX' => __( 'Fedex 10kg Box', 'mp' ),
+				'YOUR_PACKAGING' => __( 'Eigene Verpackung', 'mp' ),
+				'FEDEX TUBE'     => __( 'FedEx Tube', 'mp' ),
+				'FEDEX_PAK'      => __( 'FedEx Pak', 'mp' ),
+				'FEDEX_ENVELOPE' => __( 'FedEx Envelope', 'mp' ),
+				'FEDEX_BOX'      => __( 'FedEx Box', 'mp' ),
+				'FEDEX_25KG_BOX' => __( 'FedEx 25kg Box', 'mp' ),
+				'FEDEX_10KG_BOX' => __( 'FedEx 10kg Box', 'mp' ),
 			),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'  => $this->get_field_name( 'commercial' ),
-			'label' => array( 'text' => __( 'Allow Commercial Delivery?', 'mp' ) ),
-			'desc'  => __( 'When checked the customer can chose Residential or Commercial delivery with Residential the default. Unchecked it\'s only Residential rates.', 'mp' ),
+			'label' => array( 'text' => __( 'Gewerbliche Zustellung erlauben?', 'mp' ) ),
+			'desc'  => __( 'Wenn aktiviert, kann der Kunde zwischen Privat- und Geschäftszustellung wählen; standardmäßig ist Privat gewählt. Wenn deaktiviert, gelten nur Privat-Tarife.', 'mp' ),
 		) );
 
 		$services = array();
@@ -333,7 +333,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 
 		$metabox->add_field( 'checkbox_group', array(
 			'name'    => $this->get_field_name( 'services' ),
-			'label'   => array( 'text' => __( 'Domestic Services', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Nationale Services', 'mp' ) ),
 			'options' => $services,
 			'width'   => '33.3%',
 		) );
@@ -341,7 +341,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 		$metabox->add_field( 'text', array(
 			'name'          => $this->get_field_name( 'domestic_handling' ),
 			'default_value' => '0.00',
-			'label'         => array( 'text' => __( 'Handling Charge per Domestic Shipment', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Bearbeitungsgebühr pro nationaler Sendung', 'mp' ) ),
 			'validation'    => array(
 				'number' => true,
 				'min'    => 0,
@@ -355,7 +355,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 
 		$metabox->add_field( 'checkbox_group', array(
 			'name'    => $this->get_field_name( 'services' ),
-			'label'   => array( 'text' => __( 'International Services', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Internationale Services', 'mp' ) ),
 			'options' => $services,
 			'width'   => '33.3%',
 		) );
@@ -363,7 +363,7 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 		$metabox->add_field( 'text', array(
 			'name'          => $this->get_field_name( 'intl_handling' ),
 			'default_value' => '0.00',
-			'label'         => array( 'text' => __( 'Handling Charge per International Shipment', 'mp' ) ),
+			'label'         => array( 'text' => __( 'Bearbeitungsgebühr pro internationaler Sendung', 'mp' ) ),
 			'validation'    => array(
 				'number' => true,
 				'min'    => 0,
@@ -388,30 +388,30 @@ class MP_Shipping_FedEx extends MP_Shipping_API_Calculated {
 
 		$repeater = $metabox->add_field( 'repeater', array(
 			'name'          => $this->get_field_name( 'boxes' ),
-			'label'         => array( 'text' => __( 'Standard Boxes and Weight Limits', 'mp' ) ),
-			'desc'          => __( 'Enter your standard box sizes as LengthxWidthxHeight ( 12x8x6 ) For each box defined enter the maximum weight it can contain. Total weight selects the box size used for calculating Shipping costs.', 'mp' ),
-			'add_row_label' => __( 'Add Box', 'mp' ),
+			'label'         => array( 'text' => __( 'Standardpakete und Gewichtsgrenzen', 'mp' ) ),
+			'desc'          => __( 'Gib Deine Standard-Paketgrößen als LängexBreitexHöhe ein (12x8x6). Für jedes Paket bitte das maximale Gewicht angeben. Das Gesamtgewicht bestimmt die Paketgröße für die Versandkostenberechnung.', 'mp' ),
+			'add_row_label' => __( 'Paket hinzufügen', 'mp' ),
 			'default_value' => $boxes,
 		) );
 
 		if ( $repeater instanceof PSOURCE_Field ) {
 			$repeater->add_sub_field( 'text', array(
 				'name'       => 'name',
-				'label'      => array( 'text' => __( 'Name', 'mp' ) ),
+				'label'      => array( 'text' => __( 'Bezeichnung', 'mp' ) ),
 				'validation' => array(
 					'required' => true,
 				),
 			) );
 			$repeater->add_sub_field( 'text', array(
 				'name'       => 'size',
-				'label'      => array( 'text' => sprintf( __( 'Size (%s)', 'mp' ), mp_dimension_label() ) ),
+				'label'      => array( 'text' => sprintf( __( 'Größe (%s)', 'mp' ), mp_dimension_label() ) ),
 				'validation' => array(
 					'required' => true,
 				),
 			) );
 			$repeater->add_sub_field( 'text', array(
 				'name'       => 'weight',
-				'label'      => array( 'text' => sprintf( __( 'Max Weight (%s)', 'mp' ), mp_weight_label() ) ),
+				'label'      => array( 'text' => sprintf( __( 'Max. Gewicht (%s)', 'mp' ), mp_weight_label() ) ),
 				'validation' => array(
 					'required' => true,
 				),
