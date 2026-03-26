@@ -4,7 +4,7 @@ Tags: E-commerce, ecommerce, storefront, sell, store, shopping, cart, payment ga
 Requires at least: 3.7
 Requires PHP: 7.4
 Tested up to: 6.8.1
-ClassicPress: 2.6.0
+ClassicPress: 2.7.0
 Stable tag: 1.0.5
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
