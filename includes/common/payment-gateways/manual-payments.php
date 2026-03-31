@@ -143,17 +143,34 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 		$metabox->add_field( 'wysiwyg', array(
 			'name'	 => $this->get_field_name( 'instruction' ),
 			'label'	 => array( 'text' => __( 'Benutzeranweisungen', 'mp' ) ),
-			'desc'	 => __( 'Dies sind die Anweisungen für manuelle Zahlungen, die auf dem Zahlungsbildschirm angezeigt werden.', 'mp' ),
+			'desc'	 => __( 'Zeigt sich im Checkout, bevor der Kunde kauft. Erkläre hier, wie deine manuelle Zahlungsweise funktioniert (z.B. Bankverbindung, Adresse für Scheck, etc.). <strong>Keine Platzhalter verfügbar</strong> – dieser Text ist immer gleich.', 'mp' ),
+			'default_value' => __( 'Danke, dass du bei uns kaufzierst! Bitte überweise den Betrag auf folgendes Konto:<br /><br /><strong>Kontoinhaber:</strong> Mein Shop<br /><strong>IBAN:</strong> DE12 3456 7890 1234 5678 90<br /><strong>BIC:</strong> DEUTDEFF<br /><br />Teile uns die Zahlung per Mail mit oder warte bis wir sie erkennen.', 'mp' ),
 		) );
 		$metabox->add_field( 'wysiwyg', array(
 			'name'	 => $this->get_field_name( 'confirmation' ),
 			'label'	 => array( 'text' => __( 'Bestätigungsinformationen für Benutzer', 'mp' ) ),
-			'desc'	 => __( 'Dies sind die Anweisungen für manuelle Zahlungen, die auf dem Bestätigungsbildschirm angezeigt werden. TOTAL wird durch den Gesamtbetrag der Bestellung ersetzt und ORDERID wird durch die Bestell-ID ersetzt.', 'mp' ),
+			'desc'	 => __( 'Zeigt sich auf der Bestellbestätigungs-Seite. Erinnere den Kunden an SEINE konkrete Bestellung. <strong>Verfügbare Platzhalter:</strong> TOTAL (Betrag), ORDERID (Bestell-Nr.).', 'mp' ),
+			'default_value' => __( '<strong>Danke für deine Bestellung #ORDERID!</strong><br /><br />Sende jetzt TOTAL an folgendes Konto:<br /><br /><strong>Kontoinhaber:</strong> Mein Shop<br /><strong>IBAN:</strong> DE12 3456 7890 1234 5678 90<br /><br />Wir werden deine Zahlung überprüfen und das paket dann versenden.', 'mp' ),
 		) );
 		$metabox->add_field( 'textarea', array(
 			'name'			 => $this->get_field_name( 'email' ),
 			'label'			 => array( 'text' => __( 'Bestätigungs-E-Mail für Bestellungen', 'mp' ) ),
-			'desc'			 => __( 'Dies ist der E-Mail-Text, der an diejenigen gesendet wird, die manuelle Zahlungen vorgenommen haben. Sie sollten hier Ihre Anweisungen für manuelle Zahlungen einfügen. Es überschreibt die Standard-E-Mail für die Bestellbestätigung. Diese Codes werden durch Bestelldetails ersetzt: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. Kein HTML erlaubt.', 'mp' ),
+			'desc'			 => __( 'E-Mail-Text für manuelle Zahlungen (ersetzt die Standard-Bestellbestätigungs-E-Mail). <strong>Verfügbare Platzhalter:</strong> CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. <em>Kein HTML erlaubt.</em>', 'mp' ),
+			'default_value' => __( 'Hallo CUSTOMERNAME,
+
+Danke für deine Bestellung #ORDERID!
+
+ORDERINFO
+
+Versandadresse:
+SHIPPINGINFO
+
+Zahlungsweise:
+PAYMENTINFO
+
+Gesamt: TOTAL
+
+Die Bestellung verfolgst du hier: TRACKINGURL', 'mp' ),
 			'custom'		 => array( 'rows' => 10 ),
 			'save_callback'	 => array( 'strip_tags' ),
 		) );

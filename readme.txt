@@ -88,6 +88,7 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 * Fix: Shortcode-Builder im visuellen Editor zeigt wieder die vollstaendige Shortcode-Auswahl statt einer unvollstaendigen Teilmenge.
 * Fix: Netzwerk-Shortcodes (`mp_list_global_products`, `mp_global_categories_list`, `mp_global_tag_cloud`) werden im Netzwerkmodus wieder korrekt eingeblendet, wenn MarketPress netzwerkweit aktiv ist und die Multisite-Einstellung passt.
+* Verbesserung: Manuelles Zahlungs-Gateway zeigt jetzt klarere Feld-Beschreibungen in den Settings (welche Platzhalter wo funktionieren) und liefert aussagekräftige Beispiel-Texte als Startup-Vorlagen zum individuellen Anpassen.
 
 = 1.0.5 =
 
