@@ -124,6 +124,26 @@ class MP_Products_Screen {
 			),
 			'class'       => 'mp_product_images'
 		) ) );
+
+		$metabox->add_field( 'text', array(
+			'name'          => 'product_video_url',
+			'label'         => array( 'text' => __( 'Produktvideo URL (optional)', 'mp' ) ),
+			'desc'          => __( 'Optionales Video fuer die Produktseite. Unterstuetzt YouTube/Vimeo-Links (Embed) sowie direkte MP4/WebM-Dateien.', 'mp' ),
+			'custom'        => array( 'placeholder' => 'https://...' ),
+			'save_callback' => array( 'esc_url_raw' ),
+			'conditional'   => array(
+				'action'   => 'hide',
+				'operator' => 'OR',
+				array(
+					'name'  => 'product_type',
+					'value' => 'external',
+				),
+				array(
+					'name'  => 'has_variation',
+					'value' => 'yes',
+				),
+			),
+		) );
 	}
 
 	/**

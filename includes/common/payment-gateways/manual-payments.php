@@ -144,13 +144,13 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 			'name'	 => $this->get_field_name( 'instruction' ),
 			'label'	 => array( 'text' => __( 'Benutzeranweisungen', 'mp' ) ),
 			'desc'	 => __( 'Zeigt sich im Checkout, bevor der Kunde kauft. Erkläre hier, wie deine manuelle Zahlungsweise funktioniert (z.B. Bankverbindung, Adresse für Scheck, etc.). <strong>Keine Platzhalter verfügbar</strong> – dieser Text ist immer gleich.', 'mp' ),
-			'default_value' => __( 'Danke, dass du bei uns kaufzierst! Bitte überweise den Betrag auf folgendes Konto:<br /><br /><strong>Kontoinhaber:</strong> Mein Shop<br /><strong>IBAN:</strong> DE12 3456 7890 1234 5678 90<br /><strong>BIC:</strong> DEUTDEFF<br /><br />Teile uns die Zahlung per Mail mit oder warte bis wir sie erkennen.', 'mp' ),
+			'default_value' => __( 'Danke, dass du bei uns kaufst! Bitte überweise den Betrag auf folgendes Konto:<br /><br /><strong>Kontoinhaber:</strong> Mein Shop<br /><strong>IBAN:</strong> DE12 3456 7890 1234 5678 90<br /><strong>BIC:</strong> DEUTDEFF<br /><br />Teile uns die Zahlung per Mail mit oder warte bis wir sie erkennen.', 'mp' ),
 		) );
 		$metabox->add_field( 'wysiwyg', array(
 			'name'	 => $this->get_field_name( 'confirmation' ),
 			'label'	 => array( 'text' => __( 'Bestätigungsinformationen für Benutzer', 'mp' ) ),
 			'desc'	 => __( 'Zeigt sich auf der Bestellbestätigungs-Seite. Erinnere den Kunden an SEINE konkrete Bestellung. <strong>Verfügbare Platzhalter:</strong> TOTAL (Betrag), ORDERID (Bestell-Nr.).', 'mp' ),
-			'default_value' => __( '<strong>Danke für deine Bestellung #ORDERID!</strong><br /><br />Sende jetzt TOTAL an folgendes Konto:<br /><br /><strong>Kontoinhaber:</strong> Mein Shop<br /><strong>IBAN:</strong> DE12 3456 7890 1234 5678 90<br /><br />Wir werden deine Zahlung überprüfen und das paket dann versenden.', 'mp' ),
+			'default_value' => __( '<strong>Danke für deine Bestellung #ORDERID!</strong><br /><br />Sende jetzt TOTAL an folgendes Konto:<br /><br /><strong>Kontoinhaber:</strong> Mein Shop<br /><strong>IBAN:</strong> DE12 3456 7890 1234 5678 90<br /><br />Wir werden deine Zahlung überprüfen und das Paket dann versenden.', 'mp' ),
 		) );
 		$metabox->add_field( 'textarea', array(
 			'name'			 => $this->get_field_name( 'email' ),

@@ -2439,11 +2439,12 @@ if ( ! function_exists( 'mp_product' ) ) {
 		$twitter = $product->twitter_button( 'single_view' );
 
 		$display_description = ( ! empty( $content ) && (bool) $content );
+		$product_video_url = trim( (string) get_post_meta( $product->ID, 'mp_product_video_url', true ) );
 
 		$has_image = false;
 		if ( ! $product->has_variations() ) {
 			$values = get_post_meta( $product->ID, 'mp_product_images', true );
-			if ( $values ) {
+			if ( $values || ! empty( $product_video_url ) ) {
 				$has_image = true;
 			}
 		} else {
@@ -2499,6 +2500,20 @@ if ( ! function_exists( 'mp_product' ) ) {
 		   }
 
 		$lightbox_code = apply_filters( 'mp_single_product_image_lightbox', $lightbox_code );
+		$product_video_embed = '';
+
+		if ( ! empty( $product_video_url ) ) {
+			$oembed = wp_oembed_get( $product_video_url );
+
+			if ( ! empty( $oembed ) ) {
+				$product_video_embed = $oembed;
+			} else {
+				$video_ext = strtolower( pathinfo( wp_parse_url( $product_video_url, PHP_URL_PATH ), PATHINFO_EXTENSION ) );
+				if ( in_array( $video_ext, array( 'mp4', 'webm', 'ogg' ), true ) ) {
+					$product_video_embed = '<video controls preload="metadata" playsinline style="width:100%;height:auto;"><source src="' . esc_url( $product_video_url ) . '" type="video/' . esc_attr( $video_ext ) . '"></video>';
+				}
+			}
+		}
 		// JS-Variable für Lightbox-Option ausgeben
 		if ( $show_lightbox == 1 ) {
 			$return .= '<script>window.mpProductLightboxEnabled = true;</script>';
@@ -2511,14 +2526,18 @@ if ( ! function_exists( 'mp_product' ) ) {
 		if ( $image && $has_image && ! post_password_required( $post ) ) {
 			if ( ! $product->has_variations() ) {
 
-				if ( $values ) {
+				if ( $values || ! empty( $product_video_embed ) ) {
 
 					$return .= '<div class="mp_single_product_images">';
 
 					   $return .= '<div class="swiper mp_product_gallery" id="mp-product-gallery">';
 					   $return .= '<div class="swiper-wrapper">';
 
-					$values = explode( ',', $values );
+					$values = ! empty( $values ) ? explode( ',', $values ) : array();
+
+					if ( ! empty( $product_video_embed ) ) {
+						$return .= '<div class="swiper-slide mp-product-video-slide"><div class="mp-product-video">' . $product_video_embed . '</div></div>';
+					}
 
 					if ( $image != "single" ) {
 						foreach ( $values as $value ) {
