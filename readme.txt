@@ -84,6 +84,11 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.0.6 =
+
+* Fix: Shortcode-Builder im visuellen Editor zeigt wieder die vollstaendige Shortcode-Auswahl statt einer unvollstaendigen Teilmenge.
+* Fix: Netzwerk-Shortcodes (`mp_list_global_products`, `mp_global_categories_list`, `mp_global_tag_cloud`) werden im Netzwerkmodus wieder korrekt eingeblendet, wenn MarketPress netzwerkweit aktiv ist und die Multisite-Einstellung passt.
+
 = 1.0.5 =
 
 * Fix: Checkout-AJAX in allen betroffenen Payment-Handlern gehaertet (`free_orders`, `manual_payments`, `paypal-express`, `payfast`, `authorizenet-aim`, `simplify`); Redirects brechen den AJAX-Response nicht mehr ab.

@@ -162,45 +162,60 @@ class MP_Shortcode_Builder {
 	 * @access public
 	 */
 	public function display_short_code_form() {
-		// Shortcodes initialisieren
-			   $shortcodes = array(
-			'mp_list_categories' => __( 'Zeigt eine Liste der Produktkategorien an.', 'mp' ),
-			'mp_list_products'   => __( 'Zeigt eine Liste oder ein Raster von Produkten an.', 'mp' ),
-			'mp_product'         => __( 'Zeigt ein einzelnes Produkt an.', 'mp' ),
-			'mp_cart'            => __( 'Zeigt den Warenkorb an.', 'mp' ),
-			'mp_checkout'        => __( 'Zeigt das Checkout-Formular an.', 'mp' ),
-			'mp_order_status'    => __( 'Zeigt den Bestellstatus an.', 'mp' ),
-		);
-			   if ( did_action( 'media_buttons' ) == 0 ) {
+		if ( did_action( 'media_buttons' ) == 0 ) {
 			// Only continue if a tinymce editor exists on the current page
 			return;
 		}
-		
-		if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
-			require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
-		}
-		
-			   // Einstellungen laden, damit $settings für Multisite-Shortcodes verfügbar ist
-			   $settings = get_option( 'mp_settings' );
 
-			   if ( ! function_exists( 'mp_get_plugin_slug' ) ) {
-			   function mp_get_plugin_slug() {
-				   if ( file_exists( dirname( __FILE__ ) . '/includes/admin/dash-notice/psource-dash-notification.php' ) ) {
-					   return 'marketpress/marketpress.php';
-				   } else {
-					   return 'wordpress-ecommerce/marketpress.php';
-				   }
-			   }
-			if ( ( isset($settings['main_blog']) && mp_is_main_site() ) || isset($settings['main_blog']) && !$settings['main_blog'] ) {
-				$mu_shortcodes = array(
-					'mp_list_global_products'	  => __( 'Zeigt eine Liste oder ein Raster deiner globalen Produkte an.', 'mp' ),
-					'mp_global_categories_list'   => __( 'Zeigt eine Liste deiner globalen Kategorien an.', 'mp' ),
-					'mp_global_tag_cloud'		  => __( 'Zeigt eine Wolke oder Liste deiner globalen Produkt-Tags an.', 'mp' ),
-				);
-				
-				$shortcodes = array_merge($shortcodes, $mu_shortcodes);
+		$shortcodes = array(
+			'mp_tag_cloud'            => __( 'Zeigt eine Wolke oder Liste von Produkt-Tags an.', 'mp' ),
+			'mp_list_categories'      => __( 'Zeigt eine Liste der Produktkategorien an.', 'mp' ),
+			'mp_dropdown_categories'  => __( 'Zeigt ein Dropdown mit Produktkategorien an.', 'mp' ),
+			'mp_featured_products'    => __( 'Zeigt hervorgehobene Produkte an.', 'mp' ),
+			'mp_popular_products'     => __( 'Zeigt populaere Produkte an.', 'mp' ),
+			'mp_related_products'     => __( 'Zeigt verwandte Produkte an.', 'mp' ),
+			'mp_list_products'        => __( 'Zeigt eine Liste oder ein Raster von Produkten an.', 'mp' ),
+			'mp_product'              => __( 'Zeigt ein einzelnes Produkt an.', 'mp' ),
+			'mp_product_image'        => __( 'Zeigt ein einzelnes Produktbild an.', 'mp' ),
+			'mp_buy_button'           => __( 'Zeigt den Kaufen-Button fuer ein einzelnes Produkt an.', 'mp' ),
+			'mp_product_price'        => __( 'Zeigt den Preis eines einzelnen Produkts an.', 'mp' ),
+			'mp_product_meta'         => __( 'Zeigt Kategorien und Tags eines Produkts an.', 'mp' ),
+			'mp_product_sku'          => __( 'Zeigt die SKU eines Produkts an.', 'mp' ),
+			'mp_product_stock'        => __( 'Zeigt den Lagerbestand eines Produkts an.', 'mp' ),
+			'mp_cart'                 => __( 'Zeigt den Warenkorb an.', 'mp' ),
+			'mp_cart_widget'          => __( 'Zeigt das Warenkorb-Widget an.', 'mp' ),
+			'mp_checkout'             => __( 'Zeigt das Checkout-Formular an.', 'mp' ),
+			'mp_order_status'         => __( 'Zeigt den Bestellstatus an.', 'mp' ),
+			'mp_order_lookup_form'    => __( 'Zeigt das Formular zur Bestellsuche an.', 'mp' ),
+			'mp_cart_link'            => __( 'Zeigt einen Link zum Warenkorb an.', 'mp' ),
+			'mp_store_link'           => __( 'Zeigt einen Link zur Shop-Startseite an.', 'mp' ),
+			'mp_products_link'        => __( 'Zeigt einen Link zu den Produkten an.', 'mp' ),
+			'mp_orderstatus_link'     => __( 'Zeigt einen Link zur Bestellstatus-Seite an.', 'mp' ),
+			'mp_store_navigation'     => __( 'Zeigt die Shop-Navigation an.', 'mp' ),
+		);
+
+		if ( is_multisite() ) {
+			if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
+				require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+			}
+
+			$network_settings = get_site_option( 'mp_network_settings', array() );
+			$is_network_active = function_exists( 'mp_get_plugin_slug' ) && is_plugin_active_for_network( mp_get_plugin_slug() );
+			$show_global_shortcodes = isset( $network_settings['main_blog'] ) && (
+				( function_exists( 'mp_is_main_site' ) && mp_is_main_site() && $network_settings['main_blog'] ) ||
+				! $network_settings['main_blog']
+			);
+
+			if ( $is_network_active && $show_global_shortcodes ) {
+				$shortcodes = array_merge( $shortcodes, array(
+					'mp_list_global_products' => __( 'Zeigt eine Liste oder ein Raster globaler Produkte an.', 'mp' ),
+					'mp_global_categories_list' => __( 'Zeigt eine Liste globaler Kategorien an.', 'mp' ),
+					'mp_global_tag_cloud' => __( 'Zeigt eine Wolke oder Liste globaler Produkt-Tags an.', 'mp' ),
+				) );
 			}
 		}
+
+		$shortcodes = apply_filters( 'mp_shortcode_builder/shortcodes', $shortcodes );
 		
 		?>
 		<div id="mp-shortcode-builder" style="display:none">
