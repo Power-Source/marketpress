@@ -3228,11 +3228,15 @@ endif;
 
 if ( ! function_exists( 'mp_get_plugin_slug' ) ) {
 	function mp_get_plugin_slug() {
-		if ( file_exists( dirname( __FILE__ ) . '/includes/admin/dash-notice/psource-dash-notification.php' ) ) {
-			return 'psecommerce/psecommerce.php';
-		} else {
-			return 'psecommerce/psecommerce.php';
+		$plugin_root = dirname( dirname( dirname( __FILE__ ) ) );
+		$main_file   = 'marketpress.php';
+
+		if ( file_exists( $plugin_root . '/' . $main_file ) ) {
+			return basename( $plugin_root ) . '/' . $main_file;
 		}
+
+		// Conservative fallback for legacy callers.
+		return basename( $plugin_root ) . '/marketpress.php';
 	}
 }
 
