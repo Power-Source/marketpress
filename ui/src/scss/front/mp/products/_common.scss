@@ -21,6 +21,28 @@
 	// Product Gallery
 	&_gallery {
 		list-style: none;
+		width: 100%;
+		overflow: hidden;
+
+		.swiper-slide {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.swiper-slide a {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+		}
+
+		.swiper-slide img {
+			display: block;
+			height: auto;
+			max-width: 100%;
+			width: auto;
+		}
 		
 		&.lightSlider {
 			list-style: none;

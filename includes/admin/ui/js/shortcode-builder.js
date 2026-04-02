@@ -1,62 +1,35 @@
 (function($){
 	var shortcodeModalInstance = null;
 
-	$(document).ready(function($){
-		initShortCodeBuilder();
-		initShortcodeModal();
-		initSelect2();
-		initProductSearchField();
-		initToolTips();
-	});
+	var bindShortCodeBuilder = function($form) {
+		if (!$form || $form.length === 0 || $form.data('mpShortcodeBuilderBound')) {
+			return;
+		}
 
-	var initToolTips = function(){
-		$('.mp-tooltip').on('click', function(){
-			var $this = $(this),
-					$button = $this.find('.mp-tooltip-button');
-
-			if ( $button.length == 0 ) {
-				$this.children('span').append('<a class="mp-tooltip-button" href="#">x</a>');
-			}
-
-			$this.children('span').css({
-				"display" : "block",
-				"margin-top" : -($this.children('span').outerHeight() / 2)
-			});
-		});
-
-		$('.mp-tooltip').on('click', '.mp-tooltip-button', function(e){
-			e.preventDefault();
-			e.stopPropagation();
-			$(this).parent().fadeOut(250);
-		});
-	}
-
-	var initShortcodeModal = function() {
-		$('body').on('click', '.mp-shortcode-builder-button', function(){
-			var $form = $('#mp-shortcode-builder-form');
-			if ($form.length === 0) return;
-			shortcodeModalInstance = basicLightbox.create($form[0].cloneNode(true), {
-				onShow: function(instance) {
-					// Optional: Felder/Events im Modal reinitialisieren
-				}
-			});
-			shortcodeModalInstance.show();
-		});
-	};
-
- 	var initShortCodeBuilder = function() {
-		var $form = $('#mp-shortcode-builder-form');
+		$form.data('mpShortcodeBuilderBound', true);
 
 		$form.find('[name="shortcode"]').on('change', function(){
-			var $table = $('#' + $(this).val().replace(/_/g, '-') + '-shortcode');
+			var shortcode = $(this).val();
+			var tableId;
+			var $table;
+
+			if (!shortcode) {
+				$form.find('.form-table').hide();
+				return;
+			}
+
+			tableId = shortcode.replace(/_/g, '-') + '-shortcode';
+			$table = $form.find('.form-table').filter(function() {
+				return this.id === tableId;
+			});
 
 			if ( $table.length == 0 ) {
 				$form.find('.form-table').hide();
-				return; // bail
+				return;
 			}
 
 			$table.show().siblings('.form-table').hide();
-			refreshChosenFields();
+			refreshChosenFields($form);
 		});
 
 		$form.on('submit', function(e){
@@ -69,16 +42,14 @@
 				var $this = $(this);
 
 				if ( ($.trim($this.val()).length == 0 || ($this.attr('data-default') !== undefined && $this.attr('data-default') == $.trim($this.val()))) && !($this.is(':radio') || $this.is(':checkbox')) ) {
-					return; // Don't include empty fields or fields that are default values
+					return;
 				}
 
 				if ( $this.is(':radio') || $this.is(':checkbox') ) {
 					if ( $this.is(':checked') ) {
 						atts += ' ' + $this.attr('name') + '="' + $this.val() + '"';
-					} else {
-						if( $this.val() === "1" ){
-							atts += ' ' + $this.attr('name') + '="0"';
-						}	
+					} else if ( $this.val() === '1' ) {
+						atts += ' ' + $this.attr('name') + '="0"';
 					}
 				} else {
 					atts += ' ' + $this.attr('name') + '="' + $this.val() + '"';
@@ -92,12 +63,85 @@
 		});
 	};
 
-	var refreshChosenFields = function() {
-		$('.mp-chosen-select').trigger('chosen:updated');
+	$(document).ready(function($){
+		initShortCodeBuilder();
+		initShortcodeModal();
+		initSelect2($(document));
+		initProductSearchField($(document));
+		initToolTips($(document));
+	});
+
+	var initToolTips = function($context){
+		$context = $context || $(document);
+
+		$context.find('.mp-tooltip').off('click.mpTooltip').on('click.mpTooltip', function(){
+			var $this = $(this),
+					$button = $this.find('.mp-tooltip-button');
+
+			if ( $button.length == 0 ) {
+				$this.children('span').append('<a class="mp-tooltip-button" href="#">x</a>');
+			}
+
+			$this.children('span').css({
+				"display" : "block",
+				"margin-top" : -($this.children('span').outerHeight() / 2)
+			});
+		});
+
+		$context.find('.mp-tooltip').off('click.mpTooltipClose', '.mp-tooltip-button').on('click.mpTooltipClose', '.mp-tooltip-button', function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			$(this).parent().fadeOut(250);
+		});
+	}
+
+	var initShortcodeModal = function() {
+		$('body').on('click', '.mp-shortcode-builder-button', function(){
+			var $form = $('#mp-shortcode-builder-form');
+			if ($form.length === 0) return;
+			var $modalForm = $($form[0].cloneNode(true));
+			var $modalRoot = $('<div class="mp-shortcode-builder-modal-root"></div>').append($modalForm);
+
+			bindShortCodeBuilder($modalForm);
+			initSelect2($modalForm);
+			initProductSearchField($modalForm);
+			initToolTips($modalForm);
+
+			shortcodeModalInstance = basicLightbox.create($modalRoot[0], {
+				onShow: function(instance) {
+					var $lightbox = $(instance.element());
+					var $instanceForm = $(instance.element()).find('#mp-shortcode-builder-form');
+
+					$lightbox.css({
+						alignItems: 'flex-start',
+						paddingTop: '4vh'
+					});
+
+					$instanceForm.css({
+						marginTop: '0'
+					});
+
+					$instanceForm.find('[name="shortcode"]').trigger('change');
+				}
+			});
+			shortcodeModalInstance.show();
+		});
 	};
 
-	var initSelect2 = function() {
-		var selects = document.querySelectorAll('.mp-chosen-select');
+ 	var initShortCodeBuilder = function() {
+		var $form = $('#mp-shortcode-builder-form');
+
+		bindShortCodeBuilder($form);
+	};
+
+	var refreshChosenFields = function($context) {
+		$context = $context || $(document);
+		$context.find('.mp-chosen-select').trigger('chosen:updated');
+	};
+
+	var initSelect2 = function($context) {
+		$context = $context || $(document);
+		var selects = $context[0].querySelectorAll('.mp-chosen-select');
 		selects.forEach(function(el) {
 			if (typeof SlimSelect !== 'undefined') {
 				if (!el.slimSelect) {
@@ -113,8 +157,9 @@
 		});
 	};
 
-	var initProductSearchField = function() {
-		var selects = document.querySelectorAll('select.mp-select-product');
+	var initProductSearchField = function($context) {
+		$context = $context || $(document);
+		var selects = $context[0].querySelectorAll('select.mp-select-product');
 		selects.forEach(function(el) {
 			if (typeof SlimSelect !== 'undefined' && !el.slimSelect) {
 				el.slimSelect = new SlimSelect({

@@ -84,6 +84,12 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.0.7 =
+
+* Fix: Sehr grosse Produktbilder im Produktbildslider werden jetzt sauber auf die verfuegbare Slidergroesse skaliert, statt ueber den Container hinauszuragen.
+* Fix: Shortcode-Builder im Editor zeigt die Attribut-Optionen wieder korrekt an; die Umschaltung greift jetzt sauber im sichtbaren Modal.
+* Fix: Shortcode-Builder-Modal wird hoeher im Viewport positioniert, damit die Bedienung im Editor besser funktioniert.
+
 = 1.0.6 =
 
 * Fix: Shortcode-Builder im visuellen Editor zeigt wieder die vollstaendige Shortcode-Auswahl statt einer unvollstaendigen Teilmenge.

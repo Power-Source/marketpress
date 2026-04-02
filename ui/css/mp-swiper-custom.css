@@ -1,4 +1,29 @@
 /* Produktbild-Lightbox Overlay */
+.mp_product_gallery {
+  width: 100%;
+  overflow: hidden;
+}
+
+.mp_product_gallery .swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp_product_gallery .swiper-slide a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.mp_product_gallery .swiper-slide img {
+  display: block;
+  height: auto;
+  max-width: 100%;
+  width: auto;
+}
+
 .basicLightbox, .mp-product-lightbox {
   position: fixed !important;
   top: 0;
