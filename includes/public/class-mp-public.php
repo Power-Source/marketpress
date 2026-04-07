@@ -482,16 +482,27 @@ class MP_Public {
 		global $post;
 
 		$custom_template = false;
+		$post_id         = 0;
 
-		if ( mp_get_setting( 'pages->store' ) == $post->ID ) {
+		if ( isset( $post->ID ) ) {
+			$post_id = (int) $post->ID;
+		} else {
+			$post_id = (int) get_queried_object_id();
+		}
+
+		if ( ! $post_id ) {
+			return $template;
+		}
+
+		if ( mp_get_setting( 'pages->store' ) == $post_id ) {
 			$custom_template = locate_template( array( 'mp_store.php' ) );
-		} elseif ( mp_get_setting( 'pages->products' ) == $post->ID ) {
+		} elseif ( mp_get_setting( 'pages->products' ) == $post_id ) {
 			$custom_template = locate_template( array( 'mp_productlist.php' ) );
-		} elseif ( mp_get_setting( 'pages->cart' ) == $post->ID ) {
+		} elseif ( mp_get_setting( 'pages->cart' ) == $post_id ) {
 			$custom_template = locate_template( array( 'mp_cart.php' ) );
-		} elseif ( mp_get_setting( 'pages->checkout' ) == $post->ID ) {
+		} elseif ( mp_get_setting( 'pages->checkout' ) == $post_id ) {
 			$custom_template = locate_template( array( 'mp_checkout.php', 'mp_cart.php' ) );
-		} elseif ( mp_get_setting( 'pages->order_status' ) == $post->ID ) {
+		} elseif ( mp_get_setting( 'pages->order_status' ) == $post_id ) {
 			$custom_template = locate_template( array( 'mp_orderstatus.php' ) );
 		}
 

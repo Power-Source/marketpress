@@ -1,7 +1,7 @@
 === PS MarketPress ===
 Contributors: PSOURCE
 Tags: E-commerce, ecommerce, storefront, sell, store, shopping, cart, payment gateways, digital downloads, online store
-Requires at least: 3.7
+Requires at least: 4.9
 Requires PHP: 7.4
 Tested up to: 6.8.1
 ClassicPress: 2.7.0
@@ -89,6 +89,7 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Fix: Sehr grosse Produktbilder im Produktbildslider werden jetzt sauber auf die verfuegbare Slidergroesse skaliert, statt ueber den Container hinauszuragen.
 * Fix: Shortcode-Builder im Editor zeigt die Attribut-Optionen wieder korrekt an; die Umschaltung greift jetzt sauber im sichtbaren Modal.
 * Fix: Shortcode-Builder-Modal wird hoeher im Viewport positioniert, damit die Bedienung im Editor besser funktioniert.
+* Fix: PHP-8-Warnings im page_template-Filter behoben; die Template-Erkennung fuer Store-/Cart-/Checkout-Seiten prueft jetzt robust auf ein fehlendes Post-Objekt und nutzt eine sichere Fallback-Page-ID.
 
 = 1.0.6 =
 
