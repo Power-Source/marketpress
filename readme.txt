@@ -5,7 +5,7 @@ Requires at least: 4.9
 Requires PHP: 7.4
 Tested up to: 6.8.1
 ClassicPress: 2.7.0
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
