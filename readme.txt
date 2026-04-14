@@ -84,6 +84,17 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.0.8 =
+
+* Fix: Kritischer Fehler beim Speichern von Produktattributen behoben; Kategorien-/Term-Daten werden jetzt robust normalisiert und PHP-8-sicher verarbeitet.
+* Fix: Admin-Flow fuer Varianten-Erstellung stabilisiert; Klick auf "Varianten erstellen" triggert Speichern jetzt sprachunabhaengig und fuehrt direkt in die Variantenmaske.
+* Fix: JavaScript-Abbruch im Produkteditor beseitigt (`mp_product_admin_i18n is not defined`); Script-Lokalisierung erfolgt wieder in korrekter Reihenfolge, inklusive defensivem Fallback.
+* Fix: Datenquelle fuer gespeicherte Attributwerte gehaertet; Werte werden im Admin jetzt robust uebergeben und verarbeitet (`data-tags`/`data-tags-json`).
+* Verbesserung: Variationswerte-Eingabe im Produkteditor grundlegend bereinigt; Enter-Eingabe, sichtbare Tag-Darstellung und lokales Entfernen einzelner Werte per `x` funktionieren jetzt konsistent.
+* Verbesserung: Lokales Entfernen von Vorschlagswerten in der Variations-Erstellung ergaenzt; entfernte Werte werden nur fuer die aktuelle Bearbeitung ausgeschlossen und nicht global geloescht.
+* Verbesserung: Admin-Assets fuer den Variationsbereich nutzen filemtime-basierte Versionsparameter, damit geaenderte Skripte/Styles zuverlaessig ohne Cache-Artefakte geladen werden.
+* Verbesserung: Varianten-Popups im Produkteditor von Legacy-Colorbox auf `basicLightbox` umgestellt; reduziert jQuery-Migrate-Warnungen und stabilisiert das Modal-Verhalten.
+
 = 1.0.7 =
 
 * Fix: Sehr grosse Produktbilder im Produktbildslider werden jetzt sauber auf die verfuegbare Slidergroesse skaliert, statt ueber den Container hinauszuragen.

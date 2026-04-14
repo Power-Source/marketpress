@@ -110,7 +110,7 @@
                 } );
             } );
 
-            $( current_class + ' .variation_values' ).textext( { plugins: 'tags autocomplete' } );
+            $( current_class ).trigger( 'mp:variation-row-added' );
         }
 
         function enableNativeDragDrop( container, rowSelector, moveSelector ) {

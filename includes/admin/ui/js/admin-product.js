@@ -1,4 +1,414 @@
 jQuery( document ).ready( function( $ ) {
+    var mp_product_admin_i18n = $.extend( {
+        ajaxurl: '',
+        ajax_nonce: '',
+        creating_vatiations_message: 'Creating variations, please wait...',
+        bulk_update_prices_multiple_title: '',
+        bulk_update_prices_single_title: '',
+        bulk_update_inventory_multiple_title: '',
+        bulk_update_inventory_single_title: '',
+        bulk_delete_multiple_title: '',
+        bulk_delete_single_title: '',
+        message_input_required: 'Input is required',
+        message_valid_number_required: 'Valid number is required',
+        saving_message: 'Please wait...saving in progress...',
+        placeholder_image: ''
+    }, window.mp_product_admin_i18n || {} );
+
+    var mpVariationModalInstance = null;
+
+    function closeMpVariationModal() {
+        if ( mpVariationModalInstance ) {
+            mpVariationModalInstance.close();
+            return;
+        }
+
+        if ( window.parent && window.parent.jQuery && window.parent.jQuery.colorbox ) {
+            window.parent.jQuery.colorbox.close();
+        } else if ( window.jQuery && window.jQuery.colorbox ) {
+            window.jQuery.colorbox.close();
+        }
+    }
+
+    function createModalShell( title, contentNode ) {
+        var shell = document.createElement( 'div' ),
+            head = document.createElement( 'div' ),
+            titleEl = document.createElement( 'strong' ),
+            close = document.createElement( 'button' ),
+            body = document.createElement( 'div' );
+
+        shell.className = 'mp-variation-modal-shell';
+        head.className = 'mp-variation-modal-head';
+        body.className = 'mp-variation-modal-body';
+        close.className = 'mp-variation-modal-close';
+        close.type = 'button';
+        close.textContent = 'x';
+
+        titleEl.textContent = title || '';
+
+        close.addEventListener( 'click', function() {
+            closeMpVariationModal();
+        } );
+
+        head.appendChild( titleEl );
+        head.appendChild( close );
+        body.appendChild( contentNode );
+        shell.appendChild( head );
+        shell.appendChild( body );
+
+        return shell;
+    }
+
+    function openInlineModal( $content, title ) {
+        if ( typeof basicLightbox === 'undefined' || !$content.length ) {
+            return;
+        }
+
+        closeMpVariationModal();
+
+        var contentEl = $content.get( 0 ),
+            originalParent = contentEl.parentNode,
+            nextSibling = contentEl.nextSibling,
+            shell = createModalShell( title, contentEl );
+
+        contentEl.style.display = 'block';
+
+        mpVariationModalInstance = basicLightbox.create( shell, {
+            onClose: function() {
+                contentEl.style.display = 'none';
+                if ( originalParent ) {
+                    if ( nextSibling && nextSibling.parentNode === originalParent ) {
+                        originalParent.insertBefore( contentEl, nextSibling );
+                    } else {
+                        originalParent.appendChild( contentEl );
+                    }
+                }
+                mpVariationModalInstance = null;
+            }
+        } );
+
+        mpVariationModalInstance.show();
+    }
+
+    function openAjaxModal( url, title ) {
+        if ( typeof basicLightbox === 'undefined' ) {
+            return;
+        }
+
+        closeMpVariationModal();
+
+        $.get( url ).done( function( responseHtml ) {
+            var $response = $( '<div />' ).html( responseHtml );
+            $response.find( 'script' ).remove();
+
+            var shell = createModalShell( title, $response.get( 0 ) );
+
+            mpVariationModalInstance = basicLightbox.create( shell, {
+                onClose: function() {
+                    mpVariationModalInstance = null;
+                }
+            } );
+
+            mpVariationModalInstance.show();
+            $( 'body' ).trigger( 'mp-variation-popup-loaded' );
+        } );
+    }
+
+    window.mpCloseVariationModal = closeMpVariationModal;
+    window.mpOpenInlineModal = openInlineModal;
+    window.mpOpenAjaxModal = openAjaxModal;
+
+    function uniqTags( tags ) {
+        var out = [];
+
+        $.each( tags || [], function( _, tag ) {
+            tag = $.trim( tag || '' );
+            if ( tag.length && $.inArray( tag, out ) === -1 ) {
+                out.push( tag );
+            }
+        } );
+
+        return out;
+    }
+
+    function getRowTextarea( $row ) {
+        var $textareas = $row.find( 'textarea.variation_values' );
+
+        if ( $textareas.length > 1 ) {
+            $textareas.not( ':first' ).remove();
+        }
+
+        return $textareas.first();
+    }
+
+    function parseVariationValueString( raw ) {
+        var decoded = null,
+            tags = [];
+
+        raw = raw || '';
+
+        if ( $.isArray( raw ) ) {
+            return uniqTags( raw );
+        }
+
+        raw = $.trim( String( raw ) );
+        if ( !raw.length ) {
+            return [];
+        }
+
+        if ( raw.charAt( 0 ) === '[' ) {
+            try {
+                decoded = JSON.parse( raw );
+            } catch ( err ) {
+                decoded = null;
+            }
+        }
+
+        if ( $.isArray( decoded ) ) {
+            tags = decoded;
+        } else {
+            tags = raw.split( /\r\n|\r|\n|,/ );
+        }
+
+        return uniqTags( tags );
+    }
+
+    function getVariationTagsFromSelect( $select ) {
+        var selectedOption = $select.find( ':selected' ),
+            variationTags = selectedOption.attr( 'data-tags' ) || '',
+            variationTagsJson = selectedOption.attr( 'data-tags-json' ) || '[]',
+            tagsFromJson = [],
+            uniqueTags = [];
+
+        try {
+            tagsFromJson = JSON.parse( variationTagsJson );
+            if ( !$.isArray( tagsFromJson ) ) {
+                tagsFromJson = [];
+            }
+        } catch ( err ) {
+            tagsFromJson = [];
+        }
+
+        $.each( tagsFromJson.concat( $.map( variationTags.split( ',' ), function( tag ) {
+            tag = $.trim( tag );
+            return tag.length ? tag : null;
+        } ) ), function( _, tag ) {
+            if ( $.inArray( tag, uniqueTags ) === -1 ) {
+                uniqueTags.push( tag );
+            }
+        } );
+
+        return uniqueTags;
+    }
+
+    function getExcludedVariationTags( $row ) {
+        var raw = $row.attr( 'data-mp-excluded-tags' ) || '[]';
+
+        try {
+            raw = JSON.parse( raw );
+            if ( !$.isArray( raw ) ) {
+                raw = [];
+            }
+        } catch ( err ) {
+            raw = [];
+        }
+
+        return $.map( raw, function( tag ) {
+            tag = $.trim( tag );
+            return tag.length ? tag : null;
+        } );
+    }
+
+    function setExcludedVariationTags( $row, tags ) {
+        $row.attr( 'data-mp-excluded-tags', JSON.stringify( tags ) );
+    }
+
+    function excludeVariationTag( $row, tag ) {
+        var excluded = getExcludedVariationTags( $row );
+
+        tag = $.trim( tag || '' );
+        if ( !tag.length ) {
+            return;
+        }
+
+        if ( $.inArray( tag, excluded ) === -1 ) {
+            excluded.push( tag );
+            setExcludedVariationTags( $row, excluded );
+        }
+    }
+
+    function getEffectiveVariationTags( $row ) {
+        var allTags = getVariationTagsFromSelect( $row.find( '.mp_product_attributes_select' ) ),
+            excluded = getExcludedVariationTags( $row );
+
+        return $.grep( allTags, function( tag ) {
+            return $.inArray( tag, excluded ) === -1;
+        } );
+    }
+
+    function getRowTags( $row ) {
+        return uniqTags( $row.data( 'mpRowTags' ) || [] );
+    }
+
+    function setRowTags( $row, tags ) {
+        var $textarea = getRowTextarea( $row );
+
+        tags = uniqTags( tags );
+        $row.data( 'mpRowTags', tags );
+        $textarea.val( tags.join( ', ' ) ).trigger( 'change' );
+    }
+
+    function ensureVariationRowUi( $row ) {
+        if ( $row.data( 'mpVariationUiReady' ) ) {
+            return;
+        }
+
+        var $textarea = getRowTextarea( $row ),
+            $secondCol = $row.find( '.variation-second-col' ),
+            $ui = $( '<div class="mp-variation-input-ui"><div class="mp-variation-chip-list"></div><input type="text" class="mp-variation-chip-input" autocomplete="off" placeholder="Wert eingeben und ENTER druecken" /><div class="mp-variation-suggestions"></div></div>' );
+
+        // Remove legacy Textext markup if present to prevent duplicated UI layers.
+        $secondCol.find( '.mp-variation-input-ui' ).remove();
+        $secondCol.find( '.text-core, .text-dropdown, .text-tags, .text-autocomplete' ).remove();
+        $secondCol.find( 'input[type="hidden"][name="variation_values[]"]' ).remove();
+
+        $textarea.addClass( 'mp-variation-values-native' ).hide().after( $ui );
+        setRowTags( $row, parseVariationValueString( $textarea.val() ) );
+
+        $ui.on( 'keydown', '.mp-variation-chip-input', function( e ) {
+            if ( e.key === 'Enter' || e.key === ',' || e.keyCode === 13 || e.keyCode === 188 ) {
+                e.preventDefault();
+                addRowTag( $row, $( this ).val() );
+                $( this ).val( '' );
+                renderRowUi( $row );
+            }
+        } );
+
+        $ui.on( 'input', '.mp-variation-chip-input', function() {
+            renderRowSuggestions( $row );
+        } );
+
+        $ui.on( 'click', '.mp-variation-chip-remove', function( e ) {
+            e.preventDefault();
+            removeRowTag( $row, $( this ).attr( 'data-value' ) || '' );
+        } );
+
+        $ui.on( 'click', '.mp-variation-suggestion', function( e ) {
+            e.preventDefault();
+            addRowTag( $row, $( this ).attr( 'data-value' ) || '' );
+            $ui.find( '.mp-variation-chip-input' ).val( '' ).focus();
+            renderRowUi( $row );
+        } );
+
+        $row.data( 'mpVariationUiReady', true );
+        renderRowUi( $row );
+    }
+
+    function addRowTag( $row, tag ) {
+        var tags = getRowTags( $row );
+
+        tag = $.trim( tag || '' );
+        if ( !tag.length ) {
+            return;
+        }
+
+        if ( $.inArray( tag, tags ) === -1 ) {
+            tags.push( tag );
+            setRowTags( $row, tags );
+        }
+    }
+
+    function removeRowTag( $row, tag ) {
+        var tags = getRowTags( $row );
+
+        tag = $.trim( tag || '' );
+        if ( !tag.length ) {
+            return;
+        }
+
+        tags = $.grep( tags, function( current ) {
+            return current !== tag;
+        } );
+        setRowTags( $row, tags );
+        excludeVariationTag( $row, tag );
+        renderRowUi( $row );
+    }
+
+    function renderRowTags( $row ) {
+        var $list = $row.find( '.mp-variation-chip-list' ),
+            html = '';
+
+        $.each( getRowTags( $row ), function( _, tag ) {
+            var safe = $( '<div />' ).text( tag ).html();
+            html += '<span class="mp-variation-chip"><span class="mp-variation-chip-text">' + safe + '</span><button type="button" class="mp-variation-chip-remove" data-value="' + safe + '">x</button></span>';
+        } );
+
+        $list.html( html );
+    }
+
+    function renderRowSuggestions( $row ) {
+        var tags = getRowTags( $row ),
+            suggestions = getEffectiveVariationTags( $row ),
+            $input = $row.find( '.mp-variation-chip-input' ),
+            $box = $row.find( '.mp-variation-suggestions' ),
+            query = $.trim( $input.val() || '' ).toLowerCase(),
+            html = '';
+
+        suggestions = $.grep( suggestions, function( tag ) {
+            if ( $.inArray( tag, tags ) !== -1 ) {
+                return false;
+            }
+            if ( !query.length ) {
+                return true;
+            }
+            return tag.toLowerCase().indexOf( query ) !== -1;
+        } );
+
+        if ( !suggestions.length ) {
+            $box.empty().hide();
+            return;
+        }
+
+        $.each( suggestions, function( _, tag ) {
+            var safe = $( '<div />' ).text( tag ).html();
+            html += '<button type="button" class="mp-variation-suggestion" data-value="' + safe + '">' + safe + '</button>';
+        } );
+
+        $box.html( html ).show();
+    }
+
+    function renderRowUi( $row ) {
+        renderRowTags( $row );
+        renderRowSuggestions( $row );
+    }
+
+    function syncVariationValuesIntoField( $row, variationTags ) {
+        var current = getRowTags( $row );
+
+        if ( current.length === 0 && variationTags.length ) {
+            setRowTags( $row, variationTags );
+        }
+    }
+
+    function bindVariationSuggestions( $row ) {
+        var $select = $row.find( '.mp_product_attributes_select' ),
+            variationTags = getEffectiveVariationTags( $row );
+
+        ensureVariationRowUi( $row );
+
+        $row.find( '.mp-variation-known-values' ).remove();
+
+        $row.find( '.mp-variation-add-all' ).toggle( $select.val() !== '-1' && variationTags.length > 0 );
+        $row.find( '.mp-variation-attribute-name' ).toggle( $select.val() === '-1' );
+
+        if ( $select.val() === '-1' || variationTags.length === 0 ) {
+            renderRowUi( $row );
+            return;
+        }
+
+        syncVariationValuesIntoField( $row, variationTags );
+        renderRowUi( $row );
+    }
 
     $( document ).on( 'keyup', '.mp-variation-row .mp-variation-attribute-name', function( e ) {
         if ( $( this ).val() == '' ) {
@@ -8,30 +418,8 @@ jQuery( document ).ready( function( $ ) {
         }
     } );
 
-    $( document ).on( 'click', '.mp-variation-row .text-wrap', function( e ) {
-
-        //if ( $( this ).val() == '' || $( this ).val() == '[]' ) {
-        //  $( this ).parent().find( '.mp-variation-field-required' ).addClass( 'mp_variation_invalid' );
-        //} else {
+    $( document ).on( 'click', '.mp-variation-row .mp-variation-input-ui', function() {
         $( this ).parent().find( '.mp-variation-field-required' ).removeClass( 'mp_variation_invalid' );
-        //}
-    } );
-
-    $( document ).on( 'keyup', 'textarea.variation_values', function( e ) {
-
-        var keyCode = e.keyCode || e.which;
-
-        if ( keyCode == '9' ) {
-
-            // the prevent default allow you to stay in focus in the input and keep adding tags in
-            //var press = jQuery.Event( "keyup" );
-            //press.which = '13';
-            //press.originalEvent = KeyboardEvent;
-            // $( 'textarea.variation_values' ).val( $( 'textarea.variation_values' ).val() );
-            //$( 'textarea.variation_values' ).trigger( press );
-            //alert($( 'textarea.variation_values' ).val());
-            e.preventDefault();
-        }
     } );
 
     $( '#poststuff' ).append( '<div class="mp-admin-overlay"><div class="mp-variation-loading-spin"></div><div class="mp-variation-loading-message">' + mp_product_admin_i18n.creating_vatiations_message + '</div></div>' );
@@ -106,43 +494,25 @@ jQuery( document ).ready( function( $ ) {
 
     $( document ).on( 'click', '.mp-variation-add-all', function( e ) {
         e.preventDefault();
-        var $variation_tags_textarea = $( this ).parents( '.variation-row' ).find( 'textarea.variation_values' ),
-        variation_tags = $( this ).parents( '.variation-row' ).find( '.mp_product_attributes_select option:selected' ).attr( 'data-tags' ),
-        variation_tags_array = variation_tags.split( ',' ),
-        existing_tags = $variation_tags_textarea.textext()[0].tags()._formData,
-        all_tags = jQuery.grep(variation_tags_array, function( n, i ) {
-            return $.inArray(n, existing_tags) === -1;
-        });
+        var $row = $( this ).closest( '.variation-row' ),
+            variationTagsArray = getEffectiveVariationTags( $row ),
+            existingTags = getRowTags( $row ),
+            allTags = $.grep( variationTagsArray, function( tag ) {
+                return $.inArray( tag, existingTags ) === -1;
+            } );
 
-        $variation_tags_textarea.textext()[0].tags().addTags( all_tags );
+        if ( allTags.length ) {
+            setRowTags( $row, existingTags.concat( allTags ) );
+            renderRowUi( $row );
+        }
     } );
 
     $( document ).on( 'change', '.mp_product_attributes_select', function( ) {
-        var $variation_tags_textarea = $( this ).parents( '.variation-row' ).find( 'textarea.variation_values' );
-        $variation_tags_textarea.textext()[0].input().off('getSuggestions');
-        if ( $( this ).val( ) == '-1' ) {
-            $( this ).parent( ).find( '.mp-variation-attribute-name' ).show( );
-            $( this ).parent( ).find( '.mp-variation-add-all' ).hide( );
-        } else {
-            var variation_tags = $( this ).find( ':selected' ).attr( 'data-tags' );			
-            $( this ).parent( ).find( '.mp-variation-attribute-name' ).hide( );
-            if( variation_tags !== "" ) {
-                $( this ).parent( ).find( '.mp-variation-add-all' ).show( );				
-                var variation_tags_array = variation_tags.split( ',' );
-                $variation_tags_textarea.textext()[0].input().on('getSuggestions', function(e, data) {
-                    var textext = $(e.target).textext()[0],
-                        query = (data ? data.query : '') || '',
-                        existing_tags =textext.tags()._formData,
-                        suggestions = jQuery.grep(variation_tags_array, function( n, i ) {
-                            return $.inArray(n, existing_tags) === -1;
-                        });
-                    $(this).trigger(
-                        'setSuggestions',
-                        { result : textext.itemManager().filter(suggestions, query) }
-                    );
-                });
-            }
-        }
+        bindVariationSuggestions( $( this ).closest( '.variation-row' ) );
+    } );
+
+    $( document ).on( 'mp:variation-row-added', '.mp-variation-row', function() {
+        bindVariationSuggestions( $( this ) );
     } );
 
     $( document ).on( 'click', '.select_attributes_filter a', function( event ) {
@@ -185,6 +555,18 @@ jQuery( document ).ready( function( $ ) {
 
         var caller_id = $( this ).attr( 'id' );
 
+        if ( caller_id === 'mp_make_combinations' ) {
+            var $form = $( '#post' );
+
+            if ( !$form.find( 'input[name="mp_make_combinations"]' ).length ) {
+                $form.append( '<input type="hidden" name="mp_make_combinations" value="1" />' );
+            } else {
+                $form.find( 'input[name="mp_make_combinations"]' ).val( '1' );
+            }
+
+            $form.find( 'input[name="has_variation"][value="yes"]' ).prop( 'checked', true ).trigger( 'change' );
+        }
+
         if ( $( '.mp_variations_box' ).is( ":visible" ) ) {
 
             var variation_errors = 0;
@@ -202,36 +584,35 @@ jQuery( document ).ready( function( $ ) {
 
             } );
 
-            $( '.mp-variation-row .text-wrap input[type="hidden"]' ).each( function( index ) {
-                if ( $( this ).val() == '' || $( this ).val() == '[]' ) {
-                    $( this ).parent().find( '.mp-variation-field-required' ).addClass( 'mp_variation_invalid' );
+            $( '.mp-variation-row textarea.variation_values' ).each( function() {
+                var rowTags = parseVariationValueString( $( this ).val() );
+                if ( rowTags.length === 0 ) {
+                    $( this ).closest( '.variation-second-col' ).find( '.mp-variation-field-required' ).addClass( 'mp_variation_invalid' );
                     variation_errors++;
                 } else {
-                    $( this ).parent().find( '.mp-variation-field-required' ).removeClass( 'mp_variation_invalid' );
+                    $( this ).closest( '.variation-second-col' ).find( '.mp-variation-field-required' ).removeClass( 'mp_variation_invalid' );
                 }
             } );
 
 
             if ( variation_errors == 0 ) {
+                if ( caller_id == 'mp_make_combinations' ) {
+                    var $publishButton = $( '#publish' ),
+                        $saveButton = $( '#save-post' );
 
-//alert($( '#original_publish' ).val());
-                if ( $( '#original_publish' ).val() == 'Publish' ) {
-//$( '.mp-admin-overlay' ).show();
-                    $( '#save-post' ).removeAttr( 'disabled' );
-                    //$( '#save-post' ).prop( 'disabled', false );
-                    $( '#save-post' ).trigger('click');
-                    //mp_variation_message();
-                }
+                    $publishButton.removeAttr( 'disabled' );
+                    $saveButton.removeAttr( 'disabled' );
 
-                if ( $( '#original_publish' ).val() == 'Update' ) {
-
-//$( '.mp-admin-overlay' ).show();
-                    if ( caller_id == 'mp_make_combinations' ) {
-                        $( '#publish' ).removeAttr( 'disabled' );
-                        //$( '#publish' ).prop( 'disabled', false );
-                        $( '#publish' ).trigger('click');
+                    if ( $publishButton.length ) {
+                        $publishButton.trigger( 'click' );
+                    } else if ( $saveButton.length ) {
+                        $saveButton.trigger( 'click' );
+                    } else {
+                        $( '#post' ).trigger( 'submit' );
                     }
-                    //mp_variation_message();
+
+                    event.preventDefault();
+                    return;
                 }
             } else {
                 event.preventDefault();
@@ -240,20 +621,33 @@ jQuery( document ).ready( function( $ ) {
                 }, 100 );
             }
 
-            if ( caller_id == 'mp_make_combinations' ) {
-                event.preventDefault();
-            }
-
         }
 
     } );
 
     $( '.mp-add-new-variation' ).trigger('click');
+    $( '.mp-variation-row' ).each( function() {
+        bindVariationSuggestions( $( this ) );
+    } );
 
 } );
 /* INLINE EDIT */
 
 jQuery( document ).ready( function( $ ) {
+
+    var mp_product_admin_i18n = $.extend( {
+        ajaxurl: '',
+        ajax_nonce: '',
+        creating_vatiations_message: 'Creating variations, please wait...',
+        message_valid_number_required: 'Valid number is required',
+        message_input_required: 'Input is required',
+        saving_message: 'Please wait...saving in progress...',
+        placeholder_image: ''
+    }, window.mp_product_admin_i18n || {} );
+
+    var closeMpVariationModal = window.mpCloseVariationModal || function() {};
+    var openInlineModal = window.mpOpenInlineModal || function() {};
+    var openAjaxModal = window.mpOpenAjaxModal || function() {};
 
     $.fn.selectRange = function( start, end ) {
         return this.each( function( ) {
@@ -398,11 +792,19 @@ jQuery( document ).ready( function( $ ) {
             $( this ).blur( );
         }
     });
-    $( '#mp-product-price-inventory-variants-metabox' ).on( 'keydown', function( event ) {
-        if ( event.key === 'Enter' ) {
-            event.preventDefault();
-            return false;
+    $( '#mp-product-price-inventory-variants-metabox' ).on( 'keydown', 'input, textarea, select', function( event ) {
+        var $target = $( event.target );
+
+        if ( event.key !== 'Enter' ) {
+            return;
         }
+
+        if ( $target.is( 'textarea' ) || $target.closest( '.variation-row .text-wrap, .variation-row .text-core' ).length ) {
+            return true;
+        }
+
+        event.preventDefault();
+        return false;
     } );
     $( '#variant_bulk_doaction' ).on('click', function( ) {
         var selected_variant_bulk_action = $( '.variant_bulk_selected' ).val( );
@@ -426,14 +828,7 @@ jQuery( document ).ready( function( $ ) {
                     $( '.mp_bulk_price' ).val( mp_bulk_price_start_val );
                 }
 
-                $.colorbox( {
-                    href: $( '#mp_bulk_price' ),
-                    inline: true,
-                    opacity: .7,
-                    width: 380,
-                    height: 235,
-                    title: $( '#mp_bulk_price_title' ).html( )
-                } );
+                openInlineModal( $( '#mp_bulk_price' ), $( '#mp_bulk_price_title' ).html( ) );
             }
         }
 
@@ -460,14 +855,7 @@ jQuery( document ).ready( function( $ ) {
                     $( '.mp_bulk_inventory' ).val( mp_bulk_inventory_start_val );
                 }
 
-                $.colorbox( {
-                    href: $( '#mp_bulk_inventory' ),
-                    inline: true,
-                    opacity: .7,
-                    width: 420,
-                    height: 235,
-                    title: $( '#mp_bulk_inventory_title' ).html( )
-                } );
+                openInlineModal( $( '#mp_bulk_inventory' ), $( '#mp_bulk_inventory_title' ).html( ) );
             }
         }
 
@@ -518,14 +906,7 @@ jQuery( document ).ready( function( $ ) {
                 }
 
                 $( '.mp_variants_selected' ).html( checked_variants );
-                $.colorbox( {
-                    href: $( '#mp_bulk_delete' ),
-                    inline: true,
-                    opacity: .7,
-                    width: 380,
-                    height: 235,
-                    title: $( '#mp_bulk_delete_title' ).html( )
-                } );
+                openInlineModal( $( '#mp_bulk_delete' ), $( '#mp_bulk_delete_title' ).html( ) );
             }
         }
 
@@ -574,14 +955,14 @@ jQuery( document ).ready( function( $ ) {
         } );
     }
 
-    jQuery( '.mp_bulk_price' ).on( 'keyup', function( ) {
+    $( document ).on( 'keyup', '.mp_bulk_price', function( ) {
         if ( jQuery( '.mp_bulk_price' ).val( ) == '' || isNaN( jQuery( '.mp_bulk_price' ).val( ) ) ) {
             jQuery( '.mp_price_controls .save-bulk-form' ).attr( 'disabled', true );
         } else {
             jQuery( '.mp_price_controls .save-bulk-form' ).attr( 'disabled', false );
         }
     } );
-    jQuery( '.mp_bulk_inventory' ).on( 'keyup', function( ) {
+    $( document ).on( 'keyup', '.mp_bulk_inventory', function( ) {
         if ( jQuery( '.mp_bulk_inventory' ).val( ) !== '' && isNaN( jQuery( '.mp_bulk_inventory' ).val( ) ) ) {
             jQuery( '.mp_inventory_controls .save-bulk-form' ).attr( 'disabled', true );
         } else {
@@ -589,7 +970,7 @@ jQuery( document ).ready( function( $ ) {
         }
     } );
     //Price controls
-    jQuery( '.mp_popup_controls.mp_price_controls a.save-bulk-form' ).on( 'click', function( e ) {
+    $( document ).on( 'click', '.mp_popup_controls.mp_price_controls a.save-bulk-form', function( e ) {
         //LINK can't disabled, so we have to check
         if ( $( this ).attr( 'disabled' ) == 'disabled' ) {
             e.preventDefault();
@@ -597,7 +978,7 @@ jQuery( document ).ready( function( $ ) {
         }
 
         var global_price_set = jQuery( '.mp_bulk_price' ).val( );
-        parent.jQuery.colorbox.close( );
+        closeMpVariationModal();
         $( '.check-column-box:checked' ).each( function( ) {
             $( this ).closest( 'tr' ).find( '.field_subtype_price' ).html( global_price_set );
             $( this ).closest( 'tr' ).find( '.editable_value_price' ).val( global_price_set );
@@ -607,7 +988,7 @@ jQuery( document ).ready( function( $ ) {
         e.preventDefault( );
     } );
     //Inventory controls
-    jQuery( '.mp_popup_controls.mp_inventory_controls a.save-bulk-form' ).on( 'click', function( e ) {
+    $( document ).on( 'click', '.mp_popup_controls.mp_inventory_controls a.save-bulk-form', function( e ) {
         //LINK can't disabled, so we have to check
         if ( $( this ).attr( 'disabled' ) == 'disabled' ) {
             e.preventDefault();
@@ -619,7 +1000,7 @@ jQuery( document ).ready( function( $ ) {
             global_inventory_set = '&infin;';
         }
 
-        parent.jQuery.colorbox.close( );
+        closeMpVariationModal();
         $( '.check-column-box:checked' ).each( function( ) {
             $( this ).closest( 'tr' ).find( '.field_subtype_inventory' ).html( global_inventory_set );
             $( this ).closest( 'tr' ).find( '.editable_value_price' ).val( global_inventory_set );
@@ -629,10 +1010,10 @@ jQuery( document ).ready( function( $ ) {
         e.preventDefault( );
     } );
     //Delete controls
-    jQuery( '.mp_popup_controls.mp_delete_controls a.delete-bulk-form' ).on( 'click', function( e ) {
+    $( document ).on( 'click', '.mp_popup_controls.mp_delete_controls a.delete-bulk-form', function( e ) {
         e.preventDefault( );
         
-        parent.jQuery.colorbox.close( );
+        closeMpVariationModal();
         $( '.check-column-box:checked' ).each( function( ) {
             $( this ).closest( 'tr' ).remove( );
             save_inline_post_data( $( this ).val( ), 'delete', '', '' );
@@ -650,33 +1031,17 @@ jQuery( document ).ready( function( $ ) {
 
     /* Close thickbox window on link / cancel click */
     $( document ).on( 'click', '.mp_popup_controls a.cancel', function( e ) {
-        parent.jQuery.colorbox.close( );
+        closeMpVariationModal();
         return false;
         e.preventDefault( );
     } );
-    $( document ).on( 'click', "a.open_ajax", function( e ) {
-        $.colorbox( {
-            href: mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + ( $( this ).attr( 'data-popup-id' ) ) + '&ajax_nonce=' + encodeURIComponent( mp_product_admin_i18n.ajax_nonce ),
-            opacity: .7,
-            inline: false,
-            //width: 400,
-            //height: 460,
-            title: $( this ).closest( 'tr' ).find( '.field_more .variation_name' ).html( ),
-            onClosed: function( ) {
-                $.colorbox.remove( );
-            },
-            onOpen: function( ) {
-            },
-            onLoad: function( ) {
-                $( '#cboxClose' ).hide();
-            },
-            onComplete: function( ) {
-                $( '#cboxClose' ).show();
-            }
-        } );
-        e.preventDefault( );
-        //$.colorbox.remove
-        // return false;
+    $( document ).on( 'click', 'a.open_ajax', function( e ) {
+        e.preventDefault();
+        openAjaxModal(
+            mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + ( $( this ).attr( 'data-popup-id' ) ) + '&ajax_nonce=' + encodeURIComponent( mp_product_admin_i18n.ajax_nonce ),
+            $( this ).closest( 'tr' ).find( '.field_more .variation_name' ).html( )
+        );
+        return false;
     } );
     $( document ).on( 'click', '#variant_add', function( e ) {
         var url = mp_product_admin_i18n.ajaxurl + '?action=ajax_add_new_variant';
@@ -688,21 +1053,10 @@ jQuery( document ).ready( function( $ ) {
             var response = jQuery.parseJSON( data );
             if ( response ) {
                 if ( response.type == true ) {
-                    $.colorbox( {
-                        href: mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + response.post_id + '&new_variation&ajax_nonce=' + encodeURIComponent( mp_product_admin_i18n.ajax_nonce ),
-                        opacity: .7,
-                        inline: false,
-                        width: 400,
-                        height: 460,
-                        title: '',
-                        onClosed: function( ) {
-                            $.colorbox.remove( );
-                            //tinyMCE.execCommand("mceRepaint");
-                        },
-                        onLoad: function( ) {
-
-                        }
-                    } );
+                    openAjaxModal(
+                        mp_product_admin_i18n.ajaxurl + '?action=mp_variation_popup&variation_id=' + response.post_id + '&new_variation&ajax_nonce=' + encodeURIComponent( mp_product_admin_i18n.ajax_nonce ),
+                        ''
+                    );
                 } else {
                     alert( 'An error occured while trying to create a new variation post' );
                 }
@@ -909,7 +1263,7 @@ jQuery( document ).ready( function( $ ) {
                 $( '.mp_ajax_response' ).attr( 'class', 'mp_ajax_response' );
                 $( '.mp_ajax_response' ).addClass( 'mp_ajax_response_' + response.status );
                 if ( response.status == 'success' ) {
-                    parent.jQuery.colorbox.close();
+                    closeMpVariationModal();
                 }
                 if ( $( '#new_variation' ).val( ) == 'yes' ) {
                     //window.opener.location.reload( false );

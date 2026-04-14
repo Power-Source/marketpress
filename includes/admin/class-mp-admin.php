@@ -292,28 +292,14 @@ class MP_Admin {
 			if ( $post_type == MP_Product::get_post_type() ) {
 				wp_enqueue_style( 'mp-font-awesome', mp_plugin_url( 'includes/admin/ui/css/font-awesome.min.css' ), array(), MP_VERSION );
 				wp_enqueue_style( 'mp-product-admin', mp_plugin_url( 'includes/admin/ui/css/admin-product.css' ), array( 'mp-font-awesome' ), MP_VERSION );
-				wp_enqueue_script( 'mp-repeatable-fields', mp_plugin_url( 'includes/admin/ui/js/repeatable-fields.js' ), array( 'jquery' ), MP_VERSION );
-
-				wp_enqueue_script( 'mp-product-admin', mp_plugin_url( 'includes/admin/ui/js/admin-product.js' ), array( 'jquery', 'mp-repeatable-fields' ), MP_VERSION );
+				wp_enqueue_script(
+					'mp-repeatable-fields',
+					mp_plugin_url( 'includes/admin/ui/js/repeatable-fields.js' ),
+					array( 'jquery' ),
+					filemtime( mp_plugin_dir( 'includes/admin/ui/js/repeatable-fields.js' ) )
+				);
 
 				$ajax_nonce = wp_create_nonce( "mp-ajax-nonce" );
-
-				wp_localize_script( 'mp-product-admin', 'mp_product_admin_i18n', array(
-					'ajaxurl'								 => admin_url( 'admin-ajax.php' ),
-					'creating_vatiations_message'			 => __( 'Creating variations, please wait...', 'mp' ),
-					'ajax_nonce'							 => $ajax_nonce,
-					'bulk_update_prices_multiple_title'		 => sprintf( __( 'Update prices for %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-					'bulk_update_prices_single_title'		 => sprintf( __( 'Update price for %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-					'bulk_update_inventory_multiple_title'	 => sprintf( __( 'Update inventory for %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-					'bulk_update_inventory_single_title'	 => sprintf( __( 'Update inventory for %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-					'bulk_delete_multiple_title'			 => sprintf( __( 'Delete %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-					'bulk_delete_single_title'				 => sprintf( __( 'Delete %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
-					'date_format'							 => PSOURCE_Field_Datepicker::format_date_for_jquery( get_option( 'date_format' ) ),
-					'message_valid_number_required'			 => __( 'Valid number is required', 'mp' ),
-					'message_input_required'				 => __( 'Input is required', 'mp' ),
-					'saving_message'						 => __( 'Please wait...saving in progress...', 'mp' ),
-					'placeholder_image'						 => $mp->plugin_url( '/includes/admin/ui/images/img-placeholder.jpg' )
-				) );
 
 				//jquery textext
 				wp_enqueue_script( 'textext.core', mp_plugin_url( 'includes/admin/ui/js/jquery-textext/src/js/textext.core.js' ), array( 'jquery' ), MP_VERSION );
@@ -326,6 +312,42 @@ class MP_Admin {
 				wp_enqueue_script( 'textext.plugin.prompt', mp_plugin_url( 'includes/admin/ui/js/jquery-textext/src/js/textext.plugin.prompt.js' ), array( 'jquery' ), MP_VERSION );
 				wp_enqueue_script( 'textext.plugin.suggestions', mp_plugin_url( 'includes/admin/ui/js/jquery-textext/src/js/textext.plugin.suggestions.js' ), array( 'jquery' ), MP_VERSION );
 				wp_enqueue_script( 'textext.plugin.tags', mp_plugin_url( 'includes/admin/ui/js/jquery-textext/src/js/textext.plugin.tags.js' ), array( 'jquery' ), MP_VERSION );
+
+				wp_enqueue_script(
+					'mp-product-admin',
+					mp_plugin_url( 'includes/admin/ui/js/admin-product.js' ),
+					array(
+						'jquery',
+						'mp-repeatable-fields',
+						'basiclightbox',
+						'textext.core',
+						'textext.plugin.arrow',
+						'textext.plugin.autocomplete',
+						'textext.plugin.filter',
+						'textext.plugin.focus',
+						'textext.plugin.prompt',
+						'textext.plugin.suggestions',
+						'textext.plugin.tags'
+					),
+					filemtime( mp_plugin_dir( 'includes/admin/ui/js/admin-product.js' ) )
+				);
+
+				wp_localize_script( 'mp-product-admin', 'mp_product_admin_i18n', array(
+					'ajaxurl'                                 => admin_url( 'admin-ajax.php' ),
+					'creating_vatiations_message'            => __( 'Creating variations, please wait...', 'mp' ),
+					'ajax_nonce'                              => $ajax_nonce,
+					'bulk_update_prices_multiple_title'       => sprintf( __( 'Update prices for %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+					'bulk_update_prices_single_title'         => sprintf( __( 'Update price for %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+					'bulk_update_inventory_multiple_title'    => sprintf( __( 'Update inventory for %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+					'bulk_update_inventory_single_title'      => sprintf( __( 'Update inventory for %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+					'bulk_delete_multiple_title'              => sprintf( __( 'Delete %s product variants', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+					'bulk_delete_single_title'                => sprintf( __( 'Delete %s product variant', 'mp' ), '<span class="mp_variants_selected"></span>' ),
+					'date_format'                              => PSOURCE_Field_Datepicker::format_date_for_jquery( get_option( 'date_format' ) ),
+					'message_valid_number_required'            => __( 'Valid number is required', 'mp' ),
+					'message_input_required'                   => __( 'Input is required', 'mp' ),
+					'saving_message'                           => __( 'Please wait...saving in progress...', 'mp' ),
+					'placeholder_image'                        => $mp->plugin_url( '/includes/admin/ui/images/img-placeholder.jpg' )
+				) );
 
 				wp_enqueue_style( 'textext.core', mp_plugin_url( 'includes/admin/ui/js/jquery-textext/src/css/textext.core.css' ), array(), MP_VERSION );
 				wp_enqueue_style( 'textext.plugin.arrow', mp_plugin_url( 'includes/admin/ui/js/jquery-textext/src/css/textext.plugin.arrow.css' ), array(), MP_VERSION );

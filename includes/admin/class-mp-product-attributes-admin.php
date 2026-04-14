@@ -166,14 +166,20 @@ class MP_Product_Attributes_Admin {
 		<select name="<?php echo $name; ?>" <?php if ( !empty( $id ) ) { ?>id="<?php echo $id; ?>"<?php } ?> class="<?php echo $class; ?>">
 			<option value="-1"><?php _e( '- Neue Variation erstellen -', 'mp' ); ?></option>
 			<?php foreach ( $product_attributes as $product_attribute ) {
-				$tags = '';
+				$tags = array();
 				if( $attribute_terms = MP_Product_Attributes_Admin::get_product_attribute_terms( $product_attribute->attribute_id ) ){
 					$tags = mp_array_column( $attribute_terms, 'name' );
-					$tags = implode( ',', $tags );
 				}
 
+				if ( ! is_array( $tags ) ) {
+					$tags = array();
+				}
+
+				$tags_string = implode( ',', array_map( 'trim', $tags ) );
+				$tags_json   = wp_json_encode( array_values( $tags ) );
+
 				?>
-				<option data-tags='<?php echo $tags ?>' value="<?php
+				<option data-tags="<?php echo esc_attr( $tags_string ); ?>" data-tags-json="<?php echo esc_attr( $tags_json ); ?>" value="<?php
 				if ( $value_type == 'id' ) {
 					echo $product_attribute->attribute_id;
 				} else {
@@ -265,7 +271,9 @@ class MP_Product_Attributes_Admin {
 				}
 
 				$key	 = str_replace( 'product_', '', $field->args[ 'name' ] );
-				$value	 = $attribute->$key;
+				if ( is_object( $attribute ) && isset( $attribute->$key ) ) {
+					$value = $attribute->$key;
+				}
 				break;
 
 			case 'product_attribute_categories' :
@@ -291,6 +299,10 @@ class MP_Product_Attributes_Admin {
 				$terms			 = get_terms( $attribute_slug, array( 'hide_empty' => false ) );
 				$value			 = array();
 
+				if ( is_wp_error( $terms ) || empty( $terms ) || ! is_array( $terms ) ) {
+					break;
+				}
+
 				// Sort terms by term order
 				$product_atts->sort_terms_by_custom_order( $terms );
 
@@ -305,6 +317,56 @@ class MP_Product_Attributes_Admin {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Normalize selected product attribute categories from POST data.
+	 *
+	 * @since 1.0
+	 * @access private
+	 * @param mixed $categories Raw posted value.
+	 * @return array
+	 */
+	private static function normalize_attribute_categories( $categories ) {
+		if ( empty( $categories ) ) {
+			return array();
+		}
+
+		if ( is_string( $categories ) ) {
+			$categories = explode( ',', $categories );
+		} elseif ( ! is_array( $categories ) ) {
+			$categories = array( $categories );
+		}
+
+		$categories = array_map( 'intval', wp_parse_list( $categories ) );
+		$categories = array_filter( $categories );
+
+		return array_values( array_unique( $categories ) );
+	}
+
+	/**
+	 * Save attribute/category associations.
+	 *
+	 * @since 1.0
+	 * @access private
+	 * @param int   $attribute_id Attribute ID.
+	 * @param array $category_ids Category term IDs.
+	 */
+	private static function save_attribute_categories( $attribute_id, $category_ids ) {
+		global $wpdb;
+
+		$table_name_terms = $wpdb->prefix . 'mp_product_attributes_terms';
+
+		foreach ( $category_ids as $term_id ) {
+			$wpdb->insert(
+				$table_name_terms,
+				array(
+					'attribute_id' => (int) $attribute_id,
+					'term_id'      => (int) $term_id,
+				),
+				array( '%d', '%d' )
+			);
+		}
 	}
 
 	/**
@@ -323,6 +385,7 @@ class MP_Product_Attributes_Admin {
 		$table_name			 = MP_Product_Attributes::get_instance()->get_table_name();
 		$table_name_terms	 = $wpdb->prefix . 'mp_product_attributes_terms';
 		$redirect_url		 = remove_query_arg( array( 'action', 'action2' ) );
+		$term_ids			 = array();
 
 		// Robust: Terms aus verschachtelten Arrays extrahieren
 		$terms = array();
@@ -348,6 +411,13 @@ class MP_Product_Attributes_Admin {
 									) {
 										$slug = $row['slug'][$type][$id];
 									}
+									$name = is_string( $name ) ? trim( $name ) : '';
+									$slug = is_string( $slug ) ? trim( $slug ) : '';
+
+									if ( '' === $name ) {
+										continue;
+									}
+
 									$terms[] = array('id' => ($type == 'existing' ? '_' . $id : $id), 'name' => $name, 'slug' => $slug);
 								}
 							}
@@ -392,9 +462,11 @@ class MP_Product_Attributes_Admin {
 
 							if ( !is_wp_error( $inserted ) ) {
 								$term_ids[]  = $term_id  = $inserted[ 'term_id' ];
-							} else {
+							} elseif ( isset( $inserted->error_data['term_exists'] ) ) {
 								// term slug already exists, get existing term slug
 								$term_ids[]  = $term_id  = $inserted->error_data[ 'term_exists' ];
+							} else {
+								continue;
 							}
 						} else {
 							$term_id             = $term_ids[]             = substr( $id, 1 );
@@ -418,17 +490,9 @@ class MP_Product_Attributes_Admin {
 						}
 					}
 
-			//insert product categories
-			if ( $cats = mp_get_post_value( 'product_attribute_categories' ) ) {
-				$cats	 = explode( ',', $cats );
-				$sql	 = "INSERT INTO $table_name_terms (attribute_id, term_id) VALUES ";
-
-				foreach ( $cats as $term_id ) {
-					$sql .= $wpdb->prepare( "(%s, %s),", $attribute_id, $term_id );
-				}
-
-				$sql = rtrim( $sql, ',' ); //remove trailing comma
-				$wpdb->query( $sql );
+			$cats = self::normalize_attribute_categories( mp_get_post_value( 'product_attribute_categories' ) );
+			if ( ! empty( $cats ) ) {
+				self::save_attribute_categories( $attribute_id, $cats );
 			}
 
 			//redirect
@@ -438,7 +502,6 @@ class MP_Product_Attributes_Admin {
 				'mp_message'	 => 'mp_product_attribute_added'
 			), $redirect_url ) );
 		} else {
-			$term_ids		 = array();
 			$attribute_id	 = mp_get_get_value( 'attribute_id' );
 			$attribute_slug	 = $product_atts->generate_slug( $attribute_id );
 			$wpdb->update( $table_name, array(
@@ -471,9 +534,11 @@ class MP_Product_Attributes_Admin {
 
 					if ( !is_wp_error( $inserted ) ) {
 						$term_ids[]  = $term_id  = $inserted[ 'term_id' ];
-					} else {
+					} elseif ( isset( $inserted->error_data['term_exists'] ) ) {
 						// term slug already exists, get existing term slug
 						$term_ids[]  = $term_id  = $inserted->error_data[ 'term_exists' ];
+					} else {
+						continue;
 					}
 				} else {
 					$term_id             = $term_ids[]             = substr( $id, 1 );
@@ -500,24 +565,19 @@ class MP_Product_Attributes_Admin {
 				'hide_empty' => false,
 				'exclude'	 => $term_ids
 			) );
-			foreach ( $unused_terms as $term ) {
-				if (is_object($term) && isset($term->term_id)) {
-					wp_delete_term( $term->term_id, $attribute_slug );
+			if ( ! is_wp_error( $unused_terms ) && is_array( $unused_terms ) ) {
+				foreach ( $unused_terms as $term ) {
+					if ( is_object( $term ) && isset( $term->term_id ) ) {
+						wp_delete_term( $term->term_id, $attribute_slug );
+					}
 				}
 			}
 
 			//update product categories
 			$wpdb->delete( $table_name_terms, array( 'attribute_id' => $attribute_id ) );
-			if ( $cats = mp_get_post_value( 'product_attribute_categories' ) ) {
-				$cats	 = explode( ',', $cats );
-				$sql	 = "INSERT INTO $table_name_terms (attribute_id, term_id) VALUES ";
-
-				foreach ( $cats as $term_id ) {
-					$sql .= $wpdb->prepare( "(%s, %s),", $attribute_id, $term_id );
-				}
-
-				$sql = rtrim( $sql, ',' ); //remove trailing comma
-				$wpdb->query( $sql );
+			$cats = self::normalize_attribute_categories( mp_get_post_value( 'product_attribute_categories' ) );
+			if ( ! empty( $cats ) ) {
+				self::save_attribute_categories( $attribute_id, $cats );
 			}
 
 			//redirect

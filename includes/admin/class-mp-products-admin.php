@@ -198,8 +198,6 @@ class MP_Products_Screen {
 	 * @access public
 	 */
 	public function enqueue_styles_scripts() {
-		wp_enqueue_style( 'colorbox', mp_plugin_url( 'includes/admin/ui/colorbox/colorbox.css' ), false, '1.5.10' );
-		wp_enqueue_script( 'colorbox', mp_plugin_url( 'ui/js/jquery.colorbox-min.js' ), false, '1.5.10' );
 	}
 
 	/**
@@ -815,6 +813,39 @@ class MP_Products_Screen {
 		return $result;
 	}
 
+	/**
+	 * Normalize posted variation values from Textext JSON or plain text.
+	 *
+	 * @since 1.0
+	 * @access private
+	 * @param mixed $raw_values Raw posted value for one variation row.
+	 * @return array
+	 */
+	private function normalize_variation_values( $raw_values ) {
+		if ( is_array( $raw_values ) ) {
+			$values = $raw_values;
+		} else {
+			$raw_values = is_string( $raw_values ) ? trim( $raw_values ) : '';
+
+			if ( '' === $raw_values ) {
+				return array();
+			}
+
+			$decoded = json_decode( $raw_values, true );
+
+			if ( JSON_ERROR_NONE === json_last_error() && is_array( $decoded ) ) {
+				$values = $decoded;
+			} else {
+				$values = preg_split( '/\r\n|\r|\n|,/', $raw_values );
+			}
+		}
+
+		$values = array_map( 'trim', (array) $values );
+		$values = array_filter( $values, 'strlen' );
+
+		return array_values( array_unique( $values ) );
+	}
+
 	public static function term_id( $term, $taxonomy, $ignore_num = 'false' ) {
 
 		if ( is_numeric( $term ) && $ignore_num == false ) {
@@ -1246,6 +1277,20 @@ class MP_Products_Screen {
 	public function save_init_product_variations() {
 		global $wp_taxonomies;
 
+		$post_id = absint( mp_get_post_value( 'post_ID' ) );
+
+		if ( ! $post_id || get_post_type( $post_id ) !== MP_Product::get_post_type() ) {
+			return;
+		}
+
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+
+		if ( 1 !== (int) mp_get_post_value( 'mp_make_combinations', 0 ) ) {
+			return;
+		}
+
 		if ( mp_get_post_value( 'has_variation', 'no' ) == 'no' ) {
 			return;
 		}
@@ -1254,22 +1299,20 @@ class MP_Products_Screen {
 			wp_die( __( 'Cheatin&#8217; uh?', 'mp' ) );
 
 
-		$variation_names     = mp_get_post_value( 'product_attributes_categories', array() );
-		$new_variation_names = mp_get_post_value( 'variation_names', array() );
-		$variation_values    = mp_get_post_value( 'variation_values', array() );
-		$post_id             = mp_get_post_value( 'post_ID' );
+		$variation_names     = (array) mp_get_post_value( 'product_attributes_categories', array() );
+		$new_variation_names = (array) mp_get_post_value( 'variation_names', array() );
+		$variation_values    = (array) mp_get_post_value( 'variation_values', array() );
 
 		$data = array();
+		$data_original = array();
 
 		if ( isset( $variation_values ) && ! empty( $variation_values ) ) {
-
-			update_post_meta( $post_id, 'has_variations', 1 );
 
 			$i = 0;
 
 			foreach ( $variation_names as $variation_name ) {
-
-				$variation_name = $this->maybe_create_attribute( 'product_attr_' . $variation_name, $new_variation_names[ $i ] ); //taxonomy name made of the prefix and attribute's ID
+				$new_variation_name = isset( $new_variation_names[ $i ] ) ? $new_variation_names[ $i ] : '';
+				$variation_name = $this->maybe_create_attribute( 'product_attr_' . $variation_name, $new_variation_name ); //taxonomy name made of the prefix and attribute's ID
 
 				$args = array(
 					'orderby'      => 'name',
@@ -1282,9 +1325,13 @@ class MP_Products_Screen {
 				$terms = get_terms( array( $variation_name ), $args );
 
 				/* Put variation values in the array */
-				$variation_values_row = $variation_values[ $i ];
-				$variation_values_row = str_replace( array( '[', ']', '"' ), '', $variation_values_row );
-				$variations_data      = explode( ',', $variation_values_row );
+				$variation_values_row = isset( $variation_values[ $i ] ) ? $variation_values[ $i ] : array();
+				$variations_data      = $this->normalize_variation_values( $variation_values_row );
+
+				if ( empty( $variations_data ) ) {
+					$i ++;
+					continue;
+				}
 
 				global $variations_single_data;
 
@@ -1311,6 +1358,13 @@ class MP_Products_Screen {
 
 			$combinations          = $this->possible_product_combinations( $data );
 			$combinations_original = $this->possible_product_combinations( $data_original );
+
+			if ( empty( $combinations ) ) {
+				return;
+			}
+
+			update_post_meta( $post_id, 'has_variations', 1 );
+			update_post_meta( $post_id, 'has_variation', 'yes' );
 
 			$combination_num   = 1;
 			$combination_index = 0;
