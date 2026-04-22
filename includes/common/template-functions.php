@@ -2524,66 +2524,70 @@ if ( ! function_exists( 'mp_product' ) ) {
 		$post = get_post();
 
 		if ( $image && $has_image && ! post_password_required( $post ) ) {
-			if ( ! $product->has_variations() ) {
+			if ( $values || ! empty( $product_video_embed ) || $product->has_variations() ) {
 
-				if ( $values || ! empty( $product_video_embed ) ) {
-
-					$return .= '<div class="mp_single_product_images">';
-
-					   $return .= '<div class="swiper mp_product_gallery" id="mp-product-gallery">';
-					   $return .= '<div class="swiper-wrapper">';
-
-					$values = ! empty( $values ) ? explode( ',', $values ) : array();
-
-					if ( ! empty( $product_video_embed ) ) {
-						$return .= '<div class="swiper-slide mp-product-video-slide"><div class="mp-product-video">' . $product_video_embed . '</div></div>';
-					}
-
-					if ( $image != "single" ) {
-						foreach ( $values as $value ) {
-
-							if ( preg_match( '/http:|https:/', $value ) ) {
-								$img_url        = array( esc_url( $value ) );
-								$original_image = array( esc_url( $value ) );
-							} else {
-								//$img_url = wp_get_attachment_image_src( $value, $size );
-								$original_image = wp_get_attachment_image_src( $value, 'full' );
-								$img_url        = mp_resize_image( $value, $original_image[0], $size );
-							}
-
-							   if ( is_array($img_url) && !empty($img_url) ) {
-								   $return .= '<div class="swiper-slide"><a href="' . $original_image[0] . '" data-lg-size="1400-933"><img src="' . $img_url[0] . '" /></a></div>';
-							   }
-						}
-					} else {
-						if ( ! empty( $values[0] ) ) {
-
-							if ( preg_match( '/http:|https:/', $values[0] ) ) {
-								$img_url        = array( esc_url( $values[0] ) );
-								$original_image = array( esc_url( $values[0] ) );
-							} else {
-								$original_image = wp_get_attachment_image_src( $values[0], 'full' );
-								$img_url        = mp_resize_image( $values[0], $original_image[0], $size );
-							}
-
-							if ( is_array($img_url) && !empty($img_url) ) {
-								$return .= '<div class="swiper-slide"><a href="' . esc_url( $original_image[0] ) . '" data-lg-size="1400-933"><img src="' . esc_url( $img_url[0] ) . '" /></a></div>';
-							}
-						}
-					}
-
-					   $return .= '</div><!-- .swiper-wrapper -->';
-					   $return .= '<div class="swiper-pagination"></div>';
-					   $return .= '<div class="swiper-button-next"></div>';
-					   $return .= '<div class="swiper-button-prev"></div>';
-					   $return .= '</div><!-- end mp_product_gallery -->';
-					   $return .= "<script>document.addEventListener('DOMContentLoaded',function(){if(window.Swiper){new Swiper('#mp-product-gallery',{loop:true,slidesPerView:1,spaceBetween:0,pagination:{el:'.swiper-pagination',clickable:true},navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'}});}});</script>";
-
-					$return .= '</div><!-- end mp_single_product_images -->';
-				}
-			} else {
 				$return .= '<div class="mp_single_product_images">';
-				$return .= ( $variation ) ? $variation->image( false, 'single', $size, $image_alignment ) : $product->image( false, 'single', $size, $image_alignment );
+
+				$return .= '<div class="swiper mp_product_gallery" id="mp-product-gallery">';
+				$return .= '<div class="swiper-wrapper">';
+
+				$values = ! empty( $values ) ? explode( ',', $values ) : array();
+
+				if ( empty( $values ) && $product->has_variations() ) {
+					$default_thumb_id = get_post_thumbnail_id( $product->ID );
+					if ( $default_thumb_id ) {
+						$values[] = (string) $default_thumb_id;
+					}
+				}
+
+				$is_first_image_slide = true;
+
+				if ( $image != "single" ) {
+					foreach ( $values as $value ) {
+
+						if ( preg_match( '/http:|https:/', $value ) ) {
+							$img_url        = array( esc_url( $value ) );
+							$original_image = array( esc_url( $value ) );
+						} else {
+							$original_image = wp_get_attachment_image_src( $value, 'full' );
+							$img_url        = mp_resize_image( $value, $original_image[0], $size );
+						}
+
+						if ( is_array( $img_url ) && ! empty( $img_url ) ) {
+							$default_link_attr = $is_first_image_slide ? ' data-mp-default-href="' . esc_url( $original_image[0] ) . '"' : '';
+							$default_img_attr  = $is_first_image_slide ? ' data-mp-default-src="' . esc_url( $img_url[0] ) . '"' : '';
+							$return            .= '<div class="swiper-slide"><a href="' . esc_url( $original_image[0] ) . '"' . $default_link_attr . ' data-lg-size="1400-933"><img src="' . esc_url( $img_url[0] ) . '"' . $default_img_attr . ' /></a></div>';
+							$is_first_image_slide = false;
+						}
+					}
+				} else {
+					if ( ! empty( $values[0] ) ) {
+
+						if ( preg_match( '/http:|https:/', $values[0] ) ) {
+							$img_url        = array( esc_url( $values[0] ) );
+							$original_image = array( esc_url( $values[0] ) );
+						} else {
+							$original_image = wp_get_attachment_image_src( $values[0], 'full' );
+							$img_url        = mp_resize_image( $values[0], $original_image[0], $size );
+						}
+
+						if ( is_array( $img_url ) && ! empty( $img_url ) ) {
+							$return .= '<div class="swiper-slide"><a href="' . esc_url( $original_image[0] ) . '" data-mp-default-href="' . esc_url( $original_image[0] ) . '" data-lg-size="1400-933"><img src="' . esc_url( $img_url[0] ) . '" data-mp-default-src="' . esc_url( $img_url[0] ) . '" /></a></div>';
+						}
+					}
+				}
+
+				if ( ! empty( $product_video_embed ) ) {
+					$return .= '<div class="swiper-slide mp-product-video-slide"><div class="mp-product-video">' . $product_video_embed . '</div></div>';
+				}
+
+				$return .= '</div><!-- .swiper-wrapper -->';
+				$return .= '<div class="swiper-pagination"></div>';
+				$return .= '<div class="swiper-button-next"></div>';
+				$return .= '<div class="swiper-button-prev"></div>';
+				$return .= '</div><!-- end mp_product_gallery -->';
+				$return .= "<script>document.addEventListener('DOMContentLoaded',function(){if(window.Swiper){new Swiper('#mp-product-gallery',{loop:true,slidesPerView:1,spaceBetween:0,pagination:{el:'.swiper-pagination',clickable:true},navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'}});}});</script>";
+
 				$return .= '</div><!-- end mp_single_product_images -->';
 			}
 		}

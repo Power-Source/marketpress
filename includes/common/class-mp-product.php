@@ -322,12 +322,19 @@ public $content_tabs = array();
 			$json['in_stock']       = $selected_variation->in_stock( $qty );
 			$json['out_of_stock']   = false;
 
-			$json['image'] = $selected_variation->image_url( false, null, 'single' );
-			$json['image_full'] = $selected_variation->image_url( false, 'full', 'single' );
+			if ( has_post_thumbnail( $selected_variation->ID ) ) {
+				$json['image']      = $selected_variation->image_url( false, null, 'single' );
+				$json['image_full'] = $selected_variation->image_url( false, 'full', 'single' );
+			} else {
+				$json['image']      = false;
+				$json['image_full'] = false;
+			}
 
-			$json['description'] = $selected_variation->content( false );
+			$variation_description = trim( (string) $selected_variation->content( false ) );
+			$variation_excerpt     = trim( (string) mp_get_the_excerpt( $selected_variation->ID, 18 ) );
 
-			$json['excerpt'] = mp_get_the_excerpt( $selected_variation->ID, 18 );
+			$json['description'] = '' !== $variation_description ? $variation_description : $product->content( false );
+			$json['excerpt']     = '' !== $variation_excerpt ? $variation_excerpt : $product->excerpt();
 
 			$json['price'] = $selected_variation->display_price( false );
 		}

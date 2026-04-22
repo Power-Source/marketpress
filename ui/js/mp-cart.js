@@ -315,9 +315,45 @@ var mp_cart = { };
 
             if ( resp.success ) {
 
-                if (resp.data.image) {
-                    if ($container.find('.mp_product_image_link').size() == 0) {
-                        $('.mp_single_product_images').html(
+                var $gallery = $container.find( '#mp-product-gallery' );
+
+                if ( $gallery.length > 0 ) {
+                    var $defaultLinks = $gallery.find( 'a[data-mp-default-href]' );
+                    var $defaultImages = $gallery.find( 'img[data-mp-default-src]' );
+
+                    if ( resp.data.image ) {
+                        $defaultLinks.attr( 'href', resp.data.image_full ? resp.data.image_full : resp.data.image );
+                        $defaultImages.attr( 'src', resp.data.image );
+                        $( '.mp_product_options_thumb' ).attr( 'src', resp.data.image );
+                    } else {
+                        $defaultLinks.each( function() {
+                            var defaultHref = $( this ).attr( 'data-mp-default-href' );
+                            if ( defaultHref ) {
+                                $( this ).attr( 'href', defaultHref );
+                            }
+                        } );
+
+                        $defaultImages.each( function() {
+                            var defaultSrc = $( this ).attr( 'data-mp-default-src' );
+                            if ( defaultSrc ) {
+                                $( this ).attr( 'src', defaultSrc );
+                            }
+                        } );
+
+                        if ( $defaultImages.first().length > 0 ) {
+                            $( '.mp_product_options_thumb' ).attr( 'src', $defaultImages.first().attr( 'data-mp-default-src' ) );
+                        }
+                    }
+
+                    if ( $gallery.get( 0 ) && $gallery.get( 0 ).swiper ) {
+                        $gallery.get( 0 ).swiper.update();
+                        if ( typeof $gallery.get( 0 ).swiper.slideToLoop === 'function' ) {
+                            $gallery.get( 0 ).swiper.slideToLoop( 0, 0, false );
+                        }
+                    }
+                } else if ( resp.data.image ) {
+                    if ( $container.find( '.mp_product_image_link' ).size() == 0 ) {
+                        $container.find( '.mp_single_product_images' ).html(
                             $('<a/>').attr({
                                 'class': 'mp_product_image_link mp_lightbox cboxElement',
                                 'rel': 'lightbox enclosure',
@@ -328,19 +364,17 @@ var mp_cart = { };
                             }))
                         );
                         //reinit the lightbox
-                        $( '.mp_product_image_link' ).filter( '.mp_lightbox' ).colorbox( {
+                        $container.find( '.mp_product_image_link' ).filter( '.mp_lightbox' ).colorbox( {
                             maxWidth: "90%",
                             maxHeight: "90%",
                             close: "&times;"
                         } );
 
-						$( '.mp_product_options_thumb' ).attr('src', resp.data.image);
+                        $( '.mp_product_options_thumb' ).attr('src', resp.data.image);
                     } else {
                         $container.find('.mp_product_image_single').attr('src', resp.data.image);
                         $container.find('.mp_product_image_link').attr('href', resp.data.image_full);
                     }
-                }else{
-                    $('.mp_product_image_link').remove();
                 }
 
                 //if ( resp.data.description ) {

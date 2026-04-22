@@ -84,6 +84,11 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.0.9 =
+
+* Fix: Beim Wechsel von Produktvarianten bleibt der Beschreibungstext jetzt erhalten; wenn eine Variante keinen eigenen Beschreibungstext oder Excerpt hat, wird automatisch der Standardtext des Hauptprodukts als Fallback verwendet.
+* Verbesserung: Produktbilder- und Video-Uploader bleiben jetzt auch bei variablen Produkten verfuegbar; auf der Produktseite bleibt die Default-Galerie als Slider erhalten und beim Variantenwechsel wird nur das erste Default-Bild durch das Variantenbild ersetzt (ohne gesetztes Variationsbild faellt die Ansicht sauber auf das Default-Bild zurueck).
+
 = 1.0.8 =
 
 * Fix: Kritischer Fehler beim Speichern von Produktattributen behoben; Kategorien-/Term-Daten werden jetzt robust normalisiert und PHP-8-sicher verarbeitet.

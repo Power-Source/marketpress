@@ -93,18 +93,6 @@ class MP_Products_Screen {
 			'title'       => sprintf( __( '%1$sProduktbilder%2$s %3$sFüge Produktbilder hinzu. Das erste Bild ist das Hauptbild (Reihenfolge per Drag & Drop änderbar)%2$s', 'mp' ), '<span class="mp_meta_section_title">', '</span>', '<span class="mp_meta_bellow_desc">' ),
 			'post_type'   => MP_Product::get_post_type(),
 			'context'     => 'normal',
-			'conditional' => array(
-				'action'   => 'show',
-				'operator' => 'OR',
-				array(
-					'name'  => 'has_variation',
-					'value' => 'no',
-				),
-				array(
-					'name'  => 'product_type',
-					'value' => 'external',
-				),
-			),
 		) ) );
 
 		$metabox->add_field( 'images', apply_filters( 'mp_add_field_array_product_images', array(
@@ -112,14 +100,10 @@ class MP_Products_Screen {
 			'label'       => '',
 			'conditional' => array(
 				'action'   => 'hide',
-				'operator' => 'OR',
+				'operator' => 'AND',
 				array(
 					'name'  => 'product_type',
 					'value' => 'external',
-				),
-				array(
-					'name'  => 'has_variation',
-					'value' => 'yes',
 				),
 			),
 			'class'       => 'mp_product_images'
@@ -133,14 +117,10 @@ class MP_Products_Screen {
 			'save_callback' => array( 'esc_url_raw' ),
 			'conditional'   => array(
 				'action'   => 'hide',
-				'operator' => 'OR',
+				'operator' => 'AND',
 				array(
 					'name'  => 'product_type',
 					'value' => 'external',
-				),
-				array(
-					'name'  => 'has_variation',
-					'value' => 'yes',
 				),
 			),
 		) );
