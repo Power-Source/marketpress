@@ -31,7 +31,7 @@ class MP_Top_Rated_Products_Widget extends WP_Widget {
         $product_ratings = array();
         foreach ($comments as $comment) {
             $pid = (int) $comment->comment_post_ID;
-            if (get_post_type($pid) !== 'product') continue;
+            if (get_post_type($pid) !== MP_Product::get_post_type()) continue;
             $r = (int) get_comment_meta($comment->comment_ID, 'rating', true);
             if ($r < 1) continue;
             if (!isset($product_ratings[$pid])) {
@@ -339,24 +339,28 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         $product_post = $post;
         
         // Fallback: Produkt-ID aus dem letzten add_reviews_tab()-Aufruf
-        if (!$product_post || get_post_type($product_post->ID) !== 'product') {
+        if (!$product_post || get_post_type($product_post->ID) !== MP_Product::get_post_type()) {
             if ($this->current_product_id > 0) {
                 $product_post = get_post($this->current_product_id);
             }
         }
         
-        if (!$product_post) {
-            return $html;
+        if (!$product_post || empty($product_post->ID)) {
+            return '<p class="mp-no-reviews">' . esc_html__('Bewertungen konnten nicht geladen werden.', 'mp') . '</p>';
         }
         
         $saved_post = $post;
         $post       = $product_post;
         setup_postdata($post);
+
+        // Explizit mitgeben, damit das Template auch außerhalb des Standard-Loops die richtige Produkt-ID hat.
+        $GLOBALS['mp_comments_product_id'] = (int) $product_post->ID;
         
         ob_start();
         include $this->plugin_dir . 'templates/comments.php';
         $html = ob_get_clean();
         
+        unset($GLOBALS['mp_comments_product_id']);
         $post = $saved_post;
         wp_reset_postdata();
         
@@ -429,11 +433,11 @@ class MP_MARKETPRESS_COMMENTS_Addon {
      * @return string
      */
     public function add_mini_rating_to_price($price_html, $post_id) {
-        if (get_post_type($post_id) !== 'product') {
+        if (get_post_type($post_id) !== MP_Product::get_post_type()) {
             return $price_html;
         }
         // Auf der Einzelproduktseite zeigen wir die Sterne im Tab-Label – hier überspringen
-        if (is_singular('product')) {
+        if (is_singular(MP_Product::get_post_type())) {
             return $price_html;
         }
         $avg = self::get_average_rating($post_id);
@@ -467,7 +471,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         ), $atts, 'mp_product_rating');
         
         $product_id = (int) $atts['id'];
-        if (!$product_id || get_post_type($product_id) !== 'product') {
+        if (!$product_id || get_post_type($product_id) !== MP_Product::get_post_type()) {
             return '';
         }
         
@@ -562,7 +566,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         $product_ratings = array();
         foreach ($comments as $c) {
             $pid = (int) $c->comment_post_ID;
-            if (get_post_type($pid) !== 'product') {
+            if (get_post_type($pid) !== MP_Product::get_post_type()) {
                 continue;
             }
             $r = (int) get_comment_meta($c->comment_ID, 'rating', true);
@@ -622,7 +626,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
      */
     public function verify_comment_rating($commentdata) {
         // Nur für Produkte prüfen und nur wenn ein Rating-Feld im Formular vorhanden war
-        if (get_post_type($commentdata['comment_post_ID']) === 'product' && isset($_POST['rating'])) {
+        if (get_post_type($commentdata['comment_post_ID']) === MP_Product::get_post_type() && isset($_POST['rating'])) {
             // Prüfe auf doppelte Bewertungen (nur wenn eine Bewertung abgegeben wurde)
             $args = array(
                 'post_id' => $commentdata['comment_post_ID'],
@@ -676,7 +680,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
      * Bewertung speichern
      */
     public function save_comment_rating($comment_id, $comment_approved, $commentdata) {
-        if (isset($_POST['rating']) && get_post_type($commentdata['comment_post_ID']) === 'product') {
+        if (isset($_POST['rating']) && get_post_type($commentdata['comment_post_ID']) === MP_Product::get_post_type()) {
             $rating = intval($_POST['rating']);
             if ($rating >= 1 && $rating <= 5) {
                 add_comment_meta($comment_id, 'rating', $rating, true);
@@ -689,7 +693,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
      */
     public function display_comments_template() {
         global $post;
-        if (get_post_type() === 'product') {
+        if (get_post_type() === MP_Product::get_post_type()) {
             // Unser eigenes Bewertungstemplate verwenden
             include_once $this->plugin_dir . 'templates/comments.php';
         }
@@ -724,7 +728,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         if ($column !== 'rating') return;
         
         $comment = get_comment($comment_ID);
-        if (get_post_type($comment->comment_post_ID) !== 'product') return;
+        if (get_post_type($comment->comment_post_ID) !== MP_Product::get_post_type()) return;
         
         $rating = get_comment_meta($comment_ID, 'rating', true);
         if ($rating) {
@@ -738,7 +742,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
      * Enqueue Frontend-Skripte für bessere Darstellung
      */
     public function enqueue_rating_scripts() {
-        if (is_singular('product')) {
+        if (is_singular(MP_Product::get_post_type())) {
             // Inline-CSS für bessere Sternbewertung im Header
             wp_add_inline_style('mp-style', '
                 .comment-rating {
@@ -864,7 +868,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
      * Überschreibe das Standard-Kommentar-Template für Produktseiten
      */
     public function override_comments_template($template) {
-        if (get_post_type() === 'product') {
+        if (get_post_type() === MP_Product::get_post_type()) {
             return $this->plugin_dir . 'templates/comments.php';
         }
         return $template;
@@ -874,13 +878,28 @@ class MP_MARKETPRESS_COMMENTS_Addon {
      * Lade Bewertungssystem-Assets und UI-Fixes
      */
     public function load_rating_assets() {
+        $product_post_type = MP_Product::get_post_type();
+        $post              = get_post();
+        $post_content      = ($post && isset($post->post_content)) ? $post->post_content : '';
+        $has_product_shortcode = !empty($post_content) && (
+            has_shortcode($post_content, 'mp_product') ||
+            has_shortcode($post_content, 'mp_list_products') ||
+            has_shortcode($post_content, 'mp_featured_products')
+        );
+        $is_mp_context = is_singular($product_post_type)
+            || is_post_type_archive($product_post_type)
+            || is_tax('product_category')
+            || is_tax('product_tag')
+            || (is_singular() && $has_product_shortcode);
+
         // Bewertungsbearbeitung-Skript laden
-        if (is_singular('product')) {
-            wp_enqueue_script('mp-edit-rating', MP_COMMENTS_PLUGIN_URL . 'assets/js/edit-rating.js', array('jquery'), '1.0.0', true);
+        if ($is_mp_context) {
+            $edit_rating_ver = file_exists(MP_COMMENTS_PLUGIN_DIR . 'assets/js/edit-rating.js') ? (string) filemtime(MP_COMMENTS_PLUGIN_DIR . 'assets/js/edit-rating.js') : '1.0.0';
+            wp_enqueue_script('mp-edit-rating', MP_COMMENTS_PLUGIN_URL . 'assets/js/edit-rating.js', array('jquery'), $edit_rating_ver, true);
         }
         
         // UI-Fixes für MarketPress-Produkte
-        if (function_exists('mp_product') || is_singular('product') || is_post_type_archive('product') || is_tax('product_category') || is_tax('product_tag')) {
+        if ($is_mp_context) {
             // Inline CSS für globale MarketPress UI-Fixes
             wp_add_inline_style('mp-style', '
                 /* Verhindere unerwünschte Cursor-Positionierung und Textauswahl */
@@ -926,10 +945,12 @@ class MP_MARKETPRESS_COMMENTS_Addon {
             ', 'after');
         }
         
-        // Bewertungssystem-Assets nur auf Produktseiten laden
-        if (is_singular('product')) {
-            wp_enqueue_style('mp-ratings-style', MP_COMMENTS_PLUGIN_URL . 'assets/css/ratings.css', array(), '1.0.0');
-            wp_enqueue_script('mp-ratings-script', MP_COMMENTS_PLUGIN_URL . 'assets/js/ratings.js', array('jquery'), '1.0.0', true);
+        // Bewertungssystem-Assets auf allen MarketPress-Produktkontexten laden
+        if ($is_mp_context) {
+            $ratings_css_ver = file_exists(MP_COMMENTS_PLUGIN_DIR . 'assets/css/ratings.css') ? (string) filemtime(MP_COMMENTS_PLUGIN_DIR . 'assets/css/ratings.css') : '1.0.0';
+            $ratings_js_ver  = file_exists(MP_COMMENTS_PLUGIN_DIR . 'assets/js/ratings.js') ? (string) filemtime(MP_COMMENTS_PLUGIN_DIR . 'assets/js/ratings.js') : '1.0.0';
+            wp_enqueue_style('mp-ratings-style', MP_COMMENTS_PLUGIN_URL . 'assets/css/ratings.css', array(), $ratings_css_ver);
+            wp_enqueue_script('mp-ratings-script', MP_COMMENTS_PLUGIN_URL . 'assets/js/ratings.js', array('jquery'), $ratings_js_ver, true);
             
             // Lokalisierung für JavaScript
             wp_localize_script('mp-ratings-script', 'mp_ratings_i18n', array(
@@ -1108,7 +1129,7 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         global $post;
         
         // Nur auf der Produkt-Bearbeitungsseite laden
-        if (is_admin() && isset($post) && $post && get_post_type($post->ID) === 'product') {
+        if (is_admin() && isset($post) && $post && get_post_type($post->ID) === MP_Product::get_post_type()) {
             // Füge einen CSS-Fix für die fehlenden Schriftarten hinzu
             wp_add_inline_style('wp-admin', '
                 /* Fallback für fehlende Source Sans Pro Schriftart */

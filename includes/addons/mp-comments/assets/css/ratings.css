@@ -3,7 +3,26 @@
  * CSS für Produktbewertungen
  */
 
-/* Bewertungssystem Container */
+/* Tab-Navigation: Bullet-Points/Separatoren entfernen */
+.mp_product_tab_labels,
+.mp_product_tab_labels li,
+.mp_product_tab_label {
+    list-style: none !important;
+}
+
+.mp_product_tab_labels li::before,
+.mp_product_tab_labels li::after,
+.mp_product_tab_label::before,
+.mp_product_tab_label::after {
+    content: none !important;
+}
+
+/* Core setzt inline style="display:none" auf Tab-Container.
+ * Wenn der Tab aktiv ist, muss das explizit überschrieben werden. */
+.mp_product .mp_product_tab_content.mp_product_tab_content-current {
+    display: block !important;
+}
+
 .mp-product-reviews {
     margin: 40px 0;
 

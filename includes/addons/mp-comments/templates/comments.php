@@ -9,7 +9,13 @@ if (!defined('ABSPATH')) {
 }
 
 global $post;
-$post_id = isset($post->ID) ? (int) $post->ID : 0;
+$context_product_id = isset($GLOBALS['mp_comments_product_id']) ? (int) $GLOBALS['mp_comments_product_id'] : 0;
+$post_id            = $context_product_id > 0 ? $context_product_id : (isset($post->ID) ? (int) $post->ID : 0);
+
+if ($post_id <= 0) {
+    echo '<p class="mp-no-reviews">' . esc_html__('Bewertungen konnten nicht geladen werden.', 'mp') . '</p>';
+    return;
+}
 ?>
 
 <div id="mp-product-reviews" class="mp-product-reviews">
@@ -49,7 +55,17 @@ $post_id = isset($post->ID) ? (int) $post->ID : 0;
         </div>
     <?php endif; ?>
 
-    <?php if (have_comments()) : ?>
+    <?php
+    // Alle Kommentare dieses Produkts laden (nicht nur mit Rating-Meta),
+    // damit wp_list_comments() vollständig rendern kann
+    $all_comments = get_comments(array(
+        'post_id' => $post_id,
+        'status'  => 'approve',
+    ));
+    $comments_open = ( $post && $post->comment_status === 'open' );
+    ?>
+
+    <?php if (!empty($all_comments)) : ?>
         <div class="mp-reviews-list">
             <ol class="mp-review-list">
                 <?php
@@ -58,22 +74,17 @@ $post_id = isset($post->ID) ? (int) $post->ID : 0;
                     'short_ping'  => true,
                     'avatar_size' => 50,
                     'callback'    => 'mp_custom_comment_template',
-                ));
+                ), $all_comments);
                 ?>
             </ol>
-
-            <?php if (get_comment_pages_count() > 1 && get_option('page_comments')) : ?>
-            <nav class="mp-comment-navigation">
-                <div class="mp-nav-previous"><?php previous_comments_link(__('Ältere Bewertungen', 'mp')); ?></div>
-                <div class="mp-nav-next"><?php next_comments_link(__('Neuere Bewertungen', 'mp')); ?></div>
-            </nav>
-            <?php endif; ?>
         </div>
-    <?php elseif (comments_open()) : ?>
+    <?php elseif ($comments_open) : ?>
         <p class="mp-no-reviews"><?php _e('Noch keine Bewertungen. Sei der Erste, der dieses Produkt bewertet!', 'mp'); ?></p>
+    <?php else : ?>
+        <p class="mp-no-reviews"><?php _e('Bewertungen sind für dieses Produkt deaktiviert.', 'mp'); ?></p>
     <?php endif; ?>
 
-    <?php if (comments_open()) : ?>
+    <?php if ($comments_open) : ?>
         <?php
         $commenter            = wp_get_current_commenter();
         $current_user_id      = get_current_user_id();

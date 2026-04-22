@@ -90,6 +90,8 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Verbesserung: Produktbilder- und Video-Uploader bleiben jetzt auch bei variablen Produkten verfuegbar; auf der Produktseite bleibt die Default-Galerie als Slider erhalten und beim Variantenwechsel wird nur das erste Default-Bild durch das Variantenbild ersetzt (ohne gesetztes Variationsbild faellt die Ansicht sauber auf das Default-Bild zurueck).
 * Neu: Addon "Erlaube Produktkommentare" zu einem voll integrierten Bewertungsbereich ausgebaut: neuer Bewertungen-Tab in der Produktansicht mit Durchschnitts-Sterneanzeige, Kommentarformular, Bearbeiten-Funktion und "Hilfreich"-Markierung pro Rezension.
 * Neu: Bewertungsanzeige im Store erweitert (Mini-Sterne in Produktlisten), plus neuer Shortcode `[mp_product_rating]` und neues Widget fuer top-bewertete Produkte.
+* Neu: Addon-Einstellung "Hilfreich"-Funktion aktivieren/deaktivieren; der "Hilfreich"-Button wird nur gerendert und der AJAX-Handler nur ausgefuehrt, wenn die Option aktiv ist.
+* Neu: Sortierung `order_by="rating"` fuer `[mp_list_products]`; Produkte werden nach Durchschnittsbewertung absteigend sortiert, bei Gleichstand gewinnt das Produkt mit mehr Bewertungen. Kombinierbar mit `category`, `tag` und Paginierung.
 
 = 1.0.8 =
 

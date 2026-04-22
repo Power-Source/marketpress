@@ -32,7 +32,7 @@ class MP_Ratings_Functions {
      */
     public function check_if_user_can_rate($open, $post_id) {
         // Nur für Produkte prüfen
-        if (get_post_type($post_id) !== 'product') {
+        if (get_post_type($post_id) !== MP_Product::get_post_type()) {
             return $open;
         }
         
@@ -75,7 +75,7 @@ class MP_Ratings_Functions {
      */
     public function check_for_duplicate_ratings($commentdata) {
         // Nur für Produkte prüfen
-        if (get_post_type($commentdata['comment_post_ID']) !== 'product') {
+        if (get_post_type($commentdata['comment_post_ID']) !== MP_Product::get_post_type()) {
             return $commentdata;
         }
         
@@ -231,7 +231,7 @@ class MP_Ratings_Functions {
         $is_quick_rating = isset($_POST['is_quick_rating']) && $_POST['is_quick_rating'] == 'true';
         
         // Prüfe, ob es ein gültiges Produkt ist
-        if (!$post_id || get_post_type($post_id) !== 'product') {
+        if (!$post_id || get_post_type($post_id) !== MP_Product::get_post_type()) {
             wp_send_json_error(array('message' => __('Ungültiges Produkt', 'mp')));
             exit;
         }
@@ -359,7 +359,7 @@ class MP_Ratings_Functions {
      */
     public function add_edit_link($reply_link, $args, $comment, $post) {
         // Nur für Produkte
-        if (get_post_type($post) !== 'product') {
+        if (get_post_type($post) !== MP_Product::get_post_type()) {
             return $reply_link;
         }
         
@@ -412,7 +412,7 @@ class MP_Ratings_Functions {
         }
 
         $comment = get_comment($comment_id);
-        if (!$comment || get_post_type($comment->comment_post_ID) !== 'product') {
+        if (!$comment || get_post_type($comment->comment_post_ID) !== MP_Product::get_post_type()) {
             wp_send_json_error(array('message' => __('Ungültige Bewertung.', 'mp')));
             return;
         }
