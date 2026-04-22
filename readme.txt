@@ -88,6 +88,8 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 * Fix: Beim Wechsel von Produktvarianten bleibt der Beschreibungstext jetzt erhalten; wenn eine Variante keinen eigenen Beschreibungstext oder Excerpt hat, wird automatisch der Standardtext des Hauptprodukts als Fallback verwendet.
 * Verbesserung: Produktbilder- und Video-Uploader bleiben jetzt auch bei variablen Produkten verfuegbar; auf der Produktseite bleibt die Default-Galerie als Slider erhalten und beim Variantenwechsel wird nur das erste Default-Bild durch das Variantenbild ersetzt (ohne gesetztes Variationsbild faellt die Ansicht sauber auf das Default-Bild zurueck).
+* Neu: Addon "Erlaube Produktkommentare" zu einem voll integrierten Bewertungsbereich ausgebaut: neuer Bewertungen-Tab in der Produktansicht mit Durchschnitts-Sterneanzeige, Kommentarformular, Bearbeiten-Funktion und "Hilfreich"-Markierung pro Rezension.
+* Neu: Bewertungsanzeige im Store erweitert (Mini-Sterne in Produktlisten), plus neuer Shortcode `[mp_product_rating]` und neues Widget fuer top-bewertete Produkte.
 
 = 1.0.8 =
 

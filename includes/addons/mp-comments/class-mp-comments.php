@@ -1,5 +1,100 @@
 <?php
 /**
+ * Widget: Top bewertete Produkte
+ */
+class MP_Top_Rated_Products_Widget extends WP_Widget {
+
+    public function __construct() {
+        parent::__construct(
+            'mp_top_rated_products',
+            __('PS MarketPress – Top bewertete Produkte', 'mp'),
+            array('description' => __('Zeigt die am besten bewerteten Produkte des Shops.', 'mp'))
+        );
+    }
+
+    public function widget($args, $instance) {
+        $title  = apply_filters('widget_title', isset($instance['title']) ? $instance['title'] : '');
+        $number = (int) (isset($instance['number']) ? $instance['number'] : 5);
+
+        echo wp_kses_post($args['before_widget']);
+        if ($title) {
+            echo wp_kses_post($args['before_title'] . $title . $args['after_title']);
+        }
+
+        // Alle Bewertungskommentare laden und Durchschnitt pro Produkt berechnen
+        $comments = get_comments(array(
+            'meta_key' => 'rating',
+            'status'   => 'approve',
+            'number'   => 500,
+        ));
+
+        $product_ratings = array();
+        foreach ($comments as $comment) {
+            $pid = (int) $comment->comment_post_ID;
+            if (get_post_type($pid) !== 'product') continue;
+            $r = (int) get_comment_meta($comment->comment_ID, 'rating', true);
+            if ($r < 1) continue;
+            if (!isset($product_ratings[$pid])) {
+                $product_ratings[$pid] = array('sum' => 0, 'count' => 0);
+            }
+            $product_ratings[$pid]['sum']   += $r;
+            $product_ratings[$pid]['count'] += 1;
+        }
+
+        uasort($product_ratings, function($a, $b) {
+            $avg_a = $a['sum'] / $a['count'];
+            $avg_b = $b['sum'] / $b['count'];
+            return ($avg_b > $avg_a) ? 1 : (($avg_b < $avg_a) ? -1 : 0);
+        });
+
+        $top_ids = array_slice(array_keys($product_ratings), 0, $number, true);
+
+        if (!empty($top_ids)) {
+            echo '<ul class="mp-top-rated-widget">';
+            foreach ($top_ids as $pid) {
+                $post = get_post($pid);
+                if (!$post || $post->post_status !== 'publish') continue;
+                $avg   = $product_ratings[$pid]['sum'] / $product_ratings[$pid]['count'];
+                $stars = MP_MARKETPRESS_COMMENTS_Addon::render_stars_html($avg);
+                $product = new MP_Product($pid);
+                echo '<li class="mp-top-rated-item">';
+                echo '<a href="' . esc_url($product->url(false)) . '">' . esc_html($post->post_title) . '</a>';
+                echo ' <span class="mp-widget-stars">' . esc_html($stars) . '</span>';
+                echo ' <span class="mp-widget-avg">' . esc_html(number_format($avg, 1)) . '/5</span>';
+                echo '</li>';
+            }
+            echo '</ul>';
+        } else {
+            echo '<p>' . esc_html__('Noch keine Bewertungen vorhanden.', 'mp') . '</p>';
+        }
+
+        echo wp_kses_post($args['after_widget']);
+    }
+
+    public function form($instance) {
+        $title  = isset($instance['title'])  ? $instance['title']  : __('Top bewertete Produkte', 'mp');
+        $number = isset($instance['number']) ? (int) $instance['number'] : 5;
+        ?>
+        <p>
+            <label for="<?php echo esc_attr($this->get_field_id('title')); ?>"><?php esc_html_e('Titel:', 'mp'); ?></label>
+            <input class="widefat" id="<?php echo esc_attr($this->get_field_id('title')); ?>" name="<?php echo esc_attr($this->get_field_name('title')); ?>" type="text" value="<?php echo esc_attr($title); ?>">
+        </p>
+        <p>
+            <label for="<?php echo esc_attr($this->get_field_id('number')); ?>"><?php esc_html_e('Anzahl Produkte:', 'mp'); ?></label>
+            <input id="<?php echo esc_attr($this->get_field_id('number')); ?>" name="<?php echo esc_attr($this->get_field_name('number')); ?>" type="number" value="<?php echo esc_attr($number); ?>" min="1" max="20">
+        </p>
+        <?php
+    }
+
+    public function update($new_instance, $old_instance) {
+        return array(
+            'title'  => sanitize_text_field($new_instance['title']),
+            'number' => max(1, (int) $new_instance['number']),
+        );
+    }
+}
+
+/**
  * MarketPress Erlaube Bewertungen Addon
  */
 class MP_MARKETPRESS_COMMENTS_Addon {
@@ -25,7 +120,14 @@ class MP_MARKETPRESS_COMMENTS_Addon {
      * @var object
      */
     private static $_instance = null;
-    
+
+    /**
+     * Produkt-ID des zuletzt verarbeiteten Tabs (für render_reviews_tab)
+     *
+     * @var int
+     */
+    private $current_product_id = 0;
+
     /**
      * Gets the single instance of the class
      *
@@ -144,22 +246,27 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         // Bewertung speichern
         add_action('comment_post', array($this, 'save_comment_rating'), 10, 3);
         
-        // Assets und UI-Verbesserungen laden
+        // Assets laden
         add_action('wp_enqueue_scripts', array($this, 'load_rating_assets'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_rating_scripts'));
+        
+        // Tab-Integration: Bewertungs-Tab zur Produktseite hinzufügen
+        add_filter('mp_product/content_tabs_array', array($this, 'add_reviews_tab'), 10, 2);
+        add_filter('mp_content_tab_html',           array($this, 'render_reviews_tab'), 10, 2);
+        
+        // Mini-Sterne in Produktlisten
+        add_filter('mp_product_price_html', array($this, 'add_mini_rating_to_price'), 10, 2);
+        
+        // Shortcode [mp_product_rating]
+        add_shortcode('mp_product_rating', array($this, 'shortcode_product_rating'));
+        
+        // Widget registrieren
+        add_action('widgets_init', array($this, 'register_reviews_widget'));
         
         // Admin-Kommentarspalte für Bewertungen
         add_filter('manage_edit-comments_columns', array($this, 'add_comment_rating_column'));
         add_action('manage_comments_custom_column', array($this, 'comment_rating_column_content'), 10, 2);
         
-        // Kommentar-Template überschreiben
-        add_filter('comments_template', array($this, 'override_comments_template'));
-        
-        // Kommentarformular in die Produktseite einfügen
-        add_action('mp_product_description_end', array($this, 'display_comments_template'), 20);
-        add_action('mp_single_product_end', array($this, 'display_comments_template'), 20);
-        
-        // Sicherstellen, dass Kommentare für Produkte aktiviert sind mit höherer Priorität als die MarketPress-Kernfunktion (die 10 hat)
+        // Sicherstellen, dass Kommentare für Produkte aktiviert sind
         add_filter('comments_open', array($this, 'enable_comments_for_products'), 20, 2);
         
         // Entferne die standard ClassicPress Comments-Metabox für Produkte und füge eine Bewertungs-Metabox hinzu
@@ -170,6 +277,227 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         
         // Für die Korrektur des 404-Fehlers der Schriftarten
         add_action('admin_enqueue_scripts', array($this, 'load_admin_fonts'));
+    }
+    
+    // -------------------------------------------------------------------------
+    // Tab-Integration
+    // -------------------------------------------------------------------------
+    
+    /**
+     * Tab-Array erweitern: Bewertungs-Tab hinzufügen
+     *
+     * @param array      $tabs
+     * @param MP_Product $product
+     * @return array
+     */
+    public function add_reviews_tab($tabs, $product) {
+        $this->current_product_id = $product->ID;
+        
+        $avg   = self::get_average_rating($product->ID);
+        $count = self::get_rating_count($product->ID);
+        
+        if ($avg > 0) {
+            $stars = self::render_stars_html($avg);
+            $label = sprintf(
+                __('Bewertungen <span class="mp-tab-stars">%s</span> (%d)', 'mp'),
+                esc_html($stars),
+                $count
+            );
+        } else {
+            $label = __('Bewertungen', 'mp');
+        }
+        
+        $tabs['mp-reviews'] = $label;
+        return $tabs;
+    }
+    
+    /**
+     * Tab-HTML rendern
+     *
+     * @param string $html
+     * @param string $slug
+     * @return string
+     */
+    public function render_reviews_tab($html, $slug) {
+        if ($slug !== 'mp-reviews') {
+            return $html;
+        }
+        
+        global $post;
+        $product_post = $post;
+        
+        // Fallback: Produkt-ID aus dem letzten add_reviews_tab()-Aufruf
+        if (!$product_post || get_post_type($product_post->ID) !== 'product') {
+            if ($this->current_product_id > 0) {
+                $product_post = get_post($this->current_product_id);
+            }
+        }
+        
+        if (!$product_post) {
+            return $html;
+        }
+        
+        $saved_post = $post;
+        $post       = $product_post;
+        setup_postdata($post);
+        
+        ob_start();
+        include $this->plugin_dir . 'templates/comments.php';
+        $html = ob_get_clean();
+        
+        $post = $saved_post;
+        wp_reset_postdata();
+        
+        return $html;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Hilfsfunktionen (statisch, damit Widget + Shortcode sie nutzen können)
+    // -------------------------------------------------------------------------
+    
+    /**
+     * Durchschnittliche Bewertung eines Produkts berechnen
+     *
+     * @param int $product_id
+     * @return float  0 wenn keine Bewertungen
+     */
+    public static function get_average_rating($product_id) {
+        $comments = get_comments(array(
+            'post_id'  => $product_id,
+            'meta_key' => 'rating',
+            'status'   => 'approve',
+        ));
+        if (empty($comments)) {
+            return 0.0;
+        }
+        $total = array_sum(array_map(function($c) {
+            return (int) get_comment_meta($c->comment_ID, 'rating', true);
+        }, $comments));
+        return $total / count($comments);
+    }
+    
+    /**
+     * Anzahl der Bewertungen eines Produkts
+     *
+     * @param int $product_id
+     * @return int
+     */
+    public static function get_rating_count($product_id) {
+        return (int) get_comments(array(
+            'post_id'  => $product_id,
+            'meta_key' => 'rating',
+            'status'   => 'approve',
+            'count'    => true,
+        ));
+    }
+    
+    /**
+     * Sterne-HTML generieren
+     *
+     * @param float $rating  z.B. 4.3
+     * @param int   $max     Standard 5
+     * @return string  Unicode-Sterne, z.B. "★★★★☆"
+     */
+    public static function render_stars_html($rating, $max = 5) {
+        $full  = (int) floor($rating);
+        $half  = (($rating - $full) >= 0.5) ? 1 : 0;
+        $empty = $max - $full - $half;
+        return str_repeat('★', $full) . ($half ? '½' : '') . str_repeat('☆', $empty);
+    }
+    
+    // -------------------------------------------------------------------------
+    // Mini-Sterne in Produktlisten
+    // -------------------------------------------------------------------------
+    
+    /**
+     * Mini-Sterne vor dem Preis in Produktübersichten einblenden
+     *
+     * @param string $price_html
+     * @param int    $post_id
+     * @return string
+     */
+    public function add_mini_rating_to_price($price_html, $post_id) {
+        if (get_post_type($post_id) !== 'product') {
+            return $price_html;
+        }
+        // Auf der Einzelproduktseite zeigen wir die Sterne im Tab-Label – hier überspringen
+        if (is_singular('product')) {
+            return $price_html;
+        }
+        $avg = self::get_average_rating($post_id);
+        if ($avg <= 0.0) {
+            return $price_html;
+        }
+        $count = self::get_rating_count($post_id);
+        $stars = self::render_stars_html($avg);
+        $mini  = '<div class="mp-mini-rating" aria-label="' . esc_attr(sprintf(__('%.1f von 5 Sternen', 'mp'), $avg)) . '">';
+        $mini .= '<span class="mp-mini-stars">' . esc_html($stars) . '</span>';
+        $mini .= ' <span class="mp-mini-count">(' . $count . ')</span>';
+        $mini .= '</div>';
+        return $mini . $price_html;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Shortcode [mp_product_rating id="123" format="full" link="yes"]
+    // -------------------------------------------------------------------------
+    
+    /**
+     * Shortcode-Callback
+     *
+     * @param array $atts
+     * @return string
+     */
+    public function shortcode_product_rating($atts) {
+        $atts = shortcode_atts(array(
+            'id'     => get_the_ID(),
+            'format' => 'full',   // 'full' | 'stars' | 'number'
+            'link'   => 'yes',
+        ), $atts, 'mp_product_rating');
+        
+        $product_id = (int) $atts['id'];
+        if (!$product_id || get_post_type($product_id) !== 'product') {
+            return '';
+        }
+        
+        $avg   = self::get_average_rating($product_id);
+        $count = self::get_rating_count($product_id);
+        
+        if ($avg <= 0) {
+            return '<span class="mp-shortcode-rating mp-no-rating">' . esc_html__('Noch keine Bewertungen', 'mp') . '</span>';
+        }
+        
+        $stars = self::render_stars_html($avg);
+        
+        $inner  = '<span class="mp-shortcode-rating" itemprop="aggregateRating" itemscope itemtype="http://schema.org/AggregateRating">';
+        $inner .= '<meta itemprop="ratingValue" content="' . esc_attr(number_format($avg, 1)) . '">';
+        $inner .= '<meta itemprop="reviewCount" content="' . esc_attr($count) . '">';
+        
+        if (in_array($atts['format'], array('full', 'stars'), true)) {
+            $inner .= '<span class="mp-sc-stars">' . esc_html($stars) . '</span>';
+        }
+        if (in_array($atts['format'], array('full', 'number'), true)) {
+            $inner .= ' <span class="mp-sc-avg">' . esc_html(number_format($avg, 1)) . '/5</span>';
+            $inner .= ' <span class="mp-sc-count">(' . esc_html(sprintf(_n('%d Bewertung', '%d Bewertungen', $count, 'mp'), $count)) . ')</span>';
+        }
+        $inner .= '</span>';
+        
+        if ($atts['link'] === 'yes') {
+            $product = new MP_Product($product_id);
+            $url     = esc_url($product->url(false) . '#mp-reviews-' . $product_id);
+            return '<a href="' . $url . '" class="mp-rating-link">' . $inner . '</a>';
+        }
+        return $inner;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Widget registrieren
+    // -------------------------------------------------------------------------
+    
+    /**
+     * Widget-Klasse registrieren
+     */
+    public function register_reviews_widget() {
+        register_widget('MP_Top_Rated_Products_Widget');
     }
     
     /**
@@ -495,12 +823,14 @@ class MP_MARKETPRESS_COMMENTS_Addon {
             
             // Lokalisierung für JavaScript
             wp_localize_script('mp-ratings-script', 'mp_ratings_i18n', array(
-                'rating_1' => __('Schlecht (1 Stern)', 'mp'),
-                'rating_2' => __('Ausreichend (2 Sterne)', 'mp'),
-                'rating_3' => __('Gut (3 Sterne)', 'mp'),
-                'rating_4' => __('Sehr gut (4 Sterne)', 'mp'),
-                'rating_5' => __('Ausgezeichnet (5 Sterne)', 'mp'),
+                'ajaxurl'       => admin_url('admin-ajax.php'),
+                'rating_1'      => __('Schlecht (1 Stern)', 'mp'),
+                'rating_2'      => __('Ausreichend (2 Sterne)', 'mp'),
+                'rating_3'      => __('Gut (3 Sterne)', 'mp'),
+                'rating_4'      => __('Sehr gut (4 Sterne)', 'mp'),
+                'rating_5'      => __('Ausgezeichnet (5 Sterne)', 'mp'),
                 'select_rating' => __('Bitte wähle eine Bewertung aus.', 'mp'),
+                'helpful_voted' => __('Als hilfreich markiert', 'mp'),
             ));
             
             // Lokalisierung für das Bearbeitungsformular

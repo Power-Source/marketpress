@@ -83,4 +83,65 @@ jQuery(document).ready(function($) {
     
     // Verhindere, dass der Tab-Fokus auf nicht-interaktive Elemente gesetzt wird
     $('.mp-product-reviews').find('div, p, span').not('input, textarea, select, button, a, label').attr('tabindex', '-1');
+
+    // "Zu deiner Bewertung" Scroll-Helper
+    $(document).on('click', '.mp-find-your-review', function(e) {
+        e.preventDefault();
+        var target = $(this).attr('href');
+        var $target = $(target);
+        if ($target.length) {
+            $('html, body').animate({
+                scrollTop: $target.offset().top - 100
+            }, 500, function() {
+                $target.addClass('mp-highlight-review');
+                setTimeout(function() {
+                    $target.removeClass('mp-highlight-review');
+                }, 2000);
+            });
+        }
+    });
+
+    // "Hilfreich"-Button per AJAX togglen
+    $(document).on('click', '.mp-helpful-btn', function(e) {
+        e.preventDefault();
+
+        var $btn = $(this);
+        if ($btn.hasClass('is-loading')) {
+            return;
+        }
+
+        var commentId = $btn.data('comment-id');
+        var nonce = $btn.data('nonce');
+
+        if (!commentId || !nonce || !window.mp_ratings_i18n || !mp_ratings_i18n.ajaxurl) {
+            return;
+        }
+
+        $btn.addClass('is-loading');
+
+        $.ajax({
+            url: mp_ratings_i18n.ajaxurl,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'mp_mark_helpful',
+                comment_id: commentId,
+                nonce: nonce
+            }
+        }).done(function(resp) {
+            if (!resp || !resp.success || !resp.data) {
+                return;
+            }
+
+            var voted = !!resp.data.voted;
+            $btn.toggleClass('voted', voted);
+            $btn.attr('aria-pressed', voted ? 'true' : 'false');
+
+            if (resp.data.label) {
+                $btn.find('.mp-helpful-label').text(resp.data.label);
+            }
+        }).always(function() {
+            $btn.removeClass('is-loading');
+        });
+    });
 });

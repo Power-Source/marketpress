@@ -22,11 +22,9 @@ class MP_Ratings_Functions {
         add_action('wp_ajax_mp_quick_rating', array($this, 'quick_rating_ajax'));
         add_action('wp_ajax_nopriv_mp_quick_rating', array($this, 'quick_rating_ajax'));
         
-        // Füge Skripte für die Bearbeitungsfunktion hinzu
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_edit_scripts'));
-        
-        // Wir verwenden jetzt den Bearbeitungslink direkt im Template
-        // add_filter('comment_reply_link', array($this, 'add_edit_link'), 10, 4);
+        // Hilfreich-Abstimmung AJAX
+        add_action('wp_ajax_mp_mark_helpful',        array($this, 'mark_helpful_ajax'));
+        add_action('wp_ajax_nopriv_mp_mark_helpful', array($this, 'mark_helpful_ajax'));
     }
     
     /**
@@ -394,6 +392,52 @@ class MP_Ratings_Functions {
         }
         
         return $reply_link;
+    }
+
+    /**
+     * AJAX: "Hilfreich"-Abstimmung togglen
+     */
+    public function mark_helpful_ajax() {
+        $comment_id = isset($_POST['comment_id']) ? absint($_POST['comment_id']) : 0;
+        $nonce      = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+
+        if (!$comment_id || !wp_verify_nonce($nonce, 'mp_helpful_' . $comment_id)) {
+            wp_send_json_error(array('message' => __('Sicherheitsprüfung fehlgeschlagen.', 'mp')));
+            return;
+        }
+
+        $comment = get_comment($comment_id);
+        if (!$comment || get_post_type($comment->comment_post_ID) !== 'product') {
+            wp_send_json_error(array('message' => __('Ungültige Bewertung.', 'mp')));
+            return;
+        }
+
+        // Voter-Identifikation: eingeloggte User per ID, Gäste per gehashter IP
+        if (is_user_logged_in()) {
+            $voter_key = 'u' . get_current_user_id();
+        } else {
+            $voter_key = 'ip' . md5(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
+        }
+
+        $voters = (array) get_comment_meta($comment_id, 'mp_helpful_voters', true);
+
+        if (in_array($voter_key, $voters, true)) {
+            // Toggle off
+            $voters = array_values(array_diff($voters, array($voter_key)));
+            $voted  = false;
+        } else {
+            $voters[] = $voter_key;
+            $voted    = true;
+        }
+
+        update_comment_meta($comment_id, 'mp_helpful_voters', $voters);
+        $count = count($voters);
+
+        wp_send_json_success(array(
+            'count' => $count,
+            'voted' => $voted,
+            'label' => sprintf(_n('Hilfreich (%d)', 'Hilfreich (%d)', $count, 'mp'), $count),
+        ));
     }
 }
 
