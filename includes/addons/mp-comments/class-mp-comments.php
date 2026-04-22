@@ -220,6 +220,14 @@ class MP_MARKETPRESS_COMMENTS_Addon {
                 'yes' => __('Ja', 'mp'),
             ),
         ));
+
+        // Hilfreich-Funktion aktivieren?
+        $metabox->add_field('checkbox', array(
+            'name'          => 'comments[enable_helpful]',
+            'label'         => array('text' => __('"Hilfreich"-Funktion aktivieren', 'mp')),
+            'desc'          => __('Zeigt unter jeder Rezension einen "Hilfreich"-Button, mit dem Besucher nützliche Bewertungen markieren können.', 'mp'),
+            'default_value' => 1,
+        ));
     }
 
 
@@ -261,6 +269,10 @@ class MP_MARKETPRESS_COMMENTS_Addon {
         
         // Widget registrieren
         add_action('widgets_init', array($this, 'register_reviews_widget'));
+        
+        // Top-bewertet-Sortierung für [mp_list_products order_by="rating"]
+        add_filter('shortcode_atts_mp_list_products', array($this, 'intercept_rating_orderby'), 10, 3);
+        add_filter('mp_list_products_query_args',     array($this, 'apply_rating_orderby'), 10, 2);
         
         // Admin-Kommentarspalte für Bewertungen
         add_filter('manage_edit-comments_columns', array($this, 'add_comment_rating_column'));
@@ -499,7 +511,105 @@ class MP_MARKETPRESS_COMMENTS_Addon {
     public function register_reviews_widget() {
         register_widget('MP_Top_Rated_Products_Widget');
     }
-    
+
+    // -------------------------------------------------------------------------
+    // Top-bewertet-Sortierung für [mp_list_products order_by="rating"]
+    // -------------------------------------------------------------------------
+
+    /**
+     * Shortcode-Atts abfangen: order_by="rating" merken und neutralisieren
+     *
+     * @param array $out   Zusammengeführte Attribute nach shortcode_atts()
+     * @param array $pairs Standardwerte
+     * @param array $atts  Vom User angegebene Attribute
+     * @return array
+     */
+    public function intercept_rating_orderby($out, $pairs, $atts) {
+        if (isset($atts['order_by']) && $atts['order_by'] === 'rating') {
+            // Flag setzen, damit apply_rating_orderby() die Query modifiziert
+            $this->_sort_by_rating = true;
+            // order_by auf null zurücksetzen, damit mp_list_products() kein falsches orderby setzt
+            $out['order_by'] = null;
+        } else {
+            $this->_sort_by_rating = false;
+        }
+        return $out;
+    }
+
+    /**
+     * WP_Query-Args für Rating-Sortierung modifizieren
+     *
+     * Wird via mp_list_products_query_args-Filter aufgerufen.
+     * Berechnet für alle Produkte den Durchschnitt und sortiert per post__in.
+     *
+     * @param array $query WP_Query-Args
+     * @param array $args  mp_list_products-Args
+     * @return array
+     */
+    public function apply_rating_orderby($query, $args) {
+        if (empty($this->_sort_by_rating)) {
+            return $query;
+        }
+        $this->_sort_by_rating = false;
+
+        // Alle genehmigten Bewertungskommentare laden
+        $comments = get_comments(array(
+            'meta_key' => 'rating',
+            'status'   => 'approve',
+            'number'   => 2000,
+        ));
+
+        $product_ratings = array();
+        foreach ($comments as $c) {
+            $pid = (int) $c->comment_post_ID;
+            if (get_post_type($pid) !== 'product') {
+                continue;
+            }
+            $r = (int) get_comment_meta($c->comment_ID, 'rating', true);
+            if ($r < 1) {
+                continue;
+            }
+            if (!isset($product_ratings[$pid])) {
+                $product_ratings[$pid] = array('sum' => 0, 'count' => 0);
+            }
+            $product_ratings[$pid]['sum']   += $r;
+            $product_ratings[$pid]['count'] += 1;
+        }
+
+        if (empty($product_ratings)) {
+            return $query;
+        }
+
+        uasort($product_ratings, function ($a, $b) {
+            $avg_a = $a['sum'] / $a['count'];
+            $avg_b = $b['sum'] / $b['count'];
+            if ($avg_b === $avg_a) {
+                return $b['count'] - $a['count']; // Bei Gleichstand: mehr Bewertungen zuerst
+            }
+            return ($avg_b > $avg_a) ? 1 : -1;
+        });
+
+        $sorted_ids = array_keys($product_ratings);
+
+        // Falls die Query bereits nach bestimmten IDs filtert, Schnittmenge bilden
+        if (!empty($query['post__in'])) {
+            $sorted_ids = array_values(array_intersect($sorted_ids, $query['post__in']));
+        }
+
+        if (empty($sorted_ids)) {
+            // Keine bewerteten Produkte → leeres Ergebnis erzwingen
+            $query['post__in'] = array(0);
+        } else {
+            $query['post__in'] = $sorted_ids;
+            $query['orderby']  = 'post__in';
+        }
+
+        // Ggf. bereits gesetztes meta_key/orderby (price/sales) entfernen
+        unset($query['meta_key'], $query['order']);
+
+        return $query;
+    }
+
     /**
      * Aktiviere Kommentarunterstützung für Produkte
      */

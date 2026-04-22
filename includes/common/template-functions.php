@@ -2074,6 +2074,7 @@ if ( ! function_exists( 'mp_list_products' ) ) :
         }
 
 		// The Query
+		$query        = apply_filters( 'mp_list_products_query_args', $query, $args );
 		$custom_query = new WP_Query( $query );
 		// Get layout type
 		$layout_type = mp_get_setting( 'list_view' );

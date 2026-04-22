@@ -77,24 +77,26 @@ function mp_custom_comment_template($comment, $args, $depth) {
                         . '</a>';
                 }
 
-                // Hilfreich-Button
-                $helpful_voters = (array) get_comment_meta($comment->comment_ID, 'mp_helpful_voters', true);
-                $helpful_count  = count($helpful_voters);
-                $voter_key      = is_user_logged_in()
-                    ? 'u' . get_current_user_id()
-                    : 'ip' . md5(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
-                $user_voted     = in_array($voter_key, $helpful_voters, true);
-                $helpful_label  = sprintf(
-                    _n('Hilfreich (%d)', 'Hilfreich (%d)', $helpful_count, 'mp'),
-                    $helpful_count
-                );
-                $helpful_nonce  = wp_create_nonce('mp_helpful_' . $comment->comment_ID);
-                echo '<button class="mp-helpful-btn' . ($user_voted ? ' voted' : '') . '" type="button"'
-                    . ' data-comment-id="' . esc_attr($comment->comment_ID) . '"'
-                    . ' data-nonce="' . esc_attr($helpful_nonce) . '"'
-                    . ' aria-pressed="' . ($user_voted ? 'true' : 'false') . '">'
-                    . '<span class="mp-helpful-label">' . esc_html($helpful_label) . '</span>'
-                    . '</button>';
+                // Hilfreich-Button (nur wenn in den Einstellungen aktiv)
+                if (mp_get_setting('comments->enable_helpful', 1)) {
+                    $helpful_voters = (array) get_comment_meta($comment->comment_ID, 'mp_helpful_voters', true);
+                    $helpful_count  = count($helpful_voters);
+                    $voter_key      = is_user_logged_in()
+                        ? 'u' . get_current_user_id()
+                        : 'ip' . md5(isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
+                    $user_voted     = in_array($voter_key, $helpful_voters, true);
+                    $helpful_label  = sprintf(
+                        _n('Hilfreich (%d)', 'Hilfreich (%d)', $helpful_count, 'mp'),
+                        $helpful_count
+                    );
+                    $helpful_nonce  = wp_create_nonce('mp_helpful_' . $comment->comment_ID);
+                    echo '<button class="mp-helpful-btn' . ($user_voted ? ' voted' : '') . '" type="button"'
+                        . ' data-comment-id="' . esc_attr($comment->comment_ID) . '"'
+                        . ' data-nonce="' . esc_attr($helpful_nonce) . '"'
+                        . ' aria-pressed="' . ($user_voted ? 'true' : 'false') . '">'
+                        . '<span class="mp-helpful-label">' . esc_html($helpful_label) . '</span>'
+                        . '</button>';
+                }
                 ?>
             </div>
         </article>

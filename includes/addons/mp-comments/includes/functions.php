@@ -401,6 +401,11 @@ class MP_Ratings_Functions {
         $comment_id = isset($_POST['comment_id']) ? absint($_POST['comment_id']) : 0;
         $nonce      = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
 
+        if (!mp_get_setting('comments->enable_helpful', 1)) {
+            wp_send_json_error(array('message' => __('Diese Funktion ist deaktiviert.', 'mp')));
+            return;
+        }
+
         if (!$comment_id || !wp_verify_nonce($nonce, 'mp_helpful_' . $comment_id)) {
             wp_send_json_error(array('message' => __('Sicherheitsprüfung fehlgeschlagen.', 'mp')));
             return;
