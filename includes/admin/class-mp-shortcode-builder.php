@@ -1450,8 +1450,8 @@ class MP_Shortcode_Builder {
 	public function display_shortcode_builder_form_buttons() {
 		?>
 		<p class="submit">
-			<input class="button-primary" type="submit" value="<?php _e( 'Shortcode einfuegen', 'mp' ); ?>" />
-			<!--<input class="button" type="button" value="<?php _e( 'Auf Standardwerte zuruecksetzen', 'mp' ); ?>" />-->
+			<input class="button-primary" type="submit" value="<?php _e( 'Shortcode einfügen', 'mp' ); ?>" />
+			<!--<input class="button" type="button" value="<?php _e( 'Auf Standardwerte zurücksetzen', 'mp' ); ?>" />-->
 		</p>
 		<?php
 	}

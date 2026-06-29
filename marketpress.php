@@ -998,6 +998,7 @@ class Marketpress {
 		require_once $this->plugin_dir( 'includes/common/class-mp-product.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-installer.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-cart.php' );
+		require_once $this->plugin_dir( 'includes/common/class-mp-withdrawal.php' );
 		require_once $this->plugin_dir( 'includes/common/template-functions.php' );
 		//require_once $this->plugin_dir( 'includes/common/class-mp-taxes.php' );
 

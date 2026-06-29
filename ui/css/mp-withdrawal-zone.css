@@ -1,0 +1,157 @@
+#mp-customer-zone.mp_customer_zone-modern {
+  margin-top: 24px;
+  border: 1px solid #d7e3ec;
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(22, 53, 78, 0.08);
+}
+
+.mp_customer_zone_intro {
+  margin: 16px 0;
+  border: 1px solid #d7e3ec;
+  border-radius: 12px;
+  background: #f8fbfe;
+  padding: 14px;
+}
+
+.mp_customer_zone_intro h2 {
+  margin: 0 0 6px;
+}
+
+.mp_customer_zone_intro p {
+  margin: 0;
+  color: #39596f;
+}
+
+.mp_customer_zone_intro .mp_customer_zone_intro_hint {
+  margin-top: 8px;
+}
+
+#mp-customer-zone .mp_customer_zone_head h2 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  letter-spacing: 0.01em;
+}
+
+#mp-customer-zone .mp_customer_zone_head p {
+  margin: 0;
+  color: #35536a;
+}
+
+#mp-customer-zone .mp_customer_zone_stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+#mp-customer-zone .mp_stat_card {
+  background: #0f2a3d;
+  color: #fff;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+#mp-customer-zone .mp_stat_value {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+#mp-customer-zone .mp_stat_label {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+#mp-customer-zone .mp_withdrawal_panel {
+  margin-top: 16px;
+  border: 1px solid #dbe8f2;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+#mp-customer-zone .mp_withdrawal_panel h3 {
+  margin-top: 0;
+}
+
+#mp-customer-zone .mp_withdrawal_hint {
+  margin-bottom: 12px;
+  color: #3e5b72;
+}
+
+#mp-customer-zone .mp_withdrawal_items {
+  display: grid;
+  gap: 10px;
+}
+
+#mp-customer-zone .mp_withdrawal_item {
+  border: 1px solid #d8e5ee;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fdfefe;
+}
+
+#mp-customer-zone .mp_withdrawal_item.is-disabled {
+  background: #f9f3f3;
+  border-color: #efd6d6;
+}
+
+#mp-customer-zone .mp_withdrawal_item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+#mp-customer-zone .mp_item_title {
+  font-weight: 600;
+}
+
+#mp-customer-zone .mp_item_qty {
+  margin-left: auto;
+  color: #4f6e85;
+  font-size: 0.9rem;
+}
+
+#mp-customer-zone .mp_item_blocked {
+  margin: 8px 0 0;
+  color: #9b3a3a;
+  font-size: 0.9rem;
+}
+
+#mp-customer-zone .mp_withdrawal_actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+#mp-customer-zone .mp_withdrawal_feedback {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  display: none;
+}
+
+#mp-customer-zone .mp_withdrawal_feedback.is-ok {
+  display: block;
+  background: #eaf8ef;
+  border: 1px solid #bde6cb;
+  color: #1f6f3b;
+}
+
+#mp-customer-zone .mp_withdrawal_feedback.is-error {
+  display: block;
+  background: #fff0f0;
+  border: 1px solid #f2c7c7;
+  color: #8f2c2c;
+}
+
+@media (max-width: 768px) {
+  #mp-customer-zone .mp_customer_zone_stats {
+    grid-template-columns: 1fr;
+  }
+}

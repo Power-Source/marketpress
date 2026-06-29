@@ -695,6 +695,7 @@ class MP_Products_Screen {
 	 */
 	public function init_metaboxes() {
 		$this->init_product_type_metabox();
+		$this->init_product_withdrawal_metabox();
 		$this->init_product_price_inventory_variants_metabox();
 //		$this->init_product_images_metabox();
 //$this->init_product_details_metabox();
@@ -1601,6 +1602,40 @@ WHERE $delete_where"
 			'default_value' => 'physical',
 			'options'       => apply_filters( 'mp_product_kinds', $product_kinds )
 		) ) );
+	}
+
+	/**
+	 * Initializes the product withdrawal metabox
+	 *
+	 * @since 1.0.9
+	 * @access public
+	 */
+	public function init_product_withdrawal_metabox() {
+		$metabox = new PSOURCE_Metabox( apply_filters( 'mp_metabox_array_mp-product-withdrawal-metabox', array(
+			'id'        => 'mp-product-withdrawal-metabox',
+			'title'     => __( 'Widerruf', 'mp' ),
+			'post_type' => MP_Product::get_post_type(),
+			'context'   => 'side',
+		) ) );
+
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'mp_withdrawal_excluded',
+			'label'   => array( 'text' => __( 'Widerrufsrecht', 'mp' ) ),
+			'message' => __( 'Vom gesetzlichen Widerrufsrecht ausgeschlossen', 'mp' ),
+			'desc'    => __( 'Aktiviere dies nur für Produkte, die rechtlich vom Widerruf ausgeschlossen sind.', 'mp' ),
+		) );
+
+		$metabox->add_field( 'textarea', array(
+			'name'        => 'mp_withdrawal_exclusion_reason',
+			'label'       => array( 'text' => __( 'Ausschlussgrund (für Kundenzone)', 'mp' ) ),
+			'desc'        => __( 'Dieser Hinweis wird in der Kundenzone angezeigt, wenn ein Artikel nicht widerrufsfähig ist.', 'mp' ),
+			'custom'      => array( 'rows' => 3 ),
+			'conditional' => array(
+				'name'   => 'mp_withdrawal_excluded',
+				'value'  => 1,
+				'action' => 'show',
+			),
+		) );
 	}
 
 	public function init_product_price_inventory_variants_metabox() {

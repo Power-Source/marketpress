@@ -2255,6 +2255,17 @@ if ( ! function_exists( 'mp_order_status' ) ) :
 			}
 		}
 
+		/**
+		 * Filter the final order status page html.
+		 *
+		 * @since 1.0
+		 *
+		 * @param string $html Current HTML output.
+		 * @param MP_Order|null $order Current order if available.
+		 * @param array $args Status arguments.
+		 */
+		$html = apply_filters( 'mp_order/status_html', $html, isset( $order ) ? $order : null, $args );
+
 		if ( $echo ) {
 			echo $html;
 		} else {

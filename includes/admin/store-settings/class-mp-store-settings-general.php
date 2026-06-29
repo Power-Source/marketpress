@@ -71,6 +71,7 @@ class MP_Store_Settings_General {
 	 */
 	public function init_metaboxes() {
 		$this->init_legal_settings(); 
+		$this->init_withdrawal_settings();
 		$this->init_location_settings();
 		$this->init_tax_settings();
 		if( ! is_multisite() || ! mp_cart()->is_global ) $this->init_currency_settings();
@@ -724,6 +725,50 @@ class MP_Store_Settings_General {
 				'dmY'        => __( 'TagMonatJahr (z.B. 27052025)', 'mp' ),
 			),
 			'default_value' => '',
+		) );
+
+	}
+
+	/**
+	 * Init withdrawal settings
+	 *
+	 * @since 1.0.9
+	 * @access public
+	 */
+	public function init_withdrawal_settings() {
+		$metabox = new PSOURCE_Metabox( array(
+			'id'          => 'mp-settings-general-withdrawal',
+			'page_slugs'  => array( 'store-settings', 'toplevel_page_store-settings' ),
+			'title'       => __( 'Widerruf & Kundenzone', 'mp' ),
+			'option_name' => 'mp_settings',
+		) );
+
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'withdrawal[enabled]',
+			'label'   => array( 'text' => __( 'Digitalen Widerruf aktivieren?', 'mp' ) ),
+			'message' => __( 'Ja', 'mp' ),
+			'default_value' => 1,
+		) );
+
+		$metabox->add_field( 'textarea', array(
+			'name'  => 'withdrawal[policy_text]',
+			'label' => array( 'text' => __( 'Widerrufsbelehrung (Kundenzone)', 'mp' ) ),
+			'desc'  => __( 'Dieser Text wird in der Kundenzone auf der Bestellstatus-Seite angezeigt.', 'mp' ),
+			'custom' => array( 'rows' => 6 ),
+			'default_value' => __( 'Du kannst Deinen Widerruf hier digital in zwei Schritten erklären. Nach dem Absenden erhältst Du unverzüglich eine Eingangsbestätigung per E-Mail.', 'mp' ),
+		) );
+
+		$metabox->add_field( 'text', array(
+			'name'  => 'email[withdrawal_confirmation][subject]',
+			'label' => array( 'text' => __( 'E-Mail-Betreff: Widerrufsbestätigung', 'mp' ) ),
+			'default_value' => __( 'Eingangsbestätigung Widerruf (ORDERID)', 'mp' ),
+		) );
+
+		$metabox->add_field( 'textarea', array(
+			'name'  => 'email[withdrawal_confirmation][text]',
+			'label' => array( 'text' => __( 'E-Mail-Text: Widerrufsbestätigung', 'mp' ) ),
+			'custom' => array( 'rows' => 8 ),
+			'default_value' => __( "Hallo CUSTOMERNAME,\n\nwir bestätigen den Eingang Deines Widerrufs zur Bestellung ORDERID.\n\nBetroffene Positionen:\nWITHDRAWALITEMS\n\nWir bearbeiten Dein Anliegen so schnell wie möglich.", 'mp' ),
 		) );
 	}
 }

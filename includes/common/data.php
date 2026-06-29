@@ -183,7 +183,17 @@ $this->default_settings = array(
 			'send_email' => 1,
 			'subject'	 => 'Deine Bestellung wurde versandt! (ORDERID)',
 			'text'		 => 'Sehr geehrter CUSTOMERNAME,\nDeine Bestellung wurde versandt! Außerdem können die in Deiner Bestellung enthaltenen digitalen Downloads jetzt heruntergeladen werden. Abhängig von der Versandart und Deinem Standort sollte es in Kürze eintreffen. Bitte beziehe Dich bei jeder Kontaktaufnahme mit uns auf Deine Bestell-ID (ORDERID)..\n\nHier ist eine Bestätigung Deiner Bestelldaten:\n\n Bestellinformationen:\n ORDERINFO\n\n Versandinformationen:\n SHIPPINGINFO\n\n Zahlungsinformationen:\n PAYMENTINFO\n\n ORDERNOTES\n\nHier kannst Du den aktuellen Status Deiner Bestellung verfolgen: TRACKINGURL\n\nDanke noch einmal!',
-		) ),
+		),
+		'withdrawal_confirmation' => array(
+			'send_email' => 1,
+			'subject'    => 'Eingangsbestätigung Widerruf (ORDERID)',
+			'text'       => 'Hallo CUSTOMERNAME,\n\nwir bestätigen den Eingang Deines Widerrufs zur Bestellung ORDERID.\n\nBetroffene Positionen:\nWITHDRAWALITEMS\n\nWir bearbeiten Dein Anliegen so schnell wie möglich.',
+		),
+	),
+	'withdrawal' => array(
+		'enabled'     => 1,
+		'policy_text' => 'Du kannst Deinen Widerruf hier digital in zwei Schritten erklären. Nach dem Absenden erhältst Du unverzüglich eine Eingangsbestätigung per E-Mail.',
+	),
 	'social'					 => array(
 		'pinterest' => array(
 			'show_pinit_button'	 => 'off',
