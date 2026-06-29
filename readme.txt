@@ -84,6 +84,11 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.1.0 =
+
+* Neu: Digitale Widerrufs-Kundenzone auf der Bestellstatus-Seite (2-Schritt-Flow mit sofortiger Eingangsbestätigung per E-Mail), inklusive Ausschlusslogik pro Produkt und Snapshot pro Bestellung.
+* Neu: Admin-Metabox in der Bestellbearbeitung fuer eingegangene Widerrufe; Anfragen sind pro Bestellung übersichtlich einsehbar und mit internem Status/Notiz bearbeitbar.
+
 = 1.0.9 =
 
 * Fix: Beim Wechsel von Produktvarianten bleibt der Beschreibungstext jetzt erhalten; wenn eine Variante keinen eigenen Beschreibungstext oder Excerpt hat, wird automatisch der Standardtext des Hauptprodukts als Fallback verwendet.
@@ -92,8 +97,6 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Neu: Bewertungsanzeige im Store erweitert (Mini-Sterne in Produktlisten), plus neuer Shortcode `[mp_product_rating]` und neues Widget fuer top-bewertete Produkte.
 * Neu: Addon-Einstellung "Hilfreich"-Funktion aktivieren/deaktivieren; der "Hilfreich"-Button wird nur gerendert und der AJAX-Handler nur ausgefuehrt, wenn die Option aktiv ist.
 * Neu: Sortierung `order_by="rating"` fuer `[mp_list_products]`; Produkte werden nach Durchschnittsbewertung absteigend sortiert, bei Gleichstand gewinnt das Produkt mit mehr Bewertungen. Kombinierbar mit `category`, `tag` und Paginierung.
-* Neu: Digitale Widerrufs-Kundenzone auf der Bestellstatus-Seite (2-Schritt-Flow mit sofortiger Eingangsbestätigung per E-Mail), inklusive Ausschlusslogik pro Produkt und Snapshot pro Bestellung.
-* Neu: Admin-Metabox in der Bestellbearbeitung fuer eingegangene Widerrufe; Anfragen sind pro Bestellung übersichtlich einsehbar und mit internem Status/Notiz bearbeitbar.
 
 = 1.0.8 =
 
