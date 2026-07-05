@@ -755,27 +755,27 @@ class MP_Store_Settings_General {
 			'label' => array( 'text' => __( 'Widerrufsbelehrung (Kundenzone)', 'mp' ) ),
 			'desc'  => __( 'Dieser Text wird in der Kundenzone auf der Bestellstatus-Seite angezeigt.', 'mp' ),
 			'custom' => array( 'rows' => 6 ),
-			'default_value' => __( 'Du kannst Deinen Widerruf hier digital erklaeren. Waehle Positionen, Grund und sende direkt ab. Danach siehst Du jederzeit den Status.', 'mp' ),
+			'default_value' => __( 'Du kannst Deinen Widerruf hier digital erklären. Wähle Positionen, Grund und sende direkt ab. Danach siehst Du jederzeit den Status.', 'mp' ),
 		) );
 
 		$metabox->add_field( 'textarea', array(
 			'name'  => 'withdrawal[reason_options]',
-			'label' => array( 'text' => __( 'Widerrufsgruende (Auswahlliste)', 'mp' ) ),
+			'label' => array( 'text' => __( 'Widerrufsgründe (Auswahlliste)', 'mp' ) ),
 			'desc'  => __( 'Eine Zeile pro Grund. Optional im Format code|Bezeichnung. Beispiel: defect|Artikel ist defekt.', 'mp' ),
 			'custom' => array( 'rows' => 7 ),
-			'default_value' => "defect|Artikel ist beschaedigt oder fehlerhaft\nnot_as_described|Artikel entspricht nicht der Beschreibung\nwrong_item|Falscher Artikel geliefert\ndelay|Lieferung kam zu spaet\nother|Anderer rechtlicher Widerrufsgrund",
+			'default_value' => "defect|Artikel ist beschädigt oder fehlerhaft\nnot_as_described|Artikel entspricht nicht der Beschreibung\nwrong_item|Falscher Artikel geliefert\ndelay|Lieferung kam zu spät\nother|Anderer rechtlicher Widerrufsgrund",
 		) );
 
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'withdrawal[allow_custom_reason]',
-			'label'   => array( 'text' => __( 'Zusaetzliche Begruendung erlauben?', 'mp' ) ),
-			'message' => __( 'Optionales Textfeld fuer genauere Begruendung anzeigen', 'mp' ),
+			'label'   => array( 'text' => __( 'Zusätzliche Begründung erlauben?', 'mp' ) ),
+			'message' => __( 'Optionales Textfeld für genauere Begründung anzeigen', 'mp' ),
 			'default_value' => 1,
 		) );
 
 		$metabox->add_field( 'text', array(
 			'name'  => 'withdrawal[max_reason_length]',
-			'label' => array( 'text' => __( 'Maximale Laenge Begruendung', 'mp' ) ),
+			'label' => array( 'text' => __( 'Maximale Länge Begründung', 'mp' ) ),
 			'desc'  => __( 'Empfohlen: 300 Zeichen.', 'mp' ),
 			'default_value' => 300,
 		) );

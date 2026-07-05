@@ -170,7 +170,7 @@ class MP_Withdrawal {
 
 		$policy = (string) mp_get_setting( 'withdrawal->policy_text', '' );
 		if ( '' === trim( $policy ) ) {
-			$policy = __( 'Du kannst Deinen Widerruf hier digital erklaeren. Waehle Positionen, Grund und sende direkt ab. Danach siehst Du jederzeit den Status.', 'mp' );
+			$policy = __( 'Du kannst Deinen Widerruf hier digital erklären. Wähle Positionen, Grund und sende direkt ab. Danach siehst Du jederzeit den Status.', 'mp' );
 		}
 
 		$intro  = '<section class="mp_customer_zone_intro">';
@@ -261,7 +261,7 @@ class MP_Withdrawal {
 		$reason_options = $this->get_reason_options();
 		$reason_code    = sanitize_key( (string) mp_get_post_value( 'reason_code', '' ) );
 		if ( '' === $reason_code || ! isset( $reason_options[ $reason_code ] ) ) {
-			wp_send_json_error( array( 'message' => __( 'Bitte waehle einen Widerrufsgrund aus.', 'mp' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Bitte wähle einen Widerrufsgrund aus.', 'mp' ) ) );
 		}
 
 		$max_reason_length = $this->get_reason_max_length();
@@ -277,7 +277,7 @@ class MP_Withdrawal {
 		}
 
 		if ( $reason_len > $max_reason_length ) {
-			wp_send_json_error( array( 'message' => sprintf( __( 'Bitte kuerze die Begruendung auf maximal %d Zeichen.', 'mp' ), $max_reason_length ) ) );
+			wp_send_json_error( array( 'message' => sprintf( __( 'Bitte kürze die Begründung auf maximal %d Zeichen.', 'mp' ), $max_reason_length ) ) );
 		}
 
 		$entry = array(
@@ -388,9 +388,9 @@ class MP_Withdrawal {
 			'ajaxurl' => mp_get_ajax_url(),
 			'messages' => array(
 				'selectItems' => __( 'Bitte wähle mindestens eine Position aus.', 'mp' ),
-				'selectReason' => __( 'Bitte waehle einen Widerrufsgrund aus.', 'mp' ),
-				'noteTooLong'  => __( 'Bitte kuerze die Begruendung auf die maximal erlaubte Laenge.', 'mp' ),
-				'submitError'  => __( 'Widerruf konnte nicht uebermittelt werden.', 'mp' ),
+				'selectReason' => __( 'Bitte wähle einen Widerrufsgrund aus.', 'mp' ),
+				'noteTooLong'  => __( 'Bitte kürze die Begründung auf die maximal erlaubte Länge.', 'mp' ),
+				'submitError'  => __( 'Widerruf konnte nicht übermittelt werden.', 'mp' ),
 			),
 		) );
 	}
@@ -707,7 +707,7 @@ class MP_Withdrawal {
 				echo '<p><strong>' . esc_html__( 'Widerrufsgrund', 'mp' ) . ':</strong> ' . esc_html( $reason ) . '</p>';
 			}
 			if ( '' !== $reason_note ) {
-				echo '<p><strong>' . esc_html__( 'Begruendung', 'mp' ) . ':</strong><br>' . nl2br( esc_html( $reason_note ) ) . '</p>';
+				echo '<p><strong>' . esc_html__( 'Begründung', 'mp' ) . ':</strong><br>' . nl2br( esc_html( $reason_note ) ) . '</p>';
 			}
 
 			echo '<p><label for="mp_withdrawal_status_' . esc_attr( (string) $index ) . '"><strong>' . esc_html__( 'Status', 'mp' ) . '</strong></label><br>';
