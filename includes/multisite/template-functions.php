@@ -134,6 +134,15 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		if ( ! isset( $args['version'] ) ) {
 			$args['version'] = '';
 		}
+		if ( ! isset( $args['blog_id'] ) ) {
+			$args['blog_id'] = 0;
+		}
+		if ( ! isset( $args['exclude_post_ids'] ) ) {
+			$args['exclude_post_ids'] = array();
+		}
+		if ( ! isset( $args['disable_category_filter'] ) ) {
+			$args['disable_category_filter'] = false;
+		}
 
 		if ( isset( $args['widget_id'] ) && ! empty( $args['widget_id'] ) ) {
 			$args['widget_id'] = str_replace( 'mp_global_product_list_widget-', '', $args['widget_id'] );
@@ -237,6 +246,14 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 			$query['term']     = $args['tag'];
 		}
 
+		if ( ! empty( $args['blog_id'] ) ) {
+			$query['blog_id'] = absint( $args['blog_id'] );
+		}
+
+		if ( ! empty( $args['exclude_post_ids'] ) ) {
+			$query['exclude_post_ids'] = array_filter( array_map( 'absint', (array) $args['exclude_post_ids'] ) );
+		}
+
 // Get order direction
 		$query['order'] = mp_get_setting( 'order' );
 		if ( ! is_null( $args['order'] ) ) {
@@ -248,6 +265,14 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		$join  = "";
 		$where = " WHERE post_status = 'publish'";
 		$group = "";
+
+		if ( ! empty( $query['blog_id'] ) ) {
+			$where .= $wpdb->prepare( ' AND products.blog_id = %d', $query['blog_id'] );
+		}
+
+		if ( ! empty( $query['exclude_post_ids'] ) ) {
+			$where .= ' AND products.post_id NOT IN (' . implode( ',', array_map( 'intval', $query['exclude_post_ids'] ) ) . ')';
+		}
 
 		if ( ! empty( $args['category'] ) || ! empty( $args['tag'] ) ) {
 			$join .= " INNER JOIN {$wpdb->base_prefix}mp_term_relationships rel ON rel.post_id = products.id";
@@ -319,10 +344,13 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 
 		if ( ! mp_doing_ajax() ) {
 			$per_page = ( is_null( $args['per_page'] ) ) ? null : $args['per_page'];
-			//$content .= ( ( ( is_null( $args['filters'] ) && 1 == mp_get_setting( 'show_filters' ) ) || $args['filters'] ) && mp_arr_get_value( 'context', $args, null ) != 'widget' ) ? mp_global_products_filter( false, $per_page, $custom_query, $args ) : mp_global_products_filter( true, $per_page, $custom_query, $args );
-			if( isset( $args['context'] ) && $args['context'] == 'widget' ) {
-				$content .= ( ( ( is_null( $args['filters'] ) && 1 != mp_get_setting( 'hide_products_filter' ) ) || $args['filters'] ) ) ? mp_global_products_filter( false, $per_page, $custom_query, $args ) : '';
+			$show_filters = false;
+			if ( isset( $args['context'] ) && 'widget' === $args['context'] ) {
+				$show_filters = ( ( is_null( $args['filters'] ) && 1 != mp_get_setting( 'hide_products_filter' ) ) || $args['filters'] );
+			} elseif ( ! is_null( $args['filters'] ) ) {
+				$show_filters = (bool) $args['filters'];
 			}
+			$content .= $show_filters ? mp_global_products_filter( false, $per_page, $custom_query, $args ) : '';
 		}
 
 		$extra_id = mp_arr_get_value( 'context', $args, null ) == 'widget' ? '-widget-' . rand() : '';
@@ -458,32 +486,53 @@ if ( ! function_exists( 'mp_global_products_filter' ) ) :
 
 		global $wpdb;
 
-		/*
+		$show_category_filter = empty( $args['disable_category_filter'] );
+		$category_field_html  = '';
+		if ( $show_category_filter ) {
+			$current_category = isset( $args['category'] ) && null !== $args['category'] ? (string) $args['category'] : '-1';
+			$sql              = "SELECT DISTINCT t.term_id, t.name, t.slug FROM {$wpdb->base_prefix}mp_terms t";
+			$sql             .= " INNER JOIN {$wpdb->base_prefix}mp_term_relationships rel ON rel.term_id = t.term_id";
+			$sql             .= " INNER JOIN {$wpdb->base_prefix}mp_products products ON products.id = rel.post_id";
+			$sql             .= " WHERE t.type = 'product_category'";
 
-		Product category filter is not used anymore
+			if ( ! empty( $args['blog_id'] ) ) {
+				$sql .= $wpdb->prepare( ' AND products.blog_id = %d', absint( $args['blog_id'] ) );
+			}
 
-		$sql     = "SELECT * FROM {$wpdb->base_prefix}mp_terms WHERE `type`='product_category'";
-		$results = $wpdb->get_results( $sql );
+			$sql     .= ' ORDER BY t.name ASC';
+			$results  = $wpdb->get_results( $sql );
+			$terms    = '<select name="product_category" id="mp-product-category" class="mp_select2">';
+			$terms   .= '<option value="-1">' . esc_html__( 'Zeige alle', 'mp' ) . '</option>';
+			foreach ( (array) $results as $term ) {
+				$value = (string) absint( $term->term_id );
+				$terms .= '<option value="' . esc_attr( $value ) . '" ' . selected( $current_category, $value, false ) . '>' . esc_html( $term->name ) . '</option>';
+			}
+			$terms .= '</select>';
 
-		$terms = '<select name="product_category" id="mp-product-category" class="mp_select2">';
-		$terms .= '<option value="-1">' . __( "Show All", "mp" ) . '</option>';
-		foreach ( $results as $term ) {
-			$terms .= '<option value="' . $term->term_id . '">' . $term->name . '</option>';
+			$category_field_html  = '<div class="mp_form_field mp_products_filter_field mp_products_filter_category" data-placeholder="' . esc_attr__( 'Produktkategorie', 'mp' ) . '">';
+			$category_field_html .= '<label for="mp-product-category" class="mp_form_label">' . esc_html__( 'Kategorie', 'mp' ) . '</label>';
+			$category_field_html .= $terms;
+			$category_field_html .= '</div>';
 		}
-		$terms .= '</select>';
 
-		<div class="mp_form_field mp_products_filter_field mp_products_filter_category" data-placeholder="' . __( 'Product Category', 'mp' ) . '">
-			<label for="mp_product_category" class="mp_form_label">' . __( 'Category', 'mp' ) . '</label>
-			' . $terms . '
-		</div><!-- mp_listing_products_category -->
+		$hidden_fields = '';
+		foreach ( array( 'blog_id', 'limit', 'list_view', 'filters', 'paginate', 'disable_category_filter' ) as $hidden_key ) {
+			if ( ! isset( $args[ $hidden_key ] ) || '' === (string) $args[ $hidden_key ] ) {
+				continue;
+			}
 
-		*/
+			$hidden_fields .= '<input type="hidden" name="' . esc_attr( $hidden_key ) . '" value="' . esc_attr( is_bool( $args[ $hidden_key ] ) ? (int) $args[ $hidden_key ] : $args[ $hidden_key ] ) . '">';
+		}
+
+		if ( ! empty( $args['exclude_post_ids'] ) ) {
+			$hidden_fields .= '<input type="hidden" name="exclude_post_ids" value="' . esc_attr( implode( ',', array_map( 'absint', (array) $args['exclude_post_ids'] ) ) ) . '">';
+		}
 		$return = '
 <a name="mp-product-list-top"></a>
 <div class="mp_list_filter"' . ( ( $hidden ) ? ' style="display:none"' : '' ) . '>
 	<form id="mp_global_product_list_refine" name="mp_global_product_list_refine" class="mp-form mp_global_product_list_refine clearfix" method="get">
 		<div class="mp_form_fields">
-
+		' . $category_field_html . '
 		<div class="mp_form_field mp_products_filter_field mp_products_filter_orderby">
 			<label for="mp_sort_orderby" class="mp_form_label">' . __( 'Sortieren nach', 'mp' ) . '</label>
 			<select id="mp-sort-order" class="mp_select2" name="order" data-placeholder="' . __( 'Produktkategorie', 'mp' ) . '">
@@ -493,6 +542,7 @@ if ( ! function_exists( 'mp_global_products_filter' ) ) :
 		          ( ( is_null( $per_page ) ) ? '' : '<input type="hidden" name="per_page" value="' . $per_page . '">' ) . '
 		<input type="hidden" name="page" value="' . max( get_query_var( 'paged' ), 1 ) . '">
 		<input type="hidden" name="widget_id" value="' . $args['widget_id'] . '">
+		' . $hidden_fields . '
 		</div>
 	</form>
 </div>';

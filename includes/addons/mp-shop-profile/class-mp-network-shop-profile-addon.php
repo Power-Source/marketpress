@@ -154,6 +154,75 @@ class MP_Network_Shop_Profile_Addon {
 			'label'         => array( 'text' => __( 'Kartenhintergrund', 'mp' ) ),
 			'default_value' => '#ffffff',
 		) );
+
+		$metabox->add_field( 'section', array(
+			'name'  => 'shop_profile_related_products_section',
+			'title' => __( 'Weitere Produkte', 'mp' ),
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'shop_profile[related_products_enabled]',
+			'label'   => array( 'text' => __( 'Produktmodul unterhalb des Profils', 'mp' ) ),
+			'message' => __( 'Weitere Produkte dieses Shops anzeigen', 'mp' ),
+		) );
+		$metabox->add_field( 'text', array(
+			'name'          => 'shop_profile[related_products_title]',
+			'label'         => array( 'text' => __( 'Ueberschrift', 'mp' ) ),
+			'default_value' => __( 'Weitere Produkte aus diesem Shop', 'mp' ),
+		) );
+		$metabox->add_field( 'number', array(
+			'name'          => 'shop_profile[related_products_limit]',
+			'label'         => array( 'text' => __( 'Anzahl Produkte', 'mp' ) ),
+			'default_value' => 4,
+			'custom'        => array(
+				'min' => 1,
+				'max' => 12,
+			),
+		) );
+		$metabox->add_field( 'select', array(
+			'name'    => 'shop_profile[related_products_order_by]',
+			'label'   => array( 'text' => __( 'Sortierung', 'mp' ) ),
+			'options' => array(
+				'date'  => __( 'Veroeffentlichungsdatum', 'mp' ),
+				'title' => __( 'Produktname', 'mp' ),
+				'price' => __( 'Preis', 'mp' ),
+				'sales' => __( 'Verkaeufe', 'mp' ),
+				'rand'  => __( 'Zufaellig', 'mp' ),
+			),
+			'default_value' => 'date',
+		) );
+		$metabox->add_field( 'select', array(
+			'name'    => 'shop_profile[related_products_order]',
+			'label'   => array( 'text' => __( 'Richtung', 'mp' ) ),
+			'options' => array(
+				'DESC' => __( 'Absteigend', 'mp' ),
+				'ASC'  => __( 'Aufsteigend', 'mp' ),
+			),
+			'default_value' => 'DESC',
+		) );
+		$metabox->add_field( 'select', array(
+			'name'    => 'shop_profile[related_products_list_view]',
+			'label'   => array( 'text' => __( 'Darstellung', 'mp' ) ),
+			'options' => array(
+				'0' => __( 'Raster', 'mp' ),
+				'1' => __( 'Liste', 'mp' ),
+			),
+			'default_value' => '0',
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'shop_profile[related_products_filters]',
+			'label'   => array( 'text' => __( 'Sortierleiste', 'mp' ) ),
+			'desc'    => __( 'Zeigt oberhalb der Shop-Liste die vorhandene globale Sortierleiste an.', 'mp' ),
+			'message' => __( 'Sortierfilter anzeigen', 'mp' ),
+		) );
+		$metabox->add_field( 'taxonomy-select', array(
+			'name'                   => 'shop_profile[related_products_prefilter_categories]',
+			'label'                  => array( 'text' => __( 'Kategorie-Vorfilter', 'mp' ) ),
+			'taxonomy'               => 'product_category',
+			'multiple'               => true,
+			'placeholder'            => __( 'Vorfilter-Kategorien auswaehlen', 'mp' ),
+			'format_dropdown_header' => __( 'Kategorien', 'mp' ),
+			'desc'                   => __( 'Diese Kategorien werden als direkte Filterchips ueber der unteren Produktliste angeboten.', 'mp' ),
+		) );
 	}
 
 	public function render_page() {
@@ -202,6 +271,14 @@ if ( ! function_exists( 'mp_network_shop_profile_get_settings' ) ) :
 			'theme_bg_start'   => '#eef6ff',
 			'theme_bg_end'     => '#f8fcff',
 			'theme_card_bg'    => '#ffffff',
+			'related_products_enabled'   => 1,
+			'related_products_title'     => __( 'Weitere Produkte aus diesem Shop', 'mp' ),
+			'related_products_limit'     => 4,
+			'related_products_order_by'  => 'date',
+			'related_products_order'     => 'DESC',
+			'related_products_list_view' => '0',
+			'related_products_filters'   => 0,
+			'related_products_prefilter_categories' => '',
 		);
 
 		$target_blog = absint( $blog_id );

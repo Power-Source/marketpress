@@ -211,12 +211,26 @@ class MP_Multisite {
 		$widget_id = mp_get_post_value( 'widget_id', - 1 );
 		list( $order_by, $order ) = explode( '-', mp_get_post_value( 'order' ) );
 		$category = mp_get_post_value( 'product_category', null ) > 0 ? mp_get_post_value( 'product_category' ) : null;
+		$blog_id  = absint( mp_get_post_value( 'blog_id', 0 ) );
+		$limit    = absint( mp_get_post_value( 'limit', 0 ) );
+		$list_view = mp_get_post_value( 'list_view', null );
+		$filters  = absint( mp_get_post_value( 'filters', 0 ) );
+		$paginate = absint( mp_get_post_value( 'paginate', 0 ) );
+		$disable_category_filter = absint( mp_get_post_value( 'disable_category_filter', 0 ) );
+		$exclude_post_ids = array_filter( array_map( 'absint', explode( ',', (string) mp_get_post_value( 'exclude_post_ids', '' ) ) ) );
 		echo mp_global_list_products( array(
 			'page'      => $page,
 			'order_by'  => trim( $order_by ),
 			'order'     => trim( $order ),
 			'widget_id' => $widget_id,
-			'category'  => $category
+			'category'  => $category,
+			'blog_id'   => $blog_id,
+			'limit'     => $limit,
+			'list_view' => null === $list_view ? null : (bool) absint( $list_view ),
+			'filters'   => (bool) $filters,
+			'paginate'  => (bool) $paginate,
+			'disable_category_filter' => (bool) $disable_category_filter,
+			'exclude_post_ids' => $exclude_post_ids,
 		) );
 		die;
 	}
@@ -1008,6 +1022,23 @@ class MP_Multisite {
 		$theme_bg_end   = $theme_bg_end ? $theme_bg_end : '#f8fcff';
 		$theme_card_bg  = $theme_card_bg ? $theme_card_bg : '#ffffff';
 
+		$related_products_enabled = ! isset( $profile_settings['related_products_enabled'] ) || (bool) $profile_settings['related_products_enabled'];
+		$related_products_title   = ! empty( $profile_settings['related_products_title'] ) ? (string) $profile_settings['related_products_title'] : __( 'Weitere Produkte aus diesem Shop', 'mp' );
+		$related_products_limit   = max( 1, min( 12, absint( isset( $profile_settings['related_products_limit'] ) ? $profile_settings['related_products_limit'] : $atts['products_limit'] ) ) );
+		$related_products_order_by = isset( $profile_settings['related_products_order_by'] ) ? sanitize_key( (string) $profile_settings['related_products_order_by'] ) : 'date';
+		$related_products_order    = isset( $profile_settings['related_products_order'] ) ? strtoupper( sanitize_key( (string) $profile_settings['related_products_order'] ) ) : 'DESC';
+		$related_products_list_view = isset( $profile_settings['related_products_list_view'] ) ? (bool) absint( $profile_settings['related_products_list_view'] ) : false;
+		$related_products_filters   = ! empty( $profile_settings['related_products_filters'] );
+		$related_products_prefilter_ids = array_filter( array_map( 'absint', explode( ',', (string) ( isset( $profile_settings['related_products_prefilter_categories'] ) ? $profile_settings['related_products_prefilter_categories'] : '' ) ) ) );
+		$active_profile_category = isset( $_GET['mp_profile_category'] ) ? absint( wp_unslash( $_GET['mp_profile_category'] ) ) : 0;
+
+		if ( ! in_array( $related_products_order_by, array( 'date', 'title', 'price', 'sales', 'rand' ), true ) ) {
+			$related_products_order_by = 'date';
+		}
+		if ( ! in_array( $related_products_order, array( 'ASC', 'DESC' ), true ) ) {
+			$related_products_order = 'DESC';
+		}
+
 		$profile_image_url = '';
 		if ( ! empty( $profile_settings['hero_image_id'] ) ) {
 			$image_src = wp_get_attachment_image_src( absint( $profile_settings['hero_image_id'] ), 'large' );
@@ -1017,6 +1048,23 @@ class MP_Multisite {
 		}
 		if ( empty( $profile_image_url ) && ! empty( $profile_settings['hero_image_url'] ) ) {
 			$profile_image_url = (string) $profile_settings['hero_image_url'];
+		}
+
+		$related_prefilter_terms = array();
+		if ( ! empty( $related_products_prefilter_ids ) ) {
+			$term_objects = get_terms( array(
+				'taxonomy'   => 'product_category',
+				'hide_empty' => false,
+				'include'    => $related_products_prefilter_ids,
+			) );
+			if ( ! is_wp_error( $term_objects ) ) {
+				foreach ( (array) $term_objects as $term_object ) {
+					$related_prefilter_terms[ (int) $term_object->term_id ] = $term_object;
+				}
+			}
+			if ( $active_profile_category > 0 && ! isset( $related_prefilter_terms[ $active_profile_category ] ) ) {
+				$active_profile_category = 0;
+			}
 		}
 
 		$shop_rating_row = $wpdb->get_row(
@@ -1068,37 +1116,8 @@ class MP_Multisite {
 			}
 		}
 
-		$products_limit = max( 2, absint( $atts['products_limit'] ) );
-		$related_query  = new WP_Query(
-			array(
-				'post_type'      => MP_Product::get_post_type(),
-				'post_status'    => 'publish',
-				'posts_per_page' => $products_limit,
-				'post__not_in'   => $product_id > 0 ? array( $product_id ) : array(),
-			)
-		);
-
-		$related_items = '';
-		if ( $related_query->have_posts() ) {
-			while ( $related_query->have_posts() ) {
-				$related_query->the_post();
-				$related_id   = get_the_ID();
-				$related      = new MP_Product( $related_id );
-				$related_link = $this->use_network_shop_profile_mode()
-					? $this->get_network_shop_profile_url( $shop_id, $related_id )
-					: $this->get_reliable_product_url( $shop_id, $related_id );
-
-				if ( $this->use_network_shop_profile_mode() ) {
-					$related_link = add_query_arg( 'mp_profile_tab', 'products', $related_link );
-				}
-
-				$related_items .= '<article class="mp-network-related-item">';
-				$related_items .= '<h4><a href="' . esc_url( $related_link ) . '">' . esc_html( get_the_title() ) . '</a></h4>';
-				$related_items .= '<div class="mp-network-related-price">' . $related->display_price( false ) . '</div>';
-				$related_items .= '</article>';
-			}
-			wp_reset_postdata();
-		}
+		$related_products_total = 0;
+		$related_products_html  = '';
 
 		$reviews_html           = '';
 		$reviews_summary_html   = '';
@@ -1238,13 +1257,48 @@ class MP_Multisite {
 
 		restore_current_blog();
 
+		$related_products_total = 0;
+		if ( $related_products_enabled ) {
+			$exclude_sql = $product_id > 0 ? $wpdb->prepare( ' AND post_id != %d', $product_id ) : '';
+			$related_products_total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$wpdb->base_prefix}mp_products WHERE post_status = 'publish' AND blog_id = %d{$exclude_sql}",
+					$shop_id
+				)
+			);
+
+			if ( $related_products_total > 0 ) {
+				$related_products_html  = '<section class="mp-network-profile-card mp-network-related-products mp_global_product_list_widget">';
+				$related_products_html .= '<h3>' . esc_html( $related_products_title ) . '</h3>';
+				$related_products_html .= mp_global_list_products( array(
+					'echo'                    => false,
+					'blog_id'                 => $shop_id,
+					'category'                => $active_profile_category > 0 ? $active_profile_category : null,
+					'limit'                   => $related_products_limit,
+					'order_by'                => $related_products_order_by,
+					'order'                   => $related_products_order,
+					'list_view'               => $related_products_list_view,
+					'filters'                 => $related_products_filters,
+					'paginate'                => false,
+					'disable_category_filter' => true,
+					'exclude_post_ids'        => $product_id > 0 ? array( $product_id ) : array(),
+				) );
+				$related_products_html .= '</section>';
+			}
+		}
+
 		$base_profile_url = $this->get_network_shop_profile_url( $shop_id, $product_id );
 		if ( empty( $base_profile_url ) ) {
 			$base_profile_url = remove_query_arg( 'mp_profile_tab' );
 		}
+		$base_profile_url = remove_query_arg( 'mp_profile_category', $base_profile_url );
+		$product_tab_args = array( 'mp_profile_tab' => 'products' );
+		if ( $active_profile_category > 0 ) {
+			$product_tab_args['mp_profile_category'] = $active_profile_category;
+		}
 
 		$tab_urls = array(
-			'products' => add_query_arg( 'mp_profile_tab', 'products', $base_profile_url ),
+			'products' => add_query_arg( $product_tab_args, $base_profile_url ),
 			'coupons'  => add_query_arg( 'mp_profile_tab', 'coupons', $base_profile_url ),
 			'reviews'  => add_query_arg( 'mp_profile_tab', 'reviews', $base_profile_url ),
 		);
@@ -1274,101 +1328,71 @@ class MP_Multisite {
 			$policy_notice_html .= '</section>';
 		}
 
-		$profile_meta_html = '';
-		$profile_links = array();
-		if ( ! empty( $profile_settings['website_url'] ) ) {
-			$profile_links[] = '<a href="' . esc_url( $profile_settings['website_url'] ) . '" target="_blank" rel="noopener">' . esc_html__( 'Webseite', 'mp' ) . '</a>';
-		}
-		if ( ! empty( $profile_settings['support_url'] ) ) {
-			$profile_links[] = '<a href="' . esc_url( $profile_settings['support_url'] ) . '" target="_blank" rel="noopener">' . esc_html__( 'Support', 'mp' ) . '</a>';
-		}
 
-		$custom_links = isset( $profile_settings['custom_links'] ) ? (string) $profile_settings['custom_links'] : '';
-		if ( ! empty( $custom_links ) ) {
-			$rows = preg_split( '/\r\n|\r|\n/', $custom_links );
-			foreach ( (array) $rows as $row ) {
-				$row = trim( $row );
-				if ( '' === $row || false === strpos( $row, '|' ) ) {
-					continue;
-				}
-
-				list( $label, $url ) = array_map( 'trim', explode( '|', $row, 2 ) );
-				if ( '' === $label || '' === $url ) {
-					continue;
-				}
-
-				$profile_links[] = '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( $label ) . '</a>';
+		$related_prefilter_html = '';
+		if ( ! empty( $related_prefilter_terms ) ) {
+			$related_prefilter_html .= '<nav class="mp-network-related-prefilters" aria-label="' . esc_attr__( 'Produktkategorien', 'mp' ) . '">';
+			$all_filter_url = add_query_arg( array( 'mp_profile_tab' => 'products' ), $base_profile_url );
+			$related_prefilter_html .= '<a class="mp-network-related-prefilter' . ( 0 === $active_profile_category ? ' is-active' : '' ) . '" href="' . esc_url( $all_filter_url ) . '">' . esc_html__( 'Alle', 'mp' ) . '</a>';
+			foreach ( $related_prefilter_terms as $term_id => $term_object ) {
+				$filter_url = add_query_arg(
+					array(
+						'mp_profile_tab'      => 'products',
+						'mp_profile_category' => $term_id,
+					),
+					$base_profile_url
+				);
+				$related_prefilter_html .= '<a class="mp-network-related-prefilter' . ( $active_profile_category === $term_id ? ' is-active' : '' ) . '" href="' . esc_url( $filter_url ) . '">' . esc_html( $term_object->name ) . '</a>';
 			}
+			$related_prefilter_html .= '</nav>';
 		}
 
-		$social_links = array();
-		$social_map = array(
-			'social_facebook'  => 'Facebook',
-			'social_instagram' => 'Instagram',
-			'social_tiktok'    => 'TikTok',
-			'social_linkedin'  => 'LinkedIn',
-			'social_youtube'   => 'YouTube',
-		);
-		foreach ( $social_map as $key => $label ) {
-			if ( ! empty( $profile_settings[ $key ] ) ) {
-				$social_links[] = '<a href="' . esc_url( $profile_settings[ $key ] ) . '" target="_blank" rel="noopener">' . esc_html( $label ) . '</a>';
-			}
+		$shop_summary_html  = '<section class="mp-network-profile-card mp-network-profile-shop-card">';
+		$shop_summary_html .= '<div class="mp-network-profile-shop-header">';
+		if ( ! empty( $profile_image_url ) ) {
+			$shop_summary_html .= '<img class="mp-network-profile-shop-image" src="' . esc_url( $profile_image_url ) . '" alt="' . esc_attr( $profile_title ) . '">';
 		}
-
-		$profile_meta_html .= '<section class="mp-network-profile-card">';
-		$profile_meta_html .= '<h3>' . esc_html__( 'Profil des Shops', 'mp' ) . '</h3>';
-		$profile_meta_html .= '<p><strong>' . esc_html__( 'Gesamtbewertung', 'mp' ) . ':</strong> ' . esc_html( $shop_avg_rating ) . '/5 · ' . sprintf( esc_html__( '%d Bewertungen', 'mp' ), $shop_total_reviews ) . '</p>';
-		if ( ! empty( $profile_about ) ) {
-			$profile_meta_html .= '<p>' . esc_html( $profile_about ) . '</p>';
+		$shop_summary_html .= '<div class="mp-network-profile-shop-copy">';
+		$shop_summary_html .= '<p class="mp-network-shop-kicker">' . esc_html__( 'Shop-Profil', 'mp' ) . '</p>';
+		$shop_summary_html .= '<h2>' . esc_html( $profile_title ) . '</h2>';
+		if ( ! empty( $profile_tagline ) ) {
+			$shop_summary_html .= '<p class="mp-network-profile-tagline">' . esc_html( $profile_tagline ) . '</p>';
 		}
-		if ( ! empty( $profile_links ) ) {
-			$profile_meta_html .= '<p class="mp-network-profile-links">' . implode( ' · ', $profile_links ) . '</p>';
-		}
-		if ( ! empty( $social_links ) ) {
-			$profile_meta_html .= '<p class="mp-network-profile-social">' . implode( ' · ', $social_links ) . '</p>';
-		}
-		if ( empty( $profile_about ) && empty( $profile_links ) && empty( $social_links ) ) {
-			$profile_meta_html .= '<p>' . esc_html__( 'Noch keine Profildaten hinterlegt.', 'mp' ) . ' <a href="' . esc_url( $shop_profile_settings_url ) . '">' . esc_html__( 'Jetzt konfigurieren', 'mp' ) . '</a></p>';
-		}
-		$profile_meta_html .= '</section>';
-
-		$html  = '<section class="mp-network-shop-profile">';
-		$html .= '<style>.mp-network-shop-profile{--mp-prof-primary:' . esc_attr( $theme_primary ) . ';--mp-prof-accent:' . esc_attr( $theme_accent ) . ';--mp-prof-bg-start:' . esc_attr( $theme_bg_start ) . ';--mp-prof-bg-end:' . esc_attr( $theme_bg_end ) . ';--mp-prof-card:' . esc_attr( $theme_card_bg ) . ';display:grid;gap:18px}.mp-network-shop-profile .mp-network-profile-hero{background:linear-gradient(140deg,var(--mp-prof-bg-start),var(--mp-prof-bg-end));border:1px solid #d8e4f0;border-radius:14px;padding:16px}.mp-network-shop-profile .mp-network-shop-kicker{color:var(--mp-prof-primary);font-weight:700}.mp-network-shop-profile .mp-network-hero-media{display:flex;align-items:center;gap:14px;margin:8px 0 10px}.mp-network-shop-profile .mp-network-hero-media img{width:84px;height:84px;border-radius:14px;object-fit:cover;border:1px solid #d8e4f0}.mp-network-shop-profile .mp-network-profile-grid{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(260px,1fr);gap:16px}.mp-network-shop-profile .mp-network-profile-card{background:var(--mp-prof-card);border:1px solid #d8e4f0;border-radius:12px;padding:14px}.mp-network-shop-profile .mp-network-related-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.mp-network-shop-profile .mp-network-related-item{border:1px solid #e0eaf5;border-radius:10px;padding:10px;background:var(--mp-prof-card)}.mp-network-shop-profile .mp-network-profile-tabs{display:flex;gap:8px;flex-wrap:wrap}.mp-network-shop-profile .mp-network-profile-tab{display:inline-flex;padding:7px 12px;border-radius:999px;border:1px solid #c7d9eb;background:#fff;text-decoration:none;color:var(--mp-prof-accent)}.mp-network-shop-profile .mp-network-profile-tab.is-active{background:var(--mp-prof-primary);color:#fff;border-color:var(--mp-prof-primary)}.mp-network-shop-profile .mp-network-policy-warning{color:#9b2d2d}.mp-network-shop-profile .mp-network-coupon-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.mp-network-shop-profile .mp-network-coupon-item{border:1px solid #e0eaf5;border-radius:10px;padding:10px;background:var(--mp-prof-card)}.mp-network-shop-profile .mp-network-review-list{margin:8px 0 0;padding-left:18px}.mp-network-shop-profile .mp-network-profile-links,.mp-network-shop-profile .mp-network-profile-social{margin:8px 0 0}.mp-network-shop-profile .mp-network-shop-rating{margin:8px 0 0;color:var(--mp-prof-accent)}@media (max-width:860px){.mp-network-shop-profile .mp-network-profile-grid{grid-template-columns:1fr}}</style>';
-		$html .= '<header class="mp-network-profile-hero">';
-		$html .= '<p class="mp-network-shop-kicker">' . esc_html__( 'Shop-Profil', 'mp' ) . '</p>';
-		$html .= '<h2>' . esc_html( $profile_title ) . '</h2>';
-		if ( ! empty( $profile_image_url ) || ! empty( $profile_tagline ) ) {
-			$html .= '<div class="mp-network-hero-media">';
-			if ( ! empty( $profile_image_url ) ) {
-				$html .= '<img src="' . esc_url( $profile_image_url ) . '" alt="' . esc_attr( $profile_title ) . '">';
-			}
-			if ( ! empty( $profile_tagline ) ) {
-				$html .= '<p>' . esc_html( $profile_tagline ) . '</p>';
-			}
-			$html .= '</div>';
-		}
-		if ( ! empty( $product_title ) ) {
-			$html .= '<p>' . sprintf( esc_html__( 'Ausgewaehltes Produkt: %s', 'mp' ), esc_html( $product_title ) ) . '</p>';
-		}
-		$html .= '<p class="mp-network-shop-rating"><strong>' . esc_html__( 'Gesamtbewertung', 'mp' ) . ':</strong> ' . esc_html( $shop_avg_rating ) . '/5 · ' . sprintf( esc_html__( '%d Bewertungen', 'mp' ), $shop_total_reviews ) . '</p>';
-		$html .= '<p><a href="' . esc_url( $shop_url ) . '">' . esc_html__( 'Shop besuchen', 'mp' ) . '</a>';
+		$shop_summary_html .= '</div>';
+		$shop_summary_html .= '</div>';
+		$shop_summary_html .= '<div class="mp-network-profile-actions">';
+		$shop_summary_html .= '<a href="' . esc_url( $shop_url ) . '">' . esc_html__( 'Shop besuchen', 'mp' ) . '</a>';
 		if ( mp_get_network_setting( 'global_cart', 0 ) ) {
-			$html .= ' · <a href="' . esc_url( mp_cart_link( false, true ) ) . '">' . esc_html__( 'Zum Netzwerkwarenkorb', 'mp' ) . '</a>';
+			$shop_summary_html .= '<a href="' . esc_url( mp_cart_link( false, true ) ) . '">' . esc_html__( 'Zum Netzwerkwarenkorb', 'mp' ) . '</a>';
 		}
-		$html .= '</p>';
+		$shop_summary_html .= '</div>';
+		$shop_summary_html .= '</section>';
+
+		$html  = '<section class="mp-network-shop-profile" style="--mp-prof-primary:' . esc_attr( $theme_primary ) . ';--mp-prof-accent:' . esc_attr( $theme_accent ) . ';--mp-prof-bg-start:' . esc_attr( $theme_bg_start ) . ';--mp-prof-bg-end:' . esc_attr( $theme_bg_end ) . ';--mp-prof-card:' . esc_attr( $theme_card_bg ) . ';">';
+		$html .= '<header class="mp-network-profile-toolbar">';
+		$html .= '<div class="mp-network-profile-toolbar-copy">';
+		$html .= '<p class="mp-network-shop-kicker">' . esc_html__( 'Netzwerk Shop-Profil', 'mp' ) . '</p>';
+		$html .= '<h1>' . esc_html( $profile_title ) . '</h1>';
+		if ( ! empty( $product_title ) ) {
+			$html .= '<p>' . sprintf( esc_html__( 'Fokusprodukt: %s', 'mp' ), esc_html( $product_title ) ) . '</p>';
+		}
+		$html .= '</div>';
 		$html .= '<nav class="mp-network-profile-tabs">';
 		$html .= '<a class="mp-network-profile-tab' . ( 'products' === $active_tab ? ' is-active' : '' ) . '" href="' . esc_url( $tab_urls['products'] ) . '">' . esc_html__( 'Produkte', 'mp' ) . '</a>';
 		$html .= '<a class="mp-network-profile-tab' . ( 'coupons' === $active_tab ? ' is-active' : '' ) . '" href="' . esc_url( $tab_urls['coupons'] ) . '">' . esc_html__( 'Gutscheine', 'mp' ) . '</a>';
 		$html .= '<a class="mp-network-profile-tab' . ( 'reviews' === $active_tab ? ' is-active' : '' ) . '" href="' . esc_url( $tab_urls['reviews'] ) . '">' . esc_html__( 'Bewertungen', 'mp' ) . '</a>';
 		$html .= '</nav>';
 		$html .= '</header>';
-		$html .= $policy_notice_html;
 
 		if ( 'coupons' === $active_tab ) {
+			$html .= $shop_summary_html;
+			$html .= $policy_notice_html;
 			$html .= ! empty( $coupons_html )
 				? $coupons_html
 				: '<section class="mp-network-profile-card"><p>' . esc_html__( 'Aktuell sind keine aktiven Gutscheincodes fuer diesen Shop verfuegbar.', 'mp' ) . '</p></section>';
 		} elseif ( 'reviews' === $active_tab ) {
+			$html .= $shop_summary_html;
+			$html .= $policy_notice_html;
 			if ( $reviews_blocked ) {
 				$html .= '<section class="mp-network-profile-card mp-network-policy-warning">';
 				$html .= '<h3>' . esc_html__( 'Bewertungen blockiert', 'mp' ) . '</h3>';
@@ -1379,16 +1403,20 @@ class MP_Multisite {
 				$html .= $reviews_html;
 			}
 		} else {
-			$html .= '<div class="mp-network-profile-grid">';
-			$html .= '<div class="mp-network-profile-main">' . ( $product_html ? $product_html : '<p>' . esc_html__( 'In diesem Shop sind aktuell keine Produkte verfuegbar.', 'mp' ) . '</p>' ) . '</div>';
-			$html .= '<aside class="mp-network-profile-side">' . $profile_meta_html . $reviews_summary_html . '</aside>';
+			$html .= '<div class="mp-network-profile-stage">';
+			$html .= '<div class="mp-network-profile-feature">';
+			$html .= '<div class="mp-network-profile-feature-label">' . esc_html__( 'Ausgewaehltes Produkt', 'mp' ) . '</div>';
+			$html .= $product_html ? $product_html : '<p>' . esc_html__( 'In diesem Shop sind aktuell keine Produkte verfuegbar.', 'mp' ) . '</p>';
+			$html .= '</div>';
+			$html .= '<aside class="mp-network-profile-side">' . $shop_summary_html . $profile_meta_html . $reviews_summary_html . $policy_notice_html . '</aside>';
 			$html .= '</div>';
 
-			if ( ! empty( $related_items ) ) {
-				$html .= '<section class="mp-network-profile-card">';
-				$html .= '<h3>' . esc_html__( 'Weitere Produkte aus diesem Shop', 'mp' ) . '</h3>';
-				$html .= '<div class="mp-network-related-grid">' . $related_items . '</div>';
-				$html .= '</section>';
+			if ( ! empty( $related_prefilter_html ) ) {
+				$html .= $related_prefilter_html;
+			}
+
+			if ( ! empty( $related_products_html ) ) {
+				$html .= $related_products_html;
 			}
 		}
 
@@ -2194,16 +2222,13 @@ class MP_Multisite {
 		$html .= '.mp-flow-filter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}';
 		$html .= '.mp-flow-filter a{display:inline-block;padding:7px 10px;border-radius:999px;border:1px solid #c6d6e8;background:#fff;color:#35506b;text-decoration:none;font-size:12px;font-weight:600}';
 		$html .= '.mp-flow-filter a.is-active{background:#2f5f8f;color:#fff;border-color:#2f5f8f}';
-		$html .= '.mp-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}';
+				$html .= '<div class="mp-network-profile-shop-list-wrap">' . $related_prefilter_html . $related_products_html . '</div>';
 		$html .= '.mp-kpi-card{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
 		$html .= '.mp-kpi-card span{display:block;font-size:11px;color:#59708a;text-transform:uppercase;letter-spacing:.04em}';
 		$html .= '.mp-kpi-card strong{display:block;margin-top:6px;font-size:20px;color:#16324b}';
 		$html .= '.mp-perf-layout{display:grid;grid-template-columns:2fr 1fr;gap:12px}';
 		$html .= '.mp-perf-panel{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
 		$html .= '.mp-perf-panel h3{margin:0 0 10px;font-size:13px;color:#35506b;text-transform:uppercase;letter-spacing:.04em}';
-		$html .= '.mp-flow-bars{display:grid;gap:8px}';
-		$html .= '.mp-flow-row{display:grid;grid-template-columns:130px 1fr 48px;align-items:center;gap:8px;font-size:12px;color:#3e5972}';
-		$html .= '.mp-flow-track{height:8px;border-radius:999px;background:#e8f0f8;overflow:hidden}';
 		$html .= '.mp-flow-fill{height:100%;background:linear-gradient(90deg,#4f89bf 0%,#6fb0de 100%)}';
 		$html .= '.mp-shop-table{width:100%;border-collapse:collapse;font-size:12px}';
 		$html .= '.mp-shop-table th,.mp-shop-table td{padding:8px;border-bottom:1px solid #edf2f7;text-align:left}';

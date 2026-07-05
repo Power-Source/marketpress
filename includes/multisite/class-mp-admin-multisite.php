@@ -629,6 +629,45 @@ class MP_Admin_Multisite {
 	}
 
 	/**
+	 * Collect warnings for enabled network features that still miss required pages.
+	 *
+	 * @return array
+	 */
+	private function get_missing_network_page_warnings() {
+		$warnings = array();
+		$required_pages = array();
+
+		if ( 'shop_profile' === sanitize_key( (string) mp_get_network_setting( 'advanced->network_shop_presentation_mode', 'direct_product' ) ) ) {
+			$required_pages['network_shop_profile'] = __( 'Die Shop-Profilseite fuer den Netzwerk-Marktplatz fehlt.', 'mp' );
+		}
+
+		if ( (bool) mp_get_network_setting( 'advanced->network_customer_hub', 0 ) ) {
+			$required_pages['network_customer_hub'] = __( 'Die zentrale Kundenseite ist aktiviert, aber keine Seite ist zugewiesen.', 'mp' );
+		}
+
+		if ( (bool) mp_get_network_setting( 'advanced->network_shop_performance', 0 ) ) {
+			$required_pages['network_shop_performance'] = __( 'Die Shopuser-Performance-Seite ist aktiviert, aber keine Seite ist zugewiesen.', 'mp' );
+		}
+
+		if ( (bool) mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
+			$required_pages['network_settlement_dashboard'] = __( 'Settlement Moderation ist aktiviert, aber die Mainshop-Seite dafuer fehlt.', 'mp' );
+		}
+
+		if ( (bool) mp_get_network_setting( 'advanced->network_support_enabled', 0 ) ) {
+			$required_pages['network_support_center'] = __( 'Das Support-Center ist aktiviert, aber keine Mainshop-Seite ist zugewiesen.', 'mp' );
+		}
+
+		foreach ( $required_pages as $page_key => $message ) {
+			$page_id = (int) mp_get_network_setting( 'pages->' . $page_key, 0 );
+			if ( $page_id <= 0 || false === get_post_status( $page_id ) ) {
+				$warnings[] = $message;
+			}
+		}
+
+		return $warnings;
+	}
+
+	/**
 	 * Displays the network settings form/metaboxes
 	 *
 	 * @since 1.0
@@ -644,6 +683,7 @@ class MP_Admin_Multisite {
 		}
 
 		$snapshot = $this->get_network_settings_snapshot( $force_sync );
+		$missing_page_warnings = $this->get_missing_network_page_warnings();
 		$refresh_url = wp_nonce_url(
 			add_query_arg(
 				array(
@@ -693,6 +733,26 @@ class MP_Admin_Multisite {
 				.mp-network-settings-modern .mp-network-intro p {
 					margin: 0;
 					color: var(--mp-ui-muted);
+				}
+
+				.mp-network-settings-modern .mp-network-warning {
+					background: #fff7e8;
+					border: 1px solid #f1c27d;
+					border-radius: 14px;
+					padding: 14px 16px;
+					margin: 0 0 18px;
+					color: #7a4b00;
+				}
+
+				.mp-network-settings-modern .mp-network-warning h3 {
+					margin: 0 0 8px;
+					font-size: 16px;
+					color: #7a4b00;
+				}
+
+				.mp-network-settings-modern .mp-network-warning ul {
+					margin: 0;
+					padding-left: 18px;
 				}
 
 				.mp-network-settings-modern .mp-network-stats-grid {
@@ -815,6 +875,17 @@ class MP_Admin_Multisite {
 					<a class="mp-network-refresh" href="<?php echo esc_url( $refresh_url ); ?>"><?php esc_html_e( 'Snapshot aktualisieren', 'mp' ); ?></a>
 				</div>
 			</section>
+
+			<?php if ( ! empty( $missing_page_warnings ) ) : ?>
+				<section class="mp-network-warning">
+					<h3><?php esc_html_e( 'Fehlende Pflichtseiten erkannt', 'mp' ); ?></h3>
+					<ul>
+						<?php foreach ( $missing_page_warnings as $warning ) : ?>
+							<li><?php echo esc_html( $warning ); ?> <?php esc_html_e( 'Bitte im Bereich Netzwerkmarktplatz Seiten zuweisen oder direkt erstellen.', 'mp' ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+				</section>
+			<?php endif; ?>
 
 			<div class="clear"></div>
 			<div class="mp-settings">

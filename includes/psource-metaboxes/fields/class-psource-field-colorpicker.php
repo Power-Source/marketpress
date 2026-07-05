@@ -43,6 +43,7 @@ class PSOURCE_Field_Colorpicker extends PSOURCE_Field {
 		?>
 		<style>
 		.postbox.psource-postbox .inside .psource-colorpicker-field {
+			position: relative;
 			display: inline-flex;
 			align-items: center;
 			gap: 10px;
@@ -80,9 +81,13 @@ class PSOURCE_Field_Colorpicker extends PSOURCE_Field {
 		}
 
 		.pcr-app.psource-pickr-app[data-theme='classic'] {
+			position: absolute !important;
+			top: calc(100% + 8px) !important;
+			left: 0 !important;
 			padding: 10px;
 			width: 248px;
 			max-width: calc(100vw - 32px);
+			margin: 0;
 			border: 1px solid #d7dee8;
 			border-radius: 14px;
 			box-shadow: 0 18px 40px rgba(30, 51, 72, .18);
@@ -122,13 +127,12 @@ class PSOURCE_Field_Colorpicker extends PSOURCE_Field {
 				}
 
 				var pickr = Pickr.create({
-					container: document.body,
 					el: pickrContainer,
 					theme: 'classic',
 					appClass: 'psource-pickr-app',
-					position: 'bottom-start',
-					padding: 10,
-					autoReposition: true,
+					inline: true,
+					padding: 8,
+					autoReposition: false,
 					default: input.value || '#ffffff',
 					swatches: [
 						'#1e3348', '#2f6ca3', '#4caf50', '#f2c14e', '#ef8354',
