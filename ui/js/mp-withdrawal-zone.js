@@ -15,7 +15,7 @@
       return;
     }
 
-    $form.find('.mp_withdrawal_submit').prop('disabled', false).focus();
+    $form.find('.mp_withdrawal_submit').prop('disabled', false).trigger('focus');
     setFeedback($feedback, (window.mp_withdrawal_i18n && mp_withdrawal_i18n.messages && mp_withdrawal_i18n.messages.confirmReady) || 'Bitte pruefe Deine Auswahl und sende den Widerruf verbindlich ab.', false);
   });
 

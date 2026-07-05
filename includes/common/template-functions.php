@@ -898,6 +898,30 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 					'post_parent'    => mp_get_network_setting( 'pages->network_store_page', 0 ),
 				);
 				break;
+			case 'network_customer_hub' :
+				$args = array(
+					'post_title'     => __( 'Zentrale Kundenseite', 'mp' ),
+					'post_content'   => __( "[mp_network_customer_hub]", 'mp' ),
+					'comment_status' => 'closed',
+					'post_parent'    => mp_get_network_setting( 'pages->network_store_page', 0 ),
+				);
+				break;
+			case 'network_shop_performance' :
+				$args = array(
+					'post_title'     => __( 'Shopuser Performance', 'mp' ),
+					'post_content'   => __( "[mp_network_shop_performance]", 'mp' ),
+					'comment_status' => 'closed',
+					'post_parent'    => mp_get_network_setting( 'pages->network_store_page', 0 ),
+				);
+				break;
+			case 'network_settlement_dashboard' :
+				$args = array(
+					'post_title'     => __( 'Settlement Moderation', 'mp' ),
+					'post_content'   => __( "[mp_network_settlement_dashboard]", 'mp' ),
+					'comment_status' => 'closed',
+					'post_parent'    => mp_get_network_setting( 'pages->network_store_page', 0 ),
+				);
+				break;
 			case 'products' :
 				$args = array(
 					'post_title'   => __( 'Produkte', 'mp' ),

@@ -1008,6 +1008,7 @@ class Marketpress {
 
 		if ( is_multisite() && is_plugin_active_for_network( mp_get_plugin_slug() ) ) {
 			require_once $this->plugin_dir( 'includes/multisite/class-mp-multisite.php' );
+			require_once $this->plugin_dir( 'includes/multisite/class-mp-settlement.php' );
 			require_once $this->plugin_dir( 'includes/multisite/template-functions.php' );
 			if ( is_admin() ) {
 				require_once $this->plugin_dir( 'includes/multisite/class-mp-admin-multisite.php' );

@@ -21,6 +21,34 @@ class MP_Orders_Admin {
 	protected $_ipn_history = null;
 
 	/**
+	 * Cache for settlement status lookups within a request.
+	 *
+	 * @var array
+	 */
+	protected $_settlement_status_cache = array();
+
+	/**
+	 * Cache for flow context lookups within a request.
+	 *
+	 * @var array
+	 */
+	protected $_order_flow_cache = array();
+
+	/**
+	 * Whether settlement table existence was checked.
+	 *
+	 * @var bool|null
+	 */
+	protected $_settlement_table_exists = null;
+
+	/**
+	 * Prevent repeated list preloading in one request.
+	 *
+	 * @var bool
+	 */
+	protected $_orders_list_runtime_primed = false;
+
+	/**
 	 * Gets the single instance of the class
 	 *
 	 * @since 1.0
@@ -108,6 +136,50 @@ class MP_Orders_Admin {
 		add_filter( 'posts_join', array( &$this, 'orders_search_join' ) );
 		add_filter( 'posts_where', array( &$this, 'orders_search_where' ) );
 		add_filter( 'posts_groupby', array( &$this, 'orders_search_groupby' ) );
+		add_action( 'restrict_manage_posts', array( &$this, 'render_orders_filter_bar' ) );
+	}
+
+	/**
+	 * Render extra filters on mp_order list screen.
+	 */
+	public function render_orders_filter_bar() {
+		global $typenow;
+
+		if ( 'mp_order' !== $typenow ) {
+			return;
+		}
+
+		$flow_filter       = sanitize_key( (string) mp_get_get_value( 'mp_flow_type', '' ) );
+		$settlement_filter = sanitize_key( (string) mp_get_get_value( 'mp_settlement_status', '' ) );
+		$needs_action      = sanitize_key( (string) mp_get_get_value( 'mp_needs_action', '' ) );
+
+		echo '<select name="mp_flow_type">';
+		echo '<option value="">' . esc_html__( 'Alle Flows', 'mp' ) . '</option>';
+		$flow_options = array(
+			'local'          => __( 'Lokaler Shop-Flow', 'mp' ),
+			'hybrid_subshop' => __( 'Hybrid Subshop-Gateway', 'mp' ),
+			'network_global' => __( 'Netzwerk Mainshop', 'mp' ),
+			'network_multi'  => __( 'Netzwerk Multi-Shop', 'mp' ),
+		);
+		foreach ( $flow_options as $value => $label ) {
+			echo '<option value="' . esc_attr( $value ) . '" ' . selected( $flow_filter, $value, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select>';
+
+		echo '<select name="mp_settlement_status">';
+		echo '<option value="">' . esc_html__( 'Settlement: Alle', 'mp' ) . '</option>';
+		$settlement_options = $this->get_settlement_status_labels();
+		unset( $settlement_options['n/a'] );
+		foreach ( $settlement_options as $value => $label ) {
+			echo '<option value="' . esc_attr( $value ) . '" ' . selected( $settlement_filter, $value, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select>';
+
+		echo '<select name="mp_needs_action">';
+		echo '<option value="">' . esc_html__( 'Aktion: Alle', 'mp' ) . '</option>';
+		echo '<option value="1" ' . selected( $needs_action, '1', false ) . '>' . esc_html__( 'Braucht Aktion', 'mp' ) . '</option>';
+		echo '<option value="0" ' . selected( $needs_action, '0', false ) . '>' . esc_html__( 'Keine Aktion noetig', 'mp' ) . '</option>';
+		echo '</select>';
 	}
 
 	/**
@@ -331,6 +403,10 @@ class MP_Orders_Admin {
 			&$this,
 			'meta_box_order_actions'
 		), 'mp_order', 'side', 'high' );
+		add_meta_box( 'mp-order-progress-metabox', __( 'Bestellfortschritt', 'mp' ), array(
+			&$this,
+			'meta_box_order_progress'
+		), 'mp_order', 'side', 'high' );
 		add_meta_box( 'mp-order-history-metabox', __( 'Bestellverlauf', 'mp' ), array(
 			&$this,
 			'meta_box_order_history'
@@ -479,6 +555,58 @@ class MP_Orders_Admin {
 			<div class="clear"></div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Display a compact order flow timeline for editors.
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public function meta_box_order_progress( $post ) {
+		$order         = new MP_Order( $post );
+		$current       = (string) $order->post_status;
+		$status_steps  = array(
+			'order_received' => __( 'Empfangen', 'mp' ),
+			'order_paid'     => __( 'Bezahlt', 'mp' ),
+			'order_shipped'  => __( 'Versand', 'mp' ),
+			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
+		);
+		$current_index = array_search( $current, array_keys( $status_steps ), true );
+		if ( false === $current_index ) {
+			$current_index = -1;
+		}
+
+		echo '<div class="mp-order-progress-metabox">';
+		echo '<ol class="mp-order-steps">';
+
+		$step_index = 0;
+		foreach ( $status_steps as $status => $label ) {
+			$state_class = 'is-upcoming';
+			if ( $step_index < $current_index ) {
+				$state_class = 'is-done';
+			} elseif ( $step_index === $current_index ) {
+				$state_class = 'is-current';
+			}
+
+			echo '<li class="' . esc_attr( $state_class ) . '">';
+			echo '<span class="mp-order-step-label">' . esc_html( $label ) . '</span>';
+
+			$meta_key = 'mp_' . str_replace( 'order_', '', $status ) . '_time';
+			$time     = (int) $order->get_meta( $meta_key, 0 );
+			if ( $time > 0 ) {
+				echo '<small class="mp-order-step-time">' . esc_html( mp_format_date( $time ) ) . '</small>';
+			}
+
+			echo '</li>';
+			$step_index ++;
+		}
+
+		echo '</ol>';
+
+		$flow = $this->get_order_flow_context( $order );
+		echo '<p class="mp-order-flow-hint"><strong>' . esc_html__( 'Flow:', 'mp' ) . '</strong> ' . esc_html( $flow['label'] ) . '</p>';
+		echo '</div>';
 	}
 
 	/**
@@ -862,6 +990,15 @@ class MP_Orders_Admin {
 		if ( is_wp_error( $result ) ) {
 			wp_die( $msg );
 		} else {
+			$inline = (bool) mp_get_get_value( 'mp_inline', 0 );
+			if ( $inline ) {
+				$instance = self::get_instance();
+				$order    = new MP_Order( (int) $post_id );
+				$payload  = $instance->get_order_status_payload( (int) $post_id, $order );
+
+				wp_send_json_success( $payload );
+			}
+
 			$sendback = remove_query_arg( 'mp_order_status_updated', wp_get_referer() );
 
 			if ( empty( $sendback ) ) {
@@ -872,6 +1009,44 @@ class MP_Orders_Admin {
 		}
 
 		exit;
+	}
+
+	/**
+	 * Inline status change for admin order list (JSON only, no redirect).
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public static function ajax_change_order_status_inline() {
+		$order_cap = apply_filters( 'mp_orders_cap', 'edit_store_orders' );
+		if ( ! current_user_can( $order_cap ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unzureichende Berechtigungen.', 'mp' ) ), 403 );
+		}
+
+		check_ajax_referer( 'mp-ajax-nonce', 'ajax_nonce' );
+
+		$post_id      = (int) mp_get_post_value( 'post_id', 0 );
+		$order_status = sanitize_key( (string) mp_get_post_value( 'order_status', '' ) );
+
+		$allowed_statuses = array( 'order_received', 'order_paid', 'order_shipped', 'order_closed' );
+		if ( ! $post_id || ! in_array( $order_status, $allowed_statuses, true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Ungueltige Statusdaten.', 'mp' ) ), 400 );
+		}
+
+		$result = wp_update_post( array(
+			'ID'          => $post_id,
+			'post_status' => $order_status,
+		), true );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => __( 'Status konnte nicht aktualisiert werden.', 'mp' ) ), 500 );
+		}
+
+		$instance = self::get_instance();
+		$order    = new MP_Order( $post_id );
+		$payload  = $instance->get_order_status_payload( $post_id, $order );
+
+		wp_send_json_success( $payload );
 	}
 
 	/**
@@ -915,6 +1090,52 @@ class MP_Orders_Admin {
 		//set post status
 		$post_status = mp_get_get_value( 'post_status', array( 'order_received', 'order_paid', 'order_shipped' ) );
 		$query->set( 'post_status', $post_status );
+
+		$flow_filter       = sanitize_key( (string) mp_get_get_value( 'mp_flow_type', '' ) );
+		$settlement_filter = sanitize_key( (string) mp_get_get_value( 'mp_settlement_status', '' ) );
+		$needs_action_raw  = mp_get_get_value( 'mp_needs_action', '' );
+		$needs_action      = ( '' !== $needs_action_raw ) ? (bool) intval( $needs_action_raw ) : null;
+
+		if ( $flow_filter || $settlement_filter || null !== $needs_action ) {
+			$candidate_ids = get_posts( array(
+				'post_type'      => 'mp_order',
+				'post_status'    => 'any',
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+				'no_found_rows'  => true,
+			) );
+
+			$settlement_map = array();
+			if ( $settlement_filter || null !== $needs_action ) {
+				$settlement_map = $this->get_settlement_status_map( $candidate_ids );
+			}
+			$filtered       = array();
+
+			foreach ( (array) $candidate_ids as $order_id ) {
+				$flow_match = true;
+				if ( $flow_filter ) {
+					$order        = new MP_Order( (int) $order_id );
+					$flow_context = $this->get_order_flow_context( $order );
+					$flow_match   = ( $flow_context['mode'] === $flow_filter );
+				}
+
+				$settlement       = isset( $settlement_map[ $order_id ] ) ? $settlement_map[ $order_id ] : 'n/a';
+				$settlement_match = ( ! $settlement_filter || $settlement_filter === $settlement );
+
+				$action_required = in_array( get_post_status( $order_id ), array( 'order_received', 'order_paid' ), true );
+				if ( in_array( $settlement, array( 'expected_credit', 'on_hold', 'releasable' ), true ) ) {
+					$action_required = true;
+				}
+
+				$action_match = ( null === $needs_action || $action_required === $needs_action );
+
+				if ( $flow_match && $settlement_match && $action_match ) {
+					$filtered[] = (int) $order_id;
+				}
+			}
+
+			$query->set( 'post__in', empty( $filtered ) ? array( 0 ) : $filtered );
+		}
 
 		switch ( get_query_var( 'orderby' ) ) {
 			case 'product_coupon_discount' :
@@ -980,9 +1201,12 @@ class MP_Orders_Admin {
 
 		wp_enqueue_style( 'mp-admin-orders', mp_plugin_url( 'includes/admin/ui/css/admin-orders.css' ), false, MP_VERSION );
 		wp_enqueue_script( 'mp-admin-orders', mp_plugin_url( 'includes/admin/ui/js/admin-orders.js' ), false, MP_VERSION );
+		wp_enqueue_style( 'mp-admin-modern', mp_plugin_url( 'includes/admin/ui/css/mp-admin-modern.css' ), array(), MP_VERSION );
+		wp_enqueue_script( 'mp-admin-modern', mp_plugin_url( 'includes/admin/ui/js/mp-admin-modern.js' ), array(), MP_VERSION, true );
 
 		wp_localize_script( 'mp-admin-orders', 'mp_admin_orders', array(
 			'ajax_nonce'   => wp_create_nonce( 'mp-ajax-nonce' ),
+			'ajax_url'     => admin_url( 'admin-ajax.php' ),
 			'bulk_actions' => array(
 				'-1'             => __( 'Status ändern', 'mp' ),
 				'order_received' => __( 'Ausstehend', 'mp' ),
@@ -1058,6 +1282,318 @@ class MP_Orders_Admin {
 	}
 
 	/**
+	 * Get status labels used in list and metaboxes.
+	 *
+	 * @return array
+	 */
+	private function get_order_status_labels() {
+		return array(
+			'order_received' => __( 'Ausstehend', 'mp' ),
+			'order_paid'     => __( 'Bezahlt', 'mp' ),
+			'order_shipped'  => __( 'Versand', 'mp' ),
+			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
+			'trash'          => __( 'Muell', 'mp' ),
+		);
+	}
+
+	/**
+	 * Get localized settlement labels.
+	 *
+	 * @return array
+	 */
+	private function get_settlement_status_labels() {
+		return array(
+			'expected_credit' => __( 'Erwartete Gutschrift', 'mp' ),
+			'on_hold'         => __( 'Gesperrt', 'mp' ),
+			'releasable'      => __( 'Freigabefaehig', 'mp' ),
+			'released'        => __( 'Freigegeben', 'mp' ),
+			'n/a'             => __( 'Keine Daten', 'mp' ),
+		);
+	}
+
+	/**
+	 * Get progress percentage by status.
+	 *
+	 * @param string $status
+	 *
+	 * @return int
+	 */
+	private function get_order_progress_percent( $status ) {
+		$progress = array(
+			'order_received' => 25,
+			'order_paid'     => 50,
+			'order_shipped'  => 75,
+			'order_closed'   => 100,
+		);
+
+		return isset( $progress[ $status ] ) ? (int) $progress[ $status ] : 0;
+	}
+
+	/**
+	 * Get settlement status by order id list.
+	 *
+	 * @param array $order_ids
+	 *
+	 * @return array
+	 */
+	private function get_settlement_status_map( $order_ids ) {
+		$map = array();
+
+		if ( empty( $order_ids ) ) {
+			return $map;
+		}
+
+		$order_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $order_ids ) ) ) );
+
+		$pending_ids = array();
+		foreach ( $order_ids as $order_id ) {
+			if ( isset( $this->_settlement_status_cache[ $order_id ] ) ) {
+				$map[ $order_id ] = $this->_settlement_status_cache[ $order_id ];
+			} else {
+				$pending_ids[] = $order_id;
+			}
+		}
+
+		if ( empty( $pending_ids ) ) {
+			return $map;
+		}
+
+		if ( ! is_multisite() || ! $this->settlement_table_exists() ) {
+			foreach ( $pending_ids as $order_id ) {
+				$this->_settlement_status_cache[ $order_id ] = 'n/a';
+				$map[ $order_id ] = 'n/a';
+			}
+
+			return $map;
+		}
+
+		global $wpdb;
+		$table        = $wpdb->base_prefix . 'mp_settlement_ledger';
+		$placeholders = implode( ',', array_fill( 0, count( $pending_ids ), '%d' ) );
+		$sql          = $wpdb->prepare(
+			"SELECT order_post_id, status FROM {$table} WHERE order_post_id IN ({$placeholders})",
+			$pending_ids
+		);
+		$rows = (array) $wpdb->get_results( $sql, ARRAY_A );
+
+		$priority = array(
+			'on_hold'         => 4,
+			'expected_credit' => 3,
+			'releasable'      => 2,
+			'released'        => 1,
+		);
+
+		$best_map = array_fill_keys( $pending_ids, 'n/a' );
+
+		foreach ( $rows as $row ) {
+			$order_id = (int) $row['order_post_id'];
+			$status   = sanitize_key( (string) $row['status'] );
+
+			if ( ! isset( $priority[ $status ] ) ) {
+				continue;
+			}
+
+			$current_status = isset( $best_map[ $order_id ] ) ? $best_map[ $order_id ] : 'n/a';
+			if ( 'n/a' === $current_status || $priority[ $status ] > $priority[ $current_status ] ) {
+				$best_map[ $order_id ] = $status;
+			}
+		}
+
+		foreach ( $pending_ids as $order_id ) {
+			$this->_settlement_status_cache[ $order_id ] = isset( $best_map[ $order_id ] ) ? $best_map[ $order_id ] : 'n/a';
+			$map[ $order_id ] = $this->_settlement_status_cache[ $order_id ];
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Check settlement ledger table existence once per request.
+	 *
+	 * @return bool
+	 */
+	private function settlement_table_exists() {
+		if ( null !== $this->_settlement_table_exists ) {
+			return $this->_settlement_table_exists;
+		}
+
+		global $wpdb;
+		$table  = $wpdb->base_prefix . 'mp_settlement_ledger';
+		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+
+		$this->_settlement_table_exists = ( $exists === $table );
+
+		return $this->_settlement_table_exists;
+	}
+
+	/**
+	 * Build status-card payload for inline updates.
+	 *
+	 * @param int      $post_id
+	 * @param MP_Order $order
+	 *
+	 * @return array
+	 */
+	private function get_order_status_payload( $post_id, $order ) {
+		$current_status = get_post_status( $post_id );
+
+		return array(
+			'post_id' => (int) $post_id,
+			'status'  => (string) $current_status,
+			'html'    => $this->render_order_status_card( $order, $post_id, $current_status ),
+		);
+	}
+
+	/**
+	 * Render the modern status card for order list rows.
+	 *
+	 * @param MP_Order $order
+	 * @param int      $post_id
+	 * @param string   $current_status
+	 *
+	 * @return string
+	 */
+	private function render_order_status_card( $order, $post_id, $current_status ) {
+		$labels   = $this->get_order_status_labels();
+		$label    = isset( $labels[ $current_status ] ) ? $labels[ $current_status ] : ucfirst( (string) $current_status );
+		$progress = $this->get_order_progress_percent( $current_status );
+		$flow     = $this->get_order_flow_context( $order );
+
+		$settlement_map = $this->get_settlement_status_map( array( $post_id ) );
+		$settlement     = isset( $settlement_map[ $post_id ] ) ? $settlement_map[ $post_id ] : 'n/a';
+		$settlement_labels = $this->get_settlement_status_labels();
+		$settlement_label  = isset( $settlement_labels[ $settlement ] ) ? $settlement_labels[ $settlement ] : $settlement_labels['n/a'];
+
+		$actions = array(
+			'order_received' => __( 'Ausstehend', 'mp' ),
+			'order_paid'     => __( 'Bezahlt', 'mp' ),
+			'order_shipped'  => __( 'Versand', 'mp' ),
+			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
+		);
+
+		$needs_action = in_array( $current_status, array( 'order_received', 'order_paid' ), true ) || in_array( $settlement, array( 'expected_credit', 'on_hold', 'releasable' ), true );
+
+		$html  = '<div class="mp-order-status-card status-' . esc_attr( $current_status ) . ' settlement-' . esc_attr( $settlement ) . ( $needs_action ? ' needs-action' : '' ) . '" data-order-id="' . (int) $post_id . '" data-order-status="' . esc_attr( $current_status ) . '">';
+		$html .= '<span class="mp-order-status-badge">' . esc_html( $label ) . '</span>';
+		$html .= '<span class="mp-order-flow-badge mode-' . esc_attr( $flow['mode'] ) . '">' . esc_html( $flow['label'] ) . '</span>';
+		$html .= '<span class="mp-order-settlement-badge">' . esc_html( $settlement_label ) . '</span>';
+		$html .= '<div class="mp-order-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' . (int) $progress . '"><span style="width:' . (int) $progress . '%"></span></div>';
+		$html .= '<div class="mp-order-status-actions">';
+
+		foreach ( $actions as $action => $action_label ) {
+			if ( $action === $current_status ) {
+				continue;
+			}
+
+			$url = wp_nonce_url( add_query_arg( array(
+				'action'       => 'mp_change_order_status',
+				'order_status' => $action,
+				'order_id'     => get_the_title( $post_id ),
+				'post_id'      => $post_id,
+			), admin_url( 'admin-ajax.php' ) ), 'mp-change-order-status' );
+
+			$html .= '<a class="button button-small mp-order-status-action" data-order-status="' . esc_attr( $action ) . '" href="' . esc_url( $url ) . '">' . esc_html( $action_label ) . '</a>';
+		}
+
+		$html .= '</div>';
+		$html .= '</div>';
+
+		return $html;
+	}
+
+	/**
+	 * Resolve effective order flow/routing context for multisite setups.
+	 *
+	 * @param MP_Order $order
+	 *
+	 * @return array
+	 */
+	private function get_order_flow_context( $order ) {
+		$order_id = ( isset( $order->ID ) ) ? (int) $order->ID : 0;
+		if ( $order_id && isset( $this->_order_flow_cache[ $order_id ] ) ) {
+			return $this->_order_flow_cache[ $order_id ];
+		}
+
+		$context = array(
+			'mode'       => 'local',
+			'label'      => __( 'Lokaler Shop-Flow', 'mp' ),
+			'shop_count' => 1,
+		);
+
+		if ( ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) ) {
+			if ( $order_id ) {
+				$this->_order_flow_cache[ $order_id ] = $context;
+			}
+
+			return $context;
+		}
+
+		$blog_ids = array();
+		$cart     = $order->get_cart();
+		if ( is_object( $cart ) && method_exists( $cart, 'get_blog_ids' ) ) {
+			$blog_ids = array_filter( array_map( 'intval', (array) $cart->get_blog_ids() ) );
+		}
+
+		if ( empty( $blog_ids ) ) {
+			$blog_ids = array( (int) get_current_blog_id() );
+		}
+
+		$context['shop_count'] = count( $blog_ids );
+		$hybrid_enabled        = (bool) mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 );
+		$root_blog_id          = function_exists( 'mp_root_blog_id' ) ? (int) mp_root_blog_id() : 1;
+
+		if ( $hybrid_enabled && 1 === count( $blog_ids ) && (int) reset( $blog_ids ) !== $root_blog_id ) {
+			$context['mode']  = 'hybrid_subshop';
+			$context['label'] = __( 'Hybrid: Subshop-Gateway', 'mp' );
+		} elseif ( count( $blog_ids ) > 1 ) {
+			$context['mode']  = 'network_multi';
+			$context['label'] = __( 'Netzwerk-Flow (Multi-Shop)', 'mp' );
+		} else {
+			$context['mode']  = 'network_global';
+			$context['label'] = __( 'Netzwerk-Flow (Mainshop)', 'mp' );
+		}
+
+		if ( $order_id ) {
+			$this->_order_flow_cache[ $order_id ] = $context;
+		}
+
+		return $context;
+	}
+
+	/**
+	 * Prime order list caches once so per-row rendering stays cheap.
+	 */
+	private function prime_orders_list_runtime_data() {
+		if ( $this->_orders_list_runtime_primed ) {
+			return;
+		}
+
+		$this->_orders_list_runtime_primed = true;
+
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		global $wp_query;
+		if ( ! $wp_query || empty( $wp_query->posts ) ) {
+			return;
+		}
+
+		$order_ids = array();
+		foreach ( (array) $wp_query->posts as $post_obj ) {
+			if ( isset( $post_obj->post_type ) && 'mp_order' === $post_obj->post_type ) {
+				$order_ids[] = (int) $post_obj->ID;
+			}
+		}
+
+		if ( empty( $order_ids ) ) {
+			return;
+		}
+
+		$this->get_settlement_status_map( $order_ids );
+	}
+
+	/**
 	 * Defines the list table data for product coupons
 	 *
 	 * @since 1.0
@@ -1074,61 +1610,14 @@ class MP_Orders_Admin {
 		$order = new MP_Order( $post_id );
 		$html  = '';
 
+		if ( 'mp_orders_status' === $column ) {
+			$this->prime_orders_list_runtime_data();
+		}
+
 		switch ( $column ) {
 			//! Order Status
 			case 'mp_orders_status' :
-				switch ( $post->post_status ) {
-					case 'order_received' :
-						$text = __( 'Ausstehend', 'mp' );
-						break;
-
-					case 'order_paid' :
-						$text = __( 'Bezahlt', 'mp' );
-						break;
-
-					case 'order_shipped' :
-						$text = __( 'Versand', 'mp' );
-						break;
-
-					case 'order_closed' :
-						$text = __( 'Abgeschlossen', 'mp' );
-						break;
-
-					case 'trash' :
-						$text = __( 'Müll', 'mp' );
-						break;
-				}
-
-				$actions = array(
-				'order_received' => __( 'Ausstehend', 'mp' ),
-				'order_paid'     => __( 'Bezahlt', 'mp' ),
-				'order_shipped'  => __( 'Versand', 'mp' ),
-				'order_closed'   => __( 'Abgeschlossen', 'mp' ),
-			);
-				$html .= '<div class="mp_order_status ' . get_post_status() . '">';
-
-				if ( isset( $actions ) ) {
-					$html .= '<ul class="mp_order_status_menu">';
-					$html .= '<li class="item">' . __( 'Markieren als:', 'mp' ) . '</li>';
-
-					foreach ( $actions as $action => $label ) {
-						if ( $action == $post->post_status ) {
-							$html .= '<li class="item current"><span>' . $label . '</span></li>';
-						} else {
-							$html .= '<li class="item"><a href="' . wp_nonce_url( add_query_arg( array(
-									'action'       => 'mp_change_order_status',
-									'order_status' => $action,
-									'order_id'     => get_the_title(),
-									'post_id'      => $post_id
-								), admin_url( 'admin-ajax.php' ) ), 'mp-change-order-status' ) . '">' . $label . '</a></li>';
-						}
-					}
-
-					$html .= '</ul>';
-				}
-
-				$html .= '<img src="' . mp_plugin_url( 'ui/images/ajax-loader.gif' ) . '" alt="" />';
-				$html .= '</div>';
+				$html .= $this->render_order_status_card( $order, $post_id, get_post_status( $post_id ) );
 				break;
 
 			//! Order ID

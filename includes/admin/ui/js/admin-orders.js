@@ -33,7 +33,13 @@
 		};
 		
 		var initSelect2Fields = function() {
-			$( 'select.mp-select2' ).not( '.select2-offscreen' ).mp_select2( {
+			var $fields = $( 'select.mp-select2' ).not( '.select2-offscreen' );
+
+			if ( typeof $fields.mp_select2 !== 'function' ) {
+				return;
+			}
+
+			$fields.mp_select2( {
 				dropdownAutoWidth : false,
 				width : "element"
 			} );
@@ -58,12 +64,22 @@
 				}
 				
 				var old_value = $target.val();
+				var hasMpSelect2 = ( typeof $.fn.mp_select2 === 'function' );
 
-				$target.mp_select2( 'destroy' ).hide().next( 'img' ).show();
-				$this.mp_select2( 'disable' );
+				if ( hasMpSelect2 ) {
+					$target.mp_select2( 'destroy' );
+				}
+
+				$target.hide().next( 'img' ).show();
+
+				if ( hasMpSelect2 ) {
+					$this.mp_select2( 'disable' );
+				}
 						
 				$.post( url, data ).done( function( resp ) {
-					$this.mp_select2( 'enable' );
+					if ( hasMpSelect2 ) {
+						$this.mp_select2( 'enable' );
+					}
 					
 					if ( resp.success ) {
 						if ( resp.data.states ) {
@@ -81,12 +97,57 @@
 		
 		var initCustomerInfoLightbox = function() {
 			$( '.column-mp_orders_name' ).find( 'a' ).on('click', function() {
-				$.colorbox( {
-					href : $( this ).parent().find( '.mp-customer-info-lb' ),
-					inline : true,
-					maxWidth : "90%",
-					opacity : .7,
-					width : 640
+				var $content = $( this ).parent().find( '.mp-customer-info-lb' );
+
+				if ( window.basicLightbox && $content.length ) {
+					basicLightbox.create( '<div class="mp-admin-lightbox-content">' + $content.html() + '</div>' ).show();
+					return;
+				}
+
+				if ( $.colorbox ) {
+					$.colorbox( {
+						href : $content,
+						inline : true,
+						maxWidth : "90%",
+						opacity : .7,
+						width : 640
+					} );
+				}
+			} );
+		};
+
+		var initStatusActionFeedback = function() {
+			$( document ).on( 'click', '.mp-order-status-action', function( e ) {
+				e.preventDefault();
+
+				var $link = $( this );
+				var $card = $link.closest( '.mp-order-status-card' );
+				var postId = parseInt( $card.data( 'order-id' ), 10 );
+				var targetStatus = $link.data( 'order-status' );
+
+				if ( ! postId || ! targetStatus ) {
+					return;
+				}
+
+				$card.addClass( 'is-loading' );
+
+				$.post( mp_admin_orders.ajax_url, {
+					action: 'mp_change_order_status_inline',
+					ajax_nonce: mp_admin_orders.ajax_nonce,
+					post_id: postId,
+					order_status: targetStatus
+				} ).done( function( resp ) {
+					if ( resp && resp.success && resp.data && resp.data.html ) {
+						$card.replaceWith( resp.data.html );
+						document.dispatchEvent( new CustomEvent( 'mp:orderStatusUpdated' ) );
+						return;
+					}
+
+					$card.removeClass( 'is-loading' );
+					alert( 'Status konnte nicht aktualisiert werden.' );
+				} ).fail( function() {
+					$card.removeClass( 'is-loading' );
+					alert( 'Status konnte nicht aktualisiert werden.' );
 				} );
 			} );
 		};
@@ -149,6 +210,7 @@
 		initSelect2Fields();
 		initUpdateStatesDropdown();
 		initCustomerInfoLightbox();
+		initStatusActionFeedback();
 		handleOtherShippingMethod();
 		removeCustomShippingMethod();
 	});

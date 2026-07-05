@@ -190,6 +190,43 @@ class MP_Admin_Multisite {
 			'name'  => 'global_cart',
 			'label' => array( 'text' => __( 'Den Netzwerkwarenkorb aktivieren?', 'mp' ) ),
 		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'advanced[hybrid_gateway_routing]',
+			'label'   => array( 'text' => __( 'Hybrid-Gateway-Routing aktivieren?', 'mp' ) ),
+			'desc'    => __( 'Wenn aktiviert, nutzt ein Warenkorb mit nur einem Subshop dessen lokale Gateways. Bei Multi-Shop-Warenkörben werden weiterhin die Mainshop-Gateways verwendet.', 'mp' ),
+			'message' => __( 'Single-Subshop-Kauf nutzt lokale Gateways', 'mp' ),
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'advanced[network_customer_hub]',
+			'label'   => array( 'text' => __( 'Zentrale Kundenseite im Mainshop aktivieren?', 'mp' ) ),
+			'desc'    => __( 'Aktiviert die optionale Kundenzentrale im Mainshop per Netzwerkseite/Shortcode.', 'mp' ),
+			'message' => __( 'Kundenzentrale aktivieren', 'mp' ),
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'advanced[network_shop_performance]',
+			'label'   => array( 'text' => __( 'Shopuser Performance-Seite aktivieren?', 'mp' ) ),
+			'desc'    => __( 'Erlaubt eine optionale Seite mit Kennzahlen für Shopadmins im Netzwerk.', 'mp' ),
+			'message' => __( 'Shopperformance-Seite aktivieren', 'mp' ),
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'advanced[settlement_enabled]',
+			'label'   => array( 'text' => __( 'Settlement-Ledger aktivieren?', 'mp' ) ),
+			'desc'    => __( 'Aktiviert Freigabe-Queue, Hold/Release und Subshop-Gutschriftstatus.', 'mp' ),
+			'message' => __( 'Settlement Moderation aktivieren', 'mp' ),
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'advanced[settlement_auto_release]',
+			'label'   => array( 'text' => __( 'Automatische Freigabe nach Regeln?', 'mp' ) ),
+			'desc'    => __( 'Wenn aktiv, werden freigabefaehige Positionen nach Ablauf aller Gates automatisch auf freigegeben gesetzt.', 'mp' ),
+			'message' => __( 'Auto-Release aktivieren', 'mp' ),
+		) );
+		$metabox->add_field( 'number', array(
+			'name'          => 'advanced[settlement_hold_days]',
+			'label'         => array( 'text' => __( 'Hold-Tage', 'mp' ) ),
+			'desc'          => __( 'Wartezeit in Tagen bis eine Position ohne Konflikte freigabefaehig wird (Standard: 14).', 'mp' ),
+			'default_value' => 14,
+			'custom'        => array( 'min' => 0, 'step' => 1 ),
+		) );
 		// HIER die neue Option:
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[delete_on_uninstall]',
@@ -569,6 +606,24 @@ class MP_Admin_Multisite {
 				'required' => true,
 			),
 		) );
+		$metabox->add_field( 'post_select', array(
+			'name'        => 'pages[network_customer_hub]',
+			'label'       => array( 'text' => __( 'Zentrale Kundenseite', 'mp' ) ),
+			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
+			'placeholder' => __( 'Optional: Wähle eine Seite', 'mp' ),
+		) );
+		$metabox->add_field( 'post_select', array(
+			'name'        => 'pages[network_shop_performance]',
+			'label'       => array( 'text' => __( 'Shopuser Performance', 'mp' ) ),
+			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
+			'placeholder' => __( 'Optional: Wähle eine Seite', 'mp' ),
+		) );
+		$metabox->add_field( 'post_select', array(
+			'name'        => 'pages[network_settlement_dashboard]',
+			'label'       => array( 'text' => __( 'Settlement Moderation (Mainshop)', 'mp' ) ),
+			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
+			'placeholder' => __( 'Optional: Wähle eine Seite', 'mp' ),
+		) );
 	}
 
 	/**
@@ -590,6 +645,18 @@ class MP_Admin_Multisite {
 
 			case 'pages[network_tags]' :
 				$type = 'network_tags';
+				break;
+
+			case 'pages[network_customer_hub]' :
+				$type = 'network_customer_hub';
+				break;
+
+			case 'pages[network_shop_performance]' :
+				$type = 'network_shop_performance';
+				break;
+
+			case 'pages[network_settlement_dashboard]' :
+				$type = 'network_settlement_dashboard';
 				break;
 		}
 
@@ -615,7 +682,16 @@ class MP_Admin_Multisite {
 	 * @action psource_field/print_scripts
 	 */
 	public function create_store_page_js( $field ) {
-		if ( $field->args['original_name'] !== 'pages[network_store_page]' ) {
+		$valid_fields = array(
+			'pages[network_store_page]',
+			'pages[network_categories]',
+			'pages[network_tags]',
+			'pages[network_customer_hub]',
+			'pages[network_shop_performance]',
+			'pages[network_settlement_dashboard]',
+		);
+
+		if ( ! in_array( $field->args['original_name'], $valid_fields, true ) ) {
 			return;
 		}
 		?>

@@ -38,6 +38,7 @@ class MP_Ajax {
 		add_action( 'wp_ajax_mp_bulk_edit_products', array( &$this, 'bulk_edit_products' ) );
 		// Change order status
 		add_action( 'wp_ajax_mp_change_order_status', array( 'MP_Orders_Admin', 'ajax_change_order_status' ) );
+		add_action( 'wp_ajax_mp_change_order_status_inline', array( 'MP_Orders_Admin', 'ajax_change_order_status_inline' ) );
 		// Check if an email address exists
 		add_action( 'wp_ajax_nopriv_mp_check_if_email_exists', array( &$this, 'check_if_email_exists' ) );
 		//check if an username already exist, for validation

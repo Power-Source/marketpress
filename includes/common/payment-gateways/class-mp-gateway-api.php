@@ -85,7 +85,16 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 				return;
 			}
 
-			if (is_multisite() && mp_get_network_setting( 'global_cart' ) ) {
+			$use_network_global_gateway = ( is_multisite() && mp_get_network_setting( 'global_cart' ) );
+
+			if ( $use_network_global_gateway && ! is_admin() && mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 ) && function_exists( 'mp_cart' ) ) {
+				$blog_ids = (array) mp_cart()->get_blog_ids();
+				if ( count( $blog_ids ) === 1 && (int) reset( $blog_ids ) !== (int) mp_root_blog_id() ) {
+					$use_network_global_gateway = false;
+				}
+			}
+
+			if ( $use_network_global_gateway ) {
 				//if this is global cart, we will need to get from network admin
 				$gateways = mp_get_network_setting( 'global_gateway' );
 			} else {
@@ -100,7 +109,7 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 				}
 
 				//in global mode, we only load one gateway for all
-				if (is_multisite() && mp_get_network_setting( 'global_cart' ) && $code == $gateways ) {
+				if ( $use_network_global_gateway && $code == $gateways ) {
 					self::$_active_gateways[ $code ] = new $class;
 				} else {
 					if ( is_admin() && ( 'store-settings-payments' == mp_get_get_value( 'page' ) || 'store-setup-wizard' == mp_get_get_value( 'page' ) ) ) {

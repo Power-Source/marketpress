@@ -69,6 +69,9 @@ class MP_Multisite {
 			add_shortcode( 'mp_global_tag_cloud', array( &$this, 'mp_global_tag_cloud_sc' ) );
 		}
 
+		add_shortcode( 'mp_network_customer_hub', array( &$this, 'mp_network_customer_hub_sc' ) );
+		add_shortcode( 'mp_network_shop_performance', array( &$this, 'mp_network_shop_performance_sc' ) );
+
 		//filter global product list
 		add_action( 'wp_ajax_mp_global_update_product_list', array( &$this, 'filter_products' ) );
 		add_action( 'wp_ajax_nopriv_mp_global_update_product_list', array( &$this, 'filter_products' ) );
@@ -785,7 +788,21 @@ class MP_Multisite {
 	 */
 	public function get_gateways( $gateways ) {
 		if ( ! is_network_admin() ) {
-			if ( mp_get_network_setting( 'global_cart' ) ) {
+			$use_global_gateway = mp_get_network_setting( 'global_cart' );
+
+			if ( $use_global_gateway && ! is_admin() && mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 ) ) {
+				$blog_ids = array();
+
+				if ( function_exists( 'mp_cart' ) ) {
+					$blog_ids = (array) mp_cart()->get_blog_ids();
+				}
+
+				if ( count( $blog_ids ) === 1 && (int) reset( $blog_ids ) !== (int) mp_root_blog_id() ) {
+					$use_global_gateway = false;
+				}
+			}
+
+			if ( $use_global_gateway ) {
 				$code = mp_get_network_setting( 'global_gateway' );
 				if ( ! empty( $code ) ) {
 					$gateways = array( $code => $gateways[ $code ] );
@@ -809,6 +826,200 @@ class MP_Multisite {
 		}
 
 		return $gateways;
+	}
+
+	/**
+	 * Render the optional network customer hub.
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public function mp_network_customer_hub_sc( $atts ) {
+		if ( ! mp_is_main_site() ) {
+			return '';
+		}
+
+		if ( ! mp_get_network_setting( 'advanced->network_customer_hub', 0 ) ) {
+			return '';
+		}
+
+		if ( ! is_user_logged_in() ) {
+			return '<p>' . esc_html__( 'Bitte melde Dich an, um Deine zentrale Bestelluebersicht zu sehen.', 'mp' ) . '</p>';
+		}
+
+		$user_id = get_current_user_id();
+		$sites   = get_sites( array( 'fields' => 'ids' ) );
+		$rows    = array();
+		$totals  = array(
+			'orders' => 0,
+			'value'  => 0.0,
+		);
+
+		foreach ( $sites as $blog_id ) {
+			switch_to_blog( $blog_id );
+
+			$orders = get_posts( array(
+				'post_type'      => 'mp_order',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'author'         => $user_id,
+				'fields'         => 'ids',
+			) );
+
+			if ( ! empty( $orders ) ) {
+				$shop_name  = get_option( 'blogname' );
+				$shop_total = 0.0;
+
+				foreach ( $orders as $post_id ) {
+					$post = get_post( $post_id );
+					if ( ! $post || in_array( $post->post_status, array( 'trash', 'auto-draft' ), true ) ) {
+						continue;
+					}
+
+					$order = new MP_Order( $post_id );
+					if ( ! $order->exists() ) {
+						continue;
+					}
+
+					$total = (float) get_post_meta( $post_id, 'mp_order_total', true );
+					$shop_total += $total;
+					$totals['orders'] ++;
+					$totals['value'] += $total;
+
+					$rows[] = array(
+						'shop'   => $shop_name,
+						'order'  => $order->get_id(),
+						'total'  => $total,
+						'status' => $post->post_status,
+						'url'    => $order->tracking_url( false, $blog_id ),
+					);
+				}
+
+				if ( $shop_total > 0 ) {
+					$rows[] = array(
+						'shop'   => $shop_name,
+						'order'  => 'summary',
+						'total'  => $shop_total,
+						'status' => 'summary',
+						'url'    => '',
+					);
+				}
+			}
+
+			restore_current_blog();
+		}
+
+		if ( empty( $rows ) ) {
+			return '<p>' . esc_html__( 'Noch keine netzwerkweiten Bestellungen gefunden.', 'mp' ) . '</p>';
+		}
+
+		$html  = '<section class="mp-network-customer-hub">';
+		$html .= '<h2>' . esc_html__( 'Zentrale Kundendatenbank', 'mp' ) . '</h2>';
+		$html .= '<p><strong>' . esc_html__( 'Bestellungen:', 'mp' ) . '</strong> ' . intval( $totals['orders'] ) . ' &nbsp; <strong>' . esc_html__( 'Gesamtausgaben:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( mp_get_setting( 'currency' ), $totals['value'] ) ) . '</p>';
+		$html .= '<table class="widefat striped"><thead><tr>';
+		$html .= '<th>' . esc_html__( 'Shop', 'mp' ) . '</th>';
+		$html .= '<th>' . esc_html__( 'Bestellung', 'mp' ) . '</th>';
+		$html .= '<th>' . esc_html__( 'Status', 'mp' ) . '</th>';
+		$html .= '<th>' . esc_html__( 'Betrag', 'mp' ) . '</th>';
+		$html .= '</tr></thead><tbody>';
+
+		foreach ( $rows as $row ) {
+			$html .= '<tr>';
+			$html .= '<td>' . esc_html( $row['shop'] ) . '</td>';
+
+			if ( 'summary' === $row['order'] ) {
+				$html .= '<td><em>' . esc_html__( 'Shop-Summe', 'mp' ) . '</em></td>';
+				$html .= '<td><em>' . esc_html__( 'Zusammenfassung', 'mp' ) . '</em></td>';
+			} else {
+				$html .= '<td><a href="' . esc_url( $row['url'] ) . '">#' . esc_html( $row['order'] ) . '</a></td>';
+				$html .= '<td>' . esc_html( $row['status'] ) . '</td>';
+			}
+
+			$html .= '<td>' . esc_html( mp_format_currency( mp_get_setting( 'currency' ), $row['total'] ) ) . '</td>';
+			$html .= '</tr>';
+		}
+
+		$html .= '</tbody></table>';
+		$html .= '</section>';
+
+		return $html;
+	}
+
+	/**
+	 * Render the optional shop performance overview for shop admins.
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public function mp_network_shop_performance_sc( $atts ) {
+		if ( ! mp_get_network_setting( 'advanced->network_shop_performance', 0 ) ) {
+			return '';
+		}
+
+		if ( ! is_user_logged_in() || ! current_user_can( 'manage_store_settings' ) ) {
+			return '<p>' . esc_html__( 'Diese Seite ist nur fuer Shopadmins verfuegbar.', 'mp' ) . '</p>';
+		}
+
+		$current_blog_id = get_current_blog_id();
+		$sites           = get_sites( array( 'fields' => 'ids' ) );
+		$network_totals  = array(
+			'orders'  => 0,
+			'revenue' => 0.0,
+		);
+		$shop_totals     = array();
+
+		foreach ( $sites as $blog_id ) {
+			switch_to_blog( $blog_id );
+
+			$orders = get_posts( array(
+				'post_type'      => 'mp_order',
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			) );
+
+			$shop_revenue = 0.0;
+			$shop_orders  = 0;
+			foreach ( $orders as $post_id ) {
+				$post = get_post( $post_id );
+				if ( ! $post || in_array( $post->post_status, array( 'trash', 'auto-draft' ), true ) ) {
+					continue;
+				}
+
+				$shop_orders ++;
+				$shop_revenue += (float) get_post_meta( $post_id, 'mp_order_total', true );
+			}
+
+			$shop_totals[ $blog_id ] = array(
+				'orders'  => $shop_orders,
+				'revenue' => $shop_revenue,
+				'name'    => get_option( 'blogname' ),
+			);
+
+			$network_totals['orders'] += $shop_orders;
+			$network_totals['revenue'] += $shop_revenue;
+
+			restore_current_blog();
+		}
+
+		$current = isset( $shop_totals[ $current_blog_id ] ) ? $shop_totals[ $current_blog_id ] : array(
+			'orders'  => 0,
+			'revenue' => 0.0,
+			'name'    => get_option( 'blogname' ),
+		);
+
+		$html  = '<section class="mp-network-shop-performance">';
+		$html .= '<h2>' . esc_html__( 'Shopperformance im Netzwerk', 'mp' ) . '</h2>';
+		$html .= '<p><strong>' . esc_html__( 'Shop:', 'mp' ) . '</strong> ' . esc_html( $current['name'] ) . '</p>';
+		$html .= '<ul>';
+		$html .= '<li><strong>' . esc_html__( 'Eigene Bestellungen:', 'mp' ) . '</strong> ' . intval( $current['orders'] ) . '</li>';
+		$html .= '<li><strong>' . esc_html__( 'Eigener Umsatz:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( mp_get_setting( 'currency' ), $current['revenue'] ) ) . '</li>';
+		$html .= '<li><strong>' . esc_html__( 'Netzwerk-Bestellungen:', 'mp' ) . '</strong> ' . intval( $network_totals['orders'] ) . '</li>';
+		$html .= '<li><strong>' . esc_html__( 'Netzwerk-Umsatz:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( mp_get_setting( 'currency' ), $network_totals['revenue'] ) ) . '</li>';
+		$html .= '</ul>';
+		$html .= '</section>';
+
+		return $html;
 	}
 
 	/**
@@ -903,6 +1114,14 @@ class MP_Multisite {
 			'global_gateway'   => 'paypal_express',
 			'allowed_themes'   => array(
 				'default' => 'full',
+			),
+			'advanced'         => array(
+				'hybrid_gateway_routing' => 0,
+				'network_customer_hub'   => 0,
+				'network_shop_performance' => 0,
+				'settlement_enabled'     => 0,
+				'settlement_auto_release' => 0,
+				'settlement_hold_days'   => 14,
 			),
 		);
 

@@ -232,6 +232,8 @@ class MP_Admin {
 	 * @access public
 	 */
 	public function enqueue_styles_scripts() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
 		// SlimSelect registrieren (wird von psource-metaboxes fields benötigt)
 		wp_register_script(
 			'mp-slim-select',
@@ -374,7 +376,55 @@ class MP_Admin {
 			) );
 		}
 
+		if ( $this->is_marketpress_screen( $screen ) ) {
+			wp_enqueue_style( 'mp-admin-modern', mp_plugin_url( 'includes/admin/ui/css/mp-admin-modern.css' ), array(), MP_VERSION );
+			wp_enqueue_script( 'mp-admin-modern', mp_plugin_url( 'includes/admin/ui/js/mp-admin-modern.js' ), array(), MP_VERSION, true );
+		}
+
 		wp_enqueue_style( 'mp-admin', mp_plugin_url( 'includes/admin/ui/css/admin.css' ), array(), MP_VERSION );
+	}
+
+	/**
+	 * Determine if the current admin screen belongs to MarketPress.
+	 *
+	 * @param WP_Screen|null $screen
+	 *
+	 * @return bool
+	 */
+	private function is_marketpress_screen( $screen ) {
+		if ( ! $screen ) {
+			return false;
+		}
+
+		$id        = isset( $screen->id ) ? (string) $screen->id : '';
+		$post_type = isset( $screen->post_type ) ? (string) $screen->post_type : '';
+
+		if ( 'mp_order' === $post_type ) {
+			return true;
+		}
+
+		if ( class_exists( 'MP_Product' ) ) {
+			if ( $post_type === MP_Product::get_post_type() || $post_type === MP_Product::get_variations_post_type() ) {
+				return true;
+			}
+		}
+
+		$needles = array(
+			'mp_order',
+			'mp_product',
+			'marketpress',
+			'store-settings',
+			'store-setup-wizard',
+			'network-settlement',
+		);
+
+		foreach ( $needles as $needle ) {
+			if ( false !== strpos( $id, $needle ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
