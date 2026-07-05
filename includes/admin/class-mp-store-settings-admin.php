@@ -62,10 +62,12 @@ private function __construct() {
     // Dynamisch für alle relevanten Screens die Action registrieren
     add_action( 'current_screen', function() {
         $screen = get_current_screen();
+		$current_page = (string) mp_get_get_value( 'page', '' );
         // NICHT für Addon-Detailseite!
         if (
             $screen
             && strpos( $screen->id, 'store-settings' ) !== false
+			&& 'store-settings-shop-profile' !== $current_page
             && (
                 $screen->id !== 'store-settings_page_store-settings-addons'
                 || ( $screen->id === 'store-settings_page_store-settings-addons' && empty($_GET['addon']) )

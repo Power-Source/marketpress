@@ -126,7 +126,8 @@ class MP_Network_Shop_Profile_Addon {
 		) );
 
 		$metabox->add_field( 'section', array(
-			'label' => array( 'text' => __( 'Design', 'mp' ) ),
+			'name'  => 'shop_profile_design_section',
+			'title' => __( 'Design', 'mp' ),
 		) );
 		$metabox->add_field( 'colorpicker', array(
 			'name'          => 'shop_profile[theme_primary]',
