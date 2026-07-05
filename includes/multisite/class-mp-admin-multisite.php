@@ -278,6 +278,17 @@ class MP_Admin_Multisite {
 			),
 			'default_value' => 'direct_product',
 		) );
+		$metabox->add_field( 'select', array(
+			'name'    => 'advanced[network_mainshop_floating_cart_mode]',
+			'label'   => array( 'text' => __( 'Floating-Warenkorb auf Mainshop-Seiten', 'mp' ) ),
+			'desc'    => __( 'Steuert, wo der Floating-Warenkorb auf der Hauptseite angezeigt wird. "Nur Shop-Profilseite" ist fuer den Netzwerk-Marktplatz-Flow empfohlen.', 'mp' ),
+			'options' => array(
+				'off'     => __( 'Deaktiviert', 'mp' ),
+				'profile' => __( 'Nur Shop-Profilseite', 'mp' ),
+				'all'     => __( 'Auf allen Mainshop-Seiten', 'mp' ),
+			),
+			'default_value' => 'profile',
+		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[network_shop_profile_reviews]',
 			'label'   => array( 'text' => __( 'Bewertungs-Widget im Shop-Profil aktivieren?', 'mp' ) ),

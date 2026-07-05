@@ -250,9 +250,17 @@ class MP_Cart {
 		if ( is_array( $item ) ) {
 			if ( $product_id = mp_arr_get_value( 'product_id', $item ) ) {
 				unset( $item['product_id'] );
-				$product = new MP_Product( $product_id );
+
+				if ( $this->_is_global_item_id( $product_id ) ) {
+					list( $blog_id, $product_id ) = explode( '.', $product_id );
+					$this->set_id( intval( $blog_id ) );
+				}
+
+				$product = new MP_Product( $product_id, $this->get_blog_id() );
 				if ( $variation = $product->get_variations_by_attributes( $item, 0 ) ) {
 					$item_id = $variation->ID;
+				} else {
+					$item_id = $product_id;
 				}
 			}
 		}
@@ -417,7 +425,11 @@ class MP_Cart {
 	 * @return bool
 	 */
 	protected function _is_global_item_id( $item_id ) {
-		return ( $this->is_global && false !== strpos( $item_id, '.' ) );
+		if ( ! $this->is_global || ( ! is_scalar( $item_id ) && ! is_null( $item_id ) ) ) {
+			return false;
+		}
+
+		return false !== strpos( (string) $item_id, '.' );
 	}
 
 	/**
@@ -2479,14 +2491,17 @@ class MP_Cart {
 			$cookie_domain = get_blog_details( mp_main_site_id() )->domain;
 		}
 
-		// Setze SameSite=None und Secure für Cross-Site-Kompatibilität (z.B. Stripe Redirect)
+		$is_secure_request = is_ssl();
+
+		// Browser akzeptieren SameSite=None nur mit Secure=true.
+		// In lokalen HTTP-Umgebungen deshalb auf Lax fallen, damit der Warenkorb persistiert.
 		$options = [
 			'expires'  => $expire,
 			'path'     => '/',
 			'domain'   => $cookie_domain,
-			'secure'   => is_ssl(), // Nur mit HTTPS
+			'secure'   => $is_secure_request,
 			'httponly' => false,
-			'samesite' => 'None' // Erlaubt Cross-Site-Requests (wichtig für Payment Redirects)
+			'samesite' => $is_secure_request ? 'None' : 'Lax',
 		];
 		
 		setcookie( $this->_cookie_id, json_encode( $this->_items ), $options );

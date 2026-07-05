@@ -59,6 +59,7 @@ class MP_Multisite {
 		add_filter( 'rewrite_rules_array', array( &$this, 'add_rewrite_rules' ) );
 		add_filter( 'query_vars', array( &$this, 'add_query_vars' ) );
 		add_filter( 'mp_multisite/global_product_url', array( &$this, 'filter_global_product_navigation_url' ), 10, 4 );
+		add_filter( 'mp_cart_needed_on_page', array( &$this, 'maybe_force_mainshop_floating_cart' ) );
 
 		add_filter( 'mp_gateway_api/get_gateways', array( &$this, 'get_gateways' ) );
 		add_filter( 'mp_gateway_api/use_network_global_gateway', array( &$this, 'filter_use_network_global_gateway' ) );
@@ -1471,6 +1472,44 @@ class MP_Multisite {
 	}
 
 	/**
+	 * Force floating cart visibility on selected mainshop contexts.
+	 *
+	 * @param bool $cart_needed
+	 *
+	 * @return bool
+	 */
+	public function maybe_force_mainshop_floating_cart( $cart_needed ) {
+		if ( $cart_needed || ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) || ! mp_is_main_site() ) {
+			return (bool) $cart_needed;
+		}
+
+		$mode = sanitize_key( (string) mp_get_network_setting( 'advanced->network_mainshop_floating_cart_mode', 'profile' ) );
+		if ( ! in_array( $mode, array( 'off', 'profile', 'all' ), true ) ) {
+			$mode = 'profile';
+		}
+
+		if ( 'off' === $mode ) {
+			return false;
+		}
+
+		if ( 'all' === $mode ) {
+			return true;
+		}
+
+		$profile_page_id = (int) mp_get_network_setting( 'pages->network_shop_profile', 0 );
+		if ( $profile_page_id > 0 && (int) get_queried_object_id() === $profile_page_id ) {
+			return true;
+		}
+
+		global $post;
+		if ( is_object( $post ) && isset( $post->post_content ) && has_shortcode( (string) $post->post_content, 'mp_network_shop_profile' ) ) {
+			return true;
+		}
+
+		return ! empty( $_GET['mp_network_shop'] ) || ! empty( $_GET['mp_network_product'] );
+	}
+
+	/**
 	 * Force profile product forms into global-cart context (mainshop ajax + global item IDs).
 	 *
 	 * @param string $html
@@ -2592,6 +2631,7 @@ class MP_Multisite {
 				'network_multishop_checkout_mode' => 'bundle_only',
 				'network_multishop_checkout_default' => 'bundle',
 				'network_bundle_shipping_mode' => 'per_shop',
+				'network_mainshop_floating_cart_mode' => 'profile',
 				'network_customer_hub'   => 0,
 				'network_support_enabled' => 0,
 				'network_support_mode'   => 'autonomous',
@@ -2629,6 +2669,10 @@ class MP_Multisite {
 
 		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_bundle_shipping_mode', $settings['advanced'] ) ) {
 			$new_settings['advanced']['network_bundle_shipping_mode'] = 'per_shop';
+		}
+
+		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_mainshop_floating_cart_mode', $settings['advanced'] ) ) {
+			$new_settings['advanced']['network_mainshop_floating_cart_mode'] = 'profile';
 		}
 
 		update_site_option( 'mp_network_settings', $new_settings );
