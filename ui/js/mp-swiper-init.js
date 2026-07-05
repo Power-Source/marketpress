@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var closeBtn = document.querySelector('.mp-product-lightbox-close');
         if (closeBtn) closeBtn.onclick = function() { instance.close(); };
         var swiper = new Swiper('.mp-product-lightbox-gallery', {
-          loop: true,
+          loop: images.length > 1,
           slidesPerView: 1,
           spaceBetween: 0,
           initialSlide: startIndex,
@@ -79,15 +79,45 @@ if (typeof Swiper === 'undefined') {
   console.error('MP Swiper init: window.Swiper is not available.');
 }
 
+function mpShouldEnableLoop(container, slidesPerView, slidesPerGroup) {
+  if (!container) {
+    return false;
+  }
+
+  var slideCount = container.querySelectorAll('.swiper-wrapper > .swiper-slide:not(.swiper-slide-duplicate)').length;
+  var perView = parseInt(slidesPerView, 10);
+  var perGroup = parseInt(slidesPerGroup, 10);
+
+  if (isNaN(perView) || perView < 1) {
+    perView = 1;
+  }
+
+  if (isNaN(perGroup) || perGroup < 1) {
+    perGroup = 1;
+  }
+
+  return slideCount > Math.max(perView, perGroup);
+}
+
 window.initProductGallerySwiper = function(selector, options = {}) {
   if (typeof Swiper === 'undefined') {
     return null;
   }
 
-  return new Swiper(selector, {
+  var container = (typeof selector === 'string') ? document.querySelector(selector) : selector;
+  if (!container) {
+    return null;
+  }
+
+  var slidesPerView = options.slidesPerView || 1;
+  var slidesPerGroup = options.slidesPerGroup || 1;
+  var shouldLoop = mpShouldEnableLoop(container, slidesPerView, slidesPerGroup);
+
+  return new Swiper(container, {
     // Standardoptionen, können durch options überschrieben werden
-    loop: true,
+    loop: shouldLoop,
     slidesPerView: 1,
+    slidesPerGroup: 1,
     spaceBetween: 0,
     pagination: {
       el: '.swiper-pagination',

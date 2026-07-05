@@ -79,6 +79,12 @@
 	padding: 16px;
 	box-shadow: 0 8px 24px rgba(30, 51, 72, .06);
 	min-width: 0;
+	transition: opacity .28s ease, transform .28s ease;
+}
+
+.mp-network-shop-profile .mp-network-profile-feature.is-loading {
+	opacity: .45;
+	transform: translateY(6px);
 }
 
 .mp-network-shop-profile .mp-network-profile-feature-label {

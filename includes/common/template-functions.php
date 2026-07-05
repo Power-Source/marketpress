@@ -2867,7 +2867,7 @@ if ( ! function_exists( 'mp_product' ) ) {
 				$return .= '<div class="swiper-button-next"></div>';
 				$return .= '<div class="swiper-button-prev"></div>';
 				$return .= '</div><!-- end mp_product_gallery -->';
-				$return .= "<script>document.addEventListener('DOMContentLoaded',function(){if(window.Swiper){new Swiper('#mp-product-gallery',{loop:true,slidesPerView:1,spaceBetween:0,pagination:{el:'.swiper-pagination',clickable:true},navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'}});}});</script>";
+				$return .= "<script>document.addEventListener('DOMContentLoaded',function(){var g=document.getElementById('mp-product-gallery');if(!g||!window.Swiper){return;}var c=g.querySelectorAll('.swiper-wrapper > .swiper-slide').length;new Swiper(g,{loop:c>1,slidesPerView:1,slidesPerGroup:1,spaceBetween:0,pagination:{el:'.swiper-pagination',clickable:true},navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'}});});</script>";
 
 				$return .= '</div><!-- end mp_single_product_images -->';
 			}

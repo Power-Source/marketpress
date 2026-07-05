@@ -1108,6 +1108,7 @@ class MP_Multisite {
 
 				if ( mp_get_network_setting( 'global_cart', 0 ) ) {
 					$product_html = mp_product( false, $product_id, true, 'full', 'single', true );
+					$product_html = $this->normalize_network_profile_product_forms( $product_html, $shop_id );
 				} else {
 					$product_html  = '<article class="mp-network-product-fallback">';
 					$product_html .= '<h2>' . esc_html( $product_title ) . '</h2>';
@@ -1261,66 +1262,32 @@ class MP_Multisite {
 		restore_current_blog();
 
 		$related_products_total = 0;
-		$selected_product_rendered_first = false;
 		if ( $related_products_enabled ) {
+			$exclude_selected_sql = $product_id > 0 ? $wpdb->prepare( ' AND post_id != %d', $product_id ) : '';
 			$related_products_total = (int) $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$wpdb->base_prefix}mp_products WHERE post_status = 'publish' AND blog_id = %d",
+					"SELECT COUNT(*) FROM {$wpdb->base_prefix}mp_products WHERE post_status = 'publish' AND blog_id = %d{$exclude_selected_sql}",
 					$shop_id
 				)
 			);
 
 			if ( $related_products_total > 0 ) {
-				$selected_product_html = '';
-				if ( $product_id > 0 ) {
-					$selected_product_html = mp_global_list_products( array(
-						'echo'                    => false,
-						'blog_id'                 => $shop_id,
-						'category'                => $active_profile_category > 0 ? $active_profile_category : null,
-						'limit'                   => 1,
-						'order_by'                => 'date',
-						'order'                   => 'DESC',
-						'prioritize_post_ids'     => array( $product_id ),
-						'list_view'               => $related_products_list_view,
-						'filters'                 => false,
-						'paginate'                => false,
-						'disable_category_filter' => true,
-						'exclude_post_ids'        => array(),
-					) );
-
-					if ( false !== strpos( (string) $selected_product_html, 'mp_product_item' ) ) {
-						$selected_product_rendered_first = true;
-					}
-				}
-
-				$exclude_rest_ids = $selected_product_rendered_first && $product_id > 0 ? array( $product_id ) : array();
-				$remaining_limit = $related_products_limit - ( $selected_product_rendered_first ? 1 : 0 );
-				if ( $remaining_limit < 0 ) {
-					$remaining_limit = 0;
-				}
-
-				$remaining_products_html = '';
-				if ( $remaining_limit > 0 ) {
-					$remaining_products_html = mp_global_list_products( array(
-						'echo'                    => false,
-						'blog_id'                 => $shop_id,
-						'category'                => $active_profile_category > 0 ? $active_profile_category : null,
-						'limit'                   => $remaining_limit,
-						'order_by'                => $related_products_order_by,
-						'order'                   => $related_products_order,
-						'prioritize_post_ids'     => array(),
-						'list_view'               => $related_products_list_view,
-						'filters'                 => $related_products_filters,
-						'paginate'                => false,
-						'disable_category_filter' => true,
-						'exclude_post_ids'        => $exclude_rest_ids,
-					) );
-				}
-
 				$related_products_html  = '<section class="mp-network-profile-card mp-network-related-products mp_global_product_list_widget">';
 				$related_products_html .= '<h3>' . esc_html( $related_products_title ) . '</h3>';
-				$related_products_html .= $selected_product_rendered_first ? $selected_product_html : '';
-				$related_products_html .= $remaining_products_html;
+				$related_products_html .= mp_global_list_products( array(
+					'echo'                    => false,
+					'blog_id'                 => $shop_id,
+					'category'                => $active_profile_category > 0 ? $active_profile_category : null,
+					'limit'                   => $related_products_limit,
+					'order_by'                => $related_products_order_by,
+					'order'                   => $related_products_order,
+					'prioritize_post_ids'     => array(),
+					'list_view'               => $related_products_list_view,
+					'filters'                 => $related_products_filters,
+					'paginate'                => false,
+					'disable_category_filter' => true,
+					'exclude_post_ids'        => $product_id > 0 ? array( $product_id ) : array(),
+				) );
 				$related_products_html .= '</section>';
 			}
 		}
@@ -1418,12 +1385,14 @@ class MP_Multisite {
 		$shop_summary_html .= '</div>';
 		$shop_summary_html .= '</section>';
 
+		$sidebar_info_html = $shop_summary_html . $profile_meta_html . $reviews_summary_html . $policy_notice_html;
+
 		$products_panel_html  = '<div class="mp-network-profile-stage">';
 		$products_panel_html .= '<div class="mp-network-profile-feature">';
 		$products_panel_html .= '<div class="mp-network-profile-feature-label">' . esc_html__( 'Ausgewaehltes Produkt', 'mp' ) . '</div>';
 		$products_panel_html .= $product_html ? $product_html : '<p>' . esc_html__( 'In diesem Shop sind aktuell keine Produkte verfuegbar.', 'mp' ) . '</p>';
 		$products_panel_html .= '</div>';
-		$products_panel_html .= '<aside class="mp-network-profile-side">' . $shop_summary_html . $profile_meta_html . $reviews_summary_html . $policy_notice_html . '</aside>';
+		$products_panel_html .= '<aside class="mp-network-profile-side">' . $sidebar_info_html . '</aside>';
 		$products_panel_html .= '</div>';
 
 		if ( ! empty( $related_prefilter_html ) ) {
@@ -1434,23 +1403,34 @@ class MP_Multisite {
 			$products_panel_html .= $related_products_html;
 		}
 
-		$coupons_panel_html  = $shop_summary_html;
-		$coupons_panel_html .= $policy_notice_html;
-		$coupons_panel_html .= ! empty( $coupons_html )
+		$coupons_main_html = ! empty( $coupons_html )
 			? $coupons_html
 			: '<section class="mp-network-profile-card"><p>' . esc_html__( 'Aktuell sind keine aktiven Gutscheincodes fuer diesen Shop verfuegbar.', 'mp' ) . '</p></section>';
+		$coupons_panel_html  = '<div class="mp-network-profile-stage">';
+		$coupons_panel_html .= '<div class="mp-network-profile-feature">';
+		$coupons_panel_html .= '<div class="mp-network-profile-feature-label">' . esc_html__( 'Gutscheine', 'mp' ) . '</div>';
+		$coupons_panel_html .= $coupons_main_html;
+		$coupons_panel_html .= '</div>';
+		$coupons_panel_html .= '<aside class="mp-network-profile-side">' . $sidebar_info_html . '</aside>';
+		$coupons_panel_html .= '</div>';
 
-		$reviews_panel_html  = $shop_summary_html;
-		$reviews_panel_html .= $policy_notice_html;
+		$reviews_main_html = '';
 		if ( $reviews_blocked ) {
-			$reviews_panel_html .= '<section class="mp-network-profile-card mp-network-policy-warning">';
-			$reviews_panel_html .= '<h3>' . esc_html__( 'Bewertungen blockiert', 'mp' ) . '</h3>';
-			$reviews_panel_html .= '<p>' . esc_html__( 'Der Pflichtmodus verlangt aktivierte Bewertungen im Subshop. Bitte aktiviere das Reviews-Add-on im betroffenen Shop.', 'mp' ) . '</p>';
-			$reviews_panel_html .= '<p><a href="' . esc_url( $shop_addons_url ) . '">' . esc_html__( 'Add-on-Einstellungen dieses Shops', 'mp' ) . '</a></p>';
-			$reviews_panel_html .= '</section>';
+			$reviews_main_html .= '<section class="mp-network-profile-card mp-network-policy-warning">';
+			$reviews_main_html .= '<h3>' . esc_html__( 'Bewertungen blockiert', 'mp' ) . '</h3>';
+			$reviews_main_html .= '<p>' . esc_html__( 'Der Pflichtmodus verlangt aktivierte Bewertungen im Subshop. Bitte aktiviere das Reviews-Add-on im betroffenen Shop.', 'mp' ) . '</p>';
+			$reviews_main_html .= '<p><a href="' . esc_url( $shop_addons_url ) . '">' . esc_html__( 'Add-on-Einstellungen dieses Shops', 'mp' ) . '</a></p>';
+			$reviews_main_html .= '</section>';
 		} else {
-			$reviews_panel_html .= $reviews_html;
+			$reviews_main_html .= $reviews_html;
 		}
+		$reviews_panel_html  = '<div class="mp-network-profile-stage">';
+		$reviews_panel_html .= '<div class="mp-network-profile-feature">';
+		$reviews_panel_html .= '<div class="mp-network-profile-feature-label">' . esc_html__( 'Bewertungen', 'mp' ) . '</div>';
+		$reviews_panel_html .= $reviews_main_html;
+		$reviews_panel_html .= '</div>';
+		$reviews_panel_html .= '<aside class="mp-network-profile-side">' . $sidebar_info_html . '</aside>';
+		$reviews_panel_html .= '</div>';
 
 		$html  = '<section id="' . esc_attr( $profile_dom_id ) . '" class="mp-network-shop-profile" style="--mp-prof-primary:' . esc_attr( $theme_primary ) . ';--mp-prof-accent:' . esc_attr( $theme_accent ) . ';--mp-prof-bg-start:' . esc_attr( $theme_bg_start ) . ';--mp-prof-bg-end:' . esc_attr( $theme_bg_end ) . ';--mp-prof-card:' . esc_attr( $theme_card_bg ) . ';">';
 		$html .= '<div class="mp-network-profile-nav-row">';
@@ -1473,8 +1453,59 @@ class MP_Multisite {
 		$html .= '<div class="mp-network-profile-panel' . ( 'coupons' === $active_tab ? ' is-active' : '' ) . '" data-mp-tab-panel="coupons">' . $coupons_panel_html . '</div>';
 		$html .= '<div class="mp-network-profile-panel' . ( 'reviews' === $active_tab ? ' is-active' : '' ) . '" data-mp-tab-panel="reviews">' . $reviews_panel_html . '</div>';
 		$html .= '</div>';
-		$html .= '<script>(function(){var root=document.getElementById(' . wp_json_encode( $profile_dom_id ) . ');if(!root||root.getAttribute("data-mp-tabs-init")==="1"){return;}root.setAttribute("data-mp-tabs-init","1");var tabs=root.querySelectorAll("[data-mp-tab-target]");var panels=root.querySelectorAll("[data-mp-tab-panel]");if(!tabs.length||!panels.length){return;}var activate=function(tab){var target=tab.getAttribute("data-mp-tab-target");tabs.forEach(function(item){var active=item===tab;item.classList.toggle("is-active",active);item.setAttribute("aria-selected",active?"true":"false");});panels.forEach(function(panel){panel.classList.toggle("is-active",panel.getAttribute("data-mp-tab-panel")===target);});if(window.history&&window.history.replaceState){var href=tab.getAttribute("href");if(href){window.history.replaceState(null,"",href);}}};tabs.forEach(function(tab){tab.addEventListener("click",function(event){event.preventDefault();activate(tab);});});})();</script>';
+		$html .= '<script>(function(){';
+		$html .= 'var root=document.getElementById(' . wp_json_encode( $profile_dom_id ) . ');';
+		$html .= 'if(!root||root.getAttribute("data-mp-tabs-init")==="1"){return;}';
+		$html .= 'root.setAttribute("data-mp-tabs-init","1");';
+		$html .= 'var tabs=[];var panels=[];';
+		$html .= 'var refreshRefs=function(){tabs=[].slice.call(root.querySelectorAll("[data-mp-tab-target]"));panels=[].slice.call(root.querySelectorAll("[data-mp-tab-panel]"));};';
+		$html .= 'var activate=function(tab,skipHistory){if(!tab){return;}var target=tab.getAttribute("data-mp-tab-target");tabs.forEach(function(item){var active=item===tab;item.classList.toggle("is-active",active);item.setAttribute("aria-selected",active?"true":"false");});panels.forEach(function(panel){panel.classList.toggle("is-active",panel.getAttribute("data-mp-tab-panel")===target);});if(!skipHistory&&window.history&&window.history.replaceState){var href=tab.getAttribute("href");if(href){window.history.replaceState(null,"",href);}}};';
+		$html .= 'var rebindCartListeners=function(){if(window.mp_cart&&typeof window.mp_cart.initCartListeners==="function"){window.mp_cart.initCartListeners();}};';
+		$html .= 'var bindTabs=function(){refreshRefs();if(!tabs.length||!panels.length){return;}tabs.forEach(function(tab){if(tab.getAttribute("data-mp-tab-bound")==="1"){return;}tab.setAttribute("data-mp-tab-bound","1");tab.addEventListener("click",function(event){event.preventDefault();activate(tab,false);});});};';
+		$html .= 'var bindProductSwitch=function(){var links=root.querySelectorAll(".mp-network-related-products a[href]");[].forEach.call(links,function(link){if(link.getAttribute("data-mp-product-switch")==="1"){return;}link.setAttribute("data-mp-product-switch","1");link.addEventListener("click",function(event){var href=link.getAttribute("href")||"";if(!href||href.indexOf("mp_network_product=")===-1){return;}event.preventDefault();var feature=root.querySelector(".mp-network-profile-panel[data-mp-tab-panel=\"products\"] .mp-network-profile-feature");if(feature){feature.classList.add("is-loading");}var productsTab=root.querySelector("[data-mp-tab-target=\"products\"]");if(productsTab){activate(productsTab,true);}if(root.scrollIntoView){root.scrollIntoView({behavior:"smooth",block:"start"});}fetch(href,{credentials:"same-origin"}).then(function(response){if(!response.ok){throw new Error("profile-fetch-failed");}return response.text();}).then(function(html){var parser=new DOMParser();var doc=parser.parseFromString(html,"text/html");var nextRoot=doc.querySelector(".mp-network-shop-profile");if(!nextRoot){throw new Error("profile-missing");}var nextTabs=nextRoot.querySelector(".mp-network-profile-tabs");var nextPanels=nextRoot.querySelector(".mp-network-profile-panels");var currentTabs=root.querySelector(".mp-network-profile-tabs");var currentPanels=root.querySelector(".mp-network-profile-panels");if(nextTabs&&currentTabs){currentTabs.innerHTML=nextTabs.innerHTML;}if(nextPanels&&currentPanels){currentPanels.innerHTML=nextPanels.innerHTML;}refreshRefs();bindTabs();bindProductSwitch();rebindCartListeners();var nextProductsTab=root.querySelector("[data-mp-tab-target=\"products\"]");if(nextProductsTab){activate(nextProductsTab,true);}if(window.history&&window.history.replaceState){window.history.replaceState(null,"",href);}if(root.scrollIntoView){root.scrollIntoView({behavior:"smooth",block:"start"});}}).catch(function(){window.location.href=href;}).finally(function(){var nextFeature=root.querySelector(".mp-network-profile-panel[data-mp-tab-panel=\"products\"] .mp-network-profile-feature");if(nextFeature){nextFeature.classList.remove("is-loading");}});});});};';
+		$html .= 'bindTabs();bindProductSwitch();rebindCartListeners();';
+		$html .= '})();</script>';
 		$html .= '</section>';
+
+		return $html;
+	}
+
+	/**
+	 * Force profile product forms into global-cart context (mainshop ajax + global item IDs).
+	 *
+	 * @param string $html
+	 * @param int    $shop_id
+	 *
+	 * @return string
+	 */
+	private function normalize_network_profile_product_forms( $html, $shop_id ) {
+		$html = (string) $html;
+		$shop_id = absint( $shop_id );
+		if ( $shop_id <= 0 || empty( $html ) || ! mp_get_network_setting( 'global_cart', 0 ) ) {
+			return $html;
+		}
+
+		$root_ajax = get_admin_url( (int) mp_root_blog_id(), 'admin-ajax.php?action=mp_update_cart' );
+		if ( ! empty( $root_ajax ) ) {
+			$html = preg_replace(
+				'/data-ajax-url="[^"]*admin-ajax\.php\?action=mp_update_cart[^"]*"/i',
+				'data-ajax-url="' . esc_url( $root_ajax ) . '"',
+				$html
+			);
+		}
+
+		$html = preg_replace_callback(
+			'/name="product_id"\s+value="(\d+)"/i',
+			function( $matches ) use ( $shop_id ) {
+				$product_id = absint( $matches[1] );
+				if ( $product_id <= 0 ) {
+					return $matches[0];
+				}
+
+				return 'name="product_id" value="' . esc_attr( $shop_id . '.' . $product_id ) . '"';
+			},
+			$html
+		);
 
 		return $html;
 	}
