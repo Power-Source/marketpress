@@ -258,6 +258,33 @@ class MP_Admin_Multisite {
 			'desc'    => __( 'Erlaubt eine optionale Seite mit Kennzahlen für Shopadmins im Netzwerk.', 'mp' ),
 			'message' => __( 'Shopperformance-Seite aktivieren', 'mp' ),
 		) );
+		$metabox->add_field( 'select', array(
+			'name'    => 'advanced[network_shop_presentation_mode]',
+			'label'   => array( 'text' => __( 'Navigation im Netzwerk-Marktplatz', 'mp' ) ),
+			'desc'    => __( 'Legt fest, ob Produktklicks auf eine zentrale Shop-Profilseite gehen oder direkt ins jeweilige Subshop-Produkt.', 'mp' ),
+			'options' => array(
+				'direct_product' => __( 'Direkt auf Subshop-Produktseite', 'mp' ),
+				'shop_profile'   => __( 'Auf zentrale Shop-Profilseite', 'mp' ),
+			),
+			'default_value' => 'direct_product',
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'advanced[network_shop_profile_reviews]',
+			'label'   => array( 'text' => __( 'Bewertungs-Widget im Shop-Profil aktivieren?', 'mp' ) ),
+			'desc'    => __( 'Zeigt auf der Shop-Profilseite Sterne-Schnitt und Bewertungsanzahl des ausgewaehlten Produkts an.', 'mp' ),
+			'message' => __( 'Bewertungen im Profil anzeigen', 'mp' ),
+		) );
+		$metabox->add_field( 'select', array(
+			'name'    => 'advanced[network_reviews_policy]',
+			'label'   => array( 'text' => __( 'Netzwerk-Policy fuer Bewertungen', 'mp' ) ),
+			'desc'    => __( 'Steuert, wie strikt die Bewertungs-Erweiterung in Subshops vorausgesetzt wird und wie fehlende Aktivierung im UI markiert wird.', 'mp' ),
+			'options' => array(
+				'off'      => __( 'Deaktiviert (keine Policy-Pruefung)', 'mp' ),
+				'advisory' => __( 'Hinweis (fehlende Shops markieren)', 'mp' ),
+				'required' => __( 'Pflicht (fehlende Aktivierung klar blockierend markieren)', 'mp' ),
+			),
+			'default_value' => 'advisory',
+		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[settlement_enabled]',
 			'label'   => array( 'text' => __( 'Settlement-Ledger aktivieren?', 'mp' ) ),
@@ -1046,6 +1073,12 @@ class MP_Admin_Multisite {
 			'placeholder' => __( 'Optional: Wähle eine Seite', 'mp' ),
 		) );
 		$metabox->add_field( 'post_select', array(
+			'name'        => 'pages[network_shop_profile]',
+			'label'       => array( 'text' => __( 'Shop-Profilseite (Mainshop)', 'mp' ) ),
+			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
+			'placeholder' => __( 'Optional: Wähle eine Seite', 'mp' ),
+		) );
+		$metabox->add_field( 'post_select', array(
 			'name'        => 'pages[network_settlement_dashboard]',
 			'label'       => array( 'text' => __( 'Settlement Moderation (Mainshop)', 'mp' ) ),
 			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
@@ -1088,6 +1121,10 @@ class MP_Admin_Multisite {
 				$type = 'network_shop_performance';
 				break;
 
+			case 'pages[network_shop_profile]' :
+				$type = 'network_shop_profile';
+				break;
+
 			case 'pages[network_settlement_dashboard]' :
 				$type = 'network_settlement_dashboard';
 				break;
@@ -1127,6 +1164,7 @@ class MP_Admin_Multisite {
 			'pages[network_tags]',
 			'pages[network_customer_hub]',
 			'pages[network_shop_performance]',
+			'pages[network_shop_profile]',
 			'pages[network_settlement_dashboard]',
 			'pages[network_support_center]',
 		);

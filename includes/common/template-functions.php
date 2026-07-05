@@ -1080,6 +1080,7 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 			'network_tags'                 => 'pages->network_tags',
 			'network_customer_hub'         => 'pages->network_customer_hub',
 			'network_shop_performance'     => 'pages->network_shop_performance',
+			'network_shop_profile'         => 'pages->network_shop_profile',
 			'network_settlement_dashboard' => 'pages->network_settlement_dashboard',
 			'network_support_center'       => 'pages->network_support_center',
 		);
@@ -1138,6 +1139,14 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 				$args = array(
 					'post_title'     => __( 'Shopuser Performance', 'mp' ),
 					'post_content'   => __( "[mp_network_shop_performance]", 'mp' ),
+					'comment_status' => 'closed',
+					'post_parent'    => mp_get_network_setting( 'pages->network_store_page', 0 ),
+				);
+				break;
+			case 'network_shop_profile' :
+				$args = array(
+					'post_title'     => __( 'Shop-Profil', 'mp' ),
+					'post_content'   => __( "[mp_network_shop_profile]", 'mp' ),
 					'comment_status' => 'closed',
 					'post_parent'    => mp_get_network_setting( 'pages->network_store_page', 0 ),
 				);

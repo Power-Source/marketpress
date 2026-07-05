@@ -585,6 +585,7 @@ if ( ! function_exists( '_mp3_global_products_html' ) ) {
 				if ( ! $product_url ) {
 					$product_url = MP_Multisite::get_instance()->get_indexed_product_url( $blog_id, $product_id, $product->url( false ) );
 				}
+				$product_url = apply_filters( 'mp_multisite/global_product_url', $product_url, $blog_id, $product_id, $args );
 
 				$legacy_product_urls = array_unique( array_filter( array(
 					get_permalink( $product_id ),
@@ -752,6 +753,7 @@ if ( ! function_exists( '_mp_global_products_html' ) ) {
 			if ( ! $product_url ) {
 				$product_url = MP_Multisite::get_instance()->get_indexed_product_url( $blog_id, $product_id, $product->url( false ) );
 			}
+			$product_url = apply_filters( 'mp_multisite/global_product_url', $product_url, $blog_id, $product_id, $args );
 
 			$legacy_product_urls = array_unique( array_filter( array(
 				get_permalink( $product_id ),

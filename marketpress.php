@@ -821,6 +821,14 @@ class Marketpress {
 			'has_settings' => true,
 		) );
 
+		mp_register_addon( array(
+			'label'        => __( 'Netzwerk Shop-Profile', 'mp' ),
+			'desc'         => __( 'Optionale Profilverwaltung fuer Shopseiten im Netzwerk-Marktplatz (Branding, Links, Socials)', 'mp' ),
+			'class'        => 'MP_Network_Shop_Profile_Addon',
+			'path'         => mp_plugin_dir( 'includes/addons/mp-shop-profile/class-mp-network-shop-profile-addon.php' ),
+			'has_settings' => true,
+		) );
+
 
 		/**
 		 * Fires after all internal addons have been registered
