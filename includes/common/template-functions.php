@@ -563,6 +563,10 @@ if ( ! function_exists( '_mp_order_status_overview' ) ) :
 		$html .= '<div class="mp-customer-kpi"><span>' . esc_html__( 'Offene Lieferung', 'mp' ) . '</span><strong>' . intval( $totals['open_shipping'] ) . '</strong></div>';
 		$html .= '<div class="mp-customer-kpi"><span>' . esc_html__( 'Zu bewerten', 'mp' ) . '</span><strong>' . intval( $totals['to_review'] ) . '</strong></div>';
 		$html .= '<div class="mp-customer-kpi"><span>' . esc_html__( 'Offene Widerrufe', 'mp' ) . '</span><strong>' . intval( isset( $totals['withdrawal_open'] ) ? $totals['withdrawal_open'] : 0 ) . '</strong></div>';
+		if ( class_exists( 'MP_Support_Addon' ) && mp_get_setting( 'support->enabled', 1 ) ) {
+			$support_ticket_count = get_customer_open_ticket_count( get_current_user_id() );
+			$html .= '<div class="mp-customer-kpi"><span>' . esc_html__( 'Offene Tickets', 'mp' ) . '</span><strong>' . intval( $support_ticket_count ) . '</strong></div>';
+		}
 		$html .= '</div>';
 
 		$html .= '<div class="mp-customer-grid">';
@@ -626,6 +630,32 @@ if ( ! function_exists( '_mp_order_status_overview' ) ) :
 			$html .= '<p class="mp-customer-empty">' . esc_html__( 'Du hast aktuell keine eingereichten Widerrufe.', 'mp' ) . '</p>';
 		}
 		$html .= '</section>';
+
+		if ( class_exists( 'MP_Support_Addon' ) && mp_get_setting( 'support->enabled', 1 ) ) {
+			$user_tickets = get_customer_recent_tickets( get_current_user_id() );
+			$support_url  = ( mp_get_network_setting( 'pages->network_support_center' ) ) ? get_permalink( (int) mp_get_network_setting( 'pages->network_support_center' ) ) : mp_store_page_url( 'order_status', false );
+			$html .= '<section class="mp-customer-panel" style="margin-top:12px">';
+			$html .= '<h3>' . esc_html__( 'Meine Support-Tickets', 'mp' ) . '</h3>';
+			if ( ! empty( $user_tickets ) ) {
+				$html .= '<ul class="mp-customer-list">';
+				foreach ( array_slice( $user_tickets, 0, 5 ) as $ticket ) {
+					$status_label = get_support_status_label( (string) $ticket['status'] );
+					$priority_cls = 'high' === (string) $ticket['priority'] ? 'color:#b32d2e;font-weight:600;' : '';
+					$html .= '<li>';
+					$html .= '<div class="mp-customer-meta">';
+					$html .= '<strong>' . esc_html( (string) $ticket['title'] ) . '</strong>';
+					$html .= '<span style="' . esc_attr( $priority_cls ) . '">' . esc_html( $status_label ) . '</span>';
+					$html .= '</div>';
+					$html .= '<a class="mp-customer-cta" href="' . esc_url( $support_url ) . '">' . esc_html__( 'Zum Ticket', 'mp' ) . '</a>';
+					$html .= '</li>';
+				}
+				$html .= '</ul>';
+			} else {
+				$html .= '<p class="mp-customer-empty">' . esc_html__( 'Noch keine Support-Tickets vorhanden.', 'mp' ) . '</p>';
+			}
+			$html .= '</section>';
+		}
+
 		$html .= '</section>';
 
 		$html .= '<section id="mp-order-history" class="mp_orders mp_orders-list">';
@@ -977,6 +1007,61 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 	 *
 	 * @return int $post_id The ID of the newly created page.
 	 */
+	function get_customer_open_ticket_count( $user_id ) {
+		if ( ! post_type_exists( 'mp_support_ticket' ) ) {
+			return 0;
+		}
+		$q = new WP_Query( array(
+			'post_type'      => 'mp_support_ticket',
+			'post_status'    => 'publish',
+			'author'         => (int) $user_id,
+			'fields'         => 'ids',
+			'posts_per_page' => 1,
+			'no_found_rows'  => false,
+			'meta_query'     => array( array(
+				'key'     => '_mp_support_status',
+				'value'   => array( 'open', 'in_progress' ),
+				'compare' => 'IN',
+			) ),
+		) );
+		return (int) $q->found_posts;
+	}
+
+	function get_customer_recent_tickets( $user_id ) {
+		if ( ! post_type_exists( 'mp_support_ticket' ) ) {
+			return array();
+		}
+		$q = new WP_Query( array(
+			'post_type'      => 'mp_support_ticket',
+			'post_status'    => 'publish',
+			'author'         => (int) $user_id,
+			'posts_per_page' => 5,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'no_found_rows'  => true,
+		) );
+		$result = array();
+		foreach ( (array) $q->posts as $post ) {
+			$result[] = array(
+				'id'       => (int) $post->ID,
+				'title'    => (string) $post->post_title,
+				'status'   => (string) get_post_meta( $post->ID, '_mp_support_status', true ),
+				'priority' => (string) get_post_meta( $post->ID, '_mp_support_priority', true ),
+			);
+		}
+		return $result;
+	}
+
+	function get_support_status_label( $status ) {
+		$labels = array(
+			'open'        => __( 'Offen', 'mp' ),
+			'in_progress' => __( 'In Bearbeitung', 'mp' ),
+			'resolved'    => __( 'Gelöst', 'mp' ),
+			'closed'      => __( 'Geschlossen', 'mp' ),
+		);
+		return isset( $labels[ $status ] ) ? $labels[ $status ] : __( 'Offen', 'mp' );
+	}
+
 	function mp_create_store_page( $type ) {
 		$args     = array();
 		$defaults = array(
@@ -1035,6 +1120,14 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 				$args = array(
 					'post_title'     => __( 'Settlement Moderation', 'mp' ),
 					'post_content'   => __( "[mp_network_settlement_dashboard]", 'mp' ),
+					'comment_status' => 'closed',
+					'post_parent'    => mp_get_network_setting( 'pages->network_store_page', 0 ),
+				);
+				break;
+			case 'network_support_center' :
+				$args = array(
+					'post_title'     => __( 'Kundensupport', 'mp' ),
+					'post_content'   => __( "[mp_support_center]", 'mp' ),
 					'comment_status' => 'closed',
 					'post_parent'    => mp_get_network_setting( 'pages->network_store_page', 0 ),
 				);

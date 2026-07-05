@@ -296,6 +296,8 @@ class MP_Customer_Portal_API {
 				'status_text'=> isset( $status_labels[ $status ] ) ? $status_labels[ $status ] : ucfirst( str_replace( 'order_', '', $status ) ),
 				'total'      => $total,
 				'timestamp'  => $time,
+				'checkout_mode' => sanitize_key( (string) get_post_meta( $order_id, '_mp_network_multishop_checkout_mode', true ) ),
+				'payout_status' => sanitize_key( (string) get_post_meta( $order_id, '_mp_network_payout_status', true ) ),
 				'tracking_url' => $order->tracking_url( false ),
 			);
 
@@ -476,10 +478,13 @@ class MP_Customer_Portal_API {
 				$rows[] = array(
 					'shop'       => $shop_name,
 					'shop_id'    => $blog_id,
+					'post_id'    => $post_id,
 					'order'      => $order->get_id(),
 					'total'      => $total,
 					'status'     => $post->post_status,
 					'status_text'=> isset( $status_labels[ $post->post_status ] ) ? $status_labels[ $post->post_status ] : ucfirst( str_replace( 'order_', '', $post->post_status ) ),
+					'checkout_mode' => sanitize_key( (string) get_post_meta( $post_id, '_mp_network_multishop_checkout_mode', true ) ),
+					'payout_status' => sanitize_key( (string) get_post_meta( $post_id, '_mp_network_payout_status', true ) ),
 					'url'        => $order->tracking_url( false, $blog_id ),
 					'timestamp'  => $time,
 				);

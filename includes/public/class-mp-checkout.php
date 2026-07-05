@@ -562,7 +562,9 @@ class MP_Checkout {
 				* @param array $billing_info An array of buyer billing info.
 				* @param array $shipping_info An array of buyer shipping info.
 				*/
-			   do_action( 'mp_process_payment_' . $payment_method, $cart, $billing_info, $shipping_info );
+			if ( apply_filters( 'mp_can_checkout', true, $this, $cart, $billing_info, $shipping_info ) == true ) {
+				do_action( 'mp_process_payment_' . $payment_method, $cart, $billing_info, $shipping_info );
+			}
 			   
 			   // If we reach here, check for errors or proceed with fallback response
 			   // Some gateways (like PayPal) call wp_send_json_*() directly and exit,

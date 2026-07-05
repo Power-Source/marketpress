@@ -67,6 +67,7 @@ class MP_Pages_Admin {
 			$options['network_customer_hub'] = __('Network Customer Hub', 'mp');
 			$options['network_shop_performance'] = __('Network Shop Performance', 'mp');
 			$options['network_settlement_dashboard'] = __('Network Settlement Dashboard', 'mp');
+			$options['network_support_center'] = __('Network Support Center', 'mp');
 		}
 
 		$metabox->add_field('select', array(
@@ -92,7 +93,7 @@ class MP_Pages_Admin {
 		//$wpdb->delete($wpdb->postmeta, array('meta_key' => '_mp_store_page', 'meta_value' => $value));
 
 		update_post_meta($post_id, '_mp_store_page', $value);
-		if ( in_array( $value, array( 'network_store_page', 'network_categories', 'network_tags', 'network_customer_hub', 'network_shop_performance', 'network_settlement_dashboard' ) ) ) {
+		if ( in_array( $value, array( 'network_store_page', 'network_categories', 'network_tags', 'network_customer_hub', 'network_shop_performance', 'network_settlement_dashboard', 'network_support_center' ) ) ) {
 			mp_update_network_setting("pages->$value", $post_id);
 		} else {
 			mp_update_setting("pages->$value", $post_id);

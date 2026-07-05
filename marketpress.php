@@ -813,6 +813,14 @@ class Marketpress {
 			'has_settings' => false,
 		) );
 
+		mp_register_addon( array(
+			'label'        => __( 'Integrierter Kundensupport', 'mp' ),
+			'desc'         => __( 'Ticket-basiertes Support-Center mit Single- und Multisite-Modus', 'mp' ),
+			'class'        => 'MP_Support_Addon',
+			'path'         => mp_plugin_dir( 'includes/addons/mp-support/class-mp-support-addon.php' ),
+			'has_settings' => true,
+		) );
+
 
 		/**
 		 * Fires after all internal addons have been registered

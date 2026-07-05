@@ -628,6 +628,16 @@ class MP_Orders_Admin {
 
 		$flow = $this->get_order_flow_context( $order );
 		echo '<p class="mp-order-flow-hint"><strong>' . esc_html__( 'Flow:', 'mp' ) . '</strong> ' . esc_html( $flow['label'] ) . '</p>';
+
+		$checkout_mode = sanitize_key( (string) $order->get_meta( '_mp_network_multishop_checkout_mode', '' ) );
+		if ( '' !== $checkout_mode ) {
+			echo '<p class="mp-order-flow-hint"><strong>' . esc_html__( 'Checkout:', 'mp' ) . '</strong> ' . esc_html( $this->get_network_checkout_mode_label( $checkout_mode ) ) . '</p>';
+		}
+
+		$payout_status = sanitize_key( (string) $order->get_meta( '_mp_network_payout_status', '' ) );
+		if ( '' !== $payout_status ) {
+			echo '<p class="mp-order-flow-hint"><strong>' . esc_html__( 'Auszahlung:', 'mp' ) . '</strong> ' . esc_html( $this->get_network_payout_status_label( $payout_status ) ) . '</p>';
+		}
 		echo '</div>';
 	}
 
@@ -1617,6 +1627,42 @@ class MP_Orders_Admin {
 	}
 
 	/**
+	 * Get localized label for network multishop checkout mode.
+	 *
+	 * @param string $mode
+	 * @return string
+	 */
+	private function get_network_checkout_mode_label( $mode ) {
+		$labels = array(
+			'bundle' => __( 'Checkout: Buendelung', 'mp' ),
+			'split'  => __( 'Checkout: Getrennt', 'mp' ),
+		);
+
+		$mode = sanitize_key( (string) $mode );
+
+		return isset( $labels[ $mode ] ) ? $labels[ $mode ] : __( 'Checkout: Standard', 'mp' );
+	}
+
+	/**
+	 * Get localized label for network payout status.
+	 *
+	 * @param string $status
+	 * @return string
+	 */
+	private function get_network_payout_status_label( $status ) {
+		$labels = array(
+			'pending'   => __( 'Auszahlung: Offen', 'mp' ),
+			'started'   => __( 'Auszahlung: Gestartet', 'mp' ),
+			'confirmed' => __( 'Auszahlung: Bestaetigt', 'mp' ),
+			'paid'      => __( 'Auszahlung: Ausgezahlt', 'mp' ),
+		);
+
+		$status = sanitize_key( (string) $status );
+
+		return isset( $labels[ $status ] ) ? $labels[ $status ] : __( 'Auszahlung: n/a', 'mp' );
+	}
+
+	/**
 	 * Get labels for withdrawal filters/badges.
 	 *
 	 * @return array
@@ -1848,6 +1894,8 @@ class MP_Orders_Admin {
 		$settlement     = isset( $settlement_map[ $post_id ] ) ? $settlement_map[ $post_id ] : 'n/a';
 		$settlement_labels = $this->get_settlement_status_labels();
 		$settlement_label  = isset( $settlement_labels[ $settlement ] ) ? $settlement_labels[ $settlement ] : $settlement_labels['n/a'];
+		$checkout_mode  = sanitize_key( (string) $order->get_meta( '_mp_network_multishop_checkout_mode', '' ) );
+		$payout_status  = sanitize_key( (string) $order->get_meta( '_mp_network_payout_status', '' ) );
 
 		$actions = array(
 			'order_received' => __( 'Ausstehend', 'mp' ),
@@ -1861,7 +1909,13 @@ class MP_Orders_Admin {
 		$html  = '<div class="mp-order-status-card status-' . esc_attr( $current_status ) . ' settlement-' . esc_attr( $settlement ) . ' withdrawal-' . esc_attr( $withdrawal['status'] ) . ( $needs_action ? ' needs-action' : '' ) . '" data-order-id="' . (int) $post_id . '" data-order-status="' . esc_attr( $current_status ) . '">';
 		$html .= '<span class="mp-order-status-badge">' . esc_html( $label ) . '</span>';
 		$html .= '<span class="mp-order-flow-badge mode-' . esc_attr( $flow['mode'] ) . '">' . esc_html( $flow['label'] ) . '</span>';
+		if ( '' !== $checkout_mode ) {
+			$html .= '<span class="mp-order-flow-badge mode-' . esc_attr( $checkout_mode ) . '">' . esc_html( $this->get_network_checkout_mode_label( $checkout_mode ) ) . '</span>';
+		}
 		$html .= '<span class="mp-order-settlement-badge">' . esc_html( $settlement_label ) . '</span>';
+		if ( '' !== $payout_status ) {
+			$html .= '<span class="mp-order-settlement-badge">' . esc_html( $this->get_network_payout_status_label( $payout_status ) ) . '</span>';
+		}
 		$html .= '<span class="mp-order-withdrawal-badge state-' . esc_attr( $withdrawal['status'] ) . '">' . esc_html( $withdrawal_label ) . '</span>';
 		$html .= '<div class="mp-order-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' . (int) $progress . '"><span style="width:' . (int) $progress . '%"></span></div>';
 		$html .= '<div class="mp-order-status-actions">';

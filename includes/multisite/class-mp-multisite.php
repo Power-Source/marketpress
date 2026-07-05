@@ -60,6 +60,11 @@ class MP_Multisite {
 		add_filter( 'query_vars', array( &$this, 'add_query_vars' ) );
 
 		add_filter( 'mp_gateway_api/get_gateways', array( &$this, 'get_gateways' ) );
+		add_filter( 'mp_gateway_api/use_network_global_gateway', array( &$this, 'filter_use_network_global_gateway' ) );
+		add_action( 'init', array( &$this, 'capture_network_multishop_checkout_choice' ), 1 );
+		add_filter( 'mp_checkout/order_review', array( &$this, 'inject_multishop_checkout_selector' ) );
+		add_filter( 'mp_can_checkout', array( &$this, 'guard_split_checkout_until_cart_partition' ), 10, 5 );
+		add_action( 'mp_order/new_order', array( &$this, 'annotate_network_multishop_order' ), 20 );
 
 		$settings = get_site_option( 'mp_network_settings', array() );
 		if ( ( isset($settings['main_blog']) && mp_is_main_site() ) || isset($settings['main_blog']) && !$settings['main_blog'] ) {
@@ -788,19 +793,7 @@ class MP_Multisite {
 	 */
 	public function get_gateways( $gateways ) {
 		if ( ! is_network_admin() ) {
-			$use_global_gateway = mp_get_network_setting( 'global_cart' );
-
-			if ( $use_global_gateway && ! is_admin() && mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 ) ) {
-				$blog_ids = array();
-
-				if ( function_exists( 'mp_cart' ) ) {
-					$blog_ids = (array) mp_cart()->get_blog_ids();
-				}
-
-				if ( count( $blog_ids ) === 1 && (int) reset( $blog_ids ) !== (int) mp_root_blog_id() ) {
-					$use_global_gateway = false;
-				}
-			}
+			$use_global_gateway = $this->should_use_network_global_gateway();
 
 			if ( $use_global_gateway ) {
 				$code = mp_get_network_setting( 'global_gateway' );
@@ -826,6 +819,218 @@ class MP_Multisite {
 		}
 
 		return $gateways;
+	}
+
+	/**
+	 * Keep gateway API network/global toggle in sync with multisite checkout policy.
+	 *
+	 * @param bool $use_global_gateway
+	 * @return bool
+	 */
+	public function filter_use_network_global_gateway( $use_global_gateway ) {
+		if ( ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) ) {
+			return false;
+		}
+
+		return $this->should_use_network_global_gateway();
+	}
+
+	/**
+	 * Persist customer checkout choice (bundle vs split) for multi-shop carts.
+	 *
+	 * @return void
+	 */
+	public function capture_network_multishop_checkout_choice() {
+		if ( ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) ) {
+			return;
+		}
+
+		$choice = '';
+		if ( isset( $_POST['mp_network_checkout_mode'] ) ) {
+			$choice = sanitize_key( wp_unslash( $_POST['mp_network_checkout_mode'] ) );
+		} elseif ( isset( $_GET['mp_network_checkout_mode'] ) ) {
+			$choice = sanitize_key( wp_unslash( $_GET['mp_network_checkout_mode'] ) );
+		}
+
+		if ( in_array( $choice, array( 'bundle', 'split' ), true ) ) {
+			mp_update_session_value( 'mp_network_multishop_checkout_choice', $choice );
+		}
+	}
+
+	/**
+	 * Render checkout selector/notice for multi-shop carts.
+	 *
+	 * @param string $html
+	 * @return string
+	 */
+	public function inject_multishop_checkout_selector( $html ) {
+		if ( ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) || ! function_exists( 'mp_cart' ) ) {
+			return $html;
+		}
+
+		$blog_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) mp_cart()->get_blog_ids() ) ) ) );
+		if ( count( $blog_ids ) <= 1 ) {
+			return $html;
+		}
+
+		$policy       = sanitize_key( (string) mp_get_network_setting( 'advanced->network_multishop_checkout_mode', 'bundle_only' ) );
+		$active_mode  = $this->resolve_multishop_checkout_mode( $blog_ids );
+		$shipping_key = sanitize_key( (string) mp_get_network_setting( 'advanced->network_bundle_shipping_mode', 'per_shop' ) );
+		$shipping_map = array(
+			'per_shop'          => __( 'Versand pro Subshop', 'mp' ),
+			'combined'          => __( 'Versand kombiniert', 'mp' ),
+			'combined_discount' => __( 'Versand kombiniert mit Rabatt', 'mp' ),
+		);
+		$shipping_label = isset( $shipping_map[ $shipping_key ] ) ? $shipping_map[ $shipping_key ] : $shipping_map['per_shop'];
+
+		$block  = '<section class="mp_checkout_network_mode" style="margin:0 0 16px;padding:12px;border:1px solid #d7e4f0;border-radius:10px;background:#f7fbff">';
+		$block .= '<h3 class="mp_sub_title" style="margin:0 0 8px">' . esc_html__( 'Netzwerk-Checkout', 'mp' ) . '</h3>';
+
+		if ( 'customer_choice' === $policy ) {
+			$block .= '<p style="margin:0 0 8px">' . esc_html__( 'Dieser Warenkorb enthaelt Produkte aus mehreren Subshops. Du kannst zwischen gebuendeltem Mainshop-Checkout und getrenntem Checkout waehlen.', 'mp' ) . '</p>';
+			$block .= '<label style="display:inline-flex;gap:6px;align-items:center;margin-right:14px"><input type="radio" name="mp_network_checkout_mode" value="bundle"' . checked( 'bundle', $active_mode, false ) . '> ' . esc_html__( 'Mainshop-Buendelung', 'mp' ) . '</label>';
+			$block .= '<label style="display:inline-flex;gap:6px;align-items:center"><input type="radio" name="mp_network_checkout_mode" value="split"' . checked( 'split', $active_mode, false ) . '> ' . esc_html__( 'Getrennt pro Subshop', 'mp' ) . '</label>';
+		} elseif ( 'split_only' === $policy ) {
+			$block .= '<p style="margin:0 0 8px">' . esc_html__( 'Dieser Warenkorb ist auf getrennten Subshop-Checkout erzwungen.', 'mp' ) . '</p>';
+			$block .= '<input type="hidden" name="mp_network_checkout_mode" value="split">';
+		} else {
+			$block .= '<p style="margin:0 0 8px">' . esc_html__( 'Dieser Warenkorb wird gebuendelt im Mainshop ausgecheckt.', 'mp' ) . '</p>';
+			$block .= '<input type="hidden" name="mp_network_checkout_mode" value="bundle">';
+		}
+
+		$block .= '<p style="margin:8px 0 0;color:#516981;font-size:12px">' . sprintf( esc_html__( 'Buendelung Versandregel: %s', 'mp' ), esc_html( $shipping_label ) ) . '</p>';
+		$block .= '</section>';
+
+		return $block . $html;
+	}
+
+	/**
+	 * Prevent unintended combined payment when split mode is selected for multi-shop carts.
+	 *
+	 * @param bool        $can_checkout
+	 * @param MP_Checkout $checkout
+	 * @param MP_Cart     $cart
+	 * @param array       $billing_info
+	 * @param array       $shipping_info
+	 * @return bool
+	 */
+	public function guard_split_checkout_until_cart_partition( $can_checkout, $checkout, $cart, $billing_info, $shipping_info ) {
+		if ( ! $can_checkout || ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) ) {
+			return $can_checkout;
+		}
+
+		if ( ! is_object( $cart ) || ! method_exists( $cart, 'get_blog_ids' ) ) {
+			return $can_checkout;
+		}
+
+		$blog_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $cart->get_blog_ids() ) ) ) );
+		if ( count( $blog_ids ) <= 1 ) {
+			return $can_checkout;
+		}
+
+		if ( 'split' === $this->resolve_multishop_checkout_mode( $blog_ids ) ) {
+			if ( is_object( $checkout ) && method_exists( $checkout, 'add_error' ) ) {
+				$checkout->add_error( __( 'Getrennter Multi-Shop-Checkout ist aktiv. Die Warenkorb-Aufteilung pro Subshop wird als naechster Schritt verarbeitet; bitte wechsle vorerst auf Mainshop-Buendelung oder aktiviere die Split-Engine.', 'mp' ), 'order-review-payment' );
+			}
+
+			return false;
+		}
+
+		return $can_checkout;
+	}
+
+	/**
+	 * Resolve whether current request should use network-global gateway routing.
+	 *
+	 * @return bool
+	 */
+	private function should_use_network_global_gateway() {
+		if ( ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) ) {
+			return false;
+		}
+
+		$blog_ids = array();
+		if ( function_exists( 'mp_cart' ) ) {
+			$blog_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) mp_cart()->get_blog_ids() ) ) ) );
+		}
+
+		$root_blog_id = (int) mp_root_blog_id();
+		$hybrid       = (bool) mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 );
+
+		if ( $hybrid && count( $blog_ids ) === 1 && (int) reset( $blog_ids ) !== $root_blog_id ) {
+			return false;
+		}
+
+		if ( count( $blog_ids ) > 1 && 'split' === $this->resolve_multishop_checkout_mode( $blog_ids ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Resolve effective checkout mode for carts containing multiple subshops.
+	 *
+	 * @param array $blog_ids
+	 * @return string bundle|split
+	 */
+	private function resolve_multishop_checkout_mode( $blog_ids ) {
+		$blog_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $blog_ids ) ) ) );
+		if ( count( $blog_ids ) <= 1 ) {
+			return 'bundle';
+		}
+
+		$policy = sanitize_key( (string) mp_get_network_setting( 'advanced->network_multishop_checkout_mode', 'bundle_only' ) );
+		if ( 'split_only' === $policy ) {
+			return 'split';
+		}
+
+		if ( 'customer_choice' === $policy ) {
+			$choice = sanitize_key( (string) mp_get_session_value( 'mp_network_multishop_checkout_choice', '' ) );
+			if ( ! in_array( $choice, array( 'bundle', 'split' ), true ) ) {
+				$choice = sanitize_key( (string) mp_get_network_setting( 'advanced->network_multishop_checkout_default', 'bundle' ) );
+			}
+
+			return ( 'split' === $choice ) ? 'split' : 'bundle';
+		}
+
+		return 'bundle';
+	}
+
+	/**
+	 * Persist orchestration metadata for network orders.
+	 *
+	 * @param MP_Order $order
+	 * @return void
+	 */
+	public function annotate_network_multishop_order( $order ) {
+		if ( ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) || ! is_object( $order ) || ! method_exists( $order, 'get_cart' ) ) {
+			return;
+		}
+
+		$cart = $order->get_cart();
+		if ( ! is_object( $cart ) || ! method_exists( $cart, 'get_blog_ids' ) ) {
+			return;
+		}
+
+		$blog_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $cart->get_blog_ids() ) ) ) );
+		if ( count( $blog_ids ) <= 1 ) {
+			return;
+		}
+
+		$checkout_mode = $this->resolve_multishop_checkout_mode( $blog_ids );
+		$order->update_meta( '_mp_network_multishop_checkout_mode', $checkout_mode );
+		$order->update_meta( '_mp_network_multishop_blog_ids', $blog_ids );
+
+		if ( 'bundle' === $checkout_mode ) {
+			$shipping_mode = sanitize_key( (string) mp_get_network_setting( 'advanced->network_bundle_shipping_mode', 'per_shop' ) );
+			$hold_days     = max( 0, (int) mp_get_network_setting( 'advanced->settlement_hold_days', 14 ) );
+			$auto_at       = time() + ( $hold_days * DAY_IN_SECONDS );
+
+			$order->update_meta( '_mp_network_bundle_shipping_mode', $shipping_mode );
+			$order->update_meta( '_mp_network_payout_status', 'pending' );
+			$order->update_meta( '_mp_network_payout_auto_at', $auto_at );
+		}
 	}
 
 	/**
@@ -862,7 +1067,7 @@ class MP_Multisite {
 		$recent_reviews  = isset( $snapshot['recent_reviews'] ) && is_array( $snapshot['recent_reviews'] ) ? $snapshot['recent_reviews'] : array();
 		$withdrawals     = isset( $snapshot['withdrawals'] ) && is_array( $snapshot['withdrawals'] ) ? $snapshot['withdrawals'] : array( 'counts' => array(), 'recent' => array() );
 		$recent_withdrawals = isset( $withdrawals['recent'] ) && is_array( $withdrawals['recent'] ) ? $withdrawals['recent'] : array();
-		$withdrawal_management_enabled = (bool) mp_get_network_setting( 'global_cart', 0 ) && (bool) mp_get_setting( 'withdrawal->enabled', 1 );
+		$withdrawal_management_enabled = (bool) mp_get_network_setting( 'advanced->network_withdrawal_management', 0 ) && (bool) mp_get_setting( 'withdrawal->enabled', 1 );
 
 		$html  = '<style>';
 		$html .= '.mp-network-customer-hub{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#edf4fb 100%);border:1px solid #dbe6f2;border-radius:16px;padding:20px;color:#1f3346}';
@@ -900,6 +1105,11 @@ class MP_Multisite {
 		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Zu bewerten', 'mp' ) . '</span><strong>' . intval( $totals['to_review'] ) . '</strong></div>';
 		if ( $withdrawal_management_enabled ) {
 			$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Offene Widerrufe', 'mp' ) . '</span><strong>' . intval( isset( $totals['withdrawal_open'] ) ? $totals['withdrawal_open'] : 0 ) . '</strong></div>';
+		}
+		$support_enabled_hub = class_exists( 'MP_Support_Addon' ) && mp_get_network_setting( 'advanced->network_support_enabled', 0 ) && mp_get_setting( 'support->enabled', 1 );
+		if ( $support_enabled_hub ) {
+			$open_tickets = $this->count_open_customer_tickets( $user_id );
+			$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Offene Tickets', 'mp' ) . '</span><strong>' . intval( $open_tickets ) . '</strong></div>';
 		}
 		$html .= '</div>';
 
@@ -989,6 +1199,57 @@ class MP_Multisite {
 			$html .= '</section>';
 		}
 
+		if ( $support_enabled_hub ) {
+			$user_tickets = $this->get_customer_hub_tickets( $user_id );
+			$support_page_id = (int) mp_get_network_setting( 'pages->network_support_center', 0 );
+			$support_url = $support_page_id ? get_permalink( $support_page_id ) : home_url( '/' );
+			$html .= '<section class="mp-hub-panel" style="margin-bottom:12px;">';
+			$html .= '<h3>' . esc_html__( 'Meine Support-Tickets', 'mp' ) . '</h3>';
+			if ( ! empty( $user_tickets ) ) {
+				$html .= '<ul class="mp-hub-list">';
+				foreach ( array_slice( $user_tickets, 0, 5 ) as $ticket ) {
+					$slabels   = array(
+						'open'        => __( 'Offen', 'mp' ),
+						'in_progress' => __( 'In Bearbeitung', 'mp' ),
+						'resolved'    => __( 'Gel\u00f6st', 'mp' ),
+						'closed'      => __( 'Geschlossen', 'mp' ),
+					);
+					$slabel = isset( $slabels[ $ticket['status'] ] ) ? $slabels[ $ticket['status'] ] : __( 'Offen', 'mp' );
+					$html .= '<li>';
+					$html .= '<div class="mp-hub-meta">';
+					$html .= '<strong>' . esc_html( (string) $ticket['title'] ) . '</strong>';
+					$html .= '<span>' . esc_html( $slabel ) . '</span>';
+					$html .= '</div>';
+					$html .= '<a class="mp-hub-cta" href="' . esc_url( $support_url ) . '">' . esc_html__( 'Zum Ticket', 'mp' ) . '</a>';
+					$html .= '</li>';
+				}
+				$html .= '</ul>';
+			} else {
+				$html .= '<p class="mp-hub-empty">' . esc_html__( 'Noch keine Support-Tickets vorhanden.', 'mp' ) . '</p>';
+			}
+			$html .= '<p style="margin-top:8px;"><a href="' . esc_url( $support_url ) . '" class="mp-hub-cta">' . esc_html__( 'Neues Ticket erstellen', 'mp' ) . '</a></p>';
+			$html .= '</section>';
+		}
+
+		$checkout_mode_labels = array(
+			'bundle' => __( 'Buendelung', 'mp' ),
+			'split'  => __( 'Getrennt', 'mp' ),
+		);
+		$payout_status_labels = array(
+			'pending'   => __( 'Offen', 'mp' ),
+			'started'   => __( 'Gestartet', 'mp' ),
+			'confirmed' => __( 'Bestaetigt', 'mp' ),
+			'paid'      => __( 'Ausgezahlt', 'mp' ),
+		);
+
+		$settlement_url = '';
+		if ( function_exists( 'mp_root_blog_id' ) ) {
+			$settlement_page_id = (int) mp_get_network_setting( 'pages->network_settlement_dashboard', 0 );
+			if ( $settlement_page_id > 0 ) {
+				$settlement_url = (string) get_permalink( $settlement_page_id );
+			}
+		}
+
 		$html .= '<section class="mp-hub-panel">';
 		$html .= '<h3>' . esc_html__( 'Letzte Bestellungen', 'mp' ) . '</h3>';
 		if ( ! empty( $rows ) ) {
@@ -996,15 +1257,27 @@ class MP_Multisite {
 			$html .= '<th>' . esc_html__( 'Shop', 'mp' ) . '</th>';
 			$html .= '<th>' . esc_html__( 'Bestellung', 'mp' ) . '</th>';
 			$html .= '<th>' . esc_html__( 'Status', 'mp' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'Checkout', 'mp' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'Auszahlung', 'mp' ) . '</th>';
 			$html .= '<th>' . esc_html__( 'Betrag', 'mp' ) . '</th>';
 			$html .= '</tr></thead><tbody>';
 
 			foreach ( array_slice( $rows, 0, 20 ) as $row ) {
 				$status_label = isset( $status_labels[ $row['status'] ] ) ? $status_labels[ $row['status'] ] : ucfirst( str_replace( 'order_', '', $row['status'] ) );
+				$checkout_mode = isset( $row['checkout_mode'] ) ? sanitize_key( (string) $row['checkout_mode'] ) : '';
+				$payout_status = isset( $row['payout_status'] ) ? sanitize_key( (string) $row['payout_status'] ) : '';
+				$checkout_label = isset( $checkout_mode_labels[ $checkout_mode ] ) ? $checkout_mode_labels[ $checkout_mode ] : '&mdash;';
+				$payout_label   = isset( $payout_status_labels[ $payout_status ] ) ? $payout_status_labels[ $payout_status ] : '&mdash;';
 				$html .= '<tr>';
 				$html .= '<td>' . esc_html( $row['shop'] ) . '</td>';
 				$html .= '<td><a href="' . esc_url( $row['url'] ) . '">#' . esc_html( $row['order'] ) . '</a></td>';
 				$html .= '<td>' . esc_html( $status_label ) . '</td>';
+				$html .= '<td>' . esc_html( $checkout_label ) . '</td>';
+				if ( '' !== $settlement_url && '&mdash;' !== $payout_label ) {
+					$html .= '<td><a href="' . esc_url( $settlement_url ) . '">' . esc_html( $payout_label ) . '</a></td>';
+				} else {
+					$html .= '<td>' . esc_html( $payout_label ) . '</td>';
+				}
 				$html .= '<td>' . esc_html( mp_format_currency( $currency, $row['total'] ) ) . '</td>';
 				$html .= '</tr>';
 			}
@@ -1017,6 +1290,68 @@ class MP_Multisite {
 		$html .= '</section>';
 
 		return $html;
+	}
+
+	/**
+	 * Count open tickets for a customer (for hub KPI).
+	 *
+	 * @param int $user_id
+	 * @return int
+	 */
+	private function count_open_customer_tickets( $user_id ) {
+		if ( ! post_type_exists( 'mp_support_ticket' ) ) {
+			return 0;
+		}
+
+		$q = new WP_Query( array(
+			'post_type'      => 'mp_support_ticket',
+			'post_status'    => 'publish',
+			'author'         => (int) $user_id,
+			'fields'         => 'ids',
+			'posts_per_page' => 1,
+			'no_found_rows'  => false,
+			'meta_query'     => array( array(
+				'key'     => '_mp_support_status',
+				'value'   => array( 'open', 'in_progress' ),
+				'compare' => 'IN',
+			) ),
+		) );
+
+		return (int) $q->found_posts;
+	}
+
+	/**
+	 * Get recent tickets for a customer for the hub panel.
+	 *
+	 * @param int $user_id
+	 * @return array
+	 */
+	private function get_customer_hub_tickets( $user_id ) {
+		if ( ! post_type_exists( 'mp_support_ticket' ) ) {
+			return array();
+		}
+
+		$q = new WP_Query( array(
+			'post_type'      => 'mp_support_ticket',
+			'post_status'    => 'publish',
+			'author'         => (int) $user_id,
+			'posts_per_page' => 5,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'no_found_rows'  => true,
+		) );
+
+		$result = array();
+		foreach ( (array) $q->posts as $post ) {
+			$result[] = array(
+				'id'       => (int) $post->ID,
+				'title'    => (string) $post->post_title,
+				'status'   => (string) get_post_meta( $post->ID, '_mp_support_status', true ),
+				'priority' => (string) get_post_meta( $post->ID, '_mp_support_priority', true ),
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -1057,6 +1392,16 @@ class MP_Multisite {
 			'orders'       => 0,
 			'revenue'      => 0.0,
 			'flow_counts'  => array_fill_keys( array_keys( $flow_labels ), 0 ),
+			'checkout_mode_counts' => array(
+				'bundle' => 0,
+				'split'  => 0,
+			),
+			'payout_status_counts' => array(
+				'pending'   => 0,
+				'started'   => 0,
+				'confirmed' => 0,
+				'paid'      => 0,
+			),
 			'status_counts' => array(
 				'order_received' => 0,
 				'order_paid'     => 0,
@@ -1106,6 +1451,16 @@ class MP_Multisite {
 
 				$network_totals['orders'] ++;
 				$network_totals['revenue'] += $order_total;
+
+				$checkout_mode = sanitize_key( (string) get_post_meta( $post_id, '_mp_network_multishop_checkout_mode', true ) );
+				if ( isset( $network_totals['checkout_mode_counts'][ $checkout_mode ] ) ) {
+					$network_totals['checkout_mode_counts'][ $checkout_mode ] ++;
+				}
+
+				$payout_status = sanitize_key( (string) get_post_meta( $post_id, '_mp_network_payout_status', true ) );
+				if ( isset( $network_totals['payout_status_counts'][ $payout_status ] ) ) {
+					$network_totals['payout_status_counts'][ $payout_status ] ++;
+				}
 
 				if ( isset( $network_totals['status_counts'][ $post->post_status ] ) ) {
 					$network_totals['status_counts'][ $post->post_status ] ++;
@@ -1189,6 +1544,9 @@ class MP_Multisite {
 		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Eigener Umsatz', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $current['revenue'] ) ) . '</strong></div>';
 		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Netzwerk-Bestellungen', 'mp' ) . '</span><strong>' . intval( $network_totals['orders'] ) . '</strong></div>';
 		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Netzwerk-Umsatz', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $network_totals['revenue'] ) ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Buendel-Checkouts', 'mp' ) . '</span><strong>' . intval( $network_totals['checkout_mode_counts']['bundle'] ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Split-Checkouts', 'mp' ) . '</span><strong>' . intval( $network_totals['checkout_mode_counts']['split'] ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Offene Auszahlungen', 'mp' ) . '</span><strong>' . intval( $network_totals['payout_status_counts']['pending'] ) . '</strong></div>';
 		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Shop-Anteil Umsatz', 'mp' ) . '</span><strong>' . esc_html( number_format_i18n( $shop_share, 1 ) ) . '%</strong></div>';
 		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'AOV Shop', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $current_aov ) ) . '</strong></div>';
 		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'AOV Netzwerk', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $network_aov ) ) . '</strong></div>';
@@ -1397,7 +1755,13 @@ class MP_Multisite {
 			),
 			'advanced'         => array(
 				'hybrid_gateway_routing' => 0,
+				'network_multishop_checkout_mode' => 'bundle_only',
+				'network_multishop_checkout_default' => 'bundle',
+				'network_bundle_shipping_mode' => 'per_shop',
 				'network_customer_hub'   => 0,
+				'network_support_enabled' => 0,
+				'network_support_mode'   => 'autonomous',
+				'network_withdrawal_management' => 0,
 				'network_shop_performance' => 0,
 				'settlement_enabled'     => 0,
 				'settlement_auto_release' => 0,
@@ -1416,6 +1780,22 @@ class MP_Multisite {
 		}
 
 		$new_settings = array_replace_recursive( $default_settings, $settings );
+
+		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_withdrawal_management', $settings['advanced'] ) ) {
+			$new_settings['advanced']['network_withdrawal_management'] = ! empty( $new_settings['global_cart'] ) ? 1 : 0;
+		}
+
+		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_multishop_checkout_mode', $settings['advanced'] ) ) {
+			$new_settings['advanced']['network_multishop_checkout_mode'] = 'bundle_only';
+		}
+
+		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_multishop_checkout_default', $settings['advanced'] ) ) {
+			$new_settings['advanced']['network_multishop_checkout_default'] = 'bundle';
+		}
+
+		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_bundle_shipping_mode', $settings['advanced'] ) ) {
+			$new_settings['advanced']['network_bundle_shipping_mode'] = 'per_shop';
+		}
 
 		update_site_option( 'mp_network_settings', $new_settings );
 	}

@@ -87,6 +87,14 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 
 			$use_network_global_gateway = ( is_multisite() && mp_get_network_setting( 'global_cart' ) );
 
+			/**
+			 * Filter whether the current request should use network-global gateway routing.
+			 *
+			 * @since 1.0
+			 * @param bool $use_network_global_gateway
+			 */
+			$use_network_global_gateway = (bool) apply_filters( 'mp_gateway_api/use_network_global_gateway', $use_network_global_gateway );
+
 			if ( $use_network_global_gateway && ! is_admin() && mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 ) && function_exists( 'mp_cart' ) ) {
 				$blog_ids = (array) mp_cart()->get_blog_ids();
 				if ( count( $blog_ids ) === 1 && (int) reset( $blog_ids ) !== (int) mp_root_blog_id() ) {
