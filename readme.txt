@@ -5,7 +5,7 @@ Requires at least: 4.9
 Requires PHP: 7.4
 Tested up to: 6.8.1
 ClassicPress: 2.7.0
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -83,6 +83,27 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 
 == Changelog ==
+
+= 1.1.1 =
+
+* Neu: Netzwerk-Kundenhub deutlich erweitert (globale Warenkorbuebersicht, Discover-Bereich mit zufaelligen Netzwerkprodukten, konfigurierbare Anzahl und Anzeige nur bei leerem Warenkorb).
+* Neu: Shop-Profil im Netzwerk massiv ausgebaut (Tabs fuer Produkte/Gutscheine/Bewertungen, Shop-Beschreibung, Kategorie-Prefilter, verbesserte Navigation und AJAX-Updatefluss ohne Full-Reload).
+* Neu: Steuerung fuer Floating-Warenkorb auf Mainshop-Seiten ergaenzt (netzwerkweite Option fuer Sichtbarkeit/Modus).
+* Neu: Netzwerkanalysen und Performance-Bereich erweitert (mehr Kennzahlen, bessere Aufbereitung fuer Multisite-Betrieb).
+* Neu: Settlement-/Moderations-Flows im Netzwerk weiter ausgebaut und in den Admin-Workflow integriert.
+* Neu: Snapshot-Cockpit fuer Netzwerk-Einstellungen erweitert (inkl. Auto-Cleanup-Steuerung und Cron-Synchronisierung).
+* Neu: Pickr-basierte Farbwahl-Abhaengigkeit integriert (inkl. minifizierter Assets), um moderne UI-Konfigurationen zu unterstuetzen.
+* Verbesserung: Produktgalerie/Slider robuster gemacht; Loop-Verhalten stabilisiert und Darstellungswarnungen in Randfaellen reduziert.
+* Verbesserung: Netzwerk-Menues, Einstellungsseiten und URL-Flows konsolidiert; wichtige Routen im Netzwerk wurden vereinheitlicht.
+* Verbesserung: Codebasis in mehreren Kernbereichen strukturell refaktoriert (Lesbarkeit, Wartbarkeit, konsistentere Zustandsverwaltung).
+* Verbesserung: Kundenportal-/Bestelluebersichten weiter auf Snapshot-/API-Basis gehoben, um Last und Latenz im Netzwerkbetrieb zu senken.
+* Verbesserung: Widerrufsverwaltung weiter geschaerft (Reason-/Status-Flows, bessere Administratorenfuehrung, stabilerer Ablauf in der Praxis).
+* Fix: Theme-Ladepfad fuer Store-Themes vereinheitlicht; Plugin-Theme-Dateien und Content-Fallback werden kontextuebergreifend konsistent aufgeloest.
+* Fix: Globale Produktlisten-/Filterlogik im Netzwerk gehaertet (Paging-/Offset-Kantenfaelle, Query-Stabilitaet, konsistentere Ergebnisdarstellung).
+* Fix: Sichtbarkeits- und Taxonomie-Logik im Netzwerkmarktplatz bereinigt, damit Produktliste und Kategorien/Tags wieder deckungsgleich arbeiten.
+* Fix: Mainshop/Subsite-Warenkorbfluss weiter stabilisiert (global IDs, AJAX-Kontext, resilientere Aktualisierung in dynamischen Ansichten).
+* Fix: Mehrere UX-Regressionen im Netzwerk-Shop-Profil beseitigt (Sidebar-Persistenz, Tab-Wechsel, sanfter Ruecksprung zu Produktbereichen).
+* Fix: Diverse CSS-/Strukturprobleme in den Netzwerkoberflaechen bereinigt; neue Theme-Variante "Modern Cool Compact" vorbereitet und dokumentiert.
 
 = 1.1.0 =
 
