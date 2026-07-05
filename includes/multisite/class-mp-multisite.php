@@ -847,61 +847,154 @@ class MP_Multisite {
 			return '<p>' . esc_html__( 'Bitte melde Dich an, um Deine zentrale Bestelluebersicht zu sehen.', 'mp' ) . '</p>';
 		}
 
-		$user_id = get_current_user_id();
-		$sites   = get_sites( array( 'fields' => 'ids' ) );
-		$rows    = array();
-		$totals  = array(
-			'orders' => 0,
-			'value'  => 0.0,
+		$user_id       = get_current_user_id();
+		$sites         = get_sites( array( 'fields' => 'ids' ) );
+		$currency      = mp_get_setting( 'currency' );
+		$status_labels = array(
+			'order_received' => __( 'Ausstehend', 'mp' ),
+			'order_paid'     => __( 'Bezahlt', 'mp' ),
+			'order_shipped'  => __( 'Versandt', 'mp' ),
+			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
 		);
+		$closed_statuses = array( 'order_closed', 'order_shipped' );
+
+		$rows = array();
+		$totals = array(
+			'orders'        => 0,
+			'value'         => 0.0,
+			'shops'         => 0,
+			'open_shipping' => 0,
+			'to_review'     => 0,
+		);
+		$shop_seen             = array();
+		$pending_reviews       = array();
+		$pending_reviews_index = array();
+		$recent_reviews        = array();
 
 		foreach ( $sites as $blog_id ) {
+			$blog_id = (int) $blog_id;
 			switch_to_blog( $blog_id );
 
-			$orders = get_posts( array(
-				'post_type'      => 'mp_order',
-				'post_status'    => 'any',
-				'posts_per_page' => -1,
-				'author'         => $user_id,
-				'fields'         => 'ids',
+			$shop_name = get_option( 'blogname' );
+			$orders    = get_posts( array(
+				'post_type'        => 'mp_order',
+				'post_status'      => 'any',
+				'posts_per_page'   => -1,
+				'author'           => $user_id,
+				'fields'           => 'ids',
+				'suppress_filters' => true,
+				'no_found_rows'    => true,
 			) );
 
 			if ( ! empty( $orders ) ) {
-				$shop_name  = get_option( 'blogname' );
-				$shop_total = 0.0;
+				$shop_seen[ $blog_id ] = true;
+			}
 
-				foreach ( $orders as $post_id ) {
-					$post = get_post( $post_id );
-					if ( ! $post || in_array( $post->post_status, array( 'trash', 'auto-draft' ), true ) ) {
-						continue;
-					}
-
-					$order = new MP_Order( $post_id );
-					if ( ! $order->exists() ) {
-						continue;
-					}
-
-					$total = (float) get_post_meta( $post_id, 'mp_order_total', true );
-					$shop_total += $total;
-					$totals['orders'] ++;
-					$totals['value'] += $total;
-
-					$rows[] = array(
-						'shop'   => $shop_name,
-						'order'  => $order->get_id(),
-						'total'  => $total,
-						'status' => $post->post_status,
-						'url'    => $order->tracking_url( false, $blog_id ),
-					);
+			foreach ( $orders as $post_id ) {
+				$post = get_post( $post_id );
+				if ( ! $post || in_array( $post->post_status, array( 'trash', 'auto-draft' ), true ) ) {
+					continue;
 				}
 
-				if ( $shop_total > 0 ) {
-					$rows[] = array(
-						'shop'   => $shop_name,
-						'order'  => 'summary',
-						'total'  => $shop_total,
-						'status' => 'summary',
-						'url'    => '',
+				$order = new MP_Order( $post_id );
+				if ( ! $order->exists() ) {
+					continue;
+				}
+
+				$total           = (float) get_post_meta( $post_id, 'mp_order_total', true );
+				$totals['orders']++;
+				$totals['value'] += $total;
+
+				if ( in_array( $post->post_status, array( 'order_received', 'order_paid' ), true ) ) {
+					$totals['open_shipping']++;
+				}
+
+				$rows[] = array(
+					'shop'      => $shop_name,
+					'order'     => $order->get_id(),
+					'total'     => $total,
+					'status'    => $post->post_status,
+					'url'       => $order->tracking_url( false, $blog_id ),
+					'timestamp' => (int) get_post_time( 'U', true, $post_id ),
+				);
+
+				if ( class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) && in_array( $post->post_status, $closed_statuses, true ) ) {
+					$cart_items  = $order->get_meta( 'mp_cart_items' );
+					$product_ids = array();
+					if ( is_array( $cart_items ) ) {
+						foreach ( $cart_items as $product_id => $items ) {
+							$product_id = (int) $product_id;
+							if ( $product_id > 0 ) {
+								$product_ids[] = $product_id;
+							}
+						}
+					}
+
+					$product_ids = array_values( array_unique( array_filter( array_map( 'intval', $product_ids ) ) ) );
+					foreach ( $product_ids as $product_id ) {
+						$review_key = $blog_id . ':' . $product_id;
+						if ( isset( $pending_reviews_index[ $review_key ] ) ) {
+							continue;
+						}
+
+						$already_reviewed = get_comments( array(
+							'post_id'  => $product_id,
+							'user_id'  => $user_id,
+							'meta_key' => 'rating',
+							'count'    => true,
+						) );
+
+						if ( $already_reviewed ) {
+							continue;
+						}
+
+						$product_url = $this->get_reliable_product_url( $blog_id, $product_id );
+						if ( ! $product_url ) {
+							$product = new MP_Product( $product_id );
+							$product_url = $product->url( false );
+						}
+
+						$pending_reviews[] = array(
+							'shop'         => $shop_name,
+							'product_name' => get_the_title( $product_id ),
+							'product_url'  => $product_url,
+							'order_id'     => $order->get_id(),
+							'status'       => $post->post_status,
+							'timestamp'    => (int) get_post_time( 'U', true, $post_id ),
+						);
+						$pending_reviews_index[ $review_key ] = true;
+					}
+				}
+			}
+
+			if ( class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) ) {
+				$site_comments = get_comments( array(
+					'user_id' => $user_id,
+					'status'  => 'approve',
+					'number'  => 10,
+					'orderby' => 'comment_date_gmt',
+					'order'   => 'DESC',
+				) );
+
+				foreach ( (array) $site_comments as $comment ) {
+					$post_id = (int) $comment->comment_post_ID;
+					$rating  = (int) get_comment_meta( $comment->comment_ID, 'rating', true );
+					if ( $rating < 1 || get_post_type( $post_id ) !== MP_Product::get_post_type() ) {
+						continue;
+					}
+
+					$product_url = $this->get_reliable_product_url( $blog_id, $post_id );
+					if ( ! $product_url ) {
+						$product = new MP_Product( $post_id );
+						$product_url = $product->url( false );
+					}
+
+					$recent_reviews[] = array(
+						'shop'         => $shop_name,
+						'product_name' => get_the_title( $post_id ),
+						'product_url'  => $product_url,
+						'rating'       => $rating,
+						'timestamp'    => strtotime( $comment->comment_date_gmt . ' GMT' ),
 					);
 				}
 			}
@@ -909,37 +1002,121 @@ class MP_Multisite {
 			restore_current_blog();
 		}
 
-		if ( empty( $rows ) ) {
-			return '<p>' . esc_html__( 'Noch keine netzwerkweiten Bestellungen gefunden.', 'mp' ) . '</p>';
+		$totals['shops'] = count( $shop_seen );
+		$totals['to_review'] = count( $pending_reviews );
+
+		usort( $rows, function( $a, $b ) {
+			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
+		} );
+		usort( $pending_reviews, function( $a, $b ) {
+			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
+		} );
+		usort( $recent_reviews, function( $a, $b ) {
+			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
+		} );
+
+		$html  = '<style>';
+		$html .= '.mp-network-customer-hub{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#edf4fb 100%);border:1px solid #dbe6f2;border-radius:16px;padding:20px;color:#1f3346}';
+		$html .= '.mp-network-customer-hub h2{margin:0 0 8px;font-size:24px;letter-spacing:.01em}';
+		$html .= '.mp-hub-sub{margin:0 0 14px;color:#4a6278;font-size:13px}';
+		$html .= '.mp-hub-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}';
+		$html .= '.mp-hub-kpi{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
+		$html .= '.mp-hub-kpi span{display:block;font-size:11px;color:#59708a;text-transform:uppercase;letter-spacing:.04em}';
+		$html .= '.mp-hub-kpi strong{display:block;margin-top:6px;font-size:20px;color:#16324b}';
+		$html .= '.mp-hub-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:12px}';
+		$html .= '.mp-hub-panel{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
+		$html .= '.mp-hub-panel h3{margin:0 0 10px;font-size:13px;color:#35506b;text-transform:uppercase;letter-spacing:.04em}';
+		$html .= '.mp-hub-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}';
+		$html .= '.mp-hub-list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px;border:1px solid #e4ecf4;border-radius:10px;background:#fbfdff}';
+		$html .= '.mp-hub-meta{display:grid;gap:2px;font-size:12px;color:#4a6278}';
+		$html .= '.mp-hub-meta strong{color:#1e354a}';
+		$html .= '.mp-hub-cta{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #2f5f8f;background:#2f5f8f;color:#fff;text-decoration:none;font-size:12px;font-weight:600}';
+		$html .= '.mp-hub-empty{font-size:12px;color:#516981;margin:0}';
+		$html .= '.mp-hub-orders{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d7e4f0;border-radius:12px;overflow:hidden}';
+		$html .= '.mp-hub-orders th,.mp-hub-orders td{padding:10px;border-bottom:1px solid #edf2f7;text-align:left;font-size:12px}';
+		$html .= '.mp-hub-orders th{font-size:11px;color:#607991;text-transform:uppercase;letter-spacing:.04em;background:#f7fbff}';
+		$html .= '.mp-hub-orders tr:last-child td{border-bottom:0}';
+		$html .= '@media (max-width:900px){.mp-hub-grid{grid-template-columns:1fr}}';
+		$html .= '</style>';
+
+		$html .= '<section class="mp-network-customer-hub">';
+		$html .= '<h2>' . esc_html__( 'Zentrales Kundenportal', 'mp' ) . '</h2>';
+		$html .= '<p class="mp-hub-sub">' . esc_html__( 'Netzwerkweit alle Bestellungen, offene Bewertungen und letzte Aktivitaeten auf einen Blick.', 'mp' ) . '</p>';
+
+		$html .= '<div class="mp-hub-kpis">';
+		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Bestellungen', 'mp' ) . '</span><strong>' . intval( $totals['orders'] ) . '</strong></div>';
+		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Gesamtausgaben', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $totals['value'] ) ) . '</strong></div>';
+		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Aktive Shops', 'mp' ) . '</span><strong>' . intval( $totals['shops'] ) . '</strong></div>';
+		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Offene Lieferung', 'mp' ) . '</span><strong>' . intval( $totals['open_shipping'] ) . '</strong></div>';
+		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Zu bewerten', 'mp' ) . '</span><strong>' . intval( $totals['to_review'] ) . '</strong></div>';
+		$html .= '</div>';
+
+		$html .= '<div class="mp-hub-grid">';
+		$html .= '<section class="mp-hub-panel">';
+		$html .= '<h3>' . esc_html__( 'Jetzt bewerten', 'mp' ) . '</h3>';
+		if ( ! empty( $pending_reviews ) ) {
+			$html .= '<ul class="mp-hub-list">';
+			foreach ( array_slice( $pending_reviews, 0, 6 ) as $item ) {
+				$status_label = isset( $status_labels[ $item['status'] ] ) ? $status_labels[ $item['status'] ] : ucfirst( str_replace( 'order_', '', $item['status'] ) );
+				$html .= '<li>';
+				$html .= '<div class="mp-hub-meta">';
+				$html .= '<strong>' . esc_html( $item['product_name'] ) . '</strong>';
+				$html .= '<span>' . sprintf( esc_html__( '%1$s · Bestellung #%2$s · %3$s', 'mp' ), esc_html( $item['shop'] ), esc_html( $item['order_id'] ), esc_html( $status_label ) ) . '</span>';
+				$html .= '</div>';
+				$html .= '<a class="mp-hub-cta" href="' . esc_url( $item['product_url'] ) . '">' . esc_html__( 'Bewerten', 'mp' ) . '</a>';
+				$html .= '</li>';
+			}
+			$html .= '</ul>';
+		} else {
+			$html .= '<p class="mp-hub-empty">' . esc_html__( 'Aktuell gibt es keine offenen Bewertungen fuer Dich.', 'mp' ) . '</p>';
 		}
+		$html .= '</section>';
 
-		$html  = '<section class="mp-network-customer-hub">';
-		$html .= '<h2>' . esc_html__( 'Zentrale Kundendatenbank', 'mp' ) . '</h2>';
-		$html .= '<p><strong>' . esc_html__( 'Bestellungen:', 'mp' ) . '</strong> ' . intval( $totals['orders'] ) . ' &nbsp; <strong>' . esc_html__( 'Gesamtausgaben:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( mp_get_setting( 'currency' ), $totals['value'] ) ) . '</p>';
-		$html .= '<table class="widefat striped"><thead><tr>';
-		$html .= '<th>' . esc_html__( 'Shop', 'mp' ) . '</th>';
-		$html .= '<th>' . esc_html__( 'Bestellung', 'mp' ) . '</th>';
-		$html .= '<th>' . esc_html__( 'Status', 'mp' ) . '</th>';
-		$html .= '<th>' . esc_html__( 'Betrag', 'mp' ) . '</th>';
-		$html .= '</tr></thead><tbody>';
+		$html .= '<section class="mp-hub-panel">';
+		$html .= '<h3>' . esc_html__( 'Deine letzten Bewertungen', 'mp' ) . '</h3>';
+		if ( ! empty( $recent_reviews ) ) {
+			$html .= '<ul class="mp-hub-list">';
+			foreach ( array_slice( $recent_reviews, 0, 5 ) as $item ) {
+				$html .= '<li>';
+				$html .= '<div class="mp-hub-meta">';
+				$html .= '<strong>' . esc_html( $item['product_name'] ) . '</strong>';
+				$html .= '<span>' . sprintf( esc_html__( '%1$s · %2$s/5 Sterne', 'mp' ), esc_html( $item['shop'] ), intval( $item['rating'] ) ) . '</span>';
+				$html .= '</div>';
+				$html .= '<a class="mp-hub-cta" href="' . esc_url( $item['product_url'] ) . '">' . esc_html__( 'Ansehen', 'mp' ) . '</a>';
+				$html .= '</li>';
+			}
+			$html .= '</ul>';
+		} else {
+			$html .= '<p class="mp-hub-empty">' . esc_html__( 'Du hast noch keine Produktbewertungen abgegeben.', 'mp' ) . '</p>';
+		}
+		$html .= '</section>';
+		$html .= '</div>';
 
-		foreach ( $rows as $row ) {
-			$html .= '<tr>';
-			$html .= '<td>' . esc_html( $row['shop'] ) . '</td>';
+		$html .= '<section class="mp-hub-panel">';
+		$html .= '<h3>' . esc_html__( 'Letzte Bestellungen', 'mp' ) . '</h3>';
+		if ( ! empty( $rows ) ) {
+			$html .= '<table class="mp-hub-orders"><thead><tr>';
+			$html .= '<th>' . esc_html__( 'Shop', 'mp' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'Bestellung', 'mp' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'Status', 'mp' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'Betrag', 'mp' ) . '</th>';
+			$html .= '</tr></thead><tbody>';
 
-			if ( 'summary' === $row['order'] ) {
-				$html .= '<td><em>' . esc_html__( 'Shop-Summe', 'mp' ) . '</em></td>';
-				$html .= '<td><em>' . esc_html__( 'Zusammenfassung', 'mp' ) . '</em></td>';
-			} else {
+			foreach ( array_slice( $rows, 0, 20 ) as $row ) {
+				$status_label = isset( $status_labels[ $row['status'] ] ) ? $status_labels[ $row['status'] ] : ucfirst( str_replace( 'order_', '', $row['status'] ) );
+				$html .= '<tr>';
+				$html .= '<td>' . esc_html( $row['shop'] ) . '</td>';
 				$html .= '<td><a href="' . esc_url( $row['url'] ) . '">#' . esc_html( $row['order'] ) . '</a></td>';
-				$html .= '<td>' . esc_html( $row['status'] ) . '</td>';
+				$html .= '<td>' . esc_html( $status_label ) . '</td>';
+				$html .= '<td>' . esc_html( mp_format_currency( $currency, $row['total'] ) ) . '</td>';
+				$html .= '</tr>';
 			}
 
-			$html .= '<td>' . esc_html( mp_format_currency( mp_get_setting( 'currency' ), $row['total'] ) ) . '</td>';
-			$html .= '</tr>';
+			$html .= '</tbody></table>';
+		} else {
+			$html .= '<p class="mp-hub-empty">' . esc_html__( 'Noch keine netzwerkweiten Bestellungen gefunden.', 'mp' ) . '</p>';
 		}
-
-		$html .= '</tbody></table>';
+		$html .= '</section>';
 		$html .= '</section>';
 
 		return $html;

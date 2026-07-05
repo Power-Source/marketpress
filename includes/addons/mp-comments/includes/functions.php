@@ -117,7 +117,7 @@ class MP_Ratings_Functions {
         $orders = $wpdb->get_col($wpdb->prepare(
             "SELECT ID FROM {$wpdb->posts} 
             WHERE post_type = 'mp_order' 
-            AND post_status IN ('order_paid', 'order_shipped', 'order_completed')
+            AND post_status IN ('order_paid', 'order_shipped', 'order_completed', 'order_closed')
             AND post_author = %d",
             $user_id
         ));

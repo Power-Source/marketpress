@@ -518,14 +518,215 @@ if ( ! function_exists( '_mp_order_status_overview' ) ) :
 		$per_page       = isset( $per_page_value ) ? $per_page_value : get_option( 'posts_per_page' );
 		$offset         = ( $page - 1 ) * $per_page;
 		$total_pages    = ceil( count( $history ) / $per_page );
-		$html           = '
-			<!-- Order History -->
-			<section id="mp-order-history" class="mp_orders mp_orders-list">';
+
+		$currency             = mp_get_setting( 'currency' );
+		$status_labels        = array(
+			'order_received' => __( 'Ausstehend', 'mp' ),
+			'order_paid'     => __( 'Bezahlt', 'mp' ),
+			'order_shipped'  => __( 'Versandt', 'mp' ),
+			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
+		);
+		$closed_statuses      = array( 'order_closed', 'order_shipped' );
+		$user_id              = get_current_user_id();
+		$totals               = array(
+			'orders'        => 0,
+			'value'         => 0.0,
+			'open_shipping' => 0,
+			'to_review'     => 0,
+		);
+		$pending_reviews      = array();
+		$pending_review_index = array();
+
+		foreach ( $history as $timestamp => $entry ) {
+			if ( empty( $entry['id'] ) ) {
+				continue;
+			}
+
+			$order_id = (int) $entry['id'];
+			$order    = new MP_Order( $order_id );
+			if ( ! $order->exists() ) {
+				continue;
+			}
+
+			$status = get_post_status( $order_id );
+			if ( ! $status || in_array( $status, array( 'trash', 'auto-draft' ), true ) ) {
+				continue;
+			}
+
+			$totals['orders'] ++;
+			$totals['value'] += (float) get_post_meta( $order_id, 'mp_order_total', true );
+
+			if ( in_array( $status, array( 'order_received', 'order_paid' ), true ) ) {
+				$totals['open_shipping'] ++;
+			}
+
+			if ( ! class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) ) {
+				continue;
+			}
+
+			if ( ! in_array( $status, $closed_statuses, true ) ) {
+				continue;
+			}
+
+			$cart_items = $order->get_meta( 'mp_cart_items' );
+			$product_ids = array();
+			if ( is_array( $cart_items ) ) {
+				foreach ( $cart_items as $product_id => $items ) {
+					$product_id = (int) $product_id;
+					if ( $product_id > 0 ) {
+						$product_ids[] = $product_id;
+					}
+				}
+			} else {
+				$cart = $order->get_cart();
+				if ( is_object( $cart ) && method_exists( $cart, 'get_items' ) ) {
+					$items = (array) $cart->get_items();
+					foreach ( $items as $item ) {
+						$product_id = isset( $item['product_id'] ) ? (int) $item['product_id'] : 0;
+						if ( $product_id > 0 ) {
+							$product_ids[] = $product_id;
+						}
+					}
+				}
+			}
+
+			$product_ids = array_values( array_unique( array_filter( array_map( 'intval', $product_ids ) ) ) );
+			foreach ( $product_ids as $product_id ) {
+				if ( isset( $pending_review_index[ $product_id ] ) ) {
+					continue;
+				}
+
+				if ( get_post_type( $product_id ) !== MP_Product::get_post_type() ) {
+					continue;
+				}
+
+				$already_reviewed = get_comments( array(
+					'post_id'  => $product_id,
+					'user_id'  => $user_id,
+					'meta_key' => 'rating',
+					'count'    => true,
+				) );
+
+				if ( $already_reviewed ) {
+					continue;
+				}
+
+				$product = new MP_Product( $product_id );
+				$pending_reviews[] = array(
+					'product_id'   => $product_id,
+					'product_name' => get_the_title( $product_id ),
+					'product_url'  => $product->url( false ),
+					'order_id'      => $order->get_id(),
+					'status'        => $status,
+					'timestamp'     => (int) $timestamp,
+				);
+				$pending_review_index[ $product_id ] = true;
+			}
+		}
+
+		usort( $pending_reviews, function( $a, $b ) {
+			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
+		} );
+		$totals['to_review'] = count( $pending_reviews );
+
+		$recent_reviews = array();
+		if ( class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) ) {
+			$recent_reviews = get_comments( array(
+				'user_id' => $user_id,
+				'status'  => 'approve',
+				'number'  => 5,
+				'orderby' => 'comment_date_gmt',
+				'order'   => 'DESC',
+			) );
+			$recent_reviews = array_values( array_filter( (array) $recent_reviews, function( $comment ) {
+				$post_id = (int) $comment->comment_post_ID;
+				$rating  = (int) get_comment_meta( $comment->comment_ID, 'rating', true );
+				return ( $rating > 0 && get_post_type( $post_id ) === MP_Product::get_post_type() );
+			} ) );
+		}
+
+		$html = '<style>';
+		$html .= '.mp-customer-portal{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#edf4fb 100%);border:1px solid #dbe6f2;border-radius:16px;padding:20px;color:#1f3346;margin-bottom:16px}';
+		$html .= '.mp-customer-portal h2{margin:0 0 8px;font-size:24px;letter-spacing:.01em}';
+		$html .= '.mp-customer-sub{margin:0 0 14px;color:#4a6278;font-size:13px}';
+		$html .= '.mp-customer-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}';
+		$html .= '.mp-customer-kpi{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
+		$html .= '.mp-customer-kpi span{display:block;font-size:11px;color:#59708a;text-transform:uppercase;letter-spacing:.04em}';
+		$html .= '.mp-customer-kpi strong{display:block;margin-top:6px;font-size:20px;color:#16324b}';
+		$html .= '.mp-customer-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:12px}';
+		$html .= '.mp-customer-panel{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
+		$html .= '.mp-customer-panel h3{margin:0 0 10px;font-size:13px;color:#35506b;text-transform:uppercase;letter-spacing:.04em}';
+		$html .= '.mp-customer-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}';
+		$html .= '.mp-customer-list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px;border:1px solid #e4ecf4;border-radius:10px;background:#fbfdff}';
+		$html .= '.mp-customer-meta{display:grid;gap:2px;font-size:12px;color:#4a6278}';
+		$html .= '.mp-customer-meta strong{color:#1e354a}';
+		$html .= '.mp-customer-cta{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #2f5f8f;background:#2f5f8f;color:#fff;text-decoration:none;font-size:12px;font-weight:600}';
+		$html .= '.mp-customer-empty{font-size:12px;color:#516981;margin:0}';
+		$html .= '@media (max-width:900px){.mp-customer-grid{grid-template-columns:1fr}}';
+		$html .= '</style>';
+
+		$html .= '<section class="mp-customer-portal">';
+		$html .= '<h2>' . esc_html__( 'Kundendashboard', 'mp' ) . '</h2>';
+		$html .= '<p class="mp-customer-sub">' . esc_html__( 'Alle Deine Bestellungen, offene Aktionen und Bewertungen auf einen Blick.', 'mp' ) . '</p>';
+
+		$html .= '<div class="mp-customer-kpis">';
+		$html .= '<div class="mp-customer-kpi"><span>' . esc_html__( 'Bestellungen', 'mp' ) . '</span><strong>' . intval( $totals['orders'] ) . '</strong></div>';
+		$html .= '<div class="mp-customer-kpi"><span>' . esc_html__( 'Gesamtausgaben', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $totals['value'] ) ) . '</strong></div>';
+		$html .= '<div class="mp-customer-kpi"><span>' . esc_html__( 'Offene Lieferung', 'mp' ) . '</span><strong>' . intval( $totals['open_shipping'] ) . '</strong></div>';
+		$html .= '<div class="mp-customer-kpi"><span>' . esc_html__( 'Zu bewerten', 'mp' ) . '</span><strong>' . intval( $totals['to_review'] ) . '</strong></div>';
+		$html .= '</div>';
+
+		$html .= '<div class="mp-customer-grid">';
+		$html .= '<section class="mp-customer-panel">';
+		$html .= '<h3>' . esc_html__( 'Jetzt bewerten', 'mp' ) . '</h3>';
+		if ( ! empty( $pending_reviews ) ) {
+			$html .= '<ul class="mp-customer-list">';
+			foreach ( array_slice( $pending_reviews, 0, 6 ) as $item ) {
+				$status_label = isset( $status_labels[ $item['status'] ] ) ? $status_labels[ $item['status'] ] : ucfirst( str_replace( 'order_', '', $item['status'] ) );
+				$html .= '<li>';
+				$html .= '<div class="mp-customer-meta">';
+				$html .= '<strong>' . esc_html( $item['product_name'] ) . '</strong>';
+				$html .= '<span>' . sprintf( esc_html__( 'Bestellung #%1$s · %2$s', 'mp' ), esc_html( $item['order_id'] ), esc_html( $status_label ) ) . '</span>';
+				$html .= '</div>';
+				$html .= '<a class="mp-customer-cta" href="' . esc_url( $item['product_url'] ) . '">' . esc_html__( 'Bewerten', 'mp' ) . '</a>';
+				$html .= '</li>';
+			}
+			$html .= '</ul>';
+		} else {
+			$html .= '<p class="mp-customer-empty">' . esc_html__( 'Stark! Aktuell gibt es keine offenen Bewertungen fuer Dich.', 'mp' ) . '</p>';
+		}
+		$html .= '</section>';
+
+		$html .= '<section class="mp-customer-panel">';
+		$html .= '<h3>' . esc_html__( 'Deine letzten Bewertungen', 'mp' ) . '</h3>';
+		if ( ! empty( $recent_reviews ) ) {
+			$html .= '<ul class="mp-customer-list">';
+			foreach ( array_slice( $recent_reviews, 0, 5 ) as $comment ) {
+				$post_id = (int) $comment->comment_post_ID;
+				$rating  = (int) get_comment_meta( $comment->comment_ID, 'rating', true );
+				$product = new MP_Product( $post_id );
+				$html .= '<li>';
+				$html .= '<div class="mp-customer-meta">';
+				$html .= '<strong>' . esc_html( get_the_title( $post_id ) ) . '</strong>';
+				$html .= '<span>' . sprintf( esc_html__( '%1$s/5 Sterne · %2$s', 'mp' ), intval( $rating ), esc_html( date_i18n( get_option( 'date_format' ), strtotime( $comment->comment_date ) ) ) ) . '</span>';
+				$html .= '</div>';
+				$html .= '<a class="mp-customer-cta" href="' . esc_url( $product->url( false ) ) . '">' . esc_html__( 'Ansehen', 'mp' ) . '</a>';
+				$html .= '</li>';
+			}
+			$html .= '</ul>';
+		} else {
+			$html .= '<p class="mp-customer-empty">' . esc_html__( 'Du hast noch keine Produktbewertungen abgegeben.', 'mp' ) . '</p>';
+		}
+		$html .= '</section>';
+		$html .= '</div>';
+		$html .= '</section>';
+
+		$html .= '<section id="mp-order-history" class="mp_orders mp_orders-list">';
 
 		if ( count( $history ) > 0 ) {
 			$history = array_slice( $history, $offset, $per_page );
 			$html .= '
-				<h2 class="mp_title">' . __( 'Bestellungen', 'mp' ) . '</h2>' .
+				<h2 class="mp_title">' . __( 'Deine letzten Bestellungen', 'mp' ) . '</h2>' .
 			         '<div class="mp_order_details">';
 			foreach ( $history as $timestamp => $order ) {
 				$order = new MP_Order( $order['id'] );
