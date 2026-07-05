@@ -35,6 +35,13 @@ class MP_Orders_Admin {
 	protected $_order_flow_cache = array();
 
 	/**
+	 * Cache for withdrawal overview lookups within a request.
+	 *
+	 * @var array
+	 */
+	protected $_withdrawal_overview_cache = array();
+
+	/**
 	 * Whether settlement table existence was checked.
 	 *
 	 * @var bool|null
@@ -136,22 +143,23 @@ class MP_Orders_Admin {
 		add_filter( 'posts_join', array( &$this, 'orders_search_join' ) );
 		add_filter( 'posts_where', array( &$this, 'orders_search_where' ) );
 		add_filter( 'posts_groupby', array( &$this, 'orders_search_groupby' ) );
-		add_action( 'restrict_manage_posts', array( &$this, 'render_orders_filter_bar' ) );
+		add_action( 'restrict_manage_posts', array( &$this, 'render_orders_filter_bar' ), 20, 2 );
 	}
 
 	/**
 	 * Render extra filters on mp_order list screen.
 	 */
-	public function render_orders_filter_bar() {
-		global $typenow;
-
-		if ( 'mp_order' !== $typenow ) {
+	public function render_orders_filter_bar( $post_type = '', $which = '' ) {
+		if ( 'mp_order' !== $post_type || 'top' !== $which ) {
 			return;
 		}
 
 		$flow_filter       = sanitize_key( (string) mp_get_get_value( 'mp_flow_type', '' ) );
 		$settlement_filter = sanitize_key( (string) mp_get_get_value( 'mp_settlement_status', '' ) );
+		$withdrawal_filter = sanitize_key( (string) mp_get_get_value( 'mp_withdrawal_state', '' ) );
 		$needs_action      = sanitize_key( (string) mp_get_get_value( 'mp_needs_action', '' ) );
+
+		echo '<div class="mp-orders-toolbar">';
 
 		echo '<select name="mp_flow_type">';
 		echo '<option value="">' . esc_html__( 'Alle Flows', 'mp' ) . '</option>';
@@ -163,6 +171,13 @@ class MP_Orders_Admin {
 		);
 		foreach ( $flow_options as $value => $label ) {
 			echo '<option value="' . esc_attr( $value ) . '" ' . selected( $flow_filter, $value, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select>';
+
+		echo '<select name="mp_withdrawal_state">';
+		echo '<option value="">' . esc_html__( 'Widerruf: Alle', 'mp' ) . '</option>';
+		foreach ( $this->get_withdrawal_filter_labels() as $value => $label ) {
+			echo '<option value="' . esc_attr( $value ) . '" ' . selected( $withdrawal_filter, $value, false ) . '>' . esc_html( $label ) . '</option>';
 		}
 		echo '</select>';
 
@@ -180,6 +195,13 @@ class MP_Orders_Admin {
 		echo '<option value="1" ' . selected( $needs_action, '1', false ) . '>' . esc_html__( 'Braucht Aktion', 'mp' ) . '</option>';
 		echo '<option value="0" ' . selected( $needs_action, '0', false ) . '>' . esc_html__( 'Keine Aktion noetig', 'mp' ) . '</option>';
 		echo '</select>';
+
+		echo '<div class="mp-orders-view-toggle" role="group" aria-label="' . esc_attr__( 'Ansicht wechseln', 'mp' ) . '">';
+		echo '<button type="button" class="button" data-view="kanban">' . esc_html__( 'Kanban', 'mp' ) . '</button>';
+		echo '<button type="button" class="button" data-view="table">' . esc_html__( 'Tabelle', 'mp' ) . '</button>';
+		echo '</div>';
+
+		echo '</div>';
 	}
 
 	/**
@@ -1033,6 +1055,15 @@ class MP_Orders_Admin {
 			wp_send_json_error( array( 'message' => __( 'Ungueltige Statusdaten.', 'mp' ) ), 400 );
 		}
 
+		$post = get_post( $post_id );
+		if ( ! $post || 'mp_order' !== $post->post_type ) {
+			wp_send_json_error( array( 'message' => __( 'Ungueltige Bestellung.', 'mp' ) ), 404 );
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unzureichende Berechtigungen.', 'mp' ) ), 403 );
+		}
+
 		$result = wp_update_post( array(
 			'ID'          => $post_id,
 			'post_status' => $order_status,
@@ -1081,6 +1112,10 @@ class MP_Orders_Admin {
 	 * @param object $query
 	 */
 	public function modify_query( $query ) {
+		if ( ! is_admin() || ! $query->is_main_query() ) {
+			return;
+		}
+
 		$current_screen = get_current_screen();
 		if ( $query->get( 'post_type' ) != 'mp_order' || ! $current_screen || $current_screen->id != 'edit-mp_order' ) {
 			//bail
@@ -1093,17 +1128,48 @@ class MP_Orders_Admin {
 
 		$flow_filter       = sanitize_key( (string) mp_get_get_value( 'mp_flow_type', '' ) );
 		$settlement_filter = sanitize_key( (string) mp_get_get_value( 'mp_settlement_status', '' ) );
+		$withdrawal_filter = sanitize_key( (string) mp_get_get_value( 'mp_withdrawal_state', '' ) );
 		$needs_action_raw  = mp_get_get_value( 'mp_needs_action', '' );
 		$needs_action      = ( '' !== $needs_action_raw ) ? (bool) intval( $needs_action_raw ) : null;
+		$withdrawal_labels = $this->get_withdrawal_filter_labels();
+		if ( $withdrawal_filter && ! isset( $withdrawal_labels[ $withdrawal_filter ] ) ) {
+			$withdrawal_filter = '';
+		}
 
-		if ( $flow_filter || $settlement_filter || null !== $needs_action ) {
-			$candidate_ids = get_posts( array(
-				'post_type'      => 'mp_order',
-				'post_status'    => 'any',
-				'fields'         => 'ids',
-				'posts_per_page' => -1,
-				'no_found_rows'  => true,
-			) );
+		if ( $flow_filter || $settlement_filter || $withdrawal_filter || null !== $needs_action ) {
+			$candidate_post_status = $query->get( 'post_status' );
+			if ( ! is_array( $candidate_post_status ) ) {
+				$candidate_post_status = array( $candidate_post_status );
+			}
+			$candidate_post_status = array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) $candidate_post_status ) ) ) );
+			if ( empty( $candidate_post_status ) || ( 1 === count( $candidate_post_status ) && 'any' === reset( $candidate_post_status ) ) ) {
+				$candidate_post_status = array( 'order_received', 'order_paid', 'order_shipped', 'order_closed' );
+			}
+
+			$candidate_ids = array();
+			if ( $settlement_filter ) {
+				$candidate_ids = $this->get_order_ids_by_effective_settlement_status( $settlement_filter, $candidate_post_status );
+				if ( empty( $candidate_ids ) ) {
+					$query->set( 'post__in', array( 0 ) );
+					return;
+				}
+
+				if ( ! $flow_filter && ! $withdrawal_filter && null === $needs_action ) {
+					$query->set( 'post__in', $candidate_ids );
+					return;
+				}
+			}
+
+			if ( empty( $candidate_ids ) ) {
+				$candidate_ids = get_posts( array(
+					'post_type'        => 'mp_order',
+					'post_status'      => $candidate_post_status,
+					'fields'           => 'ids',
+					'posts_per_page'   => -1,
+					'no_found_rows'    => true,
+					'suppress_filters' => true,
+				) );
+			}
 
 			$settlement_map = array();
 			if ( $settlement_filter || null !== $needs_action ) {
@@ -1122,14 +1188,27 @@ class MP_Orders_Admin {
 				$settlement       = isset( $settlement_map[ $order_id ] ) ? $settlement_map[ $order_id ] : 'n/a';
 				$settlement_match = ( ! $settlement_filter || $settlement_filter === $settlement );
 
+				$withdrawal_overview = null;
+				if ( $withdrawal_filter || null !== $needs_action ) {
+					$withdrawal_overview = $this->get_order_withdrawal_overview( (int) $order_id );
+				}
+
+				$withdrawal_match = true;
+				if ( $withdrawal_filter ) {
+					$withdrawal_match = $this->matches_withdrawal_filter( $withdrawal_filter, $withdrawal_overview );
+				}
+
 				$action_required = in_array( get_post_status( $order_id ), array( 'order_received', 'order_paid' ), true );
 				if ( in_array( $settlement, array( 'expected_credit', 'on_hold', 'releasable' ), true ) ) {
+					$action_required = true;
+				}
+				if ( is_array( $withdrawal_overview ) && ! empty( $withdrawal_overview['has_open'] ) ) {
 					$action_required = true;
 				}
 
 				$action_match = ( null === $needs_action || $action_required === $needs_action );
 
-				if ( $flow_match && $settlement_match && $action_match ) {
+				if ( $flow_match && $settlement_match && $withdrawal_match && $action_match ) {
 					$filtered[] = (int) $order_id;
 				}
 			}
@@ -1148,6 +1227,67 @@ class MP_Orders_Admin {
 				$query->set( 'meta_key', 'times_used' );
 				break;
 		}
+	}
+
+	/**
+	 * Get order ids by effective settlement status using SQL-side priority resolution.
+	 *
+	 * @param string $status
+	 * @param array  $post_statuses
+	 *
+	 * @return array
+	 */
+	private function get_order_ids_by_effective_settlement_status( $status, $post_statuses ) {
+		$status = sanitize_key( (string) $status );
+
+		$priority = array(
+			'on_hold'         => 4,
+			'expected_credit' => 3,
+			'releasable'      => 2,
+			'released'        => 1,
+		);
+
+		if ( ! isset( $priority[ $status ] ) ) {
+			return array();
+		}
+
+		if ( ! is_multisite() || ! $this->settlement_table_exists() ) {
+			return array();
+		}
+
+		$post_statuses = array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) $post_statuses ) ) ) );
+		if ( empty( $post_statuses ) || ( 1 === count( $post_statuses ) && 'any' === reset( $post_statuses ) ) ) {
+			$post_statuses = array( 'order_received', 'order_paid', 'order_shipped', 'order_closed' );
+		}
+
+		global $wpdb;
+		$table = $wpdb->base_prefix . 'mp_settlement_ledger';
+
+		$post_status_placeholders = implode( ',', array_fill( 0, count( $post_statuses ), '%s' ) );
+		$sql = "
+			SELECT t.order_post_id
+			FROM (
+				SELECT order_post_id,
+					MAX(CASE status
+						WHEN 'on_hold' THEN 4
+						WHEN 'expected_credit' THEN 3
+						WHEN 'releasable' THEN 2
+						WHEN 'released' THEN 1
+						ELSE 0
+					END) AS settlement_priority
+				FROM {$table}
+				GROUP BY order_post_id
+			) AS t
+			INNER JOIN {$wpdb->posts} p ON p.ID = t.order_post_id
+			WHERE p.post_type = %s
+				AND p.post_status IN ({$post_status_placeholders})
+				AND t.settlement_priority = %d
+		";
+
+		$params = array_merge( array( 'mp_order' ), $post_statuses, array( (int) $priority[ $status ] ) );
+		$order_ids = (array) $wpdb->get_col( $wpdb->prepare( $sql, $params ) );
+
+		return array_values( array_unique( array_filter( array_map( 'intval', $order_ids ) ) ) );
 	}
 
 	/**
@@ -1202,11 +1342,18 @@ class MP_Orders_Admin {
 		wp_enqueue_style( 'mp-admin-orders', mp_plugin_url( 'includes/admin/ui/css/admin-orders.css' ), false, MP_VERSION );
 		wp_enqueue_script( 'mp-admin-orders', mp_plugin_url( 'includes/admin/ui/js/admin-orders.js' ), false, MP_VERSION );
 		wp_enqueue_style( 'mp-admin-modern', mp_plugin_url( 'includes/admin/ui/css/mp-admin-modern.css' ), array(), MP_VERSION );
-		wp_enqueue_script( 'mp-admin-modern', mp_plugin_url( 'includes/admin/ui/js/mp-admin-modern.js' ), array(), MP_VERSION, true );
+		wp_enqueue_script( 'mp-admin-modern', mp_plugin_url( 'includes/admin/ui/js/mp-admin-modern.js' ), array( 'mp-admin-orders' ), MP_VERSION, true );
+
+		wp_add_inline_script(
+			'mp-admin-orders',
+			"(function(){try{var v=localStorage.getItem('mpOrdersView')||'kanban';document.documentElement.classList.add('mp-orders-pref-'+v);}catch(e){document.documentElement.classList.add('mp-orders-pref-kanban');}})();",
+			'before'
+		);
 
 		wp_localize_script( 'mp-admin-orders', 'mp_admin_orders', array(
 			'ajax_nonce'   => wp_create_nonce( 'mp-ajax-nonce' ),
 			'ajax_url'     => admin_url( 'admin-ajax.php' ),
+			'dashboard'    => $this->get_orders_dashboard_widgets_data(),
 			'bulk_actions' => array(
 				'-1'             => __( 'Status ändern', 'mp' ),
 				'order_received' => __( 'Ausstehend', 'mp' ),
@@ -1216,6 +1363,164 @@ class MP_Orders_Admin {
 				'trash'          => __( 'In den Papierkorb verschieben', 'mp' ),
 			),
 		) );
+	}
+
+	/**
+	 * Build context-aware widget data for mp_order dashboard sidebar.
+	 *
+	 * @return array
+	 */
+	private function get_orders_dashboard_widgets_data() {
+		$counts = wp_count_posts( 'mp_order' );
+		$withdrawal_counts = array(
+			'none'        => 0,
+			'open'        => 0,
+			'in_progress' => 0,
+			'approved'    => 0,
+			'rejected'    => 0,
+			'refunded'    => 0,
+			'closed'      => 0,
+			'open_total'  => 0,
+		);
+
+		$order_ids_for_withdrawal = get_posts( array(
+			'post_type'              => 'mp_order',
+			'post_status'            => array( 'order_received', 'order_paid', 'order_shipped', 'order_closed' ),
+			'fields'                 => 'ids',
+			'posts_per_page'         => -1,
+			'no_found_rows'          => true,
+			'suppress_filters'       => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		) );
+
+		foreach ( (array) $order_ids_for_withdrawal as $order_id ) {
+			$overview = $this->get_order_withdrawal_overview( (int) $order_id );
+			$status   = isset( $overview['status'] ) ? sanitize_key( (string) $overview['status'] ) : 'none';
+			if ( ! isset( $withdrawal_counts[ $status ] ) ) {
+				$status = 'none';
+			}
+
+			$withdrawal_counts[ $status ]++;
+			if ( ! empty( $overview['has_open'] ) ) {
+				$withdrawal_counts['open_total']++;
+			}
+		}
+
+		$get_network_setting = function ( $key, $default = 0 ) {
+			if ( function_exists( 'mp_get_network_setting' ) ) {
+				return mp_get_network_setting( $key, $default );
+			}
+
+			return $default;
+		};
+
+		$data = array(
+			'mode'         => is_multisite() ? 'multisite' : 'single',
+			'blog_id'      => (int) get_current_blog_id(),
+			'root_blog_id' => function_exists( 'mp_root_blog_id' ) ? (int) mp_root_blog_id() : (int) get_current_blog_id(),
+			'stats'        => array(
+				'received' => isset( $counts->order_received ) ? (int) $counts->order_received : 0,
+				'paid'     => isset( $counts->order_paid ) ? (int) $counts->order_paid : 0,
+				'shipped'  => isset( $counts->order_shipped ) ? (int) $counts->order_shipped : 0,
+				'closed'   => isset( $counts->order_closed ) ? (int) $counts->order_closed : 0,
+			),
+			'network'      => array(
+				'global_cart'          => (bool) $get_network_setting( 'global_cart', 0 ),
+				'hybrid_routing'       => (bool) $get_network_setting( 'advanced->hybrid_gateway_routing', 0 ),
+				'settlement_enabled'   => (bool) $get_network_setting( 'advanced->settlement_enabled', 0 ),
+				'auto_release'         => (bool) $get_network_setting( 'advanced->settlement_auto_release', 0 ),
+				'hold_days'            => (int) $get_network_setting( 'advanced->settlement_hold_days', 14 ),
+				'shop_performance_page' => '',
+			),
+			'withdrawals'  => $withdrawal_counts,
+			'reviews'      => $this->get_reviews_dashboard_data(),
+		);
+
+		if ( is_multisite() && $get_network_setting( 'advanced->network_shop_performance', 0 ) ) {
+			$page_id = (int) $get_network_setting( 'pages->network_shop_performance', 0 );
+			if ( $page_id > 0 ) {
+				$root_blog_id = $data['root_blog_id'];
+				if ( function_exists( 'get_blog_permalink' ) ) {
+					$data['network']['shop_performance_page'] = (string) get_blog_permalink( $root_blog_id, $page_id );
+				} else {
+					$current_blog_id = get_current_blog_id();
+					if ( $root_blog_id !== $current_blog_id ) {
+						switch_to_blog( $root_blog_id );
+					}
+
+					$data['network']['shop_performance_page'] = (string) get_permalink( $page_id );
+
+					if ( $root_blog_id !== $current_blog_id ) {
+						restore_current_blog();
+					}
+				}
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Build review/rating summary for the admin order sidebar widget.
+	 *
+	 * @return array
+	 */
+	private function get_reviews_dashboard_data() {
+		$addon_active = class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) && function_exists( 'mp_comments' );
+
+		$data = array(
+			'active'          => (bool) $addon_active,
+			'approved_count'  => 0,
+			'pending_count'   => 0,
+			'recent_7d_count' => 0,
+			'average_rating'  => 0,
+			'allowed_users'   => array(),
+			'require_purchase' => false,
+			'enable_helpful'  => false,
+			'moderation_url'  => admin_url( 'edit-comments.php?comment_status=moderated' ),
+			'all_url'         => admin_url( 'edit-comments.php' ),
+			'settings_url'    => admin_url( 'admin.php?page=store-settings-addons&addon=MP_MARKETPRESS_COMMENTS_Addon' ),
+		);
+
+		if ( ! $addon_active ) {
+			return $data;
+		}
+
+		$comments_settings = (array) mp_get_setting( 'comments', array() );
+
+		$allowed_users = isset( $comments_settings['allowed_users'] ) ? (array) $comments_settings['allowed_users'] : array( 'registered', 'guests' );
+		$data['allowed_users'] = array_values( array_intersect( $allowed_users, array( 'registered', 'guests' ) ) );
+		$data['require_purchase'] = isset( $comments_settings['require_purchase'] ) && 'yes' === $comments_settings['require_purchase'];
+		$data['enable_helpful'] = isset( $comments_settings['enable_helpful'] ) ? (bool) $comments_settings['enable_helpful'] : true;
+
+		global $wpdb;
+		$product_post_type = MP_Product::get_post_type();
+		$recent_since_gmt  = gmdate( 'Y-m-d H:i:s', strtotime( '-7 days' ) );
+
+		$sql = $wpdb->prepare(
+			"SELECT
+				SUM(CASE WHEN c.comment_approved = '1' THEN 1 ELSE 0 END) AS approved_count,
+				SUM(CASE WHEN c.comment_approved = '0' THEN 1 ELSE 0 END) AS pending_count,
+				SUM(CASE WHEN c.comment_approved = '1' AND c.comment_date_gmt >= %s THEN 1 ELSE 0 END) AS recent_7d_count,
+				AVG(CASE WHEN c.comment_approved = '1' THEN CAST(cm.meta_value AS DECIMAL(10,2)) END) AS average_rating
+			FROM {$wpdb->comments} c
+			INNER JOIN {$wpdb->commentmeta} cm ON cm.comment_id = c.comment_ID AND cm.meta_key = 'rating'
+			INNER JOIN {$wpdb->posts} p ON p.ID = c.comment_post_ID
+			WHERE p.post_type = %s",
+			$recent_since_gmt,
+			$product_post_type
+		);
+
+		$row = (array) $wpdb->get_row( $sql, ARRAY_A );
+		if ( ! empty( $row ) ) {
+			$data['approved_count']  = isset( $row['approved_count'] ) ? (int) $row['approved_count'] : 0;
+			$data['pending_count']   = isset( $row['pending_count'] ) ? (int) $row['pending_count'] : 0;
+			$data['recent_7d_count'] = isset( $row['recent_7d_count'] ) ? (int) $row['recent_7d_count'] : 0;
+			$data['average_rating']  = isset( $row['average_rating'] ) ? round( (float) $row['average_rating'], 1 ) : 0;
+		}
+
+		return $data;
 	}
 
 	/**
@@ -1309,6 +1614,83 @@ class MP_Orders_Admin {
 			'released'        => __( 'Freigegeben', 'mp' ),
 			'n/a'             => __( 'Keine Daten', 'mp' ),
 		);
+	}
+
+	/**
+	 * Get labels for withdrawal filters/badges.
+	 *
+	 * @return array
+	 */
+	private function get_withdrawal_filter_labels() {
+		return array(
+			'none'        => __( 'Kein Widerruf', 'mp' ),
+			'open'        => __( 'Widerruf offen', 'mp' ),
+			'in_progress' => __( 'Widerruf in Pruefung', 'mp' ),
+			'approved'    => __( 'Widerruf genehmigt', 'mp' ),
+			'rejected'    => __( 'Widerruf abgelehnt', 'mp' ),
+			'refunded'    => __( 'Widerruf erstattet', 'mp' ),
+			'closed'      => __( 'Widerruf geschlossen', 'mp' ),
+		);
+	}
+
+	/**
+	 * Read and normalize withdrawal state information for one order.
+	 *
+	 * @param int $order_id
+	 *
+	 * @return array
+	 */
+	private function get_order_withdrawal_overview( $order_id ) {
+		$order_id = (int) $order_id;
+		if ( $order_id <= 0 ) {
+			return array(
+				'status'   => 'none',
+				'has_open' => false,
+			);
+		}
+
+		if ( isset( $this->_withdrawal_overview_cache[ $order_id ] ) ) {
+			return $this->_withdrawal_overview_cache[ $order_id ];
+		}
+
+		$status_raw = sanitize_key( (string) get_post_meta( $order_id, '_mp_withdrawal_status', true ) );
+		$map        = array(
+			'requested' => 'open',
+			'in_review' => 'in_progress',
+			'approved'  => 'approved',
+			'rejected'  => 'rejected',
+			'refunded'  => 'refunded',
+			'closed'    => 'closed',
+		);
+
+		$status = isset( $map[ $status_raw ] ) ? $map[ $status_raw ] : 'none';
+		$has_open = in_array( $status, array( 'open', 'in_progress' ), true );
+
+		$this->_withdrawal_overview_cache[ $order_id ] = array(
+			'status'   => $status,
+			'has_open' => $has_open,
+		);
+
+		return $this->_withdrawal_overview_cache[ $order_id ];
+	}
+
+	/**
+	 * Evaluate if a normalized withdrawal overview matches the selected filter.
+	 *
+	 * @param string $filter
+	 * @param array  $overview
+	 *
+	 * @return bool
+	 */
+	private function matches_withdrawal_filter( $filter, $overview ) {
+		$filter = sanitize_key( (string) $filter );
+		$status = isset( $overview['status'] ) ? sanitize_key( (string) $overview['status'] ) : 'none';
+
+		if ( 'open' === $filter ) {
+			return in_array( $status, array( 'open', 'in_progress' ), true );
+		}
+
+		return $status === $filter;
 	}
 
 	/**
@@ -1458,6 +1840,9 @@ class MP_Orders_Admin {
 		$label    = isset( $labels[ $current_status ] ) ? $labels[ $current_status ] : ucfirst( (string) $current_status );
 		$progress = $this->get_order_progress_percent( $current_status );
 		$flow     = $this->get_order_flow_context( $order );
+		$withdrawal = $this->get_order_withdrawal_overview( $post_id );
+		$withdrawal_labels = $this->get_withdrawal_filter_labels();
+		$withdrawal_label  = isset( $withdrawal_labels[ $withdrawal['status'] ] ) ? $withdrawal_labels[ $withdrawal['status'] ] : $withdrawal_labels['none'];
 
 		$settlement_map = $this->get_settlement_status_map( array( $post_id ) );
 		$settlement     = isset( $settlement_map[ $post_id ] ) ? $settlement_map[ $post_id ] : 'n/a';
@@ -1471,12 +1856,13 @@ class MP_Orders_Admin {
 			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
 		);
 
-		$needs_action = in_array( $current_status, array( 'order_received', 'order_paid' ), true ) || in_array( $settlement, array( 'expected_credit', 'on_hold', 'releasable' ), true );
+		$needs_action = in_array( $current_status, array( 'order_received', 'order_paid' ), true ) || in_array( $settlement, array( 'expected_credit', 'on_hold', 'releasable' ), true ) || ! empty( $withdrawal['has_open'] );
 
-		$html  = '<div class="mp-order-status-card status-' . esc_attr( $current_status ) . ' settlement-' . esc_attr( $settlement ) . ( $needs_action ? ' needs-action' : '' ) . '" data-order-id="' . (int) $post_id . '" data-order-status="' . esc_attr( $current_status ) . '">';
+		$html  = '<div class="mp-order-status-card status-' . esc_attr( $current_status ) . ' settlement-' . esc_attr( $settlement ) . ' withdrawal-' . esc_attr( $withdrawal['status'] ) . ( $needs_action ? ' needs-action' : '' ) . '" data-order-id="' . (int) $post_id . '" data-order-status="' . esc_attr( $current_status ) . '">';
 		$html .= '<span class="mp-order-status-badge">' . esc_html( $label ) . '</span>';
 		$html .= '<span class="mp-order-flow-badge mode-' . esc_attr( $flow['mode'] ) . '">' . esc_html( $flow['label'] ) . '</span>';
 		$html .= '<span class="mp-order-settlement-badge">' . esc_html( $settlement_label ) . '</span>';
+		$html .= '<span class="mp-order-withdrawal-badge state-' . esc_attr( $withdrawal['status'] ) . '">' . esc_html( $withdrawal_label ) . '</span>';
 		$html .= '<div class="mp-order-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' . (int) $progress . '"><span style="width:' . (int) $progress . '%"></span></div>';
 		$html .= '<div class="mp-order-status-actions">';
 

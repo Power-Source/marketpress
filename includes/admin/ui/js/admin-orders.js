@@ -139,7 +139,12 @@
 				} ).done( function( resp ) {
 					if ( resp && resp.success && resp.data && resp.data.html ) {
 						$card.replaceWith( resp.data.html );
-						document.dispatchEvent( new CustomEvent( 'mp:orderStatusUpdated' ) );
+						document.dispatchEvent( new CustomEvent( 'mp:orderStatusUpdated', {
+							detail: {
+								postId: postId,
+								status: targetStatus
+							}
+						} ) );
 						return;
 					}
 

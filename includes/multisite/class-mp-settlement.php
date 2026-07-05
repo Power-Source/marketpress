@@ -421,7 +421,7 @@ class MP_Network_Settlement {
 			return false;
 		}
 
-		$done = array( 'resolved', 'completed', 'rejected', 'denied', 'cancelled' );
+		$done = array( 'resolved', 'completed', 'rejected', 'denied', 'cancelled', 'approved', 'refunded', 'closed' );
 		foreach ( $requests as $request ) {
 			$status = strtolower( (string) mp_arr_get_value( 'status', (array) $request, 'requested' ) );
 			if ( ! in_array( $status, $done, true ) ) {

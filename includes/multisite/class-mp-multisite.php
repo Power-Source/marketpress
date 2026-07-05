@@ -960,44 +960,83 @@ class MP_Multisite {
 			return '<p>' . esc_html__( 'Diese Seite ist nur fuer Shopadmins verfuegbar.', 'mp' ) . '</p>';
 		}
 
-		$current_blog_id = get_current_blog_id();
+		$current_blog_id = (int) get_current_blog_id();
 		$sites           = get_sites( array( 'fields' => 'ids' ) );
-		$network_totals  = array(
-			'orders'  => 0,
-			'revenue' => 0.0,
+		$currency        = mp_get_setting( 'currency' );
+		$root_blog_id    = function_exists( 'mp_root_blog_id' ) ? (int) mp_root_blog_id() : 1;
+		$global_cart     = (bool) mp_get_network_setting( 'global_cart', 0 );
+		$hybrid_enabled  = (bool) mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 );
+
+		$flow_labels = array(
+			'local'          => __( 'Lokaler Flow', 'mp' ),
+			'hybrid_subshop' => __( 'Hybrid Subshop', 'mp' ),
+			'network_global' => __( 'Netzwerk Mainshop', 'mp' ),
+			'network_multi'  => __( 'Netzwerk Multi-Shop', 'mp' ),
 		);
-		$shop_totals     = array();
+
+		$flow_filter = sanitize_key( (string) mp_get_get_value( 'flow', '' ) );
+		if ( $flow_filter && ! isset( $flow_labels[ $flow_filter ] ) ) {
+			$flow_filter = '';
+		}
+
+		$network_totals = array(
+			'orders'       => 0,
+			'revenue'      => 0.0,
+			'flow_counts'  => array_fill_keys( array_keys( $flow_labels ), 0 ),
+			'status_counts' => array(
+				'order_received' => 0,
+				'order_paid'     => 0,
+				'order_shipped'  => 0,
+				'order_closed'   => 0,
+			),
+		);
+		$shop_totals = array();
 
 		foreach ( $sites as $blog_id ) {
+			$blog_id = (int) $blog_id;
 			switch_to_blog( $blog_id );
 
 			$orders = get_posts( array(
-				'post_type'      => 'mp_order',
-				'post_status'    => 'any',
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
+				'post_type'        => 'mp_order',
+				'post_status'      => 'any',
+				'posts_per_page'   => -1,
+				'fields'           => 'ids',
+				'suppress_filters' => true,
+				'no_found_rows'    => true,
 			) );
 
-			$shop_revenue = 0.0;
-			$shop_orders  = 0;
+			$shop_totals[ $blog_id ] = array(
+				'orders'  => 0,
+				'revenue' => 0.0,
+				'name'    => get_option( 'blogname' ),
+			);
+
 			foreach ( $orders as $post_id ) {
 				$post = get_post( $post_id );
 				if ( ! $post || in_array( $post->post_status, array( 'trash', 'auto-draft' ), true ) ) {
 					continue;
 				}
 
-				$shop_orders ++;
-				$shop_revenue += (float) get_post_meta( $post_id, 'mp_order_total', true );
+				$flow_mode = $this->get_order_flow_mode_for_performance( (int) $post_id, $blog_id, $root_blog_id, $global_cart, $hybrid_enabled );
+				if ( isset( $network_totals['flow_counts'][ $flow_mode ] ) ) {
+					$network_totals['flow_counts'][ $flow_mode ] ++;
+				}
+
+				if ( $flow_filter && $flow_mode !== $flow_filter ) {
+					continue;
+				}
+
+				$order_total = (float) get_post_meta( $post_id, 'mp_order_total', true );
+				$shop_totals[ $blog_id ]['orders'] ++;
+				$shop_totals[ $blog_id ]['revenue'] += $order_total;
+
+				$network_totals['orders'] ++;
+				$network_totals['revenue'] += $order_total;
+
+				if ( isset( $network_totals['status_counts'][ $post->post_status ] ) ) {
+					$network_totals['status_counts'][ $post->post_status ] ++;
+				}
 			}
-
-			$shop_totals[ $blog_id ] = array(
-				'orders'  => $shop_orders,
-				'revenue' => $shop_revenue,
-				'name'    => get_option( 'blogname' ),
-			);
-
-			$network_totals['orders'] += $shop_orders;
-			$network_totals['revenue'] += $shop_revenue;
 
 			restore_current_blog();
 		}
@@ -1008,18 +1047,185 @@ class MP_Multisite {
 			'name'    => get_option( 'blogname' ),
 		);
 
-		$html  = '<section class="mp-network-shop-performance">';
-		$html .= '<h2>' . esc_html__( 'Shopperformance im Netzwerk', 'mp' ) . '</h2>';
-		$html .= '<p><strong>' . esc_html__( 'Shop:', 'mp' ) . '</strong> ' . esc_html( $current['name'] ) . '</p>';
-		$html .= '<ul>';
-		$html .= '<li><strong>' . esc_html__( 'Eigene Bestellungen:', 'mp' ) . '</strong> ' . intval( $current['orders'] ) . '</li>';
-		$html .= '<li><strong>' . esc_html__( 'Eigener Umsatz:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( mp_get_setting( 'currency' ), $current['revenue'] ) ) . '</li>';
-		$html .= '<li><strong>' . esc_html__( 'Netzwerk-Bestellungen:', 'mp' ) . '</strong> ' . intval( $network_totals['orders'] ) . '</li>';
-		$html .= '<li><strong>' . esc_html__( 'Netzwerk-Umsatz:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( mp_get_setting( 'currency' ), $network_totals['revenue'] ) ) . '</li>';
-		$html .= '</ul>';
+		$active_shops = 0;
+		foreach ( $shop_totals as $shop_total ) {
+			if ( ! empty( $shop_total['orders'] ) ) {
+				$active_shops ++;
+			}
+		}
+
+		$network_aov = $network_totals['orders'] > 0 ? ( $network_totals['revenue'] / $network_totals['orders'] ) : 0;
+		$current_aov = $current['orders'] > 0 ? ( $current['revenue'] / $current['orders'] ) : 0;
+		$shop_share  = $network_totals['revenue'] > 0 ? ( $current['revenue'] / $network_totals['revenue'] ) * 100 : 0;
+
+		$base_url   = get_permalink( get_the_ID() );
+		$flow_links = array();
+		$flow_links[] = '<a class="' . ( '' === $flow_filter ? 'is-active' : '' ) . '" href="' . esc_url( remove_query_arg( 'flow', $base_url ) ) . '">' . esc_html__( 'Alle Flows', 'mp' ) . '</a>';
+		foreach ( $flow_labels as $flow_key => $flow_label ) {
+			$flow_links[] = '<a class="' . ( $flow_filter === $flow_key ? 'is-active' : '' ) . '" href="' . esc_url( add_query_arg( 'flow', $flow_key, $base_url ) ) . '">' . esc_html( $flow_label ) . '</a>';
+		}
+
+		uasort( $shop_totals, function( $a, $b ) {
+			$revenue_cmp = (float) $b['revenue'] <=> (float) $a['revenue'];
+			if ( 0 !== $revenue_cmp ) {
+				return $revenue_cmp;
+			}
+
+			$order_cmp = (int) $b['orders'] <=> (int) $a['orders'];
+			if ( 0 !== $order_cmp ) {
+				return $order_cmp;
+			}
+
+			return strcmp( (string) $a['name'], (string) $b['name'] );
+		} );
+		$top_rows = array_slice( $shop_totals, 0, 6, true );
+
+		$html  = '<style>';
+		$html .= '.mp-network-shop-performance{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#edf4fb 100%);border:1px solid #dbe6f2;border-radius:16px;padding:20px;color:#1f3346}';
+		$html .= '.mp-network-shop-performance h2{margin:0 0 8px;font-size:24px;letter-spacing:.01em}';
+		$html .= '.mp-perf-sub{margin:0 0 14px;color:#4a6278;font-size:13px}';
+		$html .= '.mp-flow-filter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}';
+		$html .= '.mp-flow-filter a{display:inline-block;padding:7px 10px;border-radius:999px;border:1px solid #c6d6e8;background:#fff;color:#35506b;text-decoration:none;font-size:12px;font-weight:600}';
+		$html .= '.mp-flow-filter a.is-active{background:#2f5f8f;color:#fff;border-color:#2f5f8f}';
+		$html .= '.mp-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}';
+		$html .= '.mp-kpi-card{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
+		$html .= '.mp-kpi-card span{display:block;font-size:11px;color:#59708a;text-transform:uppercase;letter-spacing:.04em}';
+		$html .= '.mp-kpi-card strong{display:block;margin-top:6px;font-size:20px;color:#16324b}';
+		$html .= '.mp-perf-layout{display:grid;grid-template-columns:2fr 1fr;gap:12px}';
+		$html .= '.mp-perf-panel{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
+		$html .= '.mp-perf-panel h3{margin:0 0 10px;font-size:13px;color:#35506b;text-transform:uppercase;letter-spacing:.04em}';
+		$html .= '.mp-flow-bars{display:grid;gap:8px}';
+		$html .= '.mp-flow-row{display:grid;grid-template-columns:130px 1fr 48px;align-items:center;gap:8px;font-size:12px;color:#3e5972}';
+		$html .= '.mp-flow-track{height:8px;border-radius:999px;background:#e8f0f8;overflow:hidden}';
+		$html .= '.mp-flow-fill{height:100%;background:linear-gradient(90deg,#4f89bf 0%,#6fb0de 100%)}';
+		$html .= '.mp-shop-table{width:100%;border-collapse:collapse;font-size:12px}';
+		$html .= '.mp-shop-table th,.mp-shop-table td{padding:8px;border-bottom:1px solid #edf2f7;text-align:left}';
+		$html .= '.mp-shop-table th{font-size:11px;color:#607991;text-transform:uppercase;letter-spacing:.04em}';
+		$html .= '@media (max-width:900px){.mp-perf-layout{grid-template-columns:1fr}}';
+		$html .= '</style>';
+
+		$html .= '<section class="mp-network-shop-performance">';
+		$html .= '<h2>' . esc_html__( 'Shopuser Performance', 'mp' ) . '</h2>';
+		$html .= '<p class="mp-perf-sub">' . esc_html__( 'E-Commerce Dashboard fuer deinen Shop im Netzwerk mit Flow-Filter und Live-Kennzahlen.', 'mp' ) . '</p>';
+		$html .= '<div class="mp-flow-filter">' . implode( '', $flow_links ) . '</div>';
+
+		$html .= '<div class="mp-kpi-grid">';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Dein Shop', 'mp' ) . '</span><strong>' . esc_html( $current['name'] ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Eigene Bestellungen', 'mp' ) . '</span><strong>' . intval( $current['orders'] ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Eigener Umsatz', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $current['revenue'] ) ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Netzwerk-Bestellungen', 'mp' ) . '</span><strong>' . intval( $network_totals['orders'] ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Netzwerk-Umsatz', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $network_totals['revenue'] ) ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'Shop-Anteil Umsatz', 'mp' ) . '</span><strong>' . esc_html( number_format_i18n( $shop_share, 1 ) ) . '%</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'AOV Shop', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $current_aov ) ) . '</strong></div>';
+		$html .= '<div class="mp-kpi-card"><span>' . esc_html__( 'AOV Netzwerk', 'mp' ) . '</span><strong>' . esc_html( mp_format_currency( $currency, $network_aov ) ) . '</strong></div>';
+		$html .= '</div>';
+
+		$total_flow_orders = array_sum( $network_totals['flow_counts'] );
+
+		$html .= '<div class="mp-perf-layout">';
+		$html .= '<div class="mp-perf-panel">';
+		$html .= '<h3>' . esc_html__( 'Top Shops im Netzwerk', 'mp' ) . '</h3>';
+		$html .= '<table class="mp-shop-table"><thead><tr>';
+		$html .= '<th>' . esc_html__( 'Shop', 'mp' ) . '</th>';
+		$html .= '<th>' . esc_html__( 'Bestellungen', 'mp' ) . '</th>';
+		$html .= '<th>' . esc_html__( 'Umsatz', 'mp' ) . '</th>';
+		$html .= '</tr></thead><tbody>';
+
+		if ( empty( $top_rows ) ) {
+			$html .= '<tr><td colspan="3">' . esc_html__( 'Keine Daten fuer den gewaelten Flow vorhanden.', 'mp' ) . '</td></tr>';
+		} else {
+			foreach ( $top_rows as $shop_row ) {
+				if ( empty( $shop_row['orders'] ) ) {
+					continue;
+				}
+				$html .= '<tr>';
+				$html .= '<td>' . esc_html( $shop_row['name'] ) . '</td>';
+				$html .= '<td>' . intval( $shop_row['orders'] ) . '</td>';
+				$html .= '<td>' . esc_html( mp_format_currency( $currency, $shop_row['revenue'] ) ) . '</td>';
+				$html .= '</tr>';
+			}
+		}
+
+		$html .= '</tbody></table>';
+		$html .= '</div>';
+
+		$html .= '<div class="mp-perf-panel">';
+		$html .= '<h3>' . esc_html__( 'Flow-Verteilung', 'mp' ) . '</h3>';
+		$html .= '<div class="mp-flow-bars">';
+		foreach ( $flow_labels as $flow_key => $flow_label ) {
+			$flow_count = isset( $network_totals['flow_counts'][ $flow_key ] ) ? (int) $network_totals['flow_counts'][ $flow_key ] : 0;
+			$flow_pct   = $total_flow_orders > 0 ? ( $flow_count / $total_flow_orders ) * 100 : 0;
+			$html .= '<div class="mp-flow-row">';
+			$html .= '<span>' . esc_html( $flow_label ) . '</span>';
+			$html .= '<div class="mp-flow-track"><div class="mp-flow-fill" style="width:' . esc_attr( number_format( $flow_pct, 2, '.', '' ) ) . '%"></div></div>';
+			$html .= '<strong>' . intval( $flow_count ) . '</strong>';
+			$html .= '</div>';
+		}
+		$html .= '</div>';
+
+		$html .= '<h3 style="margin-top:14px">' . esc_html__( 'Status-Mix (gefiltert)', 'mp' ) . '</h3>';
+		$html .= '<div class="mp-flow-bars">';
+		foreach ( $network_totals['status_counts'] as $status_key => $status_count ) {
+			$status_label = ucfirst( str_replace( 'order_', '', $status_key ) );
+			$status_pct   = $network_totals['orders'] > 0 ? ( $status_count / $network_totals['orders'] ) * 100 : 0;
+			$html .= '<div class="mp-flow-row">';
+			$html .= '<span>' . esc_html( $status_label ) . '</span>';
+			$html .= '<div class="mp-flow-track"><div class="mp-flow-fill" style="width:' . esc_attr( number_format( $status_pct, 2, '.', '' ) ) . '%"></div></div>';
+			$html .= '<strong>' . intval( $status_count ) . '</strong>';
+			$html .= '</div>';
+		}
+		$html .= '</div>';
+		$html .= '</div>';
+		$html .= '</div>';
+
+		$html .= '<p class="mp-perf-sub" style="margin-top:14px">';
+		$html .= esc_html__( 'Aktive Shops im Filter:', 'mp' ) . ' ' . intval( $active_shops ) . ' · ';
+		$html .= esc_html__( 'Flow-Kontext:', 'mp' ) . ' ' . esc_html( $flow_filter && isset( $flow_labels[ $flow_filter ] ) ? $flow_labels[ $flow_filter ] : __( 'Alle Flows', 'mp' ) );
+		$html .= '</p>';
 		$html .= '</section>';
 
 		return $html;
+	}
+
+	/**
+	 * Resolve flow mode for one network order to support flow-based performance metrics.
+	 *
+	 * @param int  $order_id
+	 * @param int  $blog_id
+	 * @param int  $root_blog_id
+	 * @param bool $global_cart
+	 * @param bool $hybrid_enabled
+	 *
+	 * @return string
+	 */
+	private function get_order_flow_mode_for_performance( $order_id, $blog_id, $root_blog_id, $global_cart, $hybrid_enabled ) {
+		if ( ! is_multisite() || ! $global_cart ) {
+			return 'local';
+		}
+
+		$order    = new MP_Order( (int) $order_id );
+		$cart     = $order->get_cart();
+		$blog_ids = array();
+
+		if ( is_object( $cart ) && method_exists( $cart, 'get_blog_ids' ) ) {
+			$blog_ids = array_filter( array_map( 'intval', (array) $cart->get_blog_ids() ) );
+		}
+
+		if ( empty( $blog_ids ) ) {
+			$blog_ids = array( (int) $blog_id );
+		}
+
+		$blog_ids = array_values( array_unique( $blog_ids ) );
+
+		if ( $hybrid_enabled && 1 === count( $blog_ids ) && (int) reset( $blog_ids ) !== (int) $root_blog_id ) {
+			return 'hybrid_subshop';
+		}
+
+		if ( count( $blog_ids ) > 1 ) {
+			return 'network_multi';
+		}
+
+		return 'network_global';
 	}
 
 	/**

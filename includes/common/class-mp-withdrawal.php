@@ -114,7 +114,12 @@ class MP_Withdrawal {
 			return $url;
 		}
 
-		$token = md5( strtolower( trim( $order->get_meta( 'mp_billing_info->email', '' ) ) ) . '|' . $order->get_id() . '|withdrawal' );
+		$tokens = $this->get_valid_withdrawal_tokens( $order );
+		$token  = reset( $tokens );
+		if ( ! is_string( $token ) || '' === $token ) {
+			return $url;
+		}
+
 		return add_query_arg( 'mp_withdrawal_token', $token, $url );
 	}
 
@@ -193,14 +198,25 @@ class MP_Withdrawal {
 		}
 
 		$order_id = (int) mp_get_post_value( 'order_id', 0 );
-		$nonce    = (string) mp_get_post_value( 'nonce', '' );
-
-		if ( ! $order_id || ! wp_verify_nonce( $nonce, 'mp_submit_withdrawal_' . $order_id ) ) {
+		if ( ! $order_id ) {
 			wp_send_json_error( array( 'message' => __( 'Ungültige Anfrage. Bitte lade die Seite neu.', 'mp' ) ) );
 		}
 
 		$order = new MP_Order( $order_id );
-		if ( ! $order->exists() || ! $this->can_access_order( $order ) ) {
+		if ( ! $order->exists() ) {
+			wp_send_json_error( array( 'message' => __( 'Bestellung nicht gefunden oder kein Zugriff.', 'mp' ) ) );
+		}
+
+		$nonce        = (string) mp_get_post_value( 'nonce', '' );
+		$access_token = sanitize_text_field( (string) mp_get_post_value( 'access_token', '' ) );
+		$nonce_valid  = (bool) wp_verify_nonce( $nonce, 'mp_submit_withdrawal_' . $order_id );
+		$token_valid  = $this->is_valid_withdrawal_access_token( $order, $access_token );
+
+		if ( ! $nonce_valid && ! $token_valid ) {
+			wp_send_json_error( array( 'message' => __( 'Ungültige Anfrage. Bitte lade die Seite neu.', 'mp' ) ) );
+		}
+
+		if ( ! $this->can_access_order( $order, $access_token ) ) {
 			wp_send_json_error( array( 'message' => __( 'Bestellung nicht gefunden oder kein Zugriff.', 'mp' ) ) );
 		}
 
@@ -322,7 +338,7 @@ class MP_Withdrawal {
 	 *
 	 * @return bool
 	 */
-	private function can_access_order( $order ) {
+	private function can_access_order( $order, $access_token = '' ) {
 		if ( is_user_logged_in() ) {
 			if ( (int) $order->post_author === (int) get_current_user_id() || current_user_can( apply_filters( 'mp_store_settings_cap', 'read_store_order' ) ) ) {
 				return true;
@@ -335,24 +351,57 @@ class MP_Withdrawal {
 			return false;
 		}
 
-		$legacy_hash = (string) get_query_var( 'mp_guest_email', '' );
+		$legacy_hash = trim( (string) $access_token );
+		if ( '' === $legacy_hash ) {
+			$legacy_hash = (string) get_query_var( 'mp_guest_email', '' );
+		}
 		if ( '' === $legacy_hash ) {
 			$legacy_hash = (string) mp_get_get_value( 'mp_withdrawal_token', '' );
 		}
 
+		return $this->is_valid_withdrawal_access_token( $order, $legacy_hash );
+	}
+
+	/**
+	 * Build all valid access tokens for guest withdrawal verification.
+	 *
+	 * @param MP_Order $order
+	 *
+	 * @return array
+	 */
+	private function get_valid_withdrawal_tokens( $order ) {
 		$email = strtolower( trim( (string) $order->get_meta( 'mp_billing_info->email', '' ) ) );
 		if ( '' === $email ) {
+			return array();
+		}
+
+		$order_id = (int) $order->get_id();
+		$tokens   = array(
+			hash_hmac( 'sha256', $email . '|' . $order_id . '|withdrawal', wp_salt( 'nonce' ) ),
+			md5( $order->get_meta( 'mp_billing_info->email', '' ) ),
+			md5( $email ),
+			md5( $email . '|' . $order_id . '|withdrawal' ),
+		);
+
+		return array_values( array_unique( array_filter( array_map( 'strval', $tokens ) ) ) );
+	}
+
+	/**
+	 * Validate one provided guest access token for a withdrawal request.
+	 *
+	 * @param MP_Order $order
+	 * @param string   $token
+	 *
+	 * @return bool
+	 */
+	private function is_valid_withdrawal_access_token( $order, $token ) {
+		$token = trim( (string) $token );
+		if ( '' === $token ) {
 			return false;
 		}
 
-		$valid_hashes = array(
-			md5( $order->get_meta( 'mp_billing_info->email', '' ) ),
-			md5( $email ),
-			md5( $email . '|' . $order->get_id() . '|withdrawal' ),
-		);
-
-		foreach ( $valid_hashes as $hash ) {
-			if ( is_string( $legacy_hash ) && '' !== $legacy_hash && hash_equals( $hash, trim( $legacy_hash ) ) ) {
+		foreach ( $this->get_valid_withdrawal_tokens( $order ) as $valid_token ) {
+			if ( hash_equals( $valid_token, $token ) ) {
 				return true;
 			}
 		}
@@ -404,6 +453,14 @@ class MP_Withdrawal {
 		}
 
 		$nonce = wp_create_nonce( 'mp_submit_withdrawal_' . $order->get_id() );
+		$guest_token = '';
+		if ( 'guest' === $order->get_meta( 'mp_user_kind', '' ) ) {
+			$guest_token = sanitize_text_field( (string) mp_get_get_value( 'mp_withdrawal_token', '' ) );
+			if ( '' === $guest_token ) {
+				$tokens = $this->get_valid_withdrawal_tokens( $order );
+				$guest_token = (string) reset( $tokens );
+			}
+		}
 
 		ob_start();
 		?>
@@ -428,10 +485,11 @@ class MP_Withdrawal {
 				<h3><?php esc_html_e( 'Digitaler Widerruf', 'mp' ); ?></h3>
 				<p class="mp_withdrawal_hint"><?php esc_html_e( 'Wähle die Positionen aus und bestätige den Widerruf in zwei Schritten.', 'mp' ); ?></p>
 
-				<form class="mp_withdrawal_form" data-order-id="<?php echo esc_attr( (string) $order->get_id() ); ?>">
+				<form class="mp_withdrawal_form" data-order-id="<?php echo esc_attr( (string) $order->get_id() ); ?>" data-prepared="0">
 					<input type="hidden" name="action" value="mp_submit_withdrawal">
 					<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>">
 					<input type="hidden" name="nonce" value="<?php echo esc_attr( $nonce ); ?>">
+					<input type="hidden" name="access_token" value="<?php echo esc_attr( $guest_token ); ?>">
 					<div class="mp_withdrawal_items">
 						<?php foreach ( $snapshot as $key => $row ) : ?>
 							<?php
