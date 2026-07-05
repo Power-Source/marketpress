@@ -2,6 +2,8 @@
 
 class MP_Admin_Multisite {
 
+	const NETWORK_MENU_SLUG = 'network-store-settings';
+
 	/**
 	 * Refers to a single instance of the class
 	 *
@@ -606,10 +608,24 @@ class MP_Admin_Multisite {
 	 * @access public
 	 */
 	public function add_menu_items() {
-		add_submenu_page( 'settings.php', __( 'Shopnetzwerk Einstellungen', 'mp' ), __( 'Shopnetzwerk', 'mp' ), 'manage_network_options', 'network-store-settings', array(
-			&$this,
-			'network_store_settings'
-		) );
+		add_menu_page(
+			__( 'PS MarketPress Netzwerk', 'mp' ),
+			__( 'PS MarketPress', 'mp' ),
+			'manage_network_options',
+			self::NETWORK_MENU_SLUG,
+			array( &$this, 'network_store_settings' ),
+			'dashicons-store',
+			58.5
+		);
+
+		add_submenu_page(
+			self::NETWORK_MENU_SLUG,
+			__( 'Shopnetzwerk Einstellungen', 'mp' ),
+			__( 'Einstellungen', 'mp' ),
+			'manage_network_options',
+			self::NETWORK_MENU_SLUG,
+			array( &$this, 'network_store_settings' )
+		);
 	}
 
 	/**
@@ -631,10 +647,10 @@ class MP_Admin_Multisite {
 		$refresh_url = wp_nonce_url(
 			add_query_arg(
 				array(
-					'page' => 'network-store-settings',
+					'page' => self::NETWORK_MENU_SLUG,
 					'mp_refresh_network_stats' => 1,
 				),
-				network_admin_url( 'settings.php' )
+				network_admin_url( 'admin.php' )
 			),
 			'mp_refresh_network_stats',
 			'_mpn'

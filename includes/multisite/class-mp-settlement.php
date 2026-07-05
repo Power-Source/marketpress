@@ -86,7 +86,7 @@ class MP_Network_Settlement {
 	 */
 	public function add_network_menu() {
 		add_submenu_page(
-			'settings.php',
+			MP_Admin_Multisite::NETWORK_MENU_SLUG,
 			__( 'Settlement Moderation', 'mp' ),
 			__( 'Settlement Moderation', 'mp' ),
 			'manage_network_options',
@@ -110,8 +110,8 @@ class MP_Network_Settlement {
 		echo '<h1>' . esc_html__( 'Settlement Moderation', 'mp' ) . '</h1>';
 		echo '<p>' . esc_html__( 'Freigabe-Queue fuer Hold/Release Entscheidungen.', 'mp' ) . '</p>';
 		echo '<p>';
-		echo '<a class="button" href="' . esc_url( network_admin_url( 'settings.php?page=network-settlement-moderation&status=open' ) ) . '">' . esc_html__( 'Open Queue', 'mp' ) . '</a> ';
-		echo '<a class="button" href="' . esc_url( network_admin_url( 'settings.php?page=network-settlement-moderation&status=all' ) ) . '">' . esc_html__( 'All', 'mp' ) . '</a>';
+		echo '<a class="button" href="' . esc_url( network_admin_url( 'admin.php?page=network-settlement-moderation&status=open' ) ) . '">' . esc_html__( 'Open Queue', 'mp' ) . '</a> ';
+		echo '<a class="button" href="' . esc_url( network_admin_url( 'admin.php?page=network-settlement-moderation&status=all' ) ) . '">' . esc_html__( 'All', 'mp' ) . '</a>';
 		echo '</p>';
 
 		echo $this->render_rows_table( $rows, true );
@@ -584,7 +584,7 @@ class MP_Network_Settlement {
 		$decision = sanitize_key( (string) mp_get_get_value( 'decision', '' ) );
 
 		if ( ! in_array( $decision, array( 'hold', 'release' ), true ) || ! $row_id ) {
-			wp_safe_redirect( network_admin_url( 'settings.php?page=network-settlement-moderation' ) );
+			wp_safe_redirect( network_admin_url( 'admin.php?page=network-settlement-moderation' ) );
 			exit;
 		}
 
@@ -607,7 +607,7 @@ class MP_Network_Settlement {
 
 		$wpdb->update( $this->table_name, $payload, array( 'id' => $row_id ) );
 
-		wp_safe_redirect( network_admin_url( 'settings.php?page=network-settlement-moderation' ) );
+		wp_safe_redirect( network_admin_url( 'admin.php?page=network-settlement-moderation' ) );
 		exit;
 	}
 }
