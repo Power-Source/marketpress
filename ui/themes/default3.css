@@ -1,3 +1,8 @@
+/*
+MarketPress Style: Modern Cool Compact
+Description: Strukturiertes, kuehl-modernes und kompaktes Frontend-Theme fuer MarketPress.
+*/
+
 .clearfix:after {
     clear: both;
     content: "";
@@ -721,4 +726,263 @@ h1.mp_product_name.entry-title{
     float: left;
     margin-top: 10px;
     margin-right: 10px;
+}
+/* ========================================================================== */
+/* Modern Cool Compact: Base Tokens                                            */
+/* ========================================================================== */
+/*
+ * Design-Tokens fuer den Kundenhub.
+ * Hier zentral Farben/Radius anpassen, statt in jedem Selektor einzeln.
+ */
+:root {
+  --mpc-bg: #f4f7fb;
+  --mpc-panel: #ffffff;
+  --mpc-border: #d9e2ec;
+  --mpc-text: #1f3448;
+  --mpc-muted: #5f778f;
+  --mpc-accent: #2e5e8d;
+  --mpc-accent-strong: #234a6f;
+  --mpc-soft: #eef4fa;
+  --mpc-radius: 10px;
+}
+
+/* ========================================================================== */
+/* Modern Cool Compact: Shared Surfaces                                        */
+/* ========================================================================== */
+/* Outer Wrapper des zentralen Kundenhubs */
+.mp-network-customer-hub {
+  background: linear-gradient(180deg, #f8fbff 0%, var(--mpc-bg) 100%);
+  border: 1px solid var(--mpc-border);
+  border-radius: 14px;
+  color: var(--mpc-text);
+  padding: 16px;
+}
+
+/* Haupttitel "Zentrales Kundenportal" */
+.mp-network-customer-hub h2 {
+  margin: 0 0 6px;
+  font-size: 21px;
+  letter-spacing: 0.01em;
+}
+
+/* Untertitel direkt unter dem H2 */
+.mp-network-customer-hub .mp-hub-sub {
+  margin: 0 0 10px;
+  color: var(--mpc-muted);
+  font-size: 12px;
+}
+
+/* Standard-Card fuer alle Hub-Bloecke */
+.mp-network-customer-hub .mp-hub-panel {
+  background: var(--mpc-panel);
+  border: 1px solid var(--mpc-border);
+  border-radius: var(--mpc-radius);
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+/* Panel-Ueberschriften wie "Jetzt bewerten", "Letzte Bestellungen" */
+.mp-network-customer-hub .mp-hub-panel h3 {
+  color: #35506b;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+/* ========================================================================== */
+/* Modern Cool Compact: KPI Grid                                               */
+/* ========================================================================== */
+/* Grid mit den Kennzahlen oben */
+.mp-network-customer-hub .mp-hub-kpis {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  margin-bottom: 10px;
+}
+
+/* Einzelne KPI-Karte */
+.mp-network-customer-hub .mp-hub-kpi {
+  background: var(--mpc-panel);
+  border: 1px solid var(--mpc-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+/* KPI-Label (klein, uppercase) */
+.mp-network-customer-hub .mp-hub-kpi span {
+  color: #607991;
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* KPI-Wert (gross) */
+.mp-network-customer-hub .mp-hub-kpi strong {
+  color: #18324a;
+  display: block;
+  font-size: 17px;
+  line-height: 1.2;
+  margin-top: 3px;
+}
+
+/* ========================================================================== */
+/* Modern Cool Compact: Lists & Actions                                        */
+/* ========================================================================== */
+/* Zwei-Spalten-Layout fuer Bewertungs-/Aktivitaetsbereich */
+.mp-network-customer-hub .mp-hub-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1.25fr 1fr;
+  margin-bottom: 10px;
+}
+
+/* Basisliste fuer Hub-Eintraege */
+.mp-network-customer-hub .mp-hub-list {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Einzelner Listeneintrag mit CTA rechts */
+.mp-network-customer-hub .mp-hub-list li {
+  align-items: center;
+  background: #fbfdff;
+  border: 1px solid #e5edf5;
+  border-radius: 8px;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 7px 8px;
+}
+
+/* Linke Meta-Spalte (Titel + Zusatzinfos) */
+.mp-network-customer-hub .mp-hub-meta {
+  color: #4a6278;
+  display: grid;
+  font-size: 12px;
+  gap: 2px;
+}
+
+/* Primarer Titel innerhalb der Meta-Spalte */
+.mp-network-customer-hub .mp-hub-meta strong {
+  color: #1e354a;
+}
+
+/* Empty-State Texte in Cards */
+.mp-network-customer-hub .mp-hub-empty {
+  color: #516981;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Primarer Aktionsbutton im Hub */
+.mp-network-customer-hub .mp-hub-cta,
+.mp-network-customer-hub a.mp-hub-cta {
+  background: var(--mpc-accent);
+  border: 1px solid var(--mpc-accent-strong);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 9px;
+  text-decoration: none;
+}
+
+/* Hover-State der Aktionsbuttons */
+.mp-network-customer-hub .mp-hub-cta:hover,
+.mp-network-customer-hub a.mp-hub-cta:hover {
+  background: var(--mpc-accent-strong);
+  color: #fff;
+}
+
+/* ========================================================================== */
+/* Modern Cool Compact: Cart + Orders                                          */
+/* ========================================================================== */
+/* Feature-Panel Abstand (z.B. Warenkorb-Panel) */
+.mp-network-customer-hub .mp-hub-feature {
+  margin-bottom: 10px;
+}
+
+/* Zusatztopmargin fuer den Discover-Block am Seitenende */
+.mp-network-customer-hub .mp-hub-feature-discover {
+  margin-top: 10px;
+}
+
+/* Mini-Cart Liste im Hub: Bullet hart deaktivieren */
+.mp-network-customer-hub .mp-hub-feature .mp_mini_cart_items {
+  display: grid;
+  gap: 6px;
+  list-style: none !important;
+  margin: 0;
+  padding: 0;
+}
+
+/* Einzelnes Mini-Cart Item im Panel */
+.mp-network-customer-hub .mp-hub-feature .mp_mini_cart_item {
+  background: #fbfdff;
+  border: 1px solid #e5edf5;
+  border-radius: 8px;
+  list-style: none !important;
+  margin: 0;
+}
+
+/* Klickflaeche je Cart-Item */
+.mp-network-customer-hub .mp-hub-feature .mp_mini_cart_item-link {
+  padding: 10px;
+}
+
+/* CTA "Warenkorb ansehen" */
+.mp-network-customer-hub .mp-hub-feature .mp_button-mini-cart {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+/* Wrapper des globalen Produktgrids */
+.mp-network-customer-hub .mp-hub-feature .mp_global_product_list_widget {
+  margin-top: 6px;
+}
+
+/* Tabelle "Letzte Bestellungen" */
+.mp-network-customer-hub .mp-hub-orders {
+  background: var(--mpc-panel);
+  border: 1px solid var(--mpc-border);
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Tabellenzellen allgemein */
+.mp-network-customer-hub .mp-hub-orders th,
+.mp-network-customer-hub .mp-hub-orders td {
+  border-bottom: 1px solid #edf2f7;
+  font-size: 12px;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Tabellenkopf */
+.mp-network-customer-hub .mp-hub-orders th {
+  background: #f7fbff;
+  color: #607991;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Letzte Tabellenzeile ohne Trennlinie */
+.mp-network-customer-hub .mp-hub-orders tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Mobile: Hub-Grid auf eine Spalte umschalten */
+@media (max-width: 900px) {
+  .mp-network-customer-hub .mp-hub-grid {
+    grid-template-columns: 1fr;
+  }
 }

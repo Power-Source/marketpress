@@ -240,6 +240,24 @@ class MP_Admin_Multisite {
 			'desc'    => __( 'Aktiviert die optionale Kundenzentrale im Mainshop per Netzwerkseite/Shortcode.', 'mp' ),
 			'message' => __( 'Kundenzentrale aktivieren', 'mp' ),
 		) );
+		$metabox->add_field( 'select', array(
+			'name'    => 'advanced[network_customer_hub_random_products_count]',
+			'label'   => array( 'text' => __( 'Anzahl Zufallsprodukte im Kundenhub', 'mp' ) ),
+			'desc'    => __( 'Legt fest, wie viele zufaellige Netzwerkprodukte im Kundenhub angezeigt werden.', 'mp' ),
+			'options' => array(
+				'4' => __( '4 Produkte', 'mp' ),
+				'6' => __( '6 Produkte', 'mp' ),
+				'8' => __( '8 Produkte', 'mp' ),
+			),
+			'default_value' => '4',
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'advanced[network_customer_hub_random_only_when_cart_empty]',
+			'label'   => array( 'text' => __( 'Zufallsprodukte nur bei leerem Warenkorb anzeigen?', 'mp' ) ),
+			'desc'    => __( 'Wenn aktiv, wird das Zufallsprodukt-Grid nur eingeblendet, wenn der globale Warenkorb leer ist.', 'mp' ),
+			'message' => __( 'Nur bei leerem Warenkorb anzeigen', 'mp' ),
+			'default_value' => true,
+		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[network_support_enabled]',
 			'label'   => array( 'text' => __( 'Integriertes Kundensupport-System aktivieren?', 'mp' ) ),

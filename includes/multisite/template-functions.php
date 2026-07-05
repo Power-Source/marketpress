@@ -124,6 +124,8 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 
 	function mp_global_list_products( $args = array() ) {
 		global $wpdb;
+		$mp_debug_enabled = is_user_logged_in() && current_user_can( 'manage_options' ) && isset( $_GET['mp_debug_products'] );
+		$mp_debug         = array();
 
 		$func_args = func_get_args();
 		$args      = mp_parse_args( $func_args, mp()->defaults['list_products'] );
@@ -145,6 +147,21 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		}
 		if ( ! isset( $args['disable_category_filter'] ) ) {
 			$args['disable_category_filter'] = false;
+		}
+
+		// Treat placeholder values from filter UIs as no-op.
+		if ( isset( $args['category'] ) ) {
+			$category = (string) $args['category'];
+			if ( '' === $category || '-1' === $category || '0' === $category || '-0' === $category ) {
+				$args['category'] = null;
+			}
+		}
+
+		if ( isset( $args['tag'] ) ) {
+			$tag = (string) $args['tag'];
+			if ( '' === $tag || '-1' === $tag || '0' === $tag || '-0' === $tag ) {
+				$args['tag'] = null;
+			}
 		}
 
 		if ( isset( $args['widget_id'] ) && ! empty( $args['widget_id'] ) ) {
@@ -181,13 +198,11 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 // Figure out page
 
 			if ( ! is_null( $args['page'] ) ) {
-				$query['paged']  = intval( $args['page'] );
+				$query['paged']  = max( 1, intval( $args['page'] ) );
 				$query['offset'] = ( $query['paged'] - 1 ) * $query['posts_per_page'];
 			} elseif ( get_query_var( 'paged' ) != '' ) {
-				$query['paged']  = $args['page'] = intval( get_query_var( 'paged' ) );
-				$query['offset'] = ( $query['paged'] - 1 ) * $query['posts_per_page'];
-			} elseif ( get_query_var( 'page' ) != '' ) {
-				$query['paged'] = $args['page'] = intval( get_query_var( 'page' ) );
+				$query['paged']  = max( 1, intval( get_query_var( 'paged' ) ) );
+				$args['page']    = $query['paged'];
 				$query['offset'] = ( $query['paged'] - 1 ) * $query['posts_per_page'];
 			} else {
 				$query['paged']  = 1;
@@ -270,7 +285,7 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		//build SQL
 		$sql   = "SELECT SQL_CALC_FOUND_ROWS products.* FROM {$wpdb->base_prefix}mp_products products";
 		$join  = "";
-		$where = " WHERE post_status = 'publish'";
+		$where = " WHERE products.post_status = 'publish'";
 		$group = "";
 
 		if ( ! empty( $query['blog_id'] ) ) {
@@ -345,6 +360,45 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		$sql .= $join . $where . $group . $order . $paging;
 		$custom_query = $wpdb->get_results( $sql );
 		$count        = $wpdb->get_var( "SELECT FOUND_ROWS();" );
+
+		if ( $mp_debug_enabled ) {
+			$table = $wpdb->base_prefix . 'mp_products';
+			$mp_debug['sql_rows'] = is_array( $custom_query ) ? count( $custom_query ) : 0;
+			$mp_debug['found_rows'] = intval( $count );
+			$mp_debug['index_total'] = intval( $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" ) );
+			$mp_debug['index_publish'] = intval( $wpdb->get_var( "SELECT COUNT(*) FROM {$table} WHERE post_status = 'publish'" ) );
+			$mp_debug['requested_blog_id'] = ! empty( $query['blog_id'] ) ? intval( $query['blog_id'] ) : 0;
+			$mp_debug['requested_category'] = isset( $args['category'] ) ? (string) $args['category'] : '';
+			$mp_debug['requested_tag'] = isset( $args['tag'] ) ? (string) $args['tag'] : '';
+			$mp_debug['reindex_triggered'] = 0;
+			$mp_debug['reindex_rows'] = 0;
+		}
+
+		if ( empty( $custom_query ) && is_multisite() && class_exists( 'MP_Multisite' ) ) {
+			$reindex_lock_key = 'mp_global_products_reindex_lock';
+			$did_reindex      = false;
+
+			if ( false === get_site_transient( $reindex_lock_key ) ) {
+				set_site_transient( $reindex_lock_key, 1, 2 * MINUTE_IN_SECONDS );
+
+				$ms = MP_Multisite::get_instance();
+				if ( is_object( $ms ) && method_exists( $ms, 'index_content' ) ) {
+					$ms->index_content();
+					$did_reindex = true;
+				}
+
+				delete_site_transient( $reindex_lock_key );
+			}
+
+			if ( $did_reindex ) {
+				$custom_query = $wpdb->get_results( $sql );
+				$count = $wpdb->get_var( "SELECT FOUND_ROWS();" );
+				if ( $mp_debug_enabled ) {
+					$mp_debug['reindex_triggered'] = 1;
+					$mp_debug['reindex_rows'] = is_array( $custom_query ) ? count( $custom_query ) : 0;
+				}
+			}
+		}
 		// Get layout type
 		$layout_type = mp_get_setting( 'list_view' );
 
@@ -377,6 +431,16 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 			}
 		} else {
 			$content .= '<div id="mp_no_products">' . apply_filters( 'mp_global_product_list_none', __( 'Keine Produkte vorhanden', 'mp' ) ) . '</div>';
+			if ( $mp_debug_enabled ) {
+				$content .= '<pre class="mp-global-products-debug" style="margin-top:10px;padding:10px;background:#111;color:#cde;font-size:12px;line-height:1.5;overflow:auto">';
+				$content .= esc_html( "mp_debug_products\n" );
+				foreach ( $mp_debug as $k => $v ) {
+					$content .= esc_html( $k . ': ' . ( is_scalar( $v ) ? (string) $v : wp_json_encode( $v ) ) . "\n" );
+				}
+				$content .= esc_html( 'sql_where: ' . $where . "\n" );
+				$content .= esc_html( 'sql_join: ' . $join . "\n" );
+				$content .= '</pre>';
+			}
 		}
 
 		$content .= '</section><!-- end mp-products -->';
@@ -940,8 +1004,9 @@ if ( ! function_exists( 'mp_global_taxonomy_list' ) ) :
 
 		//build the sql
 		$sql     = $wpdb->prepare( "SELECT t.* FROM {$wpdb->base_prefix}mp_terms AS t
-			LEFT JOIN {$wpdb->base_prefix}mp_term_relationships AS r ON t.term_id = r.term_id
-			WHERE `type`=%s AND r.public = 1
+			INNER JOIN {$wpdb->base_prefix}mp_term_relationships AS r ON t.term_id = r.term_id
+			INNER JOIN {$wpdb->base_prefix}mp_products AS p ON p.id = r.post_id
+			WHERE t.type=%s AND p.post_status = 'publish'
 			GROUP BY t.term_id HAVING COUNT(r.term_id) > 0", $taxonomy );
 		$results = $wpdb->get_results( $sql );
 

@@ -1027,7 +1027,8 @@ class Marketpress {
 			require_once $this->plugin_dir( 'includes/multisite/class-mp-multisite.php' );
 			require_once $this->plugin_dir( 'includes/multisite/class-mp-settlement.php' );
 			require_once $this->plugin_dir( 'includes/multisite/template-functions.php' );
-			if ( is_admin() ) {
+			$load_multisite_admin = is_admin() || ( function_exists( 'wp_doing_cron' ) ? wp_doing_cron() : ( defined( 'DOING_CRON' ) && DOING_CRON ) );
+			if ( $load_multisite_admin ) {
 				require_once $this->plugin_dir( 'includes/multisite/class-mp-admin-multisite.php' );
 			}
 		}

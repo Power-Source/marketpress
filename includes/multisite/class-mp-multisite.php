@@ -1944,32 +1944,41 @@ class MP_Multisite {
 		$withdrawals     = isset( $snapshot['withdrawals'] ) && is_array( $snapshot['withdrawals'] ) ? $snapshot['withdrawals'] : array( 'counts' => array(), 'recent' => array() );
 		$recent_withdrawals = isset( $withdrawals['recent'] ) && is_array( $withdrawals['recent'] ) ? $withdrawals['recent'] : array();
 		$withdrawal_management_enabled = (bool) mp_get_network_setting( 'advanced->network_withdrawal_management', 0 ) && (bool) mp_get_setting( 'withdrawal->enabled', 1 );
+		$marketplace_url = $this->get_network_marketplace_url();
+		$global_cart_enabled = (bool) mp_get_network_setting( 'global_cart', 0 ) && function_exists( 'mp_cart' );
+		$has_cart_items = false;
+		$cart_overview_html = '';
+		$random_products_count = (int) mp_get_network_setting( 'advanced->network_customer_hub_random_products_count', 4 );
+		if ( ! in_array( $random_products_count, array( 4, 6, 8 ), true ) ) {
+			$random_products_count = 4;
+		}
+		$random_only_if_cart_empty = (bool) mp_get_network_setting( 'advanced->network_customer_hub_random_only_when_cart_empty', 1 );
 
-		$html  = '<style>';
-		$html .= '.mp-network-customer-hub{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#edf4fb 100%);border:1px solid #dbe6f2;border-radius:16px;padding:20px;color:#1f3346}';
-		$html .= '.mp-network-customer-hub h2{margin:0 0 8px;font-size:24px;letter-spacing:.01em}';
-		$html .= '.mp-hub-sub{margin:0 0 14px;color:#4a6278;font-size:13px}';
-		$html .= '.mp-hub-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}';
-		$html .= '.mp-hub-kpi{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
-		$html .= '.mp-hub-kpi span{display:block;font-size:11px;color:#59708a;text-transform:uppercase;letter-spacing:.04em}';
-		$html .= '.mp-hub-kpi strong{display:block;margin-top:6px;font-size:20px;color:#16324b}';
-		$html .= '.mp-hub-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:12px}';
-		$html .= '.mp-hub-panel{background:#fff;border:1px solid #d7e4f0;border-radius:12px;padding:12px}';
-		$html .= '.mp-hub-panel h3{margin:0 0 10px;font-size:13px;color:#35506b;text-transform:uppercase;letter-spacing:.04em}';
-		$html .= '.mp-hub-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}';
-		$html .= '.mp-hub-list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px;border:1px solid #e4ecf4;border-radius:10px;background:#fbfdff}';
-		$html .= '.mp-hub-meta{display:grid;gap:2px;font-size:12px;color:#4a6278}';
-		$html .= '.mp-hub-meta strong{color:#1e354a}';
-		$html .= '.mp-hub-cta{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #2f5f8f;background:#2f5f8f;color:#fff;text-decoration:none;font-size:12px;font-weight:600}';
-		$html .= '.mp-hub-empty{font-size:12px;color:#516981;margin:0}';
-		$html .= '.mp-hub-orders{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d7e4f0;border-radius:12px;overflow:hidden}';
-		$html .= '.mp-hub-orders th,.mp-hub-orders td{padding:10px;border-bottom:1px solid #edf2f7;text-align:left;font-size:12px}';
-		$html .= '.mp-hub-orders th{font-size:11px;color:#607991;text-transform:uppercase;letter-spacing:.04em;background:#f7fbff}';
-		$html .= '.mp-hub-orders tr:last-child td{border-bottom:0}';
-		$html .= '@media (max-width:900px){.mp-hub-grid{grid-template-columns:1fr}}';
-		$html .= '</style>';
+		if ( $global_cart_enabled ) {
+			$cart = mp_cart();
+			if ( is_object( $cart ) && method_exists( $cart, 'has_items' ) && method_exists( $cart, 'cart_products_html' ) ) {
+				$has_cart_items = (bool) $cart->has_items();
+				if ( $has_cart_items ) {
+					$cart_overview_html = (string) $cart->cart_products_html();
+				}
+			}
+		}
 
-		$html .= '<section class="mp-network-customer-hub">';
+		$show_discover_products = ! $random_only_if_cart_empty || ! $has_cart_items;
+		$discover_products_html = '';
+		if ( $show_discover_products ) {
+			$discover_products_html = mp_global_list_products( array(
+				'echo'      => false,
+				'limit'     => $random_products_count,
+				'order_by'  => 'rand',
+				'order'     => 'DESC',
+				'list_view' => false,
+				'filters'   => false,
+				'paginate'  => false,
+			) );
+		}
+
+		$html  = '<section class="mp-network-customer-hub">';
 		$html .= '<h2>' . esc_html__( 'Zentrales Kundenportal', 'mp' ) . '</h2>';
 		$html .= '<p class="mp-hub-sub">' . esc_html__( 'Netzwerkweit alle Bestellungen, offene Bewertungen und letzte Aktivitaeten auf einen Blick.', 'mp' ) . '</p>';
 
@@ -1988,6 +1997,22 @@ class MP_Multisite {
 			$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Offene Tickets', 'mp' ) . '</span><strong>' . intval( $open_tickets ) . '</strong></div>';
 		}
 		$html .= '</div>';
+
+		$html .= '<section class="mp-hub-panel mp-hub-feature">';
+		$html .= '<h3>' . esc_html__( 'Globale Warenkorbuebersicht', 'mp' ) . '</h3>';
+		if ( $global_cart_enabled && $has_cart_items && '' !== trim( $cart_overview_html ) ) {
+			$html .= $cart_overview_html;
+		} else {
+			if ( $global_cart_enabled ) {
+				$html .= '<p class="mp-hub-empty">' . esc_html__( 'Dein globaler Warenkorb ist aktuell leer.', 'mp' ) . '</p>';
+			} else {
+				$html .= '<p class="mp-hub-empty">' . esc_html__( 'Der globale Netzwerkwarenkorb ist derzeit nicht aktiv.', 'mp' ) . '</p>';
+			}
+			if ( ! empty( $marketplace_url ) ) {
+				$html .= '<p><a class="mp-hub-cta" href="' . esc_url( $marketplace_url ) . '">' . esc_html__( 'Zum Netzwerk-Marktplatz', 'mp' ) . '</a></p>';
+			}
+		}
+		$html .= '</section>';
 
 		$html .= '<div class="mp-hub-grid">';
 		$html .= '<section class="mp-hub-panel">';
@@ -2163,6 +2188,18 @@ class MP_Multisite {
 			$html .= '<p class="mp-hub-empty">' . esc_html__( 'Noch keine netzwerkweiten Bestellungen gefunden.', 'mp' ) . '</p>';
 		}
 		$html .= '</section>';
+
+		if ( $show_discover_products ) {
+			$html .= '<section class="mp-hub-panel mp-hub-feature mp-hub-feature-discover">';
+			$html .= '<h3>' . esc_html__( 'Vielleicht interessant fuer Dich', 'mp' ) . '</h3>';
+			if ( '' !== trim( (string) $discover_products_html ) ) {
+				$html .= $discover_products_html;
+			} else {
+				$html .= '<p class="mp-hub-empty">' . esc_html__( 'Aktuell sind keine Netzwerkprodukte verfuegbar.', 'mp' ) . '</p>';
+			}
+			$html .= '</section>';
+		}
+
 		$html .= '</section>';
 
 		return $html;
@@ -2633,6 +2670,8 @@ class MP_Multisite {
 				'network_bundle_shipping_mode' => 'per_shop',
 				'network_mainshop_floating_cart_mode' => 'profile',
 				'network_customer_hub'   => 0,
+				'network_customer_hub_random_products_count' => 4,
+				'network_customer_hub_random_only_when_cart_empty' => 1,
 				'network_support_enabled' => 0,
 				'network_support_mode'   => 'autonomous',
 				'network_withdrawal_management' => 0,
@@ -2673,6 +2712,14 @@ class MP_Multisite {
 
 		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_mainshop_floating_cart_mode', $settings['advanced'] ) ) {
 			$new_settings['advanced']['network_mainshop_floating_cart_mode'] = 'profile';
+		}
+
+		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_customer_hub_random_products_count', $settings['advanced'] ) ) {
+			$new_settings['advanced']['network_customer_hub_random_products_count'] = 4;
+		}
+
+		if ( ! isset( $settings['advanced'] ) || ! is_array( $settings['advanced'] ) || ! array_key_exists( 'network_customer_hub_random_only_when_cart_empty', $settings['advanced'] ) ) {
+			$new_settings['advanced']['network_customer_hub_random_only_when_cart_empty'] = 1;
 		}
 
 		update_site_option( 'mp_network_settings', $new_settings );

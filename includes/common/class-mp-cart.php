@@ -175,10 +175,19 @@ class MP_Cart {
 		if ( 'mp_order' == get_current_screen()->post_type && ( 'post.php' == $hook || 'edit.php' == $hook ) ) {
 			wp_enqueue_style( 'mp-base', mp_plugin_url( 'ui/css/marketpress.css' ), false, MP_VERSION );
 
-			if ( mp_get_setting( 'store_theme' ) == 'default' ) {
-				wp_enqueue_style( 'mp-theme', mp_plugin_url( 'ui/themes/' . mp_get_setting( 'store_theme' ) . '.css' ), array(), MP_VERSION );
-			} elseif ( mp_get_setting( 'store_theme' ) != 'none' ){
-				wp_enqueue_style( 'mp-theme', content_url( 'marketpress-styles/' . mp_get_setting( 'store_theme' ) . '.css' ), array(), MP_VERSION );
+			$store_theme = sanitize_key( (string) mp_get_setting( 'store_theme' ) );
+			$theme_url   = '';
+			if ( 'none' !== $store_theme && '' !== $store_theme ) {
+				$plugin_theme_file = mp_plugin_dir( 'ui/themes/' . $store_theme . '.css' );
+				if ( file_exists( $plugin_theme_file ) ) {
+					$theme_url = mp_plugin_url( 'ui/themes/' . $store_theme . '.css' );
+				} else {
+					$theme_url = content_url( 'marketpress-styles/' . $store_theme . '.css' );
+				}
+			}
+
+			if ( '' !== $theme_url ) {
+				wp_enqueue_style( 'mp-theme', $theme_url, array(), MP_VERSION );
 			}
 		}
 	}

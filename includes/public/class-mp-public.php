@@ -379,11 +379,16 @@ class MP_Public {
 		wp_enqueue_style( 'mp-base', mp_plugin_url( 'ui/css/marketpress.css' ), false, MP_VERSION );
 		wp_enqueue_style( 'mp-frontend', mp_plugin_url( 'ui/css/frontend.css' ), array( 'mp-base' ), MP_VERSION );
 
-		$store_theme = mp_get_setting( 'store_theme' );
-		if ( $store_theme == 'default' ) {
-			$theme_url = mp_plugin_url( 'ui/themes/' . $store_theme . '.css' );
-		} elseif ( $store_theme != 'none' && !empty( $store_theme ) ){
-			$theme_url = content_url( 'marketpress-styles/' . $store_theme . '.css' );
+		$store_theme = sanitize_key( (string) mp_get_setting( 'store_theme' ) );
+		$theme_url   = '';
+
+		if ( 'none' !== $store_theme && '' !== $store_theme ) {
+			$plugin_theme_file = mp_plugin_dir( 'ui/themes/' . $store_theme . '.css' );
+			if ( file_exists( $plugin_theme_file ) ) {
+				$theme_url = mp_plugin_url( 'ui/themes/' . $store_theme . '.css' );
+			} else {
+				$theme_url = content_url( 'marketpress-styles/' . $store_theme . '.css' );
+			}
 		}
 
 		if( ! empty($theme_url) ){
