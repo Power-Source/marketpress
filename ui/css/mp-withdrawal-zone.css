@@ -77,6 +77,68 @@
   margin-top: 0;
 }
 
+#mp-customer-zone .mp_withdrawal_status_block {
+  margin-bottom: 14px;
+  padding: 10px;
+  border: 1px solid #dbe8f2;
+  border-radius: 10px;
+  background: #fbfdff;
+}
+
+#mp-customer-zone .mp_withdrawal_status_block h4 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+#mp-customer-zone .mp_withdrawal_status_list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+}
+
+#mp-customer-zone .mp_withdrawal_status_list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#mp-customer-zone .mp_withdrawal_status_badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+#mp-customer-zone .mp_withdrawal_status_badge.state-requested,
+#mp-customer-zone .mp_withdrawal_status_badge.state-in_review {
+  background: #fff4e6;
+  color: #8a4b07;
+  border-color: #f2d2aa;
+}
+
+#mp-customer-zone .mp_withdrawal_status_badge.state-approved,
+#mp-customer-zone .mp_withdrawal_status_badge.state-refunded,
+#mp-customer-zone .mp_withdrawal_status_badge.state-closed {
+  background: #eaf8ef;
+  color: #1f6f3b;
+  border-color: #bde6cb;
+}
+
+#mp-customer-zone .mp_withdrawal_status_badge.state-rejected {
+  background: #fff0f0;
+  color: #8f2c2c;
+  border-color: #f2c7c7;
+}
+
+#mp-customer-zone .mp_withdrawal_status_meta {
+  color: #4f6e85;
+  font-size: 0.85rem;
+}
+
 #mp-customer-zone .mp_withdrawal_hint {
   margin-bottom: 12px;
   color: #3e5b72;
@@ -127,6 +189,28 @@
   gap: 8px;
   margin-top: 14px;
   flex-wrap: wrap;
+}
+
+#mp-customer-zone .mp_withdrawal_reason {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+#mp-customer-zone .mp_withdrawal_reason_block[hidden] {
+  display: none;
+}
+
+#mp-customer-zone .mp_withdrawal_reason select,
+#mp-customer-zone .mp_withdrawal_reason textarea {
+  width: 100%;
+}
+
+#mp-customer-zone .mp_withdrawal_note_counter {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #537089;
+  text-align: right;
 }
 
 #mp-customer-zone .mp_withdrawal_feedback {

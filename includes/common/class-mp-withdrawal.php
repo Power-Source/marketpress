@@ -32,6 +32,8 @@ class MP_Withdrawal {
 
 		add_action( 'wp_ajax_mp_submit_withdrawal', array( $this, 'ajax_submit_withdrawal' ) );
 		add_action( 'wp_ajax_nopriv_mp_submit_withdrawal', array( $this, 'ajax_submit_withdrawal' ) );
+		add_action( 'wp_ajax_mp_get_withdrawal_status', array( $this, 'ajax_get_withdrawal_status' ) );
+		add_action( 'wp_ajax_nopriv_mp_get_withdrawal_status', array( $this, 'ajax_get_withdrawal_status' ) );
 	}
 
 	/**
@@ -168,7 +170,7 @@ class MP_Withdrawal {
 
 		$policy = (string) mp_get_setting( 'withdrawal->policy_text', '' );
 		if ( '' === trim( $policy ) ) {
-			$policy = __( 'Du kannst Deinen Widerruf hier digital in zwei Schritten erklären. Nach dem Absenden erhältst Du unverzüglich eine Eingangsbestätigung per E-Mail.', 'mp' );
+			$policy = __( 'Du kannst Deinen Widerruf hier digital erklaeren. Waehle Positionen, Grund und sende direkt ab. Danach siehst Du jederzeit den Status.', 'mp' );
 		}
 
 		$intro  = '<section class="mp_customer_zone_intro">';
@@ -208,8 +210,12 @@ class MP_Withdrawal {
 		}
 
 		$nonce        = (string) mp_get_post_value( 'nonce', '' );
+		$ajax_nonce   = (string) mp_get_post_value( 'ajax_nonce', '' );
 		$access_token = sanitize_text_field( (string) mp_get_post_value( 'access_token', '' ) );
 		$nonce_valid  = (bool) wp_verify_nonce( $nonce, 'mp_submit_withdrawal_' . $order_id );
+		if ( ! $nonce_valid && '' !== $ajax_nonce ) {
+			$nonce_valid = (bool) wp_verify_nonce( $ajax_nonce, 'mp-ajax-nonce' );
+		}
 		$token_valid  = $this->is_valid_withdrawal_access_token( $order, $access_token );
 
 		if ( ! $nonce_valid && ! $token_valid ) {
@@ -252,10 +258,35 @@ class MP_Withdrawal {
 			wp_send_json_error( array( 'message' => __( 'Keine widerrufsfähigen Positionen ausgewählt.', 'mp' ) ) );
 		}
 
+		$reason_options = $this->get_reason_options();
+		$reason_code    = sanitize_key( (string) mp_get_post_value( 'reason_code', '' ) );
+		if ( '' === $reason_code || ! isset( $reason_options[ $reason_code ] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Bitte waehle einen Widerrufsgrund aus.', 'mp' ) ) );
+		}
+
+		$max_reason_length = $this->get_reason_max_length();
+		$reason_note       = sanitize_textarea_field( (string) mp_get_post_value( 'reason_note', '' ) );
+		if ( ! $this->allow_custom_reason() ) {
+			$reason_note = '';
+		}
+
+		if ( function_exists( 'mb_strlen' ) ) {
+			$reason_len = mb_strlen( $reason_note, 'UTF-8' );
+		} else {
+			$reason_len = strlen( $reason_note );
+		}
+
+		if ( $reason_len > $max_reason_length ) {
+			wp_send_json_error( array( 'message' => sprintf( __( 'Bitte kuerze die Begruendung auf maximal %d Zeichen.', 'mp' ), $max_reason_length ) ) );
+		}
+
 		$entry = array(
 			'timestamp'      => time(),
 			'order_id'       => $order->get_id(),
 			'status'         => 'requested',
+			'reason_code'    => $reason_code,
+			'reason_label'   => (string) $reason_options[ $reason_code ],
+			'reason_note'    => $reason_note,
 			'items'          => $selected,
 			'blocked_items'  => $blocked,
 			'customer_email' => (string) $order->get_meta( 'mp_billing_info->email', '' ),
@@ -270,11 +301,42 @@ class MP_Withdrawal {
 
 		$requests[] = $entry;
 		update_post_meta( $order->ID, 'mp_withdrawal_requests', $requests );
+		update_post_meta( $order->ID, '_mp_withdrawal_status', 'requested' );
+		update_post_meta( $order->ID, '_mp_withdrawal_last_update', time() );
+		do_action( 'mp_withdrawal_updated', (int) $order->ID, (int) $order->post_author, (int) get_current_blog_id() );
 
 		$this->send_confirmation_email( $order, $entry );
 
 		wp_send_json_success( array(
 			'message' => __( 'Widerruf wurde übermittelt. Du erhältst sofort eine Eingangsbestätigung per E-Mail.', 'mp' ),
+			'status'  => array(
+				'key'   => 'requested',
+				'label' => $this->get_status_label( 'requested' ),
+			),
+		) );
+	}
+
+	/**
+	 * Return customer-visible status timeline for one order.
+	 */
+	public function ajax_get_withdrawal_status() {
+		$order_id = (int) mp_get_request_value( 'order_id', 0 );
+		if ( ! $order_id ) {
+			wp_send_json_error( array( 'message' => __( 'Ungueltige Bestellung.', 'mp' ) ), 400 );
+		}
+
+		$order = new MP_Order( $order_id );
+		if ( ! $order->exists() ) {
+			wp_send_json_error( array( 'message' => __( 'Bestellung nicht gefunden.', 'mp' ) ), 404 );
+		}
+
+		$access_token = sanitize_text_field( (string) mp_get_request_value( 'access_token', '' ) );
+		if ( ! $this->can_access_order( $order, $access_token ) ) {
+			wp_send_json_error( array( 'message' => __( 'Kein Zugriff auf diese Bestellung.', 'mp' ) ), 403 );
+		}
+
+		wp_send_json_success( array(
+			'entries' => $this->get_withdrawal_entries_for_customer( $order ),
 		) );
 	}
 
@@ -326,7 +388,9 @@ class MP_Withdrawal {
 			'ajaxurl' => mp_get_ajax_url(),
 			'messages' => array(
 				'selectItems' => __( 'Bitte wähle mindestens eine Position aus.', 'mp' ),
-				'confirmReady' => __( 'Bitte prüfe Deine Auswahl und sende den Widerruf verbindlich ab.', 'mp' ),
+				'selectReason' => __( 'Bitte waehle einen Widerrufsgrund aus.', 'mp' ),
+				'noteTooLong'  => __( 'Bitte kuerze die Begruendung auf die maximal erlaubte Laenge.', 'mp' ),
+				'submitError'  => __( 'Widerruf konnte nicht uebermittelt werden.', 'mp' ),
 			),
 		) );
 	}
@@ -441,6 +505,11 @@ class MP_Withdrawal {
 			return '';
 		}
 
+		$reason_options   = $this->get_reason_options();
+		$allow_reason_note = $this->allow_custom_reason();
+		$max_reason_len    = $this->get_reason_max_length();
+		$status_entries    = $this->get_withdrawal_entries_for_customer( $order );
+
 		$eligible_count = 0;
 		$blocked_count  = 0;
 
@@ -483,12 +552,37 @@ class MP_Withdrawal {
 
 			<div class="mp_withdrawal_panel">
 				<h3><?php esc_html_e( 'Digitaler Widerruf', 'mp' ); ?></h3>
-				<p class="mp_withdrawal_hint"><?php esc_html_e( 'Wähle die Positionen aus und bestätige den Widerruf in zwei Schritten.', 'mp' ); ?></p>
+				<p class="mp_withdrawal_hint"><?php esc_html_e( 'Wähle Positionen, nenne den Grund und sende den Widerruf direkt ab.', 'mp' ); ?></p>
 
-				<form class="mp_withdrawal_form" data-order-id="<?php echo esc_attr( (string) $order->get_id() ); ?>" data-prepared="0">
+				<?php if ( ! empty( $status_entries ) ) : ?>
+					<div class="mp_withdrawal_status_block">
+						<h4><?php esc_html_e( 'Dein Widerrufsstatus', 'mp' ); ?></h4>
+						<ul class="mp_withdrawal_status_list">
+							<?php foreach ( array_slice( $status_entries, 0, 5 ) as $entry ) : ?>
+								<li>
+									<span class="mp_withdrawal_status_badge state-<?php echo esc_attr( (string) $entry['status'] ); ?>"><?php echo esc_html( (string) $entry['status_label'] ); ?></span>
+									<span class="mp_withdrawal_status_meta">
+										<?php
+										echo esc_html(
+											sprintf(
+												__( '%1$s · %2$s', 'mp' ),
+												(string) $entry['reason_label'],
+												(string) $entry['date_text']
+											)
+										);
+										?>
+									</span>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				<?php endif; ?>
+
+				<form class="mp_withdrawal_form" data-order-id="<?php echo esc_attr( (string) $order->get_id() ); ?>" data-max-note="<?php echo esc_attr( (string) $max_reason_len ); ?>">
 					<input type="hidden" name="action" value="mp_submit_withdrawal">
 					<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>">
 					<input type="hidden" name="nonce" value="<?php echo esc_attr( $nonce ); ?>">
+					<input type="hidden" name="ajax_nonce" value="<?php echo esc_attr( wp_create_nonce( 'mp-ajax-nonce' ) ); ?>">
 					<input type="hidden" name="access_token" value="<?php echo esc_attr( $guest_token ); ?>">
 					<div class="mp_withdrawal_items">
 						<?php foreach ( $snapshot as $key => $row ) : ?>
@@ -511,9 +605,24 @@ class MP_Withdrawal {
 						<?php endforeach; ?>
 					</div>
 
+					<div class="mp_withdrawal_reason mp_withdrawal_reason_block" hidden>
+						<label for="mp_withdrawal_reason_<?php echo esc_attr( (string) $order->get_id() ); ?>"><strong><?php esc_html_e( 'Widerrufsgrund', 'mp' ); ?></strong></label>
+						<select id="mp_withdrawal_reason_<?php echo esc_attr( (string) $order->get_id() ); ?>" name="reason_code">
+							<option value=""><?php esc_html_e( 'Bitte Grund wählen', 'mp' ); ?></option>
+							<?php foreach ( $reason_options as $code => $label ) : ?>
+								<option value="<?php echo esc_attr( (string) $code ); ?>"><?php echo esc_html( (string) $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+
+						<?php if ( $allow_reason_note ) : ?>
+							<label for="mp_withdrawal_note_<?php echo esc_attr( (string) $order->get_id() ); ?>"><strong><?php esc_html_e( 'Optionale Begründung', 'mp' ); ?></strong></label>
+							<textarea id="mp_withdrawal_note_<?php echo esc_attr( (string) $order->get_id() ); ?>" name="reason_note" maxlength="<?php echo esc_attr( (string) $max_reason_len ); ?>" rows="3"></textarea>
+							<p class="mp_withdrawal_note_counter" data-max="<?php echo esc_attr( (string) $max_reason_len ); ?>">0/<?php echo esc_html( (string) $max_reason_len ); ?></p>
+						<?php endif; ?>
+					</div>
+
 					<div class="mp_withdrawal_actions">
-						<button type="button" class="mp_button mp_button-outline mp_withdrawal_prepare"><?php esc_html_e( 'Widerruf vorbereiten', 'mp' ); ?></button>
-						<button type="submit" class="mp_button mp_button-primary mp_withdrawal_submit" disabled><?php esc_html_e( 'Widerruf absenden', 'mp' ); ?></button>
+						<button type="submit" class="mp_button mp_button-primary mp_withdrawal_submit"><?php esc_html_e( 'Widerruf absenden', 'mp' ); ?></button>
 					</div>
 
 					<div class="mp_withdrawal_feedback" aria-live="polite"></div>
@@ -570,6 +679,8 @@ class MP_Withdrawal {
 			$timestamp  = (int) mp_arr_get_value( 'timestamp', $request, 0 );
 			$status     = (string) mp_arr_get_value( 'status', $request, 'requested' );
 			$admin_note = (string) mp_arr_get_value( 'admin_note', $request, '' );
+			$reason     = (string) mp_arr_get_value( 'reason_label', $request, '' );
+			$reason_note = (string) mp_arr_get_value( 'reason_note', $request, '' );
 			$items      = mp_arr_get_value( 'items', $request, array() );
 			$email      = (string) mp_arr_get_value( 'customer_email', $request, '' );
 
@@ -591,6 +702,13 @@ class MP_Withdrawal {
 				echo '<li>' . esc_html__( 'Keine Positionsdaten vorhanden.', 'mp' ) . '</li>';
 			}
 			echo '</ul>';
+
+			if ( '' !== $reason ) {
+				echo '<p><strong>' . esc_html__( 'Widerrufsgrund', 'mp' ) . ':</strong> ' . esc_html( $reason ) . '</p>';
+			}
+			if ( '' !== $reason_note ) {
+				echo '<p><strong>' . esc_html__( 'Begruendung', 'mp' ) . ':</strong><br>' . nl2br( esc_html( $reason_note ) ) . '</p>';
+			}
 
 			echo '<p><label for="mp_withdrawal_status_' . esc_attr( (string) $index ) . '"><strong>' . esc_html__( 'Status', 'mp' ) . '</strong></label><br>';
 			echo '<select id="mp_withdrawal_status_' . esc_attr( (string) $index ) . '" name="mp_withdrawal_status[' . esc_attr( (string) $index ) . ']">';
@@ -654,6 +772,15 @@ class MP_Withdrawal {
 		unset( $request );
 
 		update_post_meta( $post_id, 'mp_withdrawal_requests', $requests );
+
+		$latest = end( $requests );
+		if ( is_array( $latest ) ) {
+			$latest_status = sanitize_key( (string) mp_arr_get_value( 'status', $latest, 'requested' ) );
+			update_post_meta( $post_id, '_mp_withdrawal_status', $latest_status );
+			update_post_meta( $post_id, '_mp_withdrawal_last_update', time() );
+		}
+
+		do_action( 'mp_withdrawal_updated', (int) $post_id, (int) $post->post_author, (int) get_current_blog_id() );
 	}
 
 	/**
@@ -668,6 +795,126 @@ class MP_Withdrawal {
 			'refunded'  => __( 'Erstattet', 'mp' ),
 			'closed'    => __( 'Abgeschlossen', 'mp' ),
 		);
+	}
+
+	/**
+	 * Human-readable status label.
+	 *
+	 * @param string $status
+	 *
+	 * @return string
+	 */
+	public function get_status_label( $status ) {
+		$status = sanitize_key( (string) $status );
+		$labels = $this->get_admin_status_options();
+
+		return isset( $labels[ $status ] ) ? (string) $labels[ $status ] : (string) __( 'Unbekannt', 'mp' );
+	}
+
+	/**
+	 * Return sorted customer-visible entries.
+	 *
+	 * @param MP_Order $order
+	 *
+	 * @return array
+	 */
+	public function get_withdrawal_entries_for_customer( $order ) {
+		$requests = $order->get_meta( 'mp_withdrawal_requests', array() );
+		$requests = is_array( $requests ) ? $requests : array();
+
+		$entries = array();
+		foreach ( $requests as $request ) {
+			$status    = sanitize_key( (string) mp_arr_get_value( 'status', $request, 'requested' ) );
+			$timestamp = (int) mp_arr_get_value( 'timestamp', $request, 0 );
+			$entries[] = array(
+				'status'      => $status,
+				'status_label' => $this->get_status_label( $status ),
+				'reason_code' => sanitize_key( (string) mp_arr_get_value( 'reason_code', $request, '' ) ),
+				'reason_label' => (string) mp_arr_get_value( 'reason_label', $request, __( 'Nicht angegeben', 'mp' ) ),
+				'reason_note' => (string) mp_arr_get_value( 'reason_note', $request, '' ),
+				'timestamp'   => $timestamp,
+				'date_text'   => $timestamp ? date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $timestamp ) : '',
+			);
+		}
+
+		usort( $entries, function( $a, $b ) {
+			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
+		} );
+
+		return $entries;
+	}
+
+	/**
+	 * Parse configured withdrawal reason options.
+	 *
+	 * @return array
+	 */
+	private function get_reason_options() {
+		$raw = (string) mp_get_setting( 'withdrawal->reason_options', '' );
+		if ( '' === trim( $raw ) ) {
+			$raw = "defect|Artikel ist beschaedigt oder fehlerhaft\nnot_as_described|Artikel entspricht nicht der Beschreibung\nwrong_item|Falscher Artikel geliefert\ndelay|Lieferung kam zu spaet\nother|Anderer rechtlicher Widerrufsgrund";
+		}
+
+		$lines = preg_split( '/\r\n|\r|\n/', $raw );
+		$options = array();
+		foreach ( (array) $lines as $line ) {
+			$line = trim( (string) $line );
+			if ( '' === $line ) {
+				continue;
+			}
+
+			$code  = '';
+			$label = '';
+			if ( false !== strpos( $line, '|' ) ) {
+				$parts = explode( '|', $line, 2 );
+				$code  = sanitize_key( trim( (string) $parts[0] ) );
+				$label = sanitize_text_field( trim( (string) $parts[1] ) );
+			} else {
+				$label = sanitize_text_field( $line );
+				$code  = sanitize_key( $label );
+			}
+
+			if ( '' === $code || '' === $label ) {
+				continue;
+			}
+
+			$options[ $code ] = $label;
+		}
+
+		if ( empty( $options ) ) {
+			$options = array(
+				'other' => __( 'Anderer rechtlicher Widerrufsgrund', 'mp' ),
+			);
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Whether free text reason note is allowed.
+	 *
+	 * @return bool
+	 */
+	private function allow_custom_reason() {
+		return (bool) mp_get_setting( 'withdrawal->allow_custom_reason', 1 );
+	}
+
+	/**
+	 * Max reason note length.
+	 *
+	 * @return int
+	 */
+	private function get_reason_max_length() {
+		$max = (int) mp_get_setting( 'withdrawal->max_reason_length', 300 );
+		if ( $max < 50 ) {
+			$max = 300;
+		}
+
+		if ( $max > 1000 ) {
+			$max = 1000;
+		}
+
+		return $max;
 	}
 
 	/**

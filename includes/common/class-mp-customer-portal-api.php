@@ -36,6 +36,7 @@ class MP_Customer_Portal_API {
 		add_action( 'edit_comment', array( $this, 'invalidate_after_comment_edit' ), 10, 1 );
 		add_action( 'wp_set_comment_status', array( $this, 'invalidate_after_comment_edit' ), 10, 1 );
 		add_action( 'deleted_comment', array( $this, 'invalidate_after_comment_edit' ), 10, 1 );
+		add_action( 'mp_withdrawal_updated', array( $this, 'invalidate_after_withdrawal_update' ), 10, 3 );
 	}
 
 	/**
@@ -182,6 +183,28 @@ class MP_Customer_Portal_API {
 	}
 
 	/**
+	 * Invalidate snapshots after withdrawal updates.
+	 *
+	 * @param int $order_id
+	 * @param int $user_id
+	 * @param int $blog_id
+	 */
+	public function invalidate_after_withdrawal_update( $order_id, $user_id, $blog_id ) {
+		$user_id = (int) $user_id;
+		$blog_id = (int) $blog_id;
+
+		if ( $user_id <= 0 ) {
+			return;
+		}
+
+		if ( $blog_id <= 0 ) {
+			$blog_id = (int) get_current_blog_id();
+		}
+
+		$this->invalidate_user_cache( $user_id, $blog_id );
+	}
+
+	/**
 	 * Remove transient cache for one user.
 	 *
 	 * @param int $user_id
@@ -220,6 +243,20 @@ class MP_Customer_Portal_API {
 			'value'         => 0.0,
 			'open_shipping' => 0,
 			'to_review'     => 0,
+			'withdrawal_open' => 0,
+		);
+
+		$withdrawal_data = array(
+			'counts' => array(
+				'none'      => 0,
+				'requested' => 0,
+				'in_review' => 0,
+				'approved'  => 0,
+				'rejected'  => 0,
+				'refunded'  => 0,
+				'closed'    => 0,
+			),
+			'recent' => array(),
 		);
 
 		$orders           = array();
@@ -261,6 +298,20 @@ class MP_Customer_Portal_API {
 				'timestamp'  => $time,
 				'tracking_url' => $order->tracking_url( false ),
 			);
+
+			$withdrawal_entry = $this->get_order_withdrawal_entry( $order_id, $order->get_id(), '', $order->tracking_url( false ) );
+			$withdrawal_status = isset( $withdrawal_entry['status'] ) ? $withdrawal_entry['status'] : 'none';
+			if ( isset( $withdrawal_data['counts'][ $withdrawal_status ] ) ) {
+				$withdrawal_data['counts'][ $withdrawal_status ]++;
+			}
+
+			if ( in_array( $withdrawal_status, array( 'requested', 'in_review' ), true ) ) {
+				$totals['withdrawal_open']++;
+			}
+
+			if ( 'none' !== $withdrawal_status ) {
+				$withdrawal_data['recent'][] = $withdrawal_entry;
+			}
 
 			if ( ! $reviews_active || ! in_array( $status, $closed_statuses, true ) ) {
 				continue;
@@ -312,6 +363,7 @@ class MP_Customer_Portal_API {
 		}
 
 		usort( $pending_reviews, array( $this, 'sort_by_timestamp_desc' ) );
+		usort( $withdrawal_data['recent'], array( $this, 'sort_by_timestamp_desc' ) );
 		$totals['to_review'] = count( $pending_reviews );
 
 		$recent_reviews = $reviews_active ? $this->get_recent_reviews( $user_id, 0, 5 ) : array();
@@ -326,6 +378,10 @@ class MP_Customer_Portal_API {
 			'orders'       => $orders,
 			'pending_reviews' => $pending_reviews,
 			'recent_reviews'  => $recent_reviews,
+			'withdrawals'     => array(
+				'counts' => $withdrawal_data['counts'],
+				'recent' => array_slice( $withdrawal_data['recent'], 0, 8 ),
+			),
 			'synced_at'    => time(),
 		);
 
@@ -356,6 +412,20 @@ class MP_Customer_Portal_API {
 			'shops'         => 0,
 			'open_shipping' => 0,
 			'to_review'     => 0,
+			'withdrawal_open' => 0,
+		);
+
+		$withdrawal_data = array(
+			'counts' => array(
+				'none'      => 0,
+				'requested' => 0,
+				'in_review' => 0,
+				'approved'  => 0,
+				'rejected'  => 0,
+				'refunded'  => 0,
+				'closed'    => 0,
+			),
+			'recent' => array(),
 		);
 
 		$rows             = array();
@@ -413,6 +483,18 @@ class MP_Customer_Portal_API {
 					'url'        => $order->tracking_url( false, $blog_id ),
 					'timestamp'  => $time,
 				);
+
+				$withdrawal_entry = $this->get_order_withdrawal_entry( $post_id, $order->get_id(), $shop_name, $order->tracking_url( false, $blog_id ) );
+				$withdrawal_status = isset( $withdrawal_entry['status'] ) ? $withdrawal_entry['status'] : 'none';
+				if ( isset( $withdrawal_data['counts'][ $withdrawal_status ] ) ) {
+					$withdrawal_data['counts'][ $withdrawal_status ]++;
+				}
+				if ( in_array( $withdrawal_status, array( 'requested', 'in_review' ), true ) ) {
+					$totals['withdrawal_open']++;
+				}
+				if ( 'none' !== $withdrawal_status ) {
+					$withdrawal_data['recent'][] = $withdrawal_entry;
+				}
 
 				if ( ! $reviews_active || ! in_array( $post->post_status, $closed_statuses, true ) ) {
 					continue;
@@ -472,6 +554,7 @@ class MP_Customer_Portal_API {
 		usort( $rows, array( $this, 'sort_by_timestamp_desc' ) );
 		usort( $pending_reviews, array( $this, 'sort_by_timestamp_desc' ) );
 		usort( $recent_reviews, array( $this, 'sort_by_timestamp_desc' ) );
+		usort( $withdrawal_data['recent'], array( $this, 'sort_by_timestamp_desc' ) );
 		$totals['to_review'] = count( $pending_reviews );
 
 		return array(
@@ -484,7 +567,56 @@ class MP_Customer_Portal_API {
 			'rows'          => $rows,
 			'pending_reviews' => $pending_reviews,
 			'recent_reviews'  => $recent_reviews,
+			'withdrawals'     => array(
+				'counts' => $withdrawal_data['counts'],
+				'recent' => array_slice( $withdrawal_data['recent'], 0, 10 ),
+			),
 			'synced_at'     => time(),
+		);
+	}
+
+	/**
+	 * Build one normalized withdrawal entry for an order.
+	 *
+	 * @param int    $order_post_id
+	 * @param int    $order_id
+	 * @param string $shop_name
+	 * @param string $tracking_url
+	 *
+	 * @return array
+	 */
+	private function get_order_withdrawal_entry( $order_post_id, $order_id, $shop_name, $tracking_url ) {
+		$requests = get_post_meta( (int) $order_post_id, 'mp_withdrawal_requests', true );
+		$requests = is_array( $requests ) ? $requests : array();
+
+		if ( empty( $requests ) ) {
+			return array(
+				'order_post_id' => (int) $order_post_id,
+				'order_id'      => (int) $order_id,
+				'shop'          => (string) $shop_name,
+				'tracking_url'  => (string) $tracking_url,
+				'status'        => 'none',
+				'status_label'  => $this->get_withdrawal_status_label( 'none' ),
+				'reason_label'  => '',
+				'timestamp'     => 0,
+				'date_text'     => '',
+			);
+		}
+
+		$latest = end( $requests );
+		$status = sanitize_key( (string) mp_arr_get_value( 'status', $latest, 'requested' ) );
+		$time   = (int) mp_arr_get_value( 'timestamp', $latest, 0 );
+
+		return array(
+			'order_post_id' => (int) $order_post_id,
+			'order_id'      => (int) $order_id,
+			'shop'          => (string) $shop_name,
+			'tracking_url'  => (string) $tracking_url,
+			'status'        => $status,
+			'status_label'  => $this->get_withdrawal_status_label( $status ),
+			'reason_label'  => (string) mp_arr_get_value( 'reason_label', $latest, '' ),
+			'timestamp'     => $time,
+			'date_text'     => $time ? date_i18n( get_option( 'date_format' ), $time ) : '',
 		);
 	}
 
@@ -715,6 +847,37 @@ class MP_Customer_Portal_API {
 	}
 
 	/**
+	 * Get labels for withdrawal statuses.
+	 *
+	 * @return array
+	 */
+	private function get_withdrawal_status_labels() {
+		return array(
+			'none'      => __( 'Kein Widerruf', 'mp' ),
+			'requested' => __( 'Eingegangen', 'mp' ),
+			'in_review' => __( 'In Pruefung', 'mp' ),
+			'approved'  => __( 'Genehmigt', 'mp' ),
+			'rejected'  => __( 'Abgelehnt', 'mp' ),
+			'refunded'  => __( 'Erstattet', 'mp' ),
+			'closed'    => __( 'Abgeschlossen', 'mp' ),
+		);
+	}
+
+	/**
+	 * Resolve one withdrawal status label.
+	 *
+	 * @param string $status
+	 *
+	 * @return string
+	 */
+	private function get_withdrawal_status_label( $status ) {
+		$status = sanitize_key( (string) $status );
+		$labels = $this->get_withdrawal_status_labels();
+
+		return isset( $labels[ $status ] ) ? (string) $labels[ $status ] : (string) $labels['none'];
+	}
+
+	/**
 	 * Get sync ttl.
 	 *
 	 * @param string $scope
@@ -783,6 +946,18 @@ class MP_Customer_Portal_API {
 			'rows'           => array(),
 			'pending_reviews'=> array(),
 			'recent_reviews' => array(),
+			'withdrawals'    => array(
+				'counts' => array(
+					'none'      => 0,
+					'requested' => 0,
+					'in_review' => 0,
+					'approved'  => 0,
+					'rejected'  => 0,
+					'refunded'  => 0,
+					'closed'    => 0,
+				),
+				'recent' => array(),
+			),
 			'synced_at'      => time(),
 		);
 	}

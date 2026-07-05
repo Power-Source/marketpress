@@ -860,6 +860,8 @@ class MP_Multisite {
 		$rows            = isset( $snapshot['rows'] ) && is_array( $snapshot['rows'] ) ? $snapshot['rows'] : array();
 		$pending_reviews = isset( $snapshot['pending_reviews'] ) && is_array( $snapshot['pending_reviews'] ) ? $snapshot['pending_reviews'] : array();
 		$recent_reviews  = isset( $snapshot['recent_reviews'] ) && is_array( $snapshot['recent_reviews'] ) ? $snapshot['recent_reviews'] : array();
+		$withdrawals     = isset( $snapshot['withdrawals'] ) && is_array( $snapshot['withdrawals'] ) ? $snapshot['withdrawals'] : array( 'counts' => array(), 'recent' => array() );
+		$recent_withdrawals = isset( $withdrawals['recent'] ) && is_array( $withdrawals['recent'] ) ? $withdrawals['recent'] : array();
 
 		$html  = '<style>';
 		$html .= '.mp-network-customer-hub{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#edf4fb 100%);border:1px solid #dbe6f2;border-radius:16px;padding:20px;color:#1f3346}';
@@ -895,6 +897,7 @@ class MP_Multisite {
 		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Aktive Shops', 'mp' ) . '</span><strong>' . intval( $totals['shops'] ) . '</strong></div>';
 		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Offene Lieferung', 'mp' ) . '</span><strong>' . intval( $totals['open_shipping'] ) . '</strong></div>';
 		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Zu bewerten', 'mp' ) . '</span><strong>' . intval( $totals['to_review'] ) . '</strong></div>';
+		$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Offene Widerrufe', 'mp' ) . '</span><strong>' . intval( isset( $totals['withdrawal_open'] ) ? $totals['withdrawal_open'] : 0 ) . '</strong></div>';
 		$html .= '</div>';
 
 		$html .= '<div class="mp-hub-grid">';
@@ -937,6 +940,25 @@ class MP_Multisite {
 		}
 		$html .= '</section>';
 		$html .= '</div>';
+
+		$html .= '<section class="mp-hub-panel" style="margin-bottom:12px;">';
+		$html .= '<h3>' . esc_html__( 'Widerruf Status', 'mp' ) . '</h3>';
+		if ( ! empty( $recent_withdrawals ) ) {
+			$html .= '<ul class="mp-hub-list">';
+			foreach ( array_slice( $recent_withdrawals, 0, 6 ) as $item ) {
+				$html .= '<li>';
+				$html .= '<div class="mp-hub-meta">';
+				$html .= '<strong>' . sprintf( esc_html__( '%1$s · Bestellung #%2$s', 'mp' ), esc_html( isset( $item['shop'] ) ? $item['shop'] : '' ), esc_html( isset( $item['order_id'] ) ? $item['order_id'] : '' ) ) . '</strong>';
+				$html .= '<span>' . esc_html( sprintf( __( '%1$s · %2$s', 'mp' ), isset( $item['status_label'] ) ? $item['status_label'] : __( 'Kein Widerruf', 'mp' ), isset( $item['reason_label'] ) && '' !== $item['reason_label'] ? $item['reason_label'] : __( 'Kein Grund angegeben', 'mp' ) ) ) . '</span>';
+				$html .= '</div>';
+				$html .= '<a class="mp-hub-cta" href="' . esc_url( isset( $item['tracking_url'] ) ? $item['tracking_url'] : '#' ) . '">' . esc_html__( 'Zum Auftrag', 'mp' ) . '</a>';
+				$html .= '</li>';
+			}
+			$html .= '</ul>';
+		} else {
+			$html .= '<p class="mp-hub-empty">' . esc_html__( 'Aktuell liegen keine eingereichten Widerrufe vor.', 'mp' ) . '</p>';
+		}
+		$html .= '</section>';
 
 		$html .= '<section class="mp-hub-panel">';
 		$html .= '<h3>' . esc_html__( 'Letzte Bestellungen', 'mp' ) . '</h3>';

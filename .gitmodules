@@ -1,4 +1,0 @@
-[submodule "includes/admin/dash-notice"]
-	path = includes/admin/dash-notice
-	url = git@bitbucket.org:incsub/psource-dashboard-notification.git
-	branch = master

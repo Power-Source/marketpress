@@ -1,29 +1,48 @@
 (function ($) {
   'use strict';
 
+  function getI18nMessage(key, fallback) {
+    return (window.mp_withdrawal_i18n && mp_withdrawal_i18n.messages && mp_withdrawal_i18n.messages[key]) || fallback;
+  }
+
   function setFeedback($box, message, isError) {
     $box.removeClass('is-ok is-error').addClass(isError ? 'is-error' : 'is-ok').text(message);
   }
 
-  $(document).on('change', '.mp_withdrawal_form input[name="items[]"]', function () {
-    var $form = $(this).closest('.mp_withdrawal_form');
-    $form.attr('data-prepared', '0');
-    $form.find('.mp_withdrawal_submit').prop('disabled', true);
-  });
-
-  $(document).on('click', '.mp_withdrawal_prepare', function () {
-    var $form = $(this).closest('.mp_withdrawal_form');
+  function updateReasonBlock($form) {
     var selected = $form.find('input[name="items[]"]:checked').length;
-    var $feedback = $form.find('.mp_withdrawal_feedback');
+    var $reasonBlock = $form.find('.mp_withdrawal_reason_block');
 
-    if (!selected) {
-      setFeedback($feedback, (window.mp_withdrawal_i18n && mp_withdrawal_i18n.messages && mp_withdrawal_i18n.messages.selectItems) || 'Bitte waehle mindestens eine Position aus.', true);
+    if (!$reasonBlock.length) {
       return;
     }
 
-    $form.attr('data-prepared', '1');
-    $form.find('.mp_withdrawal_submit').prop('disabled', false).trigger('focus');
-    setFeedback($feedback, (window.mp_withdrawal_i18n && mp_withdrawal_i18n.messages && mp_withdrawal_i18n.messages.confirmReady) || 'Bitte pruefe Deine Auswahl und sende den Widerruf verbindlich ab.', false);
+    if (selected > 0) {
+      $reasonBlock.prop('hidden', false);
+    } else {
+      $reasonBlock.prop('hidden', true);
+      $form.find('select[name="reason_code"]').val('');
+      $form.find('textarea[name="reason_note"]').val('');
+      $form.find('.mp_withdrawal_note_counter').text('0/' + ($form.find('.mp_withdrawal_note_counter').data('max') || 300));
+    }
+  }
+
+  $(document).on('change', '.mp_withdrawal_form input[name="items[]"]', function () {
+    var $form = $(this).closest('.mp_withdrawal_form');
+    updateReasonBlock($form);
+  });
+
+  $(document).on('input', '.mp_withdrawal_form textarea[name="reason_note"]', function () {
+    var $textarea = $(this);
+    var $form = $textarea.closest('.mp_withdrawal_form');
+    var maxLen = parseInt($form.attr('data-max-note'), 10) || 300;
+    var value = $textarea.val() || '';
+    if (value.length > maxLen) {
+      value = value.substring(0, maxLen);
+      $textarea.val(value);
+    }
+
+    $form.find('.mp_withdrawal_note_counter').text(value.length + '/' + maxLen);
   });
 
   $(document).on('submit', '.mp_withdrawal_form', function (e) {
@@ -33,16 +52,23 @@
     var $submit = $form.find('.mp_withdrawal_submit');
     var $feedback = $form.find('.mp_withdrawal_feedback');
     var selected = $form.find('input[name="items[]"]:checked').length;
-    var prepared = $form.attr('data-prepared') === '1';
+    var reason = $form.find('select[name="reason_code"]').val();
+    var note = $form.find('textarea[name="reason_note"]').val() || '';
+    var maxLen = parseInt($form.attr('data-max-note'), 10) || 300;
     var payload = $form.serialize();
 
     if (!selected) {
-      setFeedback($feedback, (window.mp_withdrawal_i18n && mp_withdrawal_i18n.messages && mp_withdrawal_i18n.messages.selectItems) || 'Bitte waehle mindestens eine Position aus.', true);
+      setFeedback($feedback, getI18nMessage('selectItems', 'Bitte wähle mindestens eine Position aus.'), true);
       return;
     }
 
-    if (!prepared) {
-      setFeedback($feedback, (window.mp_withdrawal_i18n && mp_withdrawal_i18n.messages && mp_withdrawal_i18n.messages.confirmReady) || 'Bitte pruefe Deine Auswahl und sende den Widerruf verbindlich ab.', true);
+    if (!reason) {
+      setFeedback($feedback, getI18nMessage('selectReason', 'Bitte wähle einen Widerrufsgrund aus.'), true);
+      return;
+    }
+
+    if (note.length > maxLen) {
+      setFeedback($feedback, getI18nMessage('noteTooLong', 'Bitte kürze die Begründung auf die maximal erlaubte Länge.'), true);
       return;
     }
 
@@ -51,14 +77,16 @@
     $.post((window.mp_withdrawal_i18n && mp_withdrawal_i18n.ajaxurl) || window.ajaxurl, payload)
       .done(function (resp) {
         if (resp && resp.success) {
-          setFeedback($feedback, (resp.data && resp.data.message) || 'Widerruf wurde uebermittelt.', false);
-          $form.attr('data-prepared', '0');
+          setFeedback($feedback, (resp.data && resp.data.message) || 'Widerruf wurde übermittelt.', false);
           $form.find('input[name="items[]"]').prop('checked', false);
-          $submit.prop('disabled', true);
+          $form.find('select[name="reason_code"]').val('');
+          $form.find('textarea[name="reason_note"]').val('');
+          $form.find('.mp_withdrawal_note_counter').text('0/' + maxLen);
+          updateReasonBlock($form);
           return;
         }
 
-        setFeedback($feedback, (resp && resp.data && resp.data.message) || 'Widerruf konnte nicht uebermittelt werden.', true);
+        setFeedback($feedback, (resp && resp.data && resp.data.message) || getI18nMessage('submitError', 'Widerruf konnte nicht übermittelt werden.'), true);
       })
       .fail(function () {
         setFeedback($feedback, 'Serverfehler beim Senden des Widerrufs.', true);
@@ -66,5 +94,11 @@
       .always(function () {
         $submit.prop('disabled', false);
       });
+  });
+
+  $(function () {
+    $('.mp_withdrawal_form').each(function () {
+      updateReasonBlock($(this));
+    });
   });
 })(jQuery);
