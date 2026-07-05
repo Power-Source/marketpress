@@ -1328,6 +1328,14 @@ class MP_Multisite {
 			$policy_notice_html .= '</section>';
 		}
 
+		$profile_meta_html = '';
+		if ( ! empty( $profile_about ) ) {
+			$profile_meta_html .= '<section class="mp-network-profile-card">';
+			$profile_meta_html .= '<h3>' . esc_html__( 'Profil des Shops', 'mp' ) . '</h3>';
+			$profile_meta_html .= wpautop( wp_kses_post( $profile_about ) );
+			$profile_meta_html .= '</section>';
+		}
+
 
 		$related_prefilter_html = '';
 		if ( ! empty( $related_prefilter_terms ) ) {

@@ -318,15 +318,10 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		}
 		$paging = "";
 		if (mp_arr_get_value('posts_per_page', $query, 0) > 0) {
-			$limit  = mp_arr_get_value('posts_per_page', $query, 0);
-			$offset = mp_arr_get_value('offset', $query);
+			$limit  = max( 1, absint( mp_arr_get_value( 'posts_per_page', $query, 0 ) ) );
+			$offset = absint( mp_arr_get_value( 'offset', $query, 0 ) );
 
-			// Prüfe, ob $offset negativ ist und setze es auf 0, falls ja
-			if ($offset < 0) {
-				$offset = 0;
-			}
-
-			$paging = " LIMIT $offset,$limit";
+			$paging = $wpdb->prepare( ' LIMIT %d,%d', $offset, $limit );
 		}
 
 		$sql .= $join . $where . $group . $order . $paging;
