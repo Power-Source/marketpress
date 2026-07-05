@@ -1069,6 +1069,32 @@ if ( ! function_exists( 'mp_create_store_page' ) ) :
 			'post_type'   => 'page',
 		);
 
+		$page_setting_keys = array(
+			'store'                        => 'pages->store',
+			'products'                     => 'pages->products',
+			'cart'                         => 'pages->cart',
+			'checkout'                     => 'pages->checkout',
+			'order_status'                 => 'pages->order_status',
+			'network_store_page'           => 'pages->network_store_page',
+			'network_categories'           => 'pages->network_categories',
+			'network_tags'                 => 'pages->network_tags',
+			'network_customer_hub'         => 'pages->network_customer_hub',
+			'network_shop_performance'     => 'pages->network_shop_performance',
+			'network_settlement_dashboard' => 'pages->network_settlement_dashboard',
+			'network_support_center'       => 'pages->network_support_center',
+		);
+
+		if ( isset( $page_setting_keys[ $type ] ) ) {
+			$is_network_type = 0 === strpos( (string) $type, 'network_' );
+			$existing_post_id = $is_network_type
+				? (int) mp_get_network_setting( $page_setting_keys[ $type ], 0 )
+				: (int) mp_get_setting( $page_setting_keys[ $type ], 0 );
+
+			if ( $existing_post_id > 0 && false !== get_post_status( $existing_post_id ) ) {
+				return $existing_post_id;
+			}
+		}
+
 		switch ( $type ) {
 			case 'store' :
 				$args = array(

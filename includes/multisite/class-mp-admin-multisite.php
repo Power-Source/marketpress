@@ -50,10 +50,6 @@ class MP_Admin_Multisite {
 			add_action( 'init', array( &$this, 'init_metaboxes' ) );
 			add_action( 'network_admin_menu', array( &$this, 'add_menu_items' ) );
 			add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_styles_scripts' ) );
-			add_action( 'psource_field/print_scripts/network_store_page', array(
-				&$this,
-				'print_network_store_page_scripts'
-			) );
 			add_filter( 'psource_field/after_field', array( &$this, 'display_create_page_button' ), 10, 2 );
 			add_action( 'psource_field/print_scripts', array( &$this, 'create_store_page_js' ) );
 		}
@@ -1123,6 +1119,8 @@ class MP_Admin_Multisite {
 	 * @action psource_field/print_scripts
 	 */
 	public function create_store_page_js( $field ) {
+		static $script_printed = false;
+
 		$valid_fields = array(
 			'pages[network_store_page]',
 			'pages[network_categories]',
@@ -1136,14 +1134,26 @@ class MP_Admin_Multisite {
 		if ( ! in_array( $field->args['original_name'], $valid_fields, true ) ) {
 			return;
 		}
+
+		if ( $script_printed ) {
+			return;
+		}
+
+		$script_printed = true;
 		?>
 		<script type="text/javascript">
 			jQuery(document).ready(function ($) {
-				$('.mp-create-page-button').on('click', function (e) {
+				$(document).off('click.mpCreatePage', '.mp-create-page-button').on('click.mpCreatePage', '.mp-create-page-button', function (e) {
 					e.preventDefault();
 
 					var $this = $(this),
 						$select = $this.siblings('[name^="pages"]');
+
+					if ($this.data('mpCreating')) {
+						return;
+					}
+
+					$this.data('mpCreating', true);
 
 					$this.addClass('working');
 
@@ -1159,11 +1169,16 @@ class MP_Admin_Multisite {
 							} else {
 								$select.val(postId).trigger('change');
 							}
+							$this.removeData('mpCreating');
 							$this.isWorking(false).replaceWith(resp.data.button_html);
 						} else {
 							alert('<?php _e( 'Fehler beim erstellen der Seite, versuch es bitte noch einmal.', 'mp' ); ?>');
+							$this.removeData('mpCreating');
 							$this.isWorking(false);
 						}
+					}).fail(function () {
+						$this.removeData('mpCreating');
+						$this.isWorking(false);
 					});
 				});
 			});
