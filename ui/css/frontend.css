@@ -17,13 +17,31 @@
 	gap: 18px;
 }
 
-.mp-network-shop-profile .mp-network-profile-toolbar {
-	background: linear-gradient(140deg, var(--mp-prof-bg-start, #eef6ff), var(--mp-prof-bg-end, #f8fcff));
-	border: 1px solid #d8e4f0;
-	border-radius: 14px;
-	padding: 16px;
-	display: grid;
+.mp-network-shop-profile .mp-network-profile-nav-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.mp-network-shop-profile .mp-network-profile-nav-actions {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.mp-network-shop-profile .mp-network-profile-panels {
+	display: grid;
+	gap: 14px;
+}
+
+.mp-network-shop-profile .mp-network-profile-panel {
+	display: none;
+}
+
+.mp-network-shop-profile .mp-network-profile-panel.is-active {
+	display: block;
 }
 
 .mp-network-shop-profile .mp-network-shop-kicker {
@@ -35,22 +53,16 @@
 	margin: 0;
 }
 
-.mp-network-shop-profile .mp-network-profile-toolbar h1,
-.mp-network-shop-profile .mp-network-profile-toolbar h2,
+.mp-network-shop-profile h1,
+.mp-network-shop-profile h2,
 .mp-network-shop-profile .mp-network-profile-card h2,
 .mp-network-shop-profile .mp-network-profile-card h3 {
 	color: var(--mp-prof-accent, #1e3348);
 	margin-top: 0;
 }
 
-.mp-network-shop-profile .mp-network-profile-toolbar-copy {
-	display: grid;
-	gap: 6px;
-}
-
-.mp-network-shop-profile .mp-network-profile-toolbar-copy p {
-	margin: 0;
-	color: #41586f;
+.mp-network-shop-profile .mp-network-profile-actions .mp_button {
+	text-decoration: none;
 }
 
 .mp-network-shop-profile .mp-network-profile-stage {
@@ -233,7 +245,6 @@
 		gap: 14px;
 	}
 
-	.mp-network-shop-profile .mp-network-profile-toolbar,
 	.mp-network-shop-profile .mp-network-profile-feature,
 	.mp-network-shop-profile .mp-network-profile-card {
 		padding: 12px;
@@ -253,6 +264,7 @@
 	}
 
 	.mp-network-shop-profile .mp-network-profile-actions,
+	.mp-network-shop-profile .mp-network-profile-nav-actions,
 	.mp-network-shop-profile .mp-network-profile-tabs,
 	.mp-network-shop-profile .mp-network-related-prefilters {
 		gap: 6px;

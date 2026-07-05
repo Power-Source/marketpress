@@ -140,6 +140,9 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		if ( ! isset( $args['exclude_post_ids'] ) ) {
 			$args['exclude_post_ids'] = array();
 		}
+		if ( ! isset( $args['prioritize_post_ids'] ) ) {
+			$args['prioritize_post_ids'] = array();
+		}
 		if ( ! isset( $args['disable_category_filter'] ) ) {
 			$args['disable_category_filter'] = false;
 		}
@@ -254,6 +257,10 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 			$query['exclude_post_ids'] = array_filter( array_map( 'absint', (array) $args['exclude_post_ids'] ) );
 		}
 
+		if ( ! empty( $args['prioritize_post_ids'] ) ) {
+			$query['prioritize_post_ids'] = array_filter( array_map( 'absint', (array) $args['prioritize_post_ids'] ) );
+		}
+
 // Get order direction
 		$query['order'] = mp_get_setting( 'order' );
 		if ( ! is_null( $args['order'] ) ) {
@@ -298,8 +305,16 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 		}
 
 		$order = "";
+		$order_parts = array();
+
+		if ( ! empty( $query['prioritize_post_ids'] ) ) {
+			$order_parts[] = 'FIELD(products.post_id,' . implode( ',', array_map( 'intval', $query['prioritize_post_ids'] ) ) . ') DESC';
+		}
+
+		$has_explicit_orderby = false;
 		if ( mp_arr_get_value( 'orderby', $query, '' ) != '' ) {
 			$orderby = mp_arr_get_value( 'orderby', $query, '' );
+			$has_explicit_orderby = true;
 			switch ( $orderby ) {
 				case 'title':
 					$orderby = 'post_title';
@@ -311,10 +326,13 @@ if ( ! function_exists( 'mp_global_list_products' ) ) {
 					$orderby = 'RAND()'; // Hier den korrekten Ausdruck für die zufällige Sortierung verwenden
 					break;
 			}
-			$order = " ORDER BY " . $orderby;
+			$order_parts[] = $orderby;
 		}
-		if ( mp_arr_get_value( 'order', $query, '' ) != '' && strlen( $order ) > 0 ) {
-			$order .= " " . mp_arr_get_value( 'order', $query );
+		if ( ! empty( $order_parts ) ) {
+			$order = ' ORDER BY ' . implode( ', ', $order_parts );
+			if ( $has_explicit_orderby && mp_arr_get_value( 'order', $query, '' ) != '' ) {
+				$order .= ' ' . mp_arr_get_value( 'order', $query );
+			}
 		}
 		$paging = "";
 		if (mp_arr_get_value('posts_per_page', $query, 0) > 0) {

@@ -3,6 +3,10 @@
 class MP_Admin_Multisite {
 
 	const NETWORK_MENU_SLUG = 'network-store-settings';
+	const NETWORK_SNAPSHOT_CACHE_KEY = 'mp_network_settings_snapshot_v1';
+	const NETWORK_SNAPSHOT_CLEANUP_OPTION = 'mp_network_snapshot_cleanup_settings';
+	const NETWORK_SNAPSHOT_CLEANUP_CRON_HOOK = 'mp_network_snapshot_cleanup_event';
+	const NETWORK_SNAPSHOT_CLEANUP_RECURRENCE = 'mp_network_snapshot_cleanup_every_custom';
 
 	/**
 	 * Refers to a single instance of the class
@@ -56,6 +60,10 @@ class MP_Admin_Multisite {
 			add_action( 'psource_field/print_scripts', array( &$this, 'create_store_page_js' ) );
 		}
 		add_action( 'wp_ajax_mp_index_products', array( &$this, 'index_products' ) );
+		add_action( 'wp_ajax_mp_network_snapshot_controls', array( &$this, 'ajax_network_snapshot_controls' ) );
+		add_filter( 'cron_schedules', array( &$this, 'register_network_snapshot_cleanup_schedule' ) );
+		add_action( 'init', array( &$this, 'sync_network_snapshot_cleanup_cron' ) );
+		add_action( self::NETWORK_SNAPSHOT_CLEANUP_CRON_HOOK, array( &$this, 'cron_clear_network_settings_snapshot_cache' ) );
 		if ( mp_get_network_setting( 'global_cart' ) ) {
 			add_filter( 'psource_field/get_value/gateways[allowed][' . mp_get_network_setting( 'global_gateway', '' ) . ']', array(
 				&$this,
@@ -683,6 +691,9 @@ class MP_Admin_Multisite {
 		}
 
 		$snapshot = $this->get_network_settings_snapshot( $force_sync );
+		$cleanup_settings = $this->get_network_snapshot_cleanup_settings();
+		$cleanup_next_run = wp_next_scheduled( self::NETWORK_SNAPSHOT_CLEANUP_CRON_HOOK );
+		$snapshot_controls_nonce = wp_create_nonce( 'mp_network_snapshot_controls' );
 		$missing_page_warnings = $this->get_missing_network_page_warnings();
 		$refresh_url = wp_nonce_url(
 			add_query_arg(
@@ -805,6 +816,46 @@ class MP_Admin_Multisite {
 					background: #fff;
 				}
 
+				.mp-network-settings-modern .mp-network-gear {
+					text-decoration: none;
+					padding: 5px 9px;
+					border-radius: 999px;
+					border: 1px solid #b9cee3;
+					color: var(--mp-ui-accent);
+					background: #fff;
+					font-size: 14px;
+				}
+
+				.mp-network-settings-modern .mp-snapshot-options {
+					display: none;
+					margin-top: 10px;
+					padding: 10px;
+					border: 1px solid var(--mp-ui-border);
+					border-radius: 10px;
+					background: #fff;
+				}
+
+				.mp-network-settings-modern .mp-snapshot-options.is-open {
+					display: block;
+				}
+
+				.mp-network-settings-modern .mp-snapshot-options-row {
+					display: flex;
+					align-items: center;
+					gap: 10px;
+					flex-wrap: wrap;
+					margin-bottom: 8px;
+				}
+
+				.mp-network-settings-modern .mp-snapshot-options-row:last-child {
+					margin-bottom: 0;
+				}
+
+				.mp-network-settings-modern .mp-snapshot-status {
+					font-size: 12px;
+					color: var(--mp-ui-muted);
+				}
+
 				.mp-network-settings-modern .mp-settings .postbox {
 					border: 1px solid var(--mp-ui-border);
 					border-radius: 12px;
@@ -873,8 +924,86 @@ class MP_Admin_Multisite {
 				<div class="mp-network-meta">
 					<span><?php echo esc_html( sprintf( __( 'Snapshot aktualisiert: %s', 'mp' ), date_i18n( 'd.m.Y H:i', (int) $snapshot['generated_at'] ) ) ); ?></span>
 					<a class="mp-network-refresh" href="<?php echo esc_url( $refresh_url ); ?>"><?php esc_html_e( 'Snapshot aktualisieren', 'mp' ); ?></a>
+					<a class="mp-network-gear" href="#" id="mp-snapshot-options-toggle" aria-label="<?php esc_attr_e( 'Snapshot Optionen', 'mp' ); ?>">&#9881;</a>
+				</div>
+				<div id="mp-snapshot-options" class="mp-snapshot-options" aria-hidden="true">
+					<div class="mp-snapshot-options-row">
+						<label>
+							<input type="checkbox" id="mp-snapshot-auto-clear-enabled" <?php checked( ! empty( $cleanup_settings['enabled'] ) ); ?> />
+							<?php esc_html_e( 'Auto-Cache-Loeschung aktivieren', 'mp' ); ?>
+						</label>
+						<label for="mp-snapshot-auto-clear-interval"><?php esc_html_e( 'Intervall (Minuten)', 'mp' ); ?></label>
+						<input type="number" id="mp-snapshot-auto-clear-interval" min="5" max="1440" value="<?php echo intval( $cleanup_settings['interval_minutes'] ); ?>" style="width: 90px;" />
+						<button type="button" class="button button-primary" id="mp-snapshot-save-options"><?php esc_html_e( 'Speichern', 'mp' ); ?></button>
+						<button type="button" class="button" id="mp-snapshot-clear-cache"><?php esc_html_e( 'Cache jetzt loeschen', 'mp' ); ?></button>
+					</div>
+					<div class="mp-snapshot-options-row">
+						<span class="mp-snapshot-status" id="mp-snapshot-status-text">
+							<?php
+							if ( ! empty( $cleanup_settings['enabled'] ) && $cleanup_next_run ) {
+								echo esc_html( sprintf( __( 'Auto-Clear aktiv, naechster Lauf: %s', 'mp' ), date_i18n( 'd.m.Y H:i', (int) $cleanup_next_run ) ) );
+							} else {
+								esc_html_e( 'Auto-Clear ist deaktiviert.', 'mp' );
+							}
+							?>
+						</span>
+					</div>
 				</div>
 			</section>
+
+			<script type="text/javascript">
+				jQuery(function ($) {
+					var $toggle = $('#mp-snapshot-options-toggle');
+					var $panel = $('#mp-snapshot-options');
+					var $status = $('#mp-snapshot-status-text');
+
+					$toggle.on('click', function (e) {
+						e.preventDefault();
+						$panel.toggleClass('is-open');
+						$panel.attr('aria-hidden', !$panel.hasClass('is-open'));
+					});
+
+					function postSnapshotOptions(operation, payload) {
+						return $.post(ajaxurl, $.extend({
+							action: 'mp_network_snapshot_controls',
+							nonce: '<?php echo esc_js( $snapshot_controls_nonce ); ?>',
+							operation: operation
+						}, payload || {}));
+					}
+
+					$('#mp-snapshot-save-options').on('click', function () {
+						var enabled = $('#mp-snapshot-auto-clear-enabled').is(':checked') ? 1 : 0;
+						var interval = parseInt($('#mp-snapshot-auto-clear-interval').val(), 10) || 60;
+						$status.text('<?php echo esc_js( __( 'Speichere Snapshot-Optionen...', 'mp' ) ); ?>');
+
+						postSnapshotOptions('save_settings', {
+							enabled: enabled,
+							interval_minutes: interval
+						}).done(function (resp) {
+							if (resp && resp.success && resp.data && resp.data.message) {
+								$status.text(resp.data.message);
+							} else {
+								$status.text('<?php echo esc_js( __( 'Einstellungen gespeichert.', 'mp' ) ); ?>');
+							}
+						}).fail(function () {
+							$status.text('<?php echo esc_js( __( 'Speichern fehlgeschlagen.', 'mp' ) ); ?>');
+						});
+					});
+
+					$('#mp-snapshot-clear-cache').on('click', function () {
+						$status.text('<?php echo esc_js( __( 'Snapshot-Cache wird geloescht...', 'mp' ) ); ?>');
+						postSnapshotOptions('clear_cache').done(function (resp) {
+							if (resp && resp.success && resp.data && resp.data.message) {
+								$status.text(resp.data.message);
+								return;
+							}
+							$status.text('<?php echo esc_js( __( 'Snapshot-Cache geloescht.', 'mp' ) ); ?>');
+						}).fail(function () {
+							$status.text('<?php echo esc_js( __( 'Cache-Loeschung fehlgeschlagen.', 'mp' ) ); ?>');
+						});
+					});
+				});
+			</script>
 
 			<?php if ( ! empty( $missing_page_warnings ) ) : ?>
 				<section class="mp-network-warning">
@@ -912,7 +1041,7 @@ class MP_Admin_Multisite {
 	 * @return array
 	 */
 	private function get_network_settings_snapshot( $force_sync = false ) {
-		$cache_key = 'mp_network_settings_snapshot_v1';
+		$cache_key = self::NETWORK_SNAPSHOT_CACHE_KEY;
 
 		if ( ! $force_sync ) {
 			$cached = get_site_transient( $cache_key );
@@ -925,6 +1054,227 @@ class MP_Admin_Multisite {
 		set_site_transient( $cache_key, $snapshot, 5 * MINUTE_IN_SECONDS );
 
 		return $snapshot;
+	}
+
+	/**
+	 * Ajax endpoint for snapshot options and manual cache clear.
+	 */
+	public function ajax_network_snapshot_controls() {
+		if ( ! current_user_can( 'manage_network_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Keine Berechtigung.', 'mp' ) ), 403 );
+		}
+
+		check_ajax_referer( 'mp_network_snapshot_controls', 'nonce' );
+
+		$operation = sanitize_key( (string) mp_get_post_value( 'operation', '' ) );
+		if ( 'clear_cache' === $operation ) {
+			$this->clear_network_settings_snapshot_cache();
+			wp_send_json_success( array( 'message' => __( 'Snapshot-Cache geloescht.', 'mp' ) ) );
+		}
+
+		if ( 'save_settings' === $operation ) {
+			$enabled = (bool) intval( mp_get_post_value( 'enabled', 0 ) );
+			$interval = intval( mp_get_post_value( 'interval_minutes', 60 ) );
+			$interval = max( 5, min( 1440, $interval ) );
+
+			$this->save_network_snapshot_cleanup_settings( $enabled, $interval );
+			$this->sync_network_snapshot_cleanup_cron();
+
+			$next = wp_next_scheduled( self::NETWORK_SNAPSHOT_CLEANUP_CRON_HOOK );
+			$message = $enabled && $next
+				? sprintf( __( 'Gespeichert. Naechste Auto-Loeschung: %s', 'mp' ), date_i18n( 'd.m.Y H:i', (int) $next ) )
+				: __( 'Gespeichert. Auto-Clear deaktiviert.', 'mp' );
+
+			wp_send_json_success( array(
+				'message' => $message,
+				'next_run' => (int) $next,
+			) );
+		}
+
+		wp_send_json_error( array( 'message' => __( 'Unbekannte Aktion.', 'mp' ) ), 400 );
+	}
+
+	/**
+	 * Register dynamic cron schedule for snapshot auto cleanup.
+	 *
+	 * @param array $schedules
+	 *
+	 * @return array
+	 */
+	public function register_network_snapshot_cleanup_schedule( $schedules ) {
+		$settings = $this->get_network_snapshot_cleanup_settings();
+		$minutes = max( 5, min( 1440, intval( $settings['interval_minutes'] ) ) );
+		$slug = self::NETWORK_SNAPSHOT_CLEANUP_RECURRENCE;
+
+		$schedules[ $slug ] = array(
+			'interval' => $minutes * MINUTE_IN_SECONDS,
+			'display'  => sprintf( __( 'MarketPress Snapshot Cleanup (%d Minuten)', 'mp' ), $minutes ),
+		);
+
+		// Keep legacy dynamic slugs available so previously planned events can reschedule safely.
+		$legacy_schedules = $this->get_legacy_network_snapshot_cleanup_schedule_map();
+		foreach ( $legacy_schedules as $legacy_slug => $legacy_interval ) {
+			$schedules[ $legacy_slug ] = array(
+				'interval' => $legacy_interval,
+				'display'  => sprintf( __( 'MarketPress Snapshot Cleanup (Legacy %d Minuten)', 'mp' ), max( 1, intval( $legacy_interval / MINUTE_IN_SECONDS ) ) ),
+			);
+		}
+
+		return $schedules;
+	}
+
+	/**
+	 * Keep snapshot cleanup cron in sync with saved settings.
+	 */
+	public function sync_network_snapshot_cleanup_cron() {
+		$settings = $this->get_network_snapshot_cleanup_settings();
+		$hook = self::NETWORK_SNAPSHOT_CLEANUP_CRON_HOOK;
+
+		if ( empty( $settings['enabled'] ) ) {
+			$this->clear_network_snapshot_cleanup_schedule( $hook );
+			return;
+		}
+
+		$minutes = max( 5, min( 1440, intval( $settings['interval_minutes'] ) ) );
+		$recurrence = $this->get_network_snapshot_cleanup_recurrence( $minutes );
+		$next = wp_next_scheduled( $hook );
+
+		if ( ! $next ) {
+			wp_schedule_event( time() + MINUTE_IN_SECONDS, $recurrence, $hook );
+			return;
+		}
+
+		$current = wp_get_schedule( $hook );
+		$needs_reschedule = ( $current !== $recurrence );
+
+		if ( ! $needs_reschedule && function_exists( 'wp_get_scheduled_event' ) ) {
+			$event = wp_get_scheduled_event( $hook );
+			$target_interval = $minutes * MINUTE_IN_SECONDS;
+			if ( $event && isset( $event->interval ) && intval( $event->interval ) !== intval( $target_interval ) ) {
+				$needs_reschedule = true;
+			}
+		}
+
+		if ( $needs_reschedule ) {
+			$this->clear_network_snapshot_cleanup_schedule( $hook );
+			wp_schedule_event( time() + MINUTE_IN_SECONDS, $recurrence, $hook );
+		}
+	}
+
+	/**
+	 * Cron callback to clear network snapshot cache.
+	 */
+	public function cron_clear_network_settings_snapshot_cache() {
+		$this->clear_network_settings_snapshot_cache();
+	}
+
+	/**
+	 * Delete network snapshot transient cache.
+	 */
+	private function clear_network_settings_snapshot_cache() {
+		delete_site_transient( self::NETWORK_SNAPSHOT_CACHE_KEY );
+	}
+
+	/**
+	 * Get snapshot cleanup settings.
+	 *
+	 * @return array
+	 */
+	private function get_network_snapshot_cleanup_settings() {
+		$settings = get_site_option( self::NETWORK_SNAPSHOT_CLEANUP_OPTION, array() );
+
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+
+		$enabled = ! empty( $settings['enabled'] );
+		$interval = isset( $settings['interval_minutes'] ) ? intval( $settings['interval_minutes'] ) : 60;
+		$interval = max( 5, min( 1440, $interval ) );
+
+		return array(
+			'enabled' => $enabled,
+			'interval_minutes' => $interval,
+		);
+	}
+
+	/**
+	 * Persist snapshot cleanup settings.
+	 *
+	 * @param bool $enabled
+	 * @param int  $interval_minutes
+	 */
+	private function save_network_snapshot_cleanup_settings( $enabled, $interval_minutes ) {
+		update_site_option( self::NETWORK_SNAPSHOT_CLEANUP_OPTION, array(
+			'enabled' => (bool) $enabled,
+			'interval_minutes' => max( 5, min( 1440, intval( $interval_minutes ) ) ),
+		) );
+	}
+
+	/**
+	 * Build recurrence key from minutes.
+	 *
+	 * @param int $minutes
+	 *
+	 * @return string
+	 */
+	private function get_network_snapshot_cleanup_recurrence( $minutes ) {
+		return self::NETWORK_SNAPSHOT_CLEANUP_RECURRENCE;
+	}
+
+	/**
+	 * Discover legacy dynamic recurrence slugs from scheduled events.
+	 *
+	 * @return array<string,int>
+	 */
+	private function get_legacy_network_snapshot_cleanup_schedule_map() {
+		$map = array();
+
+		if ( ! function_exists( '_get_cron_array' ) ) {
+			return $map;
+		}
+
+		$cron = _get_cron_array();
+		if ( ! is_array( $cron ) ) {
+			return $map;
+		}
+
+		foreach ( $cron as $timestamp => $hooks ) {
+			if ( ! is_array( $hooks ) || empty( $hooks[ self::NETWORK_SNAPSHOT_CLEANUP_CRON_HOOK ] ) ) {
+				continue;
+			}
+
+			foreach ( (array) $hooks[ self::NETWORK_SNAPSHOT_CLEANUP_CRON_HOOK ] as $event ) {
+				if ( ! is_array( $event ) || empty( $event['schedule'] ) ) {
+					continue;
+				}
+
+				$schedule = (string) $event['schedule'];
+				if ( 0 !== strpos( $schedule, 'mp_network_snapshot_cleanup_every_' ) || '_minutes' !== substr( $schedule, -8 ) ) {
+					continue;
+				}
+
+				$minutes_part = str_replace( array( 'mp_network_snapshot_cleanup_every_', '_minutes' ), '', $schedule );
+				$minutes = intval( $minutes_part );
+				if ( $minutes < 1 ) {
+					continue;
+				}
+
+				$map[ $schedule ] = $minutes * MINUTE_IN_SECONDS;
+			}
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Unschedule all pending events for a cron hook.
+	 *
+	 * @param string $hook
+	 */
+	private function clear_network_snapshot_cleanup_schedule( $hook ) {
+		while ( $timestamp = wp_next_scheduled( $hook ) ) {
+			wp_unschedule_event( $timestamp, $hook );
+		}
 	}
 
 	/**

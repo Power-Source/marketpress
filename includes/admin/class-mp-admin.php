@@ -40,6 +40,8 @@ class MP_Admin {
 		add_filter( 'post_updated_messages', array( &$this, 'post_updated_messages' ) );
 		//enqueue styles and scripts
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_styles_scripts' ) );
+		// ClassicPress deprecated-asset warning fuer wp-pointer auf MP-Addons unterdruecken.
+		add_action( 'admin_enqueue_scripts', array( &$this, 'strip_deprecated_pointer_assets' ), PHP_INT_MAX - 1, 1 );
 
 		add_action( 'admin_head', array( &$this, 'admin_head' ) );
 		//add a notice for deprecated gateway
@@ -61,6 +63,25 @@ class MP_Admin {
 			}
 
 			add_action( 'admin_notices', array( &$this, 'display_quick_setup_notice' ) );
+		}
+	}
+
+	/**
+	 * Remove deprecated wp-pointer handles before ClassicPress deprecation checks.
+	 *
+	 * Runs right before ClassicPress'_cp_deprecate_wp_enqueue_scripts (PHP_INT_MAX).
+	 *
+	 * @param string $hook_suffix
+	 */
+	public function strip_deprecated_pointer_assets( $hook_suffix = '' ) {
+		if ( wp_script_is( 'wp-pointer', 'enqueued' ) || wp_script_is( 'wp-pointer', 'registered' ) ) {
+			wp_dequeue_script( 'wp-pointer' );
+			wp_deregister_script( 'wp-pointer' );
+		}
+
+		if ( wp_style_is( 'wp-pointer', 'enqueued' ) || wp_style_is( 'wp-pointer', 'registered' ) ) {
+			wp_dequeue_style( 'wp-pointer' );
+			wp_deregister_style( 'wp-pointer' );
 		}
 	}
 
