@@ -847,173 +847,19 @@ class MP_Multisite {
 			return '<p>' . esc_html__( 'Bitte melde Dich an, um Deine zentrale Bestelluebersicht zu sehen.', 'mp' ) . '</p>';
 		}
 
-		$user_id       = get_current_user_id();
-		$sites         = get_sites( array( 'fields' => 'ids' ) );
-		$currency      = mp_get_setting( 'currency' );
-		$status_labels = array(
-			'order_received' => __( 'Ausstehend', 'mp' ),
-			'order_paid'     => __( 'Bezahlt', 'mp' ),
-			'order_shipped'  => __( 'Versandt', 'mp' ),
-			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
-		);
-		$closed_statuses = array( 'order_closed', 'order_shipped' );
+		$user_id  = get_current_user_id();
+		$api      = MP_Customer_Portal_API::get_instance();
+		$snapshot = $api->get_snapshot( 'network', array(
+			'user_id'    => $user_id,
+			'force_sync' => false,
+		) );
 
-		$rows = array();
-		$totals = array(
-			'orders'        => 0,
-			'value'         => 0.0,
-			'shops'         => 0,
-			'open_shipping' => 0,
-			'to_review'     => 0,
-		);
-		$shop_seen             = array();
-		$pending_reviews       = array();
-		$pending_reviews_index = array();
-		$recent_reviews        = array();
-
-		foreach ( $sites as $blog_id ) {
-			$blog_id = (int) $blog_id;
-			switch_to_blog( $blog_id );
-
-			$shop_name = get_option( 'blogname' );
-			$orders    = get_posts( array(
-				'post_type'        => 'mp_order',
-				'post_status'      => 'any',
-				'posts_per_page'   => -1,
-				'author'           => $user_id,
-				'fields'           => 'ids',
-				'suppress_filters' => true,
-				'no_found_rows'    => true,
-			) );
-
-			if ( ! empty( $orders ) ) {
-				$shop_seen[ $blog_id ] = true;
-			}
-
-			foreach ( $orders as $post_id ) {
-				$post = get_post( $post_id );
-				if ( ! $post || in_array( $post->post_status, array( 'trash', 'auto-draft' ), true ) ) {
-					continue;
-				}
-
-				$order = new MP_Order( $post_id );
-				if ( ! $order->exists() ) {
-					continue;
-				}
-
-				$total           = (float) get_post_meta( $post_id, 'mp_order_total', true );
-				$totals['orders']++;
-				$totals['value'] += $total;
-
-				if ( in_array( $post->post_status, array( 'order_received', 'order_paid' ), true ) ) {
-					$totals['open_shipping']++;
-				}
-
-				$rows[] = array(
-					'shop'      => $shop_name,
-					'order'     => $order->get_id(),
-					'total'     => $total,
-					'status'    => $post->post_status,
-					'url'       => $order->tracking_url( false, $blog_id ),
-					'timestamp' => (int) get_post_time( 'U', true, $post_id ),
-				);
-
-				if ( class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) && in_array( $post->post_status, $closed_statuses, true ) ) {
-					$cart_items  = $order->get_meta( 'mp_cart_items' );
-					$product_ids = array();
-					if ( is_array( $cart_items ) ) {
-						foreach ( $cart_items as $product_id => $items ) {
-							$product_id = (int) $product_id;
-							if ( $product_id > 0 ) {
-								$product_ids[] = $product_id;
-							}
-						}
-					}
-
-					$product_ids = array_values( array_unique( array_filter( array_map( 'intval', $product_ids ) ) ) );
-					foreach ( $product_ids as $product_id ) {
-						$review_key = $blog_id . ':' . $product_id;
-						if ( isset( $pending_reviews_index[ $review_key ] ) ) {
-							continue;
-						}
-
-						$already_reviewed = get_comments( array(
-							'post_id'  => $product_id,
-							'user_id'  => $user_id,
-							'meta_key' => 'rating',
-							'count'    => true,
-						) );
-
-						if ( $already_reviewed ) {
-							continue;
-						}
-
-						$product_url = $this->get_reliable_product_url( $blog_id, $product_id );
-						if ( ! $product_url ) {
-							$product = new MP_Product( $product_id );
-							$product_url = $product->url( false );
-						}
-
-						$pending_reviews[] = array(
-							'shop'         => $shop_name,
-							'product_name' => get_the_title( $product_id ),
-							'product_url'  => $product_url,
-							'order_id'     => $order->get_id(),
-							'status'       => $post->post_status,
-							'timestamp'    => (int) get_post_time( 'U', true, $post_id ),
-						);
-						$pending_reviews_index[ $review_key ] = true;
-					}
-				}
-			}
-
-			if ( class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) ) {
-				$site_comments = get_comments( array(
-					'user_id' => $user_id,
-					'status'  => 'approve',
-					'number'  => 10,
-					'orderby' => 'comment_date_gmt',
-					'order'   => 'DESC',
-				) );
-
-				foreach ( (array) $site_comments as $comment ) {
-					$post_id = (int) $comment->comment_post_ID;
-					$rating  = (int) get_comment_meta( $comment->comment_ID, 'rating', true );
-					if ( $rating < 1 || get_post_type( $post_id ) !== MP_Product::get_post_type() ) {
-						continue;
-					}
-
-					$product_url = $this->get_reliable_product_url( $blog_id, $post_id );
-					if ( ! $product_url ) {
-						$product = new MP_Product( $post_id );
-						$product_url = $product->url( false );
-					}
-
-					$recent_reviews[] = array(
-						'shop'         => $shop_name,
-						'product_name' => get_the_title( $post_id ),
-						'product_url'  => $product_url,
-						'rating'       => $rating,
-						'timestamp'    => strtotime( $comment->comment_date_gmt . ' GMT' ),
-					);
-				}
-			}
-
-			restore_current_blog();
-		}
-
-		$totals['shops'] = count( $shop_seen );
-		$totals['to_review'] = count( $pending_reviews );
-
-		usort( $rows, function( $a, $b ) {
-			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
-		} );
-		usort( $pending_reviews, function( $a, $b ) {
-			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
-		} );
-		usort( $recent_reviews, function( $a, $b ) {
-			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
-		} );
+		$currency        = isset( $snapshot['currency'] ) ? $snapshot['currency'] : mp_get_setting( 'currency' );
+		$status_labels   = isset( $snapshot['status_labels'] ) && is_array( $snapshot['status_labels'] ) ? $snapshot['status_labels'] : array();
+		$totals          = isset( $snapshot['totals'] ) && is_array( $snapshot['totals'] ) ? $snapshot['totals'] : array();
+		$rows            = isset( $snapshot['rows'] ) && is_array( $snapshot['rows'] ) ? $snapshot['rows'] : array();
+		$pending_reviews = isset( $snapshot['pending_reviews'] ) && is_array( $snapshot['pending_reviews'] ) ? $snapshot['pending_reviews'] : array();
+		$recent_reviews  = isset( $snapshot['recent_reviews'] ) && is_array( $snapshot['recent_reviews'] ) ? $snapshot['recent_reviews'] : array();
 
 		$html  = '<style>';
 		$html .= '.mp-network-customer-hub{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#edf4fb 100%);border:1px solid #dbe6f2;border-radius:16px;padding:20px;color:#1f3346}';

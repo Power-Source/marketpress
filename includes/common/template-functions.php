@@ -512,138 +512,24 @@ if ( ! function_exists( '_mp_order_status_overview' ) ) :
 	 * @return string
 	 */
 	function _mp_order_status_overview() {
-		$history        = array_filter( mp_get_order_history() );
+		$api            = MP_Customer_Portal_API::get_instance();
+		$snapshot       = $api->get_snapshot( 'single', array(
+			'blog_id'    => (int) get_current_blog_id(),
+			'force_sync' => false,
+		) );
+		$order_rows     = isset( $snapshot['orders'] ) && is_array( $snapshot['orders'] ) ? $snapshot['orders'] : array();
+		$history_count  = count( $order_rows );
 		$page           = get_query_var( 'mp_status_pagenumber', 1 );
 		$per_page_value = mp_get_setting( 'per_page_order_history' );
 		$per_page       = isset( $per_page_value ) ? $per_page_value : get_option( 'posts_per_page' );
 		$offset         = ( $page - 1 ) * $per_page;
-		$total_pages    = ceil( count( $history ) / $per_page );
+		$total_pages    = ( $per_page > 0 ) ? ceil( $history_count / $per_page ) : 1;
 
-		$currency             = mp_get_setting( 'currency' );
-		$status_labels        = array(
-			'order_received' => __( 'Ausstehend', 'mp' ),
-			'order_paid'     => __( 'Bezahlt', 'mp' ),
-			'order_shipped'  => __( 'Versandt', 'mp' ),
-			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
-		);
-		$closed_statuses      = array( 'order_closed', 'order_shipped' );
-		$user_id              = get_current_user_id();
-		$totals               = array(
-			'orders'        => 0,
-			'value'         => 0.0,
-			'open_shipping' => 0,
-			'to_review'     => 0,
-		);
-		$pending_reviews      = array();
-		$pending_review_index = array();
-
-		foreach ( $history as $timestamp => $entry ) {
-			if ( empty( $entry['id'] ) ) {
-				continue;
-			}
-
-			$order_id = (int) $entry['id'];
-			$order    = new MP_Order( $order_id );
-			if ( ! $order->exists() ) {
-				continue;
-			}
-
-			$status = get_post_status( $order_id );
-			if ( ! $status || in_array( $status, array( 'trash', 'auto-draft' ), true ) ) {
-				continue;
-			}
-
-			$totals['orders'] ++;
-			$totals['value'] += (float) get_post_meta( $order_id, 'mp_order_total', true );
-
-			if ( in_array( $status, array( 'order_received', 'order_paid' ), true ) ) {
-				$totals['open_shipping'] ++;
-			}
-
-			if ( ! class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) ) {
-				continue;
-			}
-
-			if ( ! in_array( $status, $closed_statuses, true ) ) {
-				continue;
-			}
-
-			$cart_items = $order->get_meta( 'mp_cart_items' );
-			$product_ids = array();
-			if ( is_array( $cart_items ) ) {
-				foreach ( $cart_items as $product_id => $items ) {
-					$product_id = (int) $product_id;
-					if ( $product_id > 0 ) {
-						$product_ids[] = $product_id;
-					}
-				}
-			} else {
-				$cart = $order->get_cart();
-				if ( is_object( $cart ) && method_exists( $cart, 'get_items' ) ) {
-					$items = (array) $cart->get_items();
-					foreach ( $items as $item ) {
-						$product_id = isset( $item['product_id'] ) ? (int) $item['product_id'] : 0;
-						if ( $product_id > 0 ) {
-							$product_ids[] = $product_id;
-						}
-					}
-				}
-			}
-
-			$product_ids = array_values( array_unique( array_filter( array_map( 'intval', $product_ids ) ) ) );
-			foreach ( $product_ids as $product_id ) {
-				if ( isset( $pending_review_index[ $product_id ] ) ) {
-					continue;
-				}
-
-				if ( get_post_type( $product_id ) !== MP_Product::get_post_type() ) {
-					continue;
-				}
-
-				$already_reviewed = get_comments( array(
-					'post_id'  => $product_id,
-					'user_id'  => $user_id,
-					'meta_key' => 'rating',
-					'count'    => true,
-				) );
-
-				if ( $already_reviewed ) {
-					continue;
-				}
-
-				$product = new MP_Product( $product_id );
-				$pending_reviews[] = array(
-					'product_id'   => $product_id,
-					'product_name' => get_the_title( $product_id ),
-					'product_url'  => $product->url( false ),
-					'order_id'      => $order->get_id(),
-					'status'        => $status,
-					'timestamp'     => (int) $timestamp,
-				);
-				$pending_review_index[ $product_id ] = true;
-			}
-		}
-
-		usort( $pending_reviews, function( $a, $b ) {
-			return (int) $b['timestamp'] <=> (int) $a['timestamp'];
-		} );
-		$totals['to_review'] = count( $pending_reviews );
-
-		$recent_reviews = array();
-		if ( class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' ) ) {
-			$recent_reviews = get_comments( array(
-				'user_id' => $user_id,
-				'status'  => 'approve',
-				'number'  => 5,
-				'orderby' => 'comment_date_gmt',
-				'order'   => 'DESC',
-			) );
-			$recent_reviews = array_values( array_filter( (array) $recent_reviews, function( $comment ) {
-				$post_id = (int) $comment->comment_post_ID;
-				$rating  = (int) get_comment_meta( $comment->comment_ID, 'rating', true );
-				return ( $rating > 0 && get_post_type( $post_id ) === MP_Product::get_post_type() );
-			} ) );
-		}
+		$currency        = isset( $snapshot['currency'] ) ? $snapshot['currency'] : mp_get_setting( 'currency' );
+		$status_labels   = isset( $snapshot['status_labels'] ) && is_array( $snapshot['status_labels'] ) ? $snapshot['status_labels'] : array();
+		$totals          = isset( $snapshot['totals'] ) && is_array( $snapshot['totals'] ) ? $snapshot['totals'] : array();
+		$pending_reviews = isset( $snapshot['pending_reviews'] ) && is_array( $snapshot['pending_reviews'] ) ? $snapshot['pending_reviews'] : array();
+		$recent_reviews  = isset( $snapshot['recent_reviews'] ) && is_array( $snapshot['recent_reviews'] ) ? $snapshot['recent_reviews'] : array();
 
 		$html = '<style>';
 		$html .= '.mp-customer-portal{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#f8fbff 0%,#edf4fb 100%);border:1px solid #dbe6f2;border-radius:16px;padding:20px;color:#1f3346;margin-bottom:16px}';
@@ -701,16 +587,15 @@ if ( ! function_exists( '_mp_order_status_overview' ) ) :
 		$html .= '<h3>' . esc_html__( 'Deine letzten Bewertungen', 'mp' ) . '</h3>';
 		if ( ! empty( $recent_reviews ) ) {
 			$html .= '<ul class="mp-customer-list">';
-			foreach ( array_slice( $recent_reviews, 0, 5 ) as $comment ) {
-				$post_id = (int) $comment->comment_post_ID;
-				$rating  = (int) get_comment_meta( $comment->comment_ID, 'rating', true );
-				$product = new MP_Product( $post_id );
+			foreach ( array_slice( $recent_reviews, 0, 5 ) as $item ) {
+				$rating = isset( $item['rating'] ) ? (int) $item['rating'] : 0;
+				$date   = isset( $item['date_text'] ) ? (string) $item['date_text'] : '';
 				$html .= '<li>';
 				$html .= '<div class="mp-customer-meta">';
-				$html .= '<strong>' . esc_html( get_the_title( $post_id ) ) . '</strong>';
-				$html .= '<span>' . sprintf( esc_html__( '%1$s/5 Sterne · %2$s', 'mp' ), intval( $rating ), esc_html( date_i18n( get_option( 'date_format' ), strtotime( $comment->comment_date ) ) ) ) . '</span>';
+				$html .= '<strong>' . esc_html( isset( $item['product_name'] ) ? $item['product_name'] : '' ) . '</strong>';
+				$html .= '<span>' . sprintf( esc_html__( '%1$s/5 Sterne · %2$s', 'mp' ), intval( $rating ), esc_html( $date ) ) . '</span>';
 				$html .= '</div>';
-				$html .= '<a class="mp-customer-cta" href="' . esc_url( $product->url( false ) ) . '">' . esc_html__( 'Ansehen', 'mp' ) . '</a>';
+				$html .= '<a class="mp-customer-cta" href="' . esc_url( isset( $item['product_url'] ) ? $item['product_url'] : '' ) . '">' . esc_html__( 'Ansehen', 'mp' ) . '</a>';
 				$html .= '</li>';
 			}
 			$html .= '</ul>';
@@ -723,13 +608,22 @@ if ( ! function_exists( '_mp_order_status_overview' ) ) :
 
 		$html .= '<section id="mp-order-history" class="mp_orders mp_orders-list">';
 
-		if ( count( $history ) > 0 ) {
-			$history = array_slice( $history, $offset, $per_page );
+		if ( $history_count > 0 ) {
+			$page_rows = array_slice( $order_rows, $offset, $per_page );
 			$html .= '
 				<h2 class="mp_title">' . __( 'Deine letzten Bestellungen', 'mp' ) . '</h2>' .
 			         '<div class="mp_order_details">';
-			foreach ( $history as $timestamp => $order ) {
-				$order = new MP_Order( $order['id'] );
+			foreach ( $page_rows as $row ) {
+				$order_post_id = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+				if ( $order_post_id <= 0 ) {
+					continue;
+				}
+
+				$order = new MP_Order( $order_post_id );
+				if ( ! $order->exists() ) {
+					continue;
+				}
+
 				$html .= '<div class="mp_order">';
 				$html .= $order->header( false );
 				$html .= '</div><!-- end mo_order -->';

@@ -1,0 +1,791 @@
+<?php
+
+class MP_Customer_Portal_API {
+
+	/**
+	 * Singleton instance.
+	 *
+	 * @var MP_Customer_Portal_API|null
+	 */
+	private static $_instance = null;
+
+	/**
+	 * Get singleton instance.
+	 *
+	 * @return MP_Customer_Portal_API
+	 */
+	public static function get_instance() {
+		if ( null === self::$_instance ) {
+			self::$_instance = new self();
+		}
+
+		return self::$_instance;
+	}
+
+	/**
+	 * Constructor.
+	 */
+	private function __construct() {
+		add_action( 'wp_ajax_mp_customer_portal_snapshot', array( $this, 'ajax_get_snapshot' ) );
+		add_action( 'wp_ajax_mp_customer_portal_sync', array( $this, 'ajax_sync_snapshot' ) );
+		add_action( 'wp_ajax_nopriv_mp_customer_portal_snapshot', array( $this, 'ajax_guest_forbidden' ) );
+		add_action( 'wp_ajax_nopriv_mp_customer_portal_sync', array( $this, 'ajax_guest_forbidden' ) );
+
+		add_action( 'transition_post_status', array( $this, 'invalidate_after_order_status_change' ), 10, 3 );
+		add_action( 'comment_post', array( $this, 'invalidate_after_comment_change' ), 10, 2 );
+		add_action( 'edit_comment', array( $this, 'invalidate_after_comment_edit' ), 10, 1 );
+		add_action( 'wp_set_comment_status', array( $this, 'invalidate_after_comment_edit' ), 10, 1 );
+		add_action( 'deleted_comment', array( $this, 'invalidate_after_comment_edit' ), 10, 1 );
+	}
+
+	/**
+	 * AJAX response for guests.
+	 */
+	public function ajax_guest_forbidden() {
+		wp_send_json_error( array( 'message' => __( 'Bitte melde Dich an.', 'mp' ) ), 401 );
+	}
+
+	/**
+	 * AJAX: read snapshot.
+	 */
+	public function ajax_get_snapshot() {
+		if ( ! is_user_logged_in() ) {
+			$this->ajax_guest_forbidden();
+		}
+
+		$nonce = mp_get_request_value( 'ajax_nonce', '' );
+		if ( ! wp_verify_nonce( $nonce, 'mp-ajax-nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Ungueltiger Sicherheits-Token.', 'mp' ) ), 403 );
+		}
+
+		$scope    = sanitize_key( (string) mp_get_request_value( 'scope', 'single' ) );
+		$blog_id  = (int) mp_get_request_value( 'blog_id', get_current_blog_id() );
+		$snapshot = $this->get_snapshot( $scope, array(
+			'user_id'    => get_current_user_id(),
+			'blog_id'    => $blog_id,
+			'force_sync' => false,
+		) );
+
+		wp_send_json_success( $snapshot );
+	}
+
+	/**
+	 * AJAX: force sync snapshot.
+	 */
+	public function ajax_sync_snapshot() {
+		if ( ! is_user_logged_in() ) {
+			$this->ajax_guest_forbidden();
+		}
+
+		$nonce = mp_get_request_value( 'ajax_nonce', '' );
+		if ( ! wp_verify_nonce( $nonce, 'mp-ajax-nonce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Ungueltiger Sicherheits-Token.', 'mp' ) ), 403 );
+		}
+
+		$scope    = sanitize_key( (string) mp_get_request_value( 'scope', 'single' ) );
+		$blog_id  = (int) mp_get_request_value( 'blog_id', get_current_blog_id() );
+		$snapshot = $this->get_snapshot( $scope, array(
+			'user_id'    => get_current_user_id(),
+			'blog_id'    => $blog_id,
+			'force_sync' => true,
+		) );
+
+		wp_send_json_success( $snapshot );
+	}
+
+	/**
+	 * Get synchronized customer portal snapshot.
+	 *
+	 * @param string $scope
+	 * @param array  $args
+	 *
+	 * @return array
+	 */
+	public function get_snapshot( $scope = 'single', $args = array() ) {
+		$scope   = ( 'network' === $scope && is_multisite() ) ? 'network' : 'single';
+		$user_id = isset( $args['user_id'] ) ? (int) $args['user_id'] : get_current_user_id();
+		$blog_id = isset( $args['blog_id'] ) ? (int) $args['blog_id'] : (int) get_current_blog_id();
+		$force   = ! empty( $args['force_sync'] );
+
+		if ( $user_id <= 0 ) {
+			return $this->get_empty_snapshot( $scope, $blog_id );
+		}
+
+		$cache_key = $this->get_cache_key( $scope, $user_id, $blog_id );
+		if ( ! $force ) {
+			$cached = get_transient( $cache_key );
+			if ( is_array( $cached ) && ! empty( $cached['scope'] ) ) {
+				return $cached;
+			}
+		}
+
+		$stored = $this->read_synced_snapshot( $scope, $user_id, $blog_id );
+		if ( ! $force && ! empty( $stored['snapshot'] ) && ! $this->is_snapshot_stale( $stored['synced_at'], $scope ) ) {
+			set_transient( $cache_key, $stored['snapshot'], $this->get_cache_ttl( $scope ) );
+			return $stored['snapshot'];
+		}
+
+		if ( 'network' === $scope ) {
+			$snapshot = $this->build_network_snapshot( $user_id );
+		} else {
+			$snapshot = $this->build_single_snapshot( $user_id, $blog_id );
+		}
+
+		$this->write_synced_snapshot( $scope, $user_id, $blog_id, $snapshot );
+		set_transient( $cache_key, $snapshot, $this->get_cache_ttl( $scope ) );
+
+		return $snapshot;
+	}
+
+	/**
+	 * Invalidate snapshots when order status changes.
+	 *
+	 * @param string  $new_status
+	 * @param string  $old_status
+	 * @param WP_Post $post
+	 */
+	public function invalidate_after_order_status_change( $new_status, $old_status, $post ) {
+		if ( ! $post || 'mp_order' !== $post->post_type ) {
+			return;
+		}
+
+		$user_id = isset( $post->post_author ) ? (int) $post->post_author : 0;
+		if ( $user_id > 0 ) {
+			$this->invalidate_user_cache( $user_id, (int) get_current_blog_id() );
+		}
+	}
+
+	/**
+	 * Invalidate snapshots after comment creation.
+	 *
+	 * @param int $comment_id
+	 */
+	public function invalidate_after_comment_change( $comment_id ) {
+		$this->invalidate_after_comment_edit( $comment_id );
+	}
+
+	/**
+	 * Invalidate snapshots after comment updates.
+	 *
+	 * @param int $comment_id
+	 */
+	public function invalidate_after_comment_edit( $comment_id ) {
+		$comment = get_comment( (int) $comment_id );
+		if ( ! $comment ) {
+			return;
+		}
+
+		$user_id = (int) $comment->user_id;
+		if ( $user_id > 0 ) {
+			$this->invalidate_user_cache( $user_id, (int) get_current_blog_id() );
+		}
+	}
+
+	/**
+	 * Remove transient cache for one user.
+	 *
+	 * @param int $user_id
+	 * @param int $blog_id
+	 */
+	private function invalidate_user_cache( $user_id, $blog_id ) {
+		delete_transient( $this->get_cache_key( 'single', $user_id, $blog_id ) );
+		delete_transient( $this->get_cache_key( 'network', $user_id, $blog_id ) );
+	}
+
+	/**
+	 * Build single-site customer snapshot.
+	 *
+	 * @param int $user_id
+	 * @param int $blog_id
+	 *
+	 * @return array
+	 */
+	private function build_single_snapshot( $user_id, $blog_id ) {
+		$current_blog_id = (int) get_current_blog_id();
+		$switched        = false;
+
+		if ( is_multisite() && $blog_id > 0 && $blog_id !== $current_blog_id ) {
+			switch_to_blog( $blog_id );
+			$switched = true;
+		}
+
+		$currency        = mp_get_setting( 'currency' );
+		$history         = (array) array_filter( mp_get_order_history( $user_id ) );
+		$status_labels   = $this->get_status_labels();
+		$closed_statuses = $this->get_closed_statuses();
+		$reviews_active  = class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' );
+
+		$totals = array(
+			'orders'        => 0,
+			'value'         => 0.0,
+			'open_shipping' => 0,
+			'to_review'     => 0,
+		);
+
+		$orders           = array();
+		$pending_reviews  = array();
+		$pending_index    = array();
+		$candidate_review = array();
+
+		foreach ( $history as $timestamp => $entry ) {
+			if ( empty( $entry['id'] ) ) {
+				continue;
+			}
+
+			$order_id = (int) $entry['id'];
+			$order    = new MP_Order( $order_id );
+			if ( ! $order->exists() ) {
+				continue;
+			}
+
+			$status = get_post_status( $order_id );
+			if ( ! $status || in_array( $status, array( 'trash', 'auto-draft' ), true ) ) {
+				continue;
+			}
+
+			$total = (float) get_post_meta( $order_id, 'mp_order_total', true );
+			$time  = (int) $timestamp;
+
+			$totals['orders']++;
+			$totals['value'] += $total;
+			if ( in_array( $status, array( 'order_received', 'order_paid' ), true ) ) {
+				$totals['open_shipping']++;
+			}
+
+			$orders[] = array(
+				'order_id'   => $order->get_id(),
+				'post_id'    => $order_id,
+				'status'     => $status,
+				'status_text'=> isset( $status_labels[ $status ] ) ? $status_labels[ $status ] : ucfirst( str_replace( 'order_', '', $status ) ),
+				'total'      => $total,
+				'timestamp'  => $time,
+				'tracking_url' => $order->tracking_url( false ),
+			);
+
+			if ( ! $reviews_active || ! in_array( $status, $closed_statuses, true ) ) {
+				continue;
+			}
+
+			$product_ids = $this->extract_order_product_ids( $order );
+			foreach ( $product_ids as $product_id ) {
+				if ( isset( $candidate_review[ $product_id ] ) ) {
+					if ( $time > $candidate_review[ $product_id ]['timestamp'] ) {
+						$candidate_review[ $product_id ] = array(
+							'product_id' => $product_id,
+							'product_name' => get_the_title( $product_id ),
+							'product_url' => get_permalink( $product_id ),
+							'order_id' => $order->get_id(),
+							'status' => $status,
+							'timestamp' => $time,
+						);
+					}
+					continue;
+				}
+
+				$candidate_review[ $product_id ] = array(
+					'product_id' => $product_id,
+					'product_name' => get_the_title( $product_id ),
+					'product_url' => get_permalink( $product_id ),
+					'order_id' => $order->get_id(),
+					'status' => $status,
+					'timestamp' => $time,
+				);
+			}
+		}
+
+		usort( $orders, array( $this, 'sort_by_timestamp_desc' ) );
+
+		if ( $reviews_active && ! empty( $candidate_review ) ) {
+			$reviewed_ids = $this->get_reviewed_product_ids( $user_id, array_keys( $candidate_review ) );
+			foreach ( $candidate_review as $product_id => $item ) {
+				if ( isset( $reviewed_ids[ $product_id ] ) ) {
+					continue;
+				}
+
+				if ( isset( $pending_index[ $product_id ] ) ) {
+					continue;
+				}
+
+				$pending_reviews[] = $item;
+				$pending_index[ $product_id ] = true;
+			}
+		}
+
+		usort( $pending_reviews, array( $this, 'sort_by_timestamp_desc' ) );
+		$totals['to_review'] = count( $pending_reviews );
+
+		$recent_reviews = $reviews_active ? $this->get_recent_reviews( $user_id, 0, 5 ) : array();
+
+		$snapshot = array(
+			'scope'        => 'single',
+			'blog_id'      => (int) get_current_blog_id(),
+			'user_id'      => $user_id,
+			'currency'     => $currency,
+			'status_labels'=> $status_labels,
+			'totals'       => $totals,
+			'orders'       => $orders,
+			'pending_reviews' => $pending_reviews,
+			'recent_reviews'  => $recent_reviews,
+			'synced_at'    => time(),
+		);
+
+		if ( $switched ) {
+			restore_current_blog();
+		}
+
+		return $snapshot;
+	}
+
+	/**
+	 * Build network customer snapshot.
+	 *
+	 * @param int $user_id
+	 *
+	 * @return array
+	 */
+	private function build_network_snapshot( $user_id ) {
+		$currency       = mp_get_setting( 'currency' );
+		$status_labels  = $this->get_status_labels();
+		$closed_statuses = $this->get_closed_statuses();
+		$reviews_active = class_exists( 'MP_MARKETPRESS_COMMENTS_Addon' );
+		$sites          = get_sites( array( 'fields' => 'ids' ) );
+
+		$totals = array(
+			'orders'        => 0,
+			'value'         => 0.0,
+			'shops'         => 0,
+			'open_shipping' => 0,
+			'to_review'     => 0,
+		);
+
+		$rows             = array();
+		$shop_seen        = array();
+		$pending_reviews  = array();
+		$pending_index    = array();
+		$recent_reviews   = array();
+
+		foreach ( (array) $sites as $blog_id ) {
+			$blog_id = (int) $blog_id;
+			if ( $blog_id <= 0 ) {
+				continue;
+			}
+
+			switch_to_blog( $blog_id );
+			$shop_name = (string) get_option( 'blogname' );
+			$history_key = 'mp_order_history_' . $blog_id;
+			$history = (array) get_user_meta( $user_id, $history_key, true );
+			$history = array_filter( $history );
+			$site_review_candidates = array();
+
+			foreach ( $history as $entry ) {
+				if ( empty( $entry['id'] ) ) {
+					continue;
+				}
+
+				$post_id = (int) $entry['id'];
+				$post    = get_post( $post_id );
+				if ( ! $post || in_array( $post->post_status, array( 'trash', 'auto-draft' ), true ) ) {
+					continue;
+				}
+
+				$order = new MP_Order( $post_id );
+				if ( ! $order->exists() ) {
+					continue;
+				}
+
+				$total = (float) get_post_meta( $post_id, 'mp_order_total', true );
+				$time  = (int) get_post_time( 'U', true, $post_id );
+				$totals['orders']++;
+				$totals['value'] += $total;
+				$shop_seen[ $blog_id ] = true;
+
+				if ( in_array( $post->post_status, array( 'order_received', 'order_paid' ), true ) ) {
+					$totals['open_shipping']++;
+				}
+
+				$rows[] = array(
+					'shop'       => $shop_name,
+					'shop_id'    => $blog_id,
+					'order'      => $order->get_id(),
+					'total'      => $total,
+					'status'     => $post->post_status,
+					'status_text'=> isset( $status_labels[ $post->post_status ] ) ? $status_labels[ $post->post_status ] : ucfirst( str_replace( 'order_', '', $post->post_status ) ),
+					'url'        => $order->tracking_url( false, $blog_id ),
+					'timestamp'  => $time,
+				);
+
+				if ( ! $reviews_active || ! in_array( $post->post_status, $closed_statuses, true ) ) {
+					continue;
+				}
+
+				$product_ids = $this->extract_order_product_ids( $order );
+				foreach ( $product_ids as $product_id ) {
+					$review_key = $blog_id . ':' . $product_id;
+					if ( isset( $site_review_candidates[ $review_key ] ) ) {
+						continue;
+					}
+
+					$site_review_candidates[ $review_key ] = array(
+						'shop'         => $shop_name,
+						'shop_id'      => $blog_id,
+						'product_id'   => $product_id,
+						'product_name' => get_the_title( $product_id ),
+						'product_url'  => get_permalink( $product_id ),
+						'order_id'     => $order->get_id(),
+						'status'       => $post->post_status,
+						'timestamp'    => $time,
+					);
+				}
+			}
+
+			if ( $reviews_active && ! empty( $site_review_candidates ) ) {
+				$site_product_ids = array();
+				foreach ( $site_review_candidates as $candidate ) {
+					$site_product_ids[] = (int) $candidate['product_id'];
+				}
+
+				$reviewed_map = $this->get_reviewed_product_ids( $user_id, $site_product_ids );
+				foreach ( $site_review_candidates as $review_key => $candidate ) {
+					$product_id = (int) $candidate['product_id'];
+					if ( isset( $reviewed_map[ $product_id ] ) || isset( $pending_index[ $review_key ] ) ) {
+						continue;
+					}
+
+					unset( $candidate['product_id'] );
+					$pending_reviews[] = $candidate;
+					$pending_index[ $review_key ] = true;
+				}
+			}
+
+			if ( $reviews_active ) {
+				$site_recent_reviews = $this->get_recent_reviews( $user_id, $blog_id, 10 );
+				foreach ( $site_recent_reviews as $review ) {
+					$review['shop'] = $shop_name;
+					$recent_reviews[] = $review;
+				}
+			}
+
+			restore_current_blog();
+		}
+
+		$totals['shops'] = count( $shop_seen );
+		usort( $rows, array( $this, 'sort_by_timestamp_desc' ) );
+		usort( $pending_reviews, array( $this, 'sort_by_timestamp_desc' ) );
+		usort( $recent_reviews, array( $this, 'sort_by_timestamp_desc' ) );
+		$totals['to_review'] = count( $pending_reviews );
+
+		return array(
+			'scope'         => 'network',
+			'blog_id'       => (int) get_current_blog_id(),
+			'user_id'       => $user_id,
+			'currency'      => $currency,
+			'status_labels' => $status_labels,
+			'totals'        => $totals,
+			'rows'          => $rows,
+			'pending_reviews' => $pending_reviews,
+			'recent_reviews'  => $recent_reviews,
+			'synced_at'     => time(),
+		);
+	}
+
+	/**
+	 * Read synced snapshot from user meta.
+	 *
+	 * @param string $scope
+	 * @param int    $user_id
+	 * @param int    $blog_id
+	 *
+	 * @return array
+	 */
+	private function read_synced_snapshot( $scope, $user_id, $blog_id ) {
+		if ( 'network' === $scope ) {
+			$snapshot = get_user_meta( $user_id, '_mp_customer_portal_network_snapshot', true );
+			$synced   = (int) get_user_meta( $user_id, '_mp_customer_portal_network_synced_at', true );
+		} else {
+			$snapshot = get_user_meta( $user_id, '_mp_customer_portal_single_snapshot_' . $blog_id, true );
+			$synced   = (int) get_user_meta( $user_id, '_mp_customer_portal_single_synced_at_' . $blog_id, true );
+		}
+
+		if ( ! is_array( $snapshot ) ) {
+			$snapshot = array();
+		}
+
+		return array(
+			'snapshot'  => $snapshot,
+			'synced_at' => $synced,
+		);
+	}
+
+	/**
+	 * Write synced snapshot to user meta.
+	 *
+	 * @param string $scope
+	 * @param int    $user_id
+	 * @param int    $blog_id
+	 * @param array  $snapshot
+	 */
+	private function write_synced_snapshot( $scope, $user_id, $blog_id, $snapshot ) {
+		if ( 'network' === $scope ) {
+			update_user_meta( $user_id, '_mp_customer_portal_network_snapshot', $snapshot );
+			update_user_meta( $user_id, '_mp_customer_portal_network_synced_at', time() );
+			return;
+		}
+
+		update_user_meta( $user_id, '_mp_customer_portal_single_snapshot_' . $blog_id, $snapshot );
+		update_user_meta( $user_id, '_mp_customer_portal_single_synced_at_' . $blog_id, time() );
+	}
+
+	/**
+	 * Returns whether snapshot is stale.
+	 *
+	 * @param int    $synced_at
+	 * @param string $scope
+	 *
+	 * @return bool
+	 */
+	private function is_snapshot_stale( $synced_at, $scope ) {
+		$synced_at = (int) $synced_at;
+		if ( $synced_at <= 0 ) {
+			return true;
+		}
+
+		return ( time() - $synced_at ) > $this->get_sync_ttl( $scope );
+	}
+
+	/**
+	 * Extract unique product ids from an order.
+	 *
+	 * @param MP_Order $order
+	 *
+	 * @return array
+	 */
+	private function extract_order_product_ids( $order ) {
+		$product_ids = array();
+		$cart_items  = $order->get_meta( 'mp_cart_items' );
+
+		if ( is_array( $cart_items ) ) {
+			foreach ( $cart_items as $product_id => $items ) {
+				$product_id = (int) $product_id;
+				if ( $product_id > 0 ) {
+					$product_ids[] = $product_id;
+				}
+			}
+		} else {
+			$cart = $order->get_cart();
+			if ( is_object( $cart ) && method_exists( $cart, 'get_items' ) ) {
+				$items = (array) $cart->get_items();
+				foreach ( $items as $item ) {
+					$product_id = isset( $item['product_id'] ) ? (int) $item['product_id'] : 0;
+					if ( $product_id > 0 ) {
+						$product_ids[] = $product_id;
+					}
+				}
+			}
+		}
+
+		$product_ids = array_values( array_unique( array_filter( array_map( 'intval', $product_ids ) ) ) );
+
+		if ( ! empty( $product_ids ) ) {
+			$product_post_type = MP_Product::get_post_type();
+			$product_ids = array_values( array_filter( $product_ids, function( $product_id ) use ( $product_post_type ) {
+				return get_post_type( (int) $product_id ) === $product_post_type;
+			} ) );
+		}
+
+		return $product_ids;
+	}
+
+	/**
+	 * Get map of reviewed product ids for user.
+	 *
+	 * @param int   $user_id
+	 * @param array $product_ids
+	 *
+	 * @return array
+	 */
+	private function get_reviewed_product_ids( $user_id, $product_ids ) {
+		$map = array();
+		$product_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $product_ids ) ) ) );
+		if ( empty( $product_ids ) ) {
+			return $map;
+		}
+
+		$comments = get_comments( array(
+			'user_id'  => $user_id,
+			'post__in' => $product_ids,
+			'status'   => 'approve',
+			'number'   => 0,
+			'meta_key' => 'rating',
+		) );
+
+		foreach ( (array) $comments as $comment ) {
+			$map[ (int) $comment->comment_post_ID ] = true;
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Get recent reviews for current blog context.
+	 *
+	 * @param int $user_id
+	 * @param int $blog_id
+	 * @param int $limit
+	 *
+	 * @return array
+	 */
+	private function get_recent_reviews( $user_id, $blog_id, $limit ) {
+		if ( $blog_id > 0 && is_multisite() && $blog_id !== (int) get_current_blog_id() ) {
+			switch_to_blog( $blog_id );
+			$switched = true;
+		} else {
+			$switched = false;
+		}
+
+		$product_post_type = MP_Product::get_post_type();
+		$comments = get_comments( array(
+			'user_id' => $user_id,
+			'status'  => 'approve',
+			'number'  => (int) $limit,
+			'orderby' => 'comment_date_gmt',
+			'order'   => 'DESC',
+		) );
+
+		$items = array();
+		foreach ( (array) $comments as $comment ) {
+			$post_id = (int) $comment->comment_post_ID;
+			$rating  = (int) get_comment_meta( $comment->comment_ID, 'rating', true );
+			if ( $rating < 1 || get_post_type( $post_id ) !== $product_post_type ) {
+				continue;
+			}
+
+			$items[] = array(
+				'product_id'   => $post_id,
+				'product_name' => get_the_title( $post_id ),
+				'product_url'  => get_permalink( $post_id ),
+				'rating'       => $rating,
+				'timestamp'    => strtotime( $comment->comment_date_gmt . ' GMT' ),
+				'date_text'    => date_i18n( get_option( 'date_format' ), strtotime( $comment->comment_date ) ),
+			);
+		}
+
+		if ( $switched ) {
+			restore_current_blog();
+		}
+
+		usort( $items, array( $this, 'sort_by_timestamp_desc' ) );
+		return array_slice( $items, 0, (int) $limit );
+	}
+
+	/**
+	 * Shared timestamp sorting.
+	 *
+	 * @param array $a
+	 * @param array $b
+	 *
+	 * @return int
+	 */
+	private function sort_by_timestamp_desc( $a, $b ) {
+		$at = isset( $a['timestamp'] ) ? (int) $a['timestamp'] : 0;
+		$bt = isset( $b['timestamp'] ) ? (int) $b['timestamp'] : 0;
+		return $bt <=> $at;
+	}
+
+	/**
+	 * Get status labels.
+	 *
+	 * @return array
+	 */
+	private function get_status_labels() {
+		return array(
+			'order_received' => __( 'Ausstehend', 'mp' ),
+			'order_paid'     => __( 'Bezahlt', 'mp' ),
+			'order_shipped'  => __( 'Versandt', 'mp' ),
+			'order_closed'   => __( 'Abgeschlossen', 'mp' ),
+		);
+	}
+
+	/**
+	 * Get closed statuses.
+	 *
+	 * @return array
+	 */
+	private function get_closed_statuses() {
+		return array( 'order_closed', 'order_shipped' );
+	}
+
+	/**
+	 * Get sync ttl.
+	 *
+	 * @param string $scope
+	 *
+	 * @return int
+	 */
+	private function get_sync_ttl( $scope ) {
+		$default_ttl = ( 'network' === $scope ) ? 420 : 300;
+		return (int) apply_filters( 'mp_customer_portal_sync_ttl/' . $scope, $default_ttl );
+	}
+
+	/**
+	 * Get cache ttl.
+	 *
+	 * @param string $scope
+	 *
+	 * @return int
+	 */
+	private function get_cache_ttl( $scope ) {
+		$default_ttl = ( 'network' === $scope ) ? 90 : 60;
+		return (int) apply_filters( 'mp_customer_portal_cache_ttl/' . $scope, $default_ttl );
+	}
+
+	/**
+	 * Build transient cache key.
+	 *
+	 * @param string $scope
+	 * @param int    $user_id
+	 * @param int    $blog_id
+	 *
+	 * @return string
+	 */
+	private function get_cache_key( $scope, $user_id, $blog_id ) {
+		if ( 'network' === $scope ) {
+			return 'mp_portal_snapshot_network_' . $user_id;
+		}
+
+		return 'mp_portal_snapshot_single_' . $user_id . '_' . $blog_id;
+	}
+
+	/**
+	 * Empty snapshot fallback.
+	 *
+	 * @param string $scope
+	 * @param int    $blog_id
+	 *
+	 * @return array
+	 */
+	private function get_empty_snapshot( $scope, $blog_id ) {
+		$empty = array(
+			'orders'        => 0,
+			'value'         => 0.0,
+			'open_shipping' => 0,
+			'to_review'     => 0,
+			'shops'         => 0,
+		);
+
+		return array(
+			'scope'          => $scope,
+			'blog_id'        => (int) $blog_id,
+			'user_id'        => 0,
+			'currency'       => mp_get_setting( 'currency' ),
+			'status_labels'  => $this->get_status_labels(),
+			'totals'         => $empty,
+			'orders'         => array(),
+			'rows'           => array(),
+			'pending_reviews'=> array(),
+			'recent_reviews' => array(),
+			'synced_at'      => time(),
+		);
+	}
+}
+
+MP_Customer_Portal_API::get_instance();
