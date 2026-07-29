@@ -207,26 +207,26 @@ class MP_Admin_Multisite {
 			'label'   => array( 'text' => __( 'Multi-Shop Checkout-Modus', 'mp' ) ),
 			'desc'    => __( 'Steuert, wie Warenkörbe mit Produkten aus mehreren Subshops ausgecheckt werden: gebündelt im Mainshop, strikt getrennt oder per Kundenauswahl.', 'mp' ),
 			'options' => array(
-				'bundle_only'    => __( 'Nur Mainshop-Buendelung', 'mp' ),
+				'bundle_only'    => __( 'Nur Mainshop-Netzwerkcheckouts', 'mp' ),
 				'split_only'      => __( 'Nur getrennt pro Subshop', 'mp' ),
-				'customer_choice' => __( 'Kunde waehlt im Checkout', 'mp' ),
+				'customer_choice' => __( 'Kunde wählt im Checkout', 'mp' ),
 			),
 			'default_value' => 'bundle_only',
 		) );
 		$metabox->add_field( 'select', array(
 			'name'    => 'advanced[network_multishop_checkout_default]',
 			'label'   => array( 'text' => __( 'Standardmodus bei Kundenauswahl', 'mp' ) ),
-			'desc'    => __( 'Nur relevant, wenn der Modus "Kunde waehlt im Checkout" aktiv ist.', 'mp' ),
+			'desc'    => __( 'Nur relevant, wenn der Modus "Kunde wählt im Checkout" aktiv ist.', 'mp' ),
 			'options' => array(
-				'bundle' => __( 'Buendelung (Mainshop)', 'mp' ),
-				'split'  => __( 'Getrennt pro Subshop', 'mp' ),
+				'bundle' => __( 'Netzwerkcheckouts (Mainshop)', 'mp' ),
+				'split'  => __( 'Subshop Gateways', 'mp' ),
 			),
 			'default_value' => 'bundle',
 		) );
 		$metabox->add_field( 'select', array(
 			'name'    => 'advanced[network_bundle_shipping_mode]',
-			'label'   => array( 'text' => __( 'Versandregel bei Buendelung', 'mp' ) ),
-			'desc'    => __( 'Legt fest, wie Versandkosten bei Mainshop-Buendelung behandelt werden.', 'mp' ),
+			'label'   => array( 'text' => __( 'Versandregel bei Netzwerkcheckouts', 'mp' ) ),
+			'desc'    => __( 'Legt fest, wie Versandkosten bei Mainshop-Netzwerkcheckouts behandelt werden.', 'mp' ),
 			'options' => array(
 				'per_shop'          => __( 'Pro Subshop getrennt berechnen', 'mp' ),
 				'combined'          => __( 'Netzwerkweit zusammenfassen', 'mp' ),
@@ -259,22 +259,6 @@ class MP_Admin_Multisite {
 			'default_value' => true,
 		) );
 		$metabox->add_field( 'checkbox', array(
-			'name'    => 'advanced[network_support_enabled]',
-			'label'   => array( 'text' => __( 'Integriertes Kundensupport-System aktivieren?', 'mp' ) ),
-			'desc'    => __( 'Aktiviert das Support-Ticket-System im Netzwerk: KPI im Cockpit, Support-Panel im zentralen Kundenhub und Ticket-Verwaltung im Backend. Das Add-on muss zusätzlich unter Einstellungen → Erweiterungen aktiviert werden.', 'mp' ),
-			'message' => __( 'Support-System aktivieren', 'mp' ),
-		) );
-		$metabox->add_field( 'select', array(
-			'name'    => 'advanced[network_support_mode]',
-			'label'   => array( 'text' => __( 'Support-Modus', 'mp' ) ),
-			'desc'    => __( 'Autonom: Jeder Shop hat seine eigene Ticket-Inbox. Mainshop-Sync: Alle Tickets landen im Mainshop, Subshop-Kunden sehen ihre Tickets übers zentrale Portal.', 'mp' ),
-			'options' => array(
-				'autonomous'    => __( 'Subsite autonom', 'mp' ),
-				'mainshop_sync' => __( 'Mainshop Sync', 'mp' ),
-			),
-			'default_value' => 'autonomous',
-		) );
-		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[network_withdrawal_management]',
 			'label'   => array( 'text' => __( 'Widerrufsmanagement im zentralen Hub aktivieren?', 'mp' ) ),
 			'desc'    => __( 'Zeigt Widerrufs-KPIs, Statusverlauf und "Widerruf starten" im zentralen Kundenhub an.', 'mp' ),
@@ -299,7 +283,7 @@ class MP_Admin_Multisite {
 		$metabox->add_field( 'select', array(
 			'name'    => 'advanced[network_mainshop_floating_cart_mode]',
 			'label'   => array( 'text' => __( 'Floating-Warenkorb auf Mainshop-Seiten', 'mp' ) ),
-			'desc'    => __( 'Steuert, wo der Floating-Warenkorb auf der Hauptseite angezeigt wird. "Nur Shop-Profilseite" ist fuer den Netzwerk-Marktplatz-Flow empfohlen.', 'mp' ),
+			'desc'    => __( 'Steuert, wo der Floating-Warenkorb auf der Hauptseite angezeigt wird. "Nur Shop-Profilseite" ist für den Netzwerk-Marktplatz-Flow empfohlen.', 'mp' ),
 			'options' => array(
 				'off'     => __( 'Deaktiviert', 'mp' ),
 				'profile' => __( 'Nur Shop-Profilseite', 'mp' ),
@@ -310,12 +294,12 @@ class MP_Admin_Multisite {
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[network_shop_profile_reviews]',
 			'label'   => array( 'text' => __( 'Bewertungs-Widget im Shop-Profil aktivieren?', 'mp' ) ),
-			'desc'    => __( 'Zeigt auf der Shop-Profilseite Sterne-Schnitt und Bewertungsanzahl des ausgewaehlten Produkts an.', 'mp' ),
+			'desc'    => __( 'Zeigt auf der Shop-Profilseite Sterne-Schnitt und Bewertungsanzahl des ausgewählten Produkts an.', 'mp' ),
 			'message' => __( 'Bewertungen im Profil anzeigen', 'mp' ),
 		) );
 		$metabox->add_field( 'select', array(
 			'name'    => 'advanced[network_reviews_policy]',
-			'label'   => array( 'text' => __( 'Netzwerk-Policy fuer Bewertungen', 'mp' ) ),
+			'label'   => array( 'text' => __( 'Netzwerk-Policy für Bewertungen', 'mp' ) ),
 			'desc'    => __( 'Steuert, wie strikt die Bewertungs-Erweiterung in Subshops vorausgesetzt wird und wie fehlende Aktivierung im UI markiert wird.', 'mp' ),
 			'options' => array(
 				'off'      => __( 'Deaktiviert (keine Policy-Pruefung)', 'mp' ),
@@ -326,9 +310,9 @@ class MP_Admin_Multisite {
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[settlement_enabled]',
-			'label'   => array( 'text' => __( 'Settlement-Ledger aktivieren?', 'mp' ) ),
-			'desc'    => __( 'Aktiviert Freigabe-Queue, Hold/Release und Subshop-Gutschriftstatus.', 'mp' ),
-			'message' => __( 'Settlement Moderation aktivieren', 'mp' ),
+			'label'   => array( 'text' => __( 'Auszahlungsfreigabe aktivieren?', 'mp' ) ),
+			'desc'    => __( 'Aktiviert die Freigabe-Warteschlange, Zurueckhalten/Freigabe und den Gutschriftstatus der Subshops.', 'mp' ),
+			'message' => __( 'Auszahlungsfreigabe aktivieren', 'mp' ),
 		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[settlement_auto_release]',
@@ -675,7 +659,7 @@ class MP_Admin_Multisite {
 		$required_pages = array();
 
 		if ( 'shop_profile' === sanitize_key( (string) mp_get_network_setting( 'advanced->network_shop_presentation_mode', 'direct_product' ) ) ) {
-			$required_pages['network_shop_profile'] = __( 'Die Shop-Profilseite fuer den Netzwerk-Marktplatz fehlt.', 'mp' );
+			$required_pages['network_shop_profile'] = __( 'Die Shop-Profilseite für den Netzwerk-Marktplatz fehlt.', 'mp' );
 		}
 
 		if ( (bool) mp_get_network_setting( 'advanced->network_customer_hub', 0 ) ) {
@@ -686,13 +670,6 @@ class MP_Admin_Multisite {
 			$required_pages['network_shop_performance'] = __( 'Die Shopuser-Performance-Seite ist aktiviert, aber keine Seite ist zugewiesen.', 'mp' );
 		}
 
-		if ( (bool) mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
-			$required_pages['network_settlement_dashboard'] = __( 'Settlement Moderation ist aktiviert, aber die Mainshop-Seite dafuer fehlt.', 'mp' );
-		}
-
-		if ( (bool) mp_get_network_setting( 'advanced->network_support_enabled', 0 ) ) {
-			$required_pages['network_support_center'] = __( 'Das Support-Center ist aktiviert, aber keine Mainshop-Seite ist zugewiesen.', 'mp' );
-		}
 
 		foreach ( $required_pages as $page_key => $message ) {
 			$page_id = (int) mp_get_network_setting( 'pages->' . $page_key, 0 );
@@ -910,7 +887,7 @@ class MP_Admin_Multisite {
 
 			<section class="mp-network-intro">
 				<h3><?php esc_html_e( 'Netzwerk Cockpit', 'mp' ); ?></h3>
-				<p><?php esc_html_e( 'Snapshot-basierter Schnellueberblick fuer Netzwerkbetrieb, Widerrufe und vorbereitetes Support-KPI.', 'mp' ); ?></p>
+				<p><?php esc_html_e( 'Snapshot-basierter Schnellueberblick für Netzwerkbetrieb, Widerrufe und vorbereitetes Support-KPI.', 'mp' ); ?></p>
 				<div class="mp-network-stats-grid">
 					<article class="mp-network-stat-card">
 						<span class="mp-network-stat-label"><?php esc_html_e( 'Aktive Shops', 'mp' ); ?></span>
@@ -1324,8 +1301,6 @@ class MP_Admin_Multisite {
 		$payout_pending   = 0;
 		$active_shops     = 0;
 		$indexed_products = (int) MP_Multisite::get_instance()->count();
-		$support_enabled  = (bool) mp_get_network_setting( 'advanced->network_support_enabled', 0 );
-		$support_mode     = (string) mp_get_network_setting( 'advanced->network_support_mode', 'autonomous' );
 
 		foreach ( (array) $sites as $blog_id ) {
 			switch_to_blog( (int) $blog_id );
@@ -1422,23 +1397,7 @@ class MP_Admin_Multisite {
 			) );
 			$payout_pending += (int) $payout_query->found_posts;
 
-			if ( $support_enabled && 'autonomous' === $support_mode ) {
-				$support_open += $this->count_open_support_tickets_in_current_blog();
-			}
-
 			restore_current_blog();
-		}
-
-		if ( $support_enabled && 'mainshop_sync' === $support_mode ) {
-			$root_blog_id = function_exists( 'mp_root_blog_id' ) ? (int) mp_root_blog_id() : 1;
-			switch_to_blog( $root_blog_id );
-			$support_open = $this->count_open_support_tickets_in_current_blog();
-			restore_current_blog();
-		}
-
-		$mode_label      = 'mainshop_sync' === $support_mode ? __( 'Mainshop Sync', 'mp' ) : __( 'Subsite autonom', 'mp' );
-		if ( ! $support_enabled ) {
-			$mode_label = __( 'Deaktiviert', 'mp' );
 		}
 
 		return array(
@@ -1450,38 +1409,10 @@ class MP_Admin_Multisite {
 			'split_orders'     => $split_orders,
 			'payout_pending'   => $payout_pending,
 			'indexed_products' => $indexed_products,
-			'support_open'     => $support_open,
-			'support_mode_label' => $mode_label,
+			'support_open'     => 0,
+			'support_mode_label' => __( 'Deaktiviert', 'mp' ),
 			'generated_at'     => time(),
 		);
-	}
-
-	/**
-	 * Count open support tickets in current blog context.
-	 *
-	 * @return int
-	 */
-	private function count_open_support_tickets_in_current_blog() {
-		if ( ! post_type_exists( 'mp_support_ticket' ) ) {
-			return 0;
-		}
-
-		$query = new WP_Query( array(
-			'post_type'      => 'mp_support_ticket',
-			'post_status'    => 'publish',
-			'fields'         => 'ids',
-			'posts_per_page' => 1,
-			'no_found_rows'  => false,
-			'meta_query'     => array(
-				array(
-					'key'     => '_mp_support_status',
-					'value'   => array( 'open', 'in_progress' ),
-					'compare' => 'IN',
-				),
-			),
-		) );
-
-		return (int) $query->found_posts;
 	}
 
 	/**
@@ -1544,18 +1475,6 @@ class MP_Admin_Multisite {
 			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
 			'placeholder' => __( 'Optional: Wähle eine Seite', 'mp' ),
 		) );
-		$metabox->add_field( 'post_select', array(
-			'name'        => 'pages[network_settlement_dashboard]',
-			'label'       => array( 'text' => __( 'Settlement Moderation (Mainshop)', 'mp' ) ),
-			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
-			'placeholder' => __( 'Optional: Wähle eine Seite', 'mp' ),
-		) );
-		$metabox->add_field( 'post_select', array(
-			'name'        => 'pages[network_support_center]',
-			'label'       => array( 'text' => __( 'Support-Center (Mainshop)', 'mp' ) ),
-			'query'       => array( 'post_type' => 'page', 'orderby' => 'title', 'order' => 'ASC' ),
-			'placeholder' => __( 'Optional: Wähle eine Seite', 'mp' ),
-		) );
 	}
 
 	/**
@@ -1591,13 +1510,6 @@ class MP_Admin_Multisite {
 				$type = 'network_shop_profile';
 				break;
 
-			case 'pages[network_settlement_dashboard]' :
-				$type = 'network_settlement_dashboard';
-				break;
-
-			case 'pages[network_support_center]' :
-				$type = 'network_support_center';
-				break;
 		}
 
 		if ( isset( $type ) ) {
@@ -1631,8 +1543,6 @@ class MP_Admin_Multisite {
 			'pages[network_customer_hub]',
 			'pages[network_shop_performance]',
 			'pages[network_shop_profile]',
-			'pages[network_settlement_dashboard]',
-			'pages[network_support_center]',
 		);
 
 		if ( ! in_array( $field->args['original_name'], $valid_fields, true ) ) {

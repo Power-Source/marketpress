@@ -52,12 +52,24 @@ class MP_Prosites_Addon {
 	 * @access public
 	 */
 	public function get_gateways( $gateways ) {
-		if ( is_multisite() && ! is_network_admin() ) {
-			foreach ( $gateways as $code => $gateway ) {
-				$level = str_replace( 'psts_level_', '', mp_get_network_setting( 'allowed_gateways->' . $code, '' ) );
-				if ( $level != 'full' && ! is_pro_site( false, $level ) ) {
-					unset( $gateways[ $code ] );
-				}
+		if ( ! is_multisite() || is_network_admin() || ! function_exists( 'is_pro_site' ) ) {
+			return $gateways;
+		}
+
+		$blog_id = get_current_blog_id();
+		if ( empty( $blog_id ) ) {
+			return $gateways;
+		}
+
+		foreach ( $gateways as $code => $gateway ) {
+			$level = trim( str_replace( 'psts_level_', '', (string) mp_get_network_setting( 'allowed_gateways->' . $code, '' ) ) );
+			if ( '' === $level || 'full' === $level || 'none' === $level ) {
+				continue;
+			}
+
+			$level = absint( $level );
+			if ( $level <= 0 || ! is_pro_site( $blog_id, $level ) ) {
+				unset( $gateways[ $code ] );
 			}
 		}
 
@@ -72,14 +84,25 @@ class MP_Prosites_Addon {
 	 * @filter mp_get_theme_list
 	 */
 	public function get_theme_list( $theme_list, $allowed_themes ) {
-		if ( is_multisite() && ! is_network_admin() ) {
-			foreach ( $theme_list as $key => $theme ) {
-				if ( $permissions = mp_arr_get_value( $key, $allowed_themes ) ) {
-					$level = str_replace( 'psts_level_', '', $permissions );
+		if ( ! is_multisite() || is_network_admin() || ! function_exists( 'is_pro_site' ) ) {
+			return $theme_list;
+		}
 
-					if ( $permissions != 'full' || ! is_pro_site( false, $level ) ) {
-						unset( $theme_list[ $key ] );
-					}
+		$blog_id = get_current_blog_id();
+		if ( empty( $blog_id ) ) {
+			return $theme_list;
+		}
+
+		foreach ( $theme_list as $key => $theme ) {
+			if ( $permissions = mp_arr_get_value( $key, $allowed_themes ) ) {
+				$level = trim( str_replace( 'psts_level_', '', (string) $permissions ) );
+				if ( '' === $level || 'full' === $level || 'none' === $level ) {
+					continue;
+				}
+
+				$level = absint( $level );
+				if ( $level <= 0 || ! is_pro_site( $blog_id, $level ) ) {
+					unset( $theme_list[ $key ] );
 				}
 			}
 		}

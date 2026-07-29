@@ -84,21 +84,31 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.1.2 =
+
+* Fix: Auszahlungsfreigabe im Admin robust registriert und erreichbar gemacht; fehlerhafte URL-/Routing-Pfade wurden bereinigt und auf den korrekten Admin-Aufruf konsolidiert.
+* Fix: Zugriff auf die Auszahlungsfreigabe stabilisiert (inkl. Super-Admin-Fallbacks), damit Berechtigungspruefungen nicht mehr inkonsistent blockieren.
+* Neu: Eigenes Recht `manage_settlement_approvals` eingefuehrt und in die Rollenverwaltung integriert (`store-settings-capabilities`) fuer gezielte Freigabe von Auszahlungsaktionen.
+* Verbesserung: Auszahlungsfreigabe als reiner Admin-Workflow gehaertet; Frontend-Abhaengigkeiten und unnoetige Seitenkopplungen entfernt.
+* Verbesserung: UI-Texte der Auszahlungsfreigabe auf verstaendliche deutsche Begriffe umgestellt.
+* Verbesserung: Status- und Grund-Spalten in der Auszahlungsfreigabe zeigen jetzt uebersetzbare, menschenlesbare Labels statt technischer Keys.
+* Fix: Mainshop-/Multisite-Erkennung im Freigabe-Flow an die MarketPress-Logik angepasst, damit die Seite im richtigen Kontext geladen wird.
+
 = 1.1.1 =
 
 * Neu: Netzwerk-Kundenhub deutlich erweitert (globale Warenkorbuebersicht, Discover-Bereich mit zufaelligen Netzwerkprodukten, konfigurierbare Anzahl und Anzeige nur bei leerem Warenkorb).
-* Neu: Shop-Profil im Netzwerk massiv ausgebaut (Tabs fuer Produkte/Gutscheine/Bewertungen, Shop-Beschreibung, Kategorie-Prefilter, verbesserte Navigation und AJAX-Updatefluss ohne Full-Reload).
-* Neu: Steuerung fuer Floating-Warenkorb auf Mainshop-Seiten ergaenzt (netzwerkweite Option fuer Sichtbarkeit/Modus).
-* Neu: Netzwerkanalysen und Performance-Bereich erweitert (mehr Kennzahlen, bessere Aufbereitung fuer Multisite-Betrieb).
+* Neu: Shop-Profil im Netzwerk massiv ausgebaut (Tabs für Produkte/Gutscheine/Bewertungen, Shop-Beschreibung, Kategorie-Prefilter, verbesserte Navigation und AJAX-Updatefluss ohne Full-Reload).
+* Neu: Steuerung für Floating-Warenkorb auf Mainshop-Seiten ergaenzt (netzwerkweite Option für Sichtbarkeit/Modus).
+* Neu: Netzwerkanalysen und Performance-Bereich erweitert (mehr Kennzahlen, bessere Aufbereitung für Multisite-Betrieb).
 * Neu: Settlement-/Moderations-Flows im Netzwerk weiter ausgebaut und in den Admin-Workflow integriert.
-* Neu: Snapshot-Cockpit fuer Netzwerk-Einstellungen erweitert (inkl. Auto-Cleanup-Steuerung und Cron-Synchronisierung).
+* Neu: Snapshot-Cockpit für Netzwerk-Einstellungen erweitert (inkl. Auto-Cleanup-Steuerung und Cron-Synchronisierung).
 * Neu: Pickr-basierte Farbwahl-Abhaengigkeit integriert (inkl. minifizierter Assets), um moderne UI-Konfigurationen zu unterstuetzen.
 * Verbesserung: Produktgalerie/Slider robuster gemacht; Loop-Verhalten stabilisiert und Darstellungswarnungen in Randfaellen reduziert.
 * Verbesserung: Netzwerk-Menues, Einstellungsseiten und URL-Flows konsolidiert; wichtige Routen im Netzwerk wurden vereinheitlicht.
 * Verbesserung: Codebasis in mehreren Kernbereichen strukturell refaktoriert (Lesbarkeit, Wartbarkeit, konsistentere Zustandsverwaltung).
 * Verbesserung: Kundenportal-/Bestelluebersichten weiter auf Snapshot-/API-Basis gehoben, um Last und Latenz im Netzwerkbetrieb zu senken.
 * Verbesserung: Widerrufsverwaltung weiter geschaerft (Reason-/Status-Flows, bessere Administratorenfuehrung, stabilerer Ablauf in der Praxis).
-* Fix: Theme-Ladepfad fuer Store-Themes vereinheitlicht; Plugin-Theme-Dateien und Content-Fallback werden kontextuebergreifend konsistent aufgeloest.
+* Fix: Theme-Ladepfad für Store-Themes vereinheitlicht; Plugin-Theme-Dateien und Content-Fallback werden kontextuebergreifend konsistent aufgeloest.
 * Fix: Globale Produktlisten-/Filterlogik im Netzwerk gehaertet (Paging-/Offset-Kantenfaelle, Query-Stabilitaet, konsistentere Ergebnisdarstellung).
 * Fix: Sichtbarkeits- und Taxonomie-Logik im Netzwerkmarktplatz bereinigt, damit Produktliste und Kategorien/Tags wieder deckungsgleich arbeiten.
 * Fix: Mainshop/Subsite-Warenkorbfluss weiter stabilisiert (global IDs, AJAX-Kontext, resilientere Aktualisierung in dynamischen Ansichten).
@@ -108,26 +118,26 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 = 1.1.0 =
 
 * Neu: Digitale Widerrufs-Kundenzone auf der Bestellstatus-Seite (2-Schritt-Flow mit sofortiger Eingangsbestätigung per E-Mail), inklusive Ausschlusslogik pro Produkt und Snapshot pro Bestellung.
-* Neu: Admin-Metabox in der Bestellbearbeitung fuer eingegangene Widerrufe; Anfragen sind pro Bestellung übersichtlich einsehbar und mit internem Status/Notiz bearbeitbar.
+* Neu: Admin-Metabox in der Bestellbearbeitung für eingegangene Widerrufe; Anfragen sind pro Bestellung übersichtlich einsehbar und mit internem Status/Notiz bearbeitbar.
 
 = 1.0.9 =
 
 * Fix: Beim Wechsel von Produktvarianten bleibt der Beschreibungstext jetzt erhalten; wenn eine Variante keinen eigenen Beschreibungstext oder Excerpt hat, wird automatisch der Standardtext des Hauptprodukts als Fallback verwendet.
 * Verbesserung: Produktbilder- und Video-Uploader bleiben jetzt auch bei variablen Produkten verfuegbar; auf der Produktseite bleibt die Default-Galerie als Slider erhalten und beim Variantenwechsel wird nur das erste Default-Bild durch das Variantenbild ersetzt (ohne gesetztes Variationsbild faellt die Ansicht sauber auf das Default-Bild zurueck).
 * Neu: Addon "Erlaube Produktkommentare" zu einem voll integrierten Bewertungsbereich ausgebaut: neuer Bewertungen-Tab in der Produktansicht mit Durchschnitts-Sterneanzeige, Kommentarformular, Bearbeiten-Funktion und "Hilfreich"-Markierung pro Rezension.
-* Neu: Bewertungsanzeige im Store erweitert (Mini-Sterne in Produktlisten), plus neuer Shortcode `[mp_product_rating]` und neues Widget fuer top-bewertete Produkte.
+* Neu: Bewertungsanzeige im Store erweitert (Mini-Sterne in Produktlisten), plus neuer Shortcode `[mp_product_rating]` und neues Widget für top-bewertete Produkte.
 * Neu: Addon-Einstellung "Hilfreich"-Funktion aktivieren/deaktivieren; der "Hilfreich"-Button wird nur gerendert und der AJAX-Handler nur ausgefuehrt, wenn die Option aktiv ist.
-* Neu: Sortierung `order_by="rating"` fuer `[mp_list_products]`; Produkte werden nach Durchschnittsbewertung absteigend sortiert, bei Gleichstand gewinnt das Produkt mit mehr Bewertungen. Kombinierbar mit `category`, `tag` und Paginierung.
+* Neu: Sortierung `order_by="rating"` für `[mp_list_products]`; Produkte werden nach Durchschnittsbewertung absteigend sortiert, bei Gleichstand gewinnt das Produkt mit mehr Bewertungen. Kombinierbar mit `category`, `tag` und Paginierung.
 
 = 1.0.8 =
 
 * Fix: Kritischer Fehler beim Speichern von Produktattributen behoben; Kategorien-/Term-Daten werden jetzt robust normalisiert und PHP-8-sicher verarbeitet.
-* Fix: Admin-Flow fuer Varianten-Erstellung stabilisiert; Klick auf "Varianten erstellen" triggert Speichern jetzt sprachunabhaengig und fuehrt direkt in die Variantenmaske.
+* Fix: Admin-Flow für Varianten-Erstellung stabilisiert; Klick auf "Varianten erstellen" triggert Speichern jetzt sprachunabhaengig und fuehrt direkt in die Variantenmaske.
 * Fix: JavaScript-Abbruch im Produkteditor beseitigt (`mp_product_admin_i18n is not defined`); Script-Lokalisierung erfolgt wieder in korrekter Reihenfolge, inklusive defensivem Fallback.
-* Fix: Datenquelle fuer gespeicherte Attributwerte gehaertet; Werte werden im Admin jetzt robust uebergeben und verarbeitet (`data-tags`/`data-tags-json`).
+* Fix: Datenquelle für gespeicherte Attributwerte gehaertet; Werte werden im Admin jetzt robust uebergeben und verarbeitet (`data-tags`/`data-tags-json`).
 * Verbesserung: Variationswerte-Eingabe im Produkteditor grundlegend bereinigt; Enter-Eingabe, sichtbare Tag-Darstellung und lokales Entfernen einzelner Werte per `x` funktionieren jetzt konsistent.
-* Verbesserung: Lokales Entfernen von Vorschlagswerten in der Variations-Erstellung ergaenzt; entfernte Werte werden nur fuer die aktuelle Bearbeitung ausgeschlossen und nicht global geloescht.
-* Verbesserung: Admin-Assets fuer den Variationsbereich nutzen filemtime-basierte Versionsparameter, damit geaenderte Skripte/Styles zuverlaessig ohne Cache-Artefakte geladen werden.
+* Verbesserung: Lokales Entfernen von Vorschlagswerten in der Variations-Erstellung ergaenzt; entfernte Werte werden nur für die aktuelle Bearbeitung ausgeschlossen und nicht global geloescht.
+* Verbesserung: Admin-Assets für den Variationsbereich nutzen filemtime-basierte Versionsparameter, damit geaenderte Skripte/Styles zuverlaessig ohne Cache-Artefakte geladen werden.
 * Verbesserung: Varianten-Popups im Produkteditor von Legacy-Colorbox auf `basicLightbox` umgestellt; reduziert jQuery-Migrate-Warnungen und stabilisiert das Modal-Verhalten.
 
 = 1.0.7 =
@@ -135,23 +145,23 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Fix: Sehr grosse Produktbilder im Produktbildslider werden jetzt sauber auf die verfuegbare Slidergroesse skaliert, statt ueber den Container hinauszuragen.
 * Fix: Shortcode-Builder im Editor zeigt die Attribut-Optionen wieder korrekt an; die Umschaltung greift jetzt sauber im sichtbaren Modal.
 * Fix: Shortcode-Builder-Modal wird hoeher im Viewport positioniert, damit die Bedienung im Editor besser funktioniert.
-* Fix: PHP-8-Warnings im page_template-Filter behoben; die Template-Erkennung fuer Store-/Cart-/Checkout-Seiten prueft jetzt robust auf ein fehlendes Post-Objekt und nutzt eine sichere Fallback-Page-ID.
+* Fix: PHP-8-Warnings im page_template-Filter behoben; die Template-Erkennung für Store-/Cart-/Checkout-Seiten prueft jetzt robust auf ein fehlendes Post-Objekt und nutzt eine sichere Fallback-Page-ID.
 
 = 1.0.6 =
 
 * Fix: Shortcode-Builder im visuellen Editor zeigt wieder die vollstaendige Shortcode-Auswahl statt einer unvollstaendigen Teilmenge.
 * Fix: Netzwerk-Shortcodes (`mp_list_global_products`, `mp_global_categories_list`, `mp_global_tag_cloud`) werden im Netzwerkmodus wieder korrekt eingeblendet, wenn MarketPress netzwerkweit aktiv ist und die Multisite-Einstellung passt.
 * Verbesserung: Manuelles Zahlungs-Gateway zeigt jetzt klarere Feld-Beschreibungen in den Settings (welche Platzhalter wo funktionieren) und liefert aussagekräftige Beispiel-Texte als Startup-Vorlagen zum individuellen Anpassen.
-* Neu: Produkte unterstuetzen jetzt optional eine Video-URL (`Produktvideo URL`) fuer die Produktdetailseite; YouTube/Vimeo-Links werden eingebettet, direkte MP4/WebM-Dateien als HTML5-Video angezeigt.
+* Neu: Produkte unterstuetzen jetzt optional eine Video-URL (`Produktvideo URL`) für die Produktdetailseite; YouTube/Vimeo-Links werden eingebettet, direkte MP4/WebM-Dateien als HTML5-Video angezeigt.
 
 = 1.0.5 =
 
 * Fix: Checkout-AJAX in allen betroffenen Payment-Handlern gehaertet (`free_orders`, `manual_payments`, `paypal-express`, `payfast`, `authorizenet-aim`, `simplify`); Redirects brechen den AJAX-Response nicht mehr ab.
-* Fix: Checkout-Controller verarbeitet Gateway-Rueckgaben robuster und nutzt konsistente Cache-Handoff-Keys fuer Order/Redirect-URL.
+* Fix: Checkout-Controller verarbeitet Gateway-Rueckgaben robuster und nutzt konsistente Cache-Handoff-Keys für Order/Redirect-URL.
 * Fix: Kostenlose digitale Produkte umgehen den Checkout jetzt komplett und starten direkt den Download.
 * Fix: Free-Download-Flow unterstuetzt jetzt sowohl String- als auch Array-`file_url`-Metadaten (inkl. Multi-File-Addon), wodurch Fatal Errors wie `ltrim(): Argument #1 must be of type string, array given` entfallen.
 * Verbesserung: Free-Download-Handler verarbeitet externe Download-Quellen (z.B. GitHub-Links) robuster und nutzt saubere Redirect-/Fallback-Logik.
-* Verbesserung: Mengenfeld wird auf digitalen Produktseiten automatisch ausgeblendet; fuer die interne Verarbeitung bleibt `product_quantity=1` erhalten.
+* Verbesserung: Mengenfeld wird auf digitalen Produktseiten automatisch ausgeblendet; für die interne Verarbeitung bleibt `product_quantity=1` erhalten.
 * Verbesserung: Inline-Status unter dem Free-Download-Button hinzugefuegt (Erfolg beim Start, Fehlermeldung bei nicht gefundener Datei).
 * Fix: Syntaxproblem im Gateway `authorizenet-aim` behoben (saubere Funktionsstruktur, keine Parse-Fehler mehr).
 

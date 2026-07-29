@@ -599,8 +599,9 @@ class MP_Ajax {
 
 		list( $order_by, $order ) = explode( '-', $post_order );
 
-		if ( session_id() == '' ) {
-			session_start();
+		mp_public()->start_session();
+		if ( ! isset( $_SESSION ) || ! is_array( $_SESSION ) ) {
+			$_SESSION = array();
 		}
 
 		if ( isset( $post_order ) ) {

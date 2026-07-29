@@ -141,10 +141,31 @@ class MP_Public {
 	 * @access protected
 	 */
 	public function start_session() {
-		$sess_id = session_id();
-		if ( empty( $sess_id ) ) {
-			@session_start();
+		if ( ! function_exists( 'session_status' ) ) {
+			return false;
 		}
+
+		if ( PHP_SESSION_ACTIVE === session_status() ) {
+			return true;
+		}
+
+		if ( ( function_exists( 'wp_doing_cron' ) && wp_doing_cron() ) || ( defined( 'DOING_CRON' ) && DOING_CRON ) ) {
+			return false;
+		}
+
+		if ( ( defined( 'WP_CLI' ) && WP_CLI ) || 'cli' === PHP_SAPI ) {
+			return false;
+		}
+
+		if ( headers_sent() ) {
+			return false;
+		}
+
+		if ( session_id() ) {
+			return true;
+		}
+
+		return @session_start();
 	}
 
 	/**

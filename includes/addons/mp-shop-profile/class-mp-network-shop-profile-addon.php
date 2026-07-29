@@ -24,7 +24,7 @@ class MP_Network_Shop_Profile_Addon {
 	}
 
 	public function register_menu() {
-		if ( is_network_admin() || ! is_admin() || ! is_multisite() ) {
+		if ( is_network_admin() || ! is_admin() || ! is_multisite() || is_main_site() || ! $this->is_profile_mode_active() ) {
 			return;
 		}
 
@@ -56,7 +56,7 @@ class MP_Network_Shop_Profile_Addon {
 	}
 
 	public function register_subshop_profile_metabox() {
-		if ( ! is_admin() || ! is_multisite() || is_network_admin() ) {
+		if ( ! is_admin() || ! is_multisite() || is_network_admin() || is_main_site() || ! $this->is_profile_mode_active() ) {
 			return;
 		}
 
@@ -74,7 +74,7 @@ class MP_Network_Shop_Profile_Addon {
 		$metabox->add_field( 'text', array(
 			'name'  => 'shop_profile[display_name]',
 			'label' => array( 'text' => __( 'Profilname', 'mp' ) ),
-			'desc'  => __( 'Optionaler Anzeigename fuer das Shop-Profil.', 'mp' ),
+			'desc'  => __( 'Optionaler Anzeigename für das Shop-Profil.', 'mp' ),
 		) );
 		$metabox->add_field( 'text', array(
 			'name'  => 'shop_profile[tagline]',
@@ -226,6 +226,10 @@ class MP_Network_Shop_Profile_Addon {
 	}
 
 	public function render_page() {
+		if ( ! $this->is_profile_mode_active() ) {
+			wp_die( esc_html__( 'Die Shop-Profilseite ist im Netzwerk derzeit nicht aktiviert.', 'mp' ) );
+		}
+
 		$cap = apply_filters( 'mp_store_settings_cap', 'manage_store_settings' );
 		if ( ! current_user_can( $cap ) ) {
 			wp_die( esc_html__( 'Unzureichende Berechtigung.', 'mp' ) );

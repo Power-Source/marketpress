@@ -40,7 +40,7 @@ class MP_Admin {
 		add_filter( 'post_updated_messages', array( &$this, 'post_updated_messages' ) );
 		//enqueue styles and scripts
 		add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_styles_scripts' ) );
-		// ClassicPress deprecated-asset warning fuer wp-pointer auf MP-Addons unterdruecken.
+		// ClassicPress deprecated-asset warning für wp-pointer auf MP-Addons unterdruecken.
 		add_action( 'admin_enqueue_scripts', array( &$this, 'strip_deprecated_pointer_assets' ), PHP_INT_MAX - 1, 1 );
 
 		add_action( 'admin_head', array( &$this, 'admin_head' ) );

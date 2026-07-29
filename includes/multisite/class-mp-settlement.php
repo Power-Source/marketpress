@@ -38,9 +38,11 @@ class MP_Network_Settlement {
 
 		add_shortcode( 'mp_network_settlement_dashboard', array( $this, 'render_frontend_dashboard_shortcode' ) );
 
-		if ( is_network_admin() ) {
-			add_action( 'network_admin_menu', array( $this, 'add_network_menu' ) );
+		if ( is_admin() && ! is_network_admin() ) {
+			add_action( 'admin_menu', array( $this, 'add_main_menu' ) );
 		}
+
+		add_action( 'init', array( $this, 'redirect_direct_settlement_paths' ), 1 );
 
 		add_action( 'admin_post_mp_settlement_decision', array( $this, 'handle_admin_decision' ) );
 	}
@@ -82,36 +84,116 @@ class MP_Network_Settlement {
 	}
 
 	/**
-	 * Network admin menu.
+	 * Main site admin menu.
 	 */
-	public function add_network_menu() {
+	public function add_main_menu() {
 		add_submenu_page(
-			MP_Admin_Multisite::NETWORK_MENU_SLUG,
-			__( 'Settlement Moderation', 'mp' ),
-			__( 'Settlement Moderation', 'mp' ),
-			'manage_network_options',
-			'network-settlement-moderation',
-			array( $this, 'render_network_admin_page' )
+			null,
+			__( 'Auszahlungsfreigabe', 'mp' ),
+			__( 'Auszahlungsfreigabe', 'mp' ),
+			'read',
+			'store-settings-settlement',
+			array( $this, 'render_main_admin_page' )
 		);
 	}
 
 	/**
-	 * Render network moderation queue.
+	 * Resolve the capability required for accessing settlement admin UI.
+	 * Falls back for multisite/main-site contexts where custom caps might be missing.
+	 *
+	 * @return string
 	 */
-	public function render_network_admin_page() {
-		if ( ! current_user_can( 'manage_network_options' ) ) {
+	private function get_required_capability() {
+		return (string) apply_filters( 'mp_settlement_required_cap', 'manage_settlement_approvals' );
+	}
+
+	/**
+	 * Central access check for settlement moderation.
+	 * Super admins are always allowed; site-level roles can be granted via dedicated capability.
+	 *
+	 * @return bool
+	 */
+	private function current_user_can_access_settlement() {
+		if ( is_multisite() && is_super_admin() ) {
+			return true;
+		}
+
+		if ( current_user_can( 'manage_network_options' ) || current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+
+		$required_cap = $this->get_required_capability();
+		if ( '' !== $required_cap && current_user_can( $required_cap ) ) {
+			return true;
+		}
+
+		if ( current_user_can( apply_filters( 'mp_store_settings_cap', 'manage_store_settings' ) ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Redirect legacy/direct settlement paths to the canonical admin URL.
+	 */
+	public function redirect_direct_settlement_paths() {
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		if ( '' === $request_uri ) {
+			return;
+		}
+
+		$path = (string) wp_parse_url( $request_uri, PHP_URL_PATH );
+		if ( '' === $path ) {
+			return;
+		}
+
+		$normalized_path = rtrim( $path, '/' );
+		$bad_paths = array(
+			'/store-settings-settlement',
+			'/wp-admin/store-settings-settlement',
+			'/wp-admin/network/network-settlement-moderation',
+		);
+
+		if ( ! in_array( $normalized_path, $bad_paths, true ) ) {
+			return;
+		}
+
+		$target = admin_url( 'admin.php?page=store-settings-settlement' );
+		if ( is_user_logged_in() ) {
+			wp_safe_redirect( $target, 302 );
+			exit;
+		}
+
+		wp_safe_redirect( wp_login_url( $target ), 302 );
+		exit;
+	}
+
+	/**
+	 * Render main site moderation queue.
+	 */
+	public function render_main_admin_page() {
+		if ( ! $this->current_user_can_access_settlement() ) {
 			wp_die( esc_html__( 'Keine Berechtigung.', 'mp' ) );
+		}
+
+		if ( ! mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
+			echo '<div class="wrap">';
+			echo '<h1>' . esc_html__( 'Auszahlungsfreigabe', 'mp' ) . '</h1>';
+			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Die Auszahlungsfreigabe ist aktuell deaktiviert. Aktiviere sie in den Netzwerk-Einstellungen unter MarketPress.', 'mp' ) . '</p></div>';
+			echo '</div>';
+			return;
 		}
 
 		$status = sanitize_key( (string) mp_get_get_value( 'status', 'open' ) );
 		$rows   = $this->get_queue_rows( $status );
 
 		echo '<div class="wrap">';
-		echo '<h1>' . esc_html__( 'Settlement Moderation', 'mp' ) . '</h1>';
-		echo '<p>' . esc_html__( 'Freigabe-Queue fuer Hold/Release Entscheidungen.', 'mp' ) . '</p>';
+		echo '<h1>' . esc_html__( 'Auszahlungsfreigabe', 'mp' ) . '</h1>';
+		echo '<p>' . esc_html__( 'Liste offener Auszahlungen, die zurueckgehalten oder freigegeben werden koennen.', 'mp' ) . '</p>';
 		echo '<p>';
-		echo '<a class="button" href="' . esc_url( network_admin_url( 'admin.php?page=network-settlement-moderation&status=open' ) ) . '">' . esc_html__( 'Open Queue', 'mp' ) . '</a> ';
-		echo '<a class="button" href="' . esc_url( network_admin_url( 'admin.php?page=network-settlement-moderation&status=all' ) ) . '">' . esc_html__( 'All', 'mp' ) . '</a>';
+		echo '<a class="button" href="' . esc_url( admin_url( 'admin.php?page=store-settings-settlement&status=open' ) ) . '">' . esc_html__( 'Nur offene', 'mp' ) . '</a> ';
+		echo '<a class="button" href="' . esc_url( admin_url( 'admin.php?page=store-settings-settlement&status=all' ) ) . '">' . esc_html__( 'Alle', 'mp' ) . '</a>';
 		echo '</p>';
 
 		echo $this->render_rows_table( $rows, true );
@@ -124,26 +206,7 @@ class MP_Network_Settlement {
 	 * @return string
 	 */
 	public function render_frontend_dashboard_shortcode() {
-		if ( ! mp_is_main_site() ) {
-			return '';
-		}
-
-		if ( ! mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
-			return '';
-		}
-
-		if ( ! is_user_logged_in() || ! current_user_can( 'manage_store_settings' ) ) {
-			return '<p>' . esc_html__( 'Diese Seite ist nur fuer Shopmanager verfuegbar.', 'mp' ) . '</p>';
-		}
-
-		$rows = $this->get_queue_rows( 'open' );
-		$html = '<section class="mp-network-settlement-dashboard">';
-		$html .= '<h2>' . esc_html__( 'Settlement Moderation Dashboard', 'mp' ) . '</h2>';
-		$html .= '<p>' . esc_html__( 'Offene Positionen fuer Freigabe oder Hold.', 'mp' ) . '</p>';
-		$html .= $this->render_rows_table( $rows, current_user_can( 'manage_network_options' ) );
-		$html .= '</section>';
-
-		return $html;
+		return '';
 	}
 
 	/**
@@ -524,12 +587,12 @@ class MP_Network_Settlement {
 	 */
 	private function render_rows_table( $rows, $allow_actions ) {
 		if ( empty( $rows ) ) {
-			return '<p>' . esc_html__( 'Keine offenen Settlement-Eintraege.', 'mp' ) . '</p>';
+			return '<p>' . esc_html__( 'Keine offenen Auszahlungen zur Freigabe.', 'mp' ) . '</p>';
 		}
 
 		$html  = '<table class="widefat striped">';
 		$html .= '<thead><tr>';
-		$html .= '<th>ID</th><th>' . esc_html__( 'Order', 'mp' ) . '</th><th>' . esc_html__( 'Shop', 'mp' ) . '</th><th>' . esc_html__( 'Status', 'mp' ) . '</th><th>' . esc_html__( 'Reason', 'mp' ) . '</th><th>' . esc_html__( 'Amount', 'mp' ) . '</th><th>' . esc_html__( 'Action', 'mp' ) . '</th>';
+		$html .= '<th>ID</th><th>' . esc_html__( 'Bestellung', 'mp' ) . '</th><th>' . esc_html__( 'Shop', 'mp' ) . '</th><th>' . esc_html__( 'Status', 'mp' ) . '</th><th>' . esc_html__( 'Grund', 'mp' ) . '</th><th>' . esc_html__( 'Betrag', 'mp' ) . '</th><th>' . esc_html__( 'Aktion', 'mp' ) . '</th>';
 		$html .= '</tr></thead><tbody>';
 
 		foreach ( $rows as $row ) {
@@ -539,12 +602,15 @@ class MP_Network_Settlement {
 				$shop_name = $details->blogname;
 			}
 
+			$status_label = $this->get_settlement_status_label( isset( $row['status'] ) ? (string) $row['status'] : '' );
+			$reason_label = $this->get_settlement_reason_label( isset( $row['gate_reason'] ) ? (string) $row['gate_reason'] : '' );
+
 			$html .= '<tr>';
 			$html .= '<td>' . (int) $row['id'] . '</td>';
 			$html .= '<td>#' . esc_html( $row['order_key'] ) . '</td>';
 			$html .= '<td>' . esc_html( $shop_name ) . ' (' . (int) $row['shop_blog_id'] . ')</td>';
-			$html .= '<td>' . esc_html( $row['status'] ) . '</td>';
-			$html .= '<td>' . esc_html( $row['gate_reason'] ) . '</td>';
+			$html .= '<td>' . esc_html( $status_label ) . '</td>';
+			$html .= '<td>' . esc_html( $reason_label ) . '</td>';
 			$html .= '<td>' . esc_html( mp_format_currency( $row['currency'], (float) $row['gross_amount'] ) ) . '</td>';
 			$html .= '<td>';
 
@@ -557,8 +623,8 @@ class MP_Network_Settlement {
 					admin_url( 'admin-post.php?action=mp_settlement_decision&row=' . (int) $row['id'] . '&decision=release' ),
 					'mp_settlement_decision_' . (int) $row['id']
 				);
-				$html .= '<a class="button" href="' . esc_url( $hold_url ) . '">' . esc_html__( 'Hold', 'mp' ) . '</a> ';
-				$html .= '<a class="button button-primary" href="' . esc_url( $release_url ) . '">' . esc_html__( 'Release', 'mp' ) . '</a>';
+				$html .= '<a class="button" href="' . esc_url( $hold_url ) . '">' . esc_html__( 'Zurueckhalten', 'mp' ) . '</a> ';
+				$html .= '<a class="button button-primary" href="' . esc_url( $release_url ) . '">' . esc_html__( 'Freigeben', 'mp' ) . '</a>';
 			} else {
 				$html .= '&mdash;';
 			}
@@ -573,10 +639,72 @@ class MP_Network_Settlement {
 	}
 
 	/**
+	 * Get localized label for a settlement status key.
+	 *
+	 * @param string $status
+	 * @return string
+	 */
+	private function get_settlement_status_label( $status ) {
+		$labels = array(
+			'expected_credit' => __( 'Noch offen', 'mp' ),
+			'on_hold'         => __( 'Zurueckgehalten', 'mp' ),
+			'releasable'      => __( 'Freigabefaehig', 'mp' ),
+			'released'        => __( 'Freigegeben', 'mp' ),
+		);
+
+		$status = sanitize_key( (string) $status );
+
+		if ( isset( $labels[ $status ] ) ) {
+			return $labels[ $status ];
+		}
+
+		if ( '' === $status ) {
+			return __( 'Unbekannt', 'mp' );
+		}
+
+		return ucwords( str_replace( '_', ' ', $status ) );
+	}
+
+	/**
+	 * Get localized label for a settlement reason key.
+	 *
+	 * @param string $reason
+	 * @return string
+	 */
+	private function get_settlement_reason_label( $reason ) {
+		$labels = array(
+			'payment_pending'        => __( 'Zahlung noch offen', 'mp' ),
+			'awaiting_shipping'      => __( 'Wartet auf Versandabschluss', 'mp' ),
+			'awaiting_withdrawal'    => __( 'Wartet auf Widerrufsfrist', 'mp' ),
+			'awaiting_warranty'      => __( 'Wartet auf Gewaehrleistungsfrist', 'mp' ),
+			'ready_for_release'      => __( 'Bereit zur Freigabe', 'mp' ),
+			'manual_hold'            => __( 'Manuell zurueckgehalten', 'mp' ),
+			'manual_release'         => __( 'Manuell freigegeben', 'mp' ),
+			'invalid_order'          => __( 'Ungueltige Bestellung', 'mp' ),
+			'no_shop_split'          => __( 'Keine Shop-Aufteilung gefunden', 'mp' ),
+			'objection_open'         => __( 'Offener Einwand', 'mp' ),
+			'chargeback_open'        => __( 'Chargeback offen', 'mp' ),
+			'refund_open'            => __( 'Rueckerstattung offen', 'mp' ),
+		);
+
+		$reason = sanitize_key( (string) $reason );
+
+		if ( isset( $labels[ $reason ] ) ) {
+			return $labels[ $reason ];
+		}
+
+		if ( '' === $reason ) {
+			return __( 'Unbekannt', 'mp' );
+		}
+
+		return ucwords( str_replace( '_', ' ', $reason ) );
+	}
+
+	/**
 	 * Manual hold/release action.
 	 */
 	public function handle_admin_decision() {
-		if ( ! current_user_can( 'manage_network_options' ) ) {
+		if ( ! $this->current_user_can_access_settlement() ) {
 			wp_die( esc_html__( 'Keine Berechtigung.', 'mp' ) );
 		}
 
@@ -584,7 +712,7 @@ class MP_Network_Settlement {
 		$decision = sanitize_key( (string) mp_get_get_value( 'decision', '' ) );
 
 		if ( ! in_array( $decision, array( 'hold', 'release' ), true ) || ! $row_id ) {
-			wp_safe_redirect( network_admin_url( 'admin.php?page=network-settlement-moderation' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=store-settings-settlement' ) );
 			exit;
 		}
 
@@ -607,7 +735,7 @@ class MP_Network_Settlement {
 
 		$wpdb->update( $this->table_name, $payload, array( 'id' => $row_id ) );
 
-		wp_safe_redirect( network_admin_url( 'admin.php?page=network-settlement-moderation' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=store-settings-settlement' ) );
 		exit;
 	}
 }

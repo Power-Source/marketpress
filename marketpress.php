@@ -28,6 +28,71 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 define( 'MP_VERSION', '1.1.1' );
 
+if ( ! function_exists( 'mp_marketpress_access_is_allowed' ) ) {
+	function mp_marketpress_access_is_allowed() {
+		global $wpdb;
+
+		if ( ! is_multisite() || is_network_admin() ) {
+			return true;
+		}
+
+		$blog_id = absint( get_current_blog_id() );
+		if ( ! $blog_id || is_main_site( $blog_id ) ) {
+			return true;
+		}
+
+		$psts_settings = (array) get_site_option( 'psts_settings', array() );
+		if ( empty( $psts_settings ) ) {
+			return true;
+		}
+
+		$modules_enabled = isset( $psts_settings['modules_enabled'] ) ? (array) $psts_settings['modules_enabled'] : array();
+		if ( ! in_array( 'ProSites_Module_MarketPress_Access', $modules_enabled, true ) ) {
+			return true;
+		}
+
+		$allowed_levels = isset( $psts_settings['marketpress_allowed_levels'] ) ? (array) $psts_settings['marketpress_allowed_levels'] : array();
+		$allowed_levels = array_map( 'absint', $allowed_levels );
+		$allowed_levels = array_values( array_unique( array_filter( $allowed_levels, function ( $item ) {
+			return $item >= 0;
+		} ) ) );
+		if ( empty( $allowed_levels ) ) {
+			return false;
+		}
+
+		$level = 0;
+		if ( isset( $wpdb->base_prefix ) ) {
+			$table_name = $wpdb->base_prefix . 'pro_sites';
+			$site_level = $wpdb->get_var( $wpdb->prepare( "SELECT level FROM {$table_name} WHERE blog_ID = %d AND expire > %d LIMIT 1", $blog_id, time() ) );
+			if ( null !== $site_level && false !== $site_level && '' !== (string) $site_level ) {
+				$level = absint( $site_level );
+			}
+		}
+
+		if ( $level < 0 ) {
+			$level = 0;
+		}
+
+		return in_array( $level, $allowed_levels, true );
+	}
+}
+
+if ( ! function_exists( 'mp_marketpress_hide_from_plugins_list' ) ) {
+	function mp_marketpress_hide_from_plugins_list( $plugins ) {
+		$plugin_basename = plugin_basename( __FILE__ );
+		if ( isset( $plugins[ $plugin_basename ] ) && ! mp_marketpress_access_is_allowed() ) {
+			unset( $plugins[ $plugin_basename ] );
+		}
+
+		return $plugins;
+	}
+}
+
+if ( ! mp_marketpress_access_is_allowed() ) {
+	add_filter( 'all_plugins', 'mp_marketpress_hide_from_plugins_list' );
+	return;
+}
+
 /**
  * Main class Marketpress.
  */
@@ -813,21 +878,16 @@ class Marketpress {
 			'has_settings' => false,
 		) );
 
-		mp_register_addon( array(
-			'label'        => __( 'Integrierter Kundensupport', 'mp' ),
-			'desc'         => __( 'Ticket-basiertes Support-Center mit Single- und Multisite-Modus', 'mp' ),
-			'class'        => 'MP_Support_Addon',
-			'path'         => mp_plugin_dir( 'includes/addons/mp-support/class-mp-support-addon.php' ),
-			'has_settings' => true,
-		) );
-
-		mp_register_addon( array(
-			'label'        => __( 'Netzwerk Shop-Profile', 'mp' ),
-			'desc'         => __( 'Optionale Profilverwaltung fuer Shopseiten im Netzwerk-Marktplatz (Branding, Links, Socials)', 'mp' ),
-			'class'        => 'MP_Network_Shop_Profile_Addon',
-			'path'         => mp_plugin_dir( 'includes/addons/mp-shop-profile/class-mp-network-shop-profile-addon.php' ),
-			'has_settings' => true,
-		) );
+		$show_network_shop_profile_addon = ! ( is_multisite() && ! is_network_admin() && ! is_main_site() );
+		if ( $show_network_shop_profile_addon ) {
+			mp_register_addon( array(
+				'label'        => __( 'Netzwerk Shop-Profile', 'mp' ),
+				'desc'         => __( 'Optionale Profilverwaltung für Shopseiten im Netzwerk-Marktplatz (Branding, Links, Socials)', 'mp' ),
+				'class'        => 'MP_Network_Shop_Profile_Addon',
+				'path'         => mp_plugin_dir( 'includes/addons/mp-shop-profile/class-mp-network-shop-profile-addon.php' ),
+				'has_settings' => true,
+			) );
+		}
 
 
 		/**

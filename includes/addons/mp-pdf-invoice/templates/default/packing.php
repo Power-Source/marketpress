@@ -207,7 +207,7 @@
 		</tbody>
 	</table>
 
-	<div class="note"><?php _e( 'Dieser Lieferschein dient als Beleg fuer die enthaltene Warenlieferung.', 'mp' ); ?></div>
+	<div class="note"><?php _e( 'Dieser Lieferschein dient als Beleg für die enthaltene Warenlieferung.', 'mp' ); ?></div>
 
 	<div class="footer">{{company_name}} &bull; {{company_address}}</div>
 </div>

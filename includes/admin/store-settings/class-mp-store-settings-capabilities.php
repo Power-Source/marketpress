@@ -78,7 +78,7 @@ class MP_Store_Settings_Capabilities {
 				$role_caps = mp_arr_get_value( $role_name, $saved_caps, array() );
 			?>
 				<div id="mp-settings-capabilities-<?php echo esc_attr( $role_name ); ?>" class="postbox mp-capabilities-role-box" data-role="<?php echo esc_attr( $role_name ); ?>" style="<?php echo esc_attr( $style ); ?>">
-					<h3 class="hndle"><span><?php echo esc_html( sprintf( __( 'Berechtigungen fuer Rolle: %s', 'mp' ), $role['name'] ) ); ?></span></h3>
+					<h3 class="hndle"><span><?php echo esc_html( sprintf( __( 'Berechtigungen für Rolle: %s', 'mp' ), $role['name'] ) ); ?></span></h3>
 					<div class="inside">
 						<p class="description"><?php _e( 'Waehle hier, was diese Rolle im Shop machen darf.', 'mp' ); ?></p>
 						<div class="mp-capabilities-sections">
@@ -168,6 +168,7 @@ class MP_Store_Settings_Capabilities {
 		$group_map = array(
 			'store' => array(
 				'manage_store_settings',
+				'manage_settlement_approvals',
 			),
 			'catalog' => array(
 				'manage_product_categories',
@@ -270,6 +271,7 @@ class MP_Store_Settings_Capabilities {
 	private function get_capability_label( $cap ) {
 		$labels = array(
 			'manage_store_settings'      => __( 'Shop-Einstellungen verwalten', 'mp' ),
+			'manage_settlement_approvals' => __( 'Auszahlungsfreigabe verwalten', 'mp' ),
 			'manage_product_categories'  => __( 'Produktkategorien verwalten', 'mp' ),
 			'manage_product_tags'        => __( 'Produktschlagworte verwalten', 'mp' ),
 			'edit_product'               => __( 'Produkt bearbeiten', 'mp' ),

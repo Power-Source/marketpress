@@ -1221,10 +1221,10 @@ class MP_Multisite {
 					$minimum_amount    = $this->get_coupon_minimum_amount_text( $coupon_id );
 
 					$applies_map = array(
-						'all'      => __( 'gilt fuer den gesamten Shop', 'mp' ),
-						'category' => __( 'gilt nur fuer ausgewaehlte Kategorien', 'mp' ),
-						'product'  => __( 'gilt nur fuer ausgewaehlte Produkte', 'mp' ),
-						'user'     => __( 'gilt nur fuer ausgewaehlte Benutzer', 'mp' ),
+						'all'      => __( 'gilt für den gesamten Shop', 'mp' ),
+						'category' => __( 'gilt nur für ausgewählte Kategorien', 'mp' ),
+						'product'  => __( 'gilt nur für ausgewählte Produkte', 'mp' ),
+						'user'     => __( 'gilt nur für ausgewählte Benutzer', 'mp' ),
 					);
 					$applies_hint = isset( $applies_map[ $applies_to ] ) ? $applies_map[ $applies_to ] : __( 'gilt nach Shop-Konfiguration', 'mp' );
 
@@ -1390,7 +1390,7 @@ class MP_Multisite {
 
 		$products_panel_html  = '<div class="mp-network-profile-stage">';
 		$products_panel_html .= '<div class="mp-network-profile-feature">';
-		$products_panel_html .= '<div class="mp-network-profile-feature-label">' . esc_html__( 'Ausgewaehltes Produkt', 'mp' ) . '</div>';
+		$products_panel_html .= '<div class="mp-network-profile-feature-label">' . esc_html__( 'Ausgewähltes Produkt', 'mp' ) . '</div>';
 		$products_panel_html .= $product_html ? $product_html : '<p>' . esc_html__( 'In diesem Shop sind aktuell keine Produkte verfuegbar.', 'mp' ) . '</p>';
 		$products_panel_html .= '</div>';
 		$products_panel_html .= '<aside class="mp-network-profile-side">' . $sidebar_info_html . '</aside>';
@@ -1406,7 +1406,7 @@ class MP_Multisite {
 
 		$coupons_main_html = ! empty( $coupons_html )
 			? $coupons_html
-			: '<section class="mp-network-profile-card"><p>' . esc_html__( 'Aktuell sind keine aktiven Gutscheincodes fuer diesen Shop verfuegbar.', 'mp' ) . '</p></section>';
+			: '<section class="mp-network-profile-card"><p>' . esc_html__( 'Aktuell sind keine aktiven Gutscheincodes für diesen Shop verfuegbar.', 'mp' ) . '</p></section>';
 		$coupons_panel_html  = '<div class="mp-network-profile-stage">';
 		$coupons_panel_html .= '<div class="mp-network-profile-feature">';
 		$coupons_panel_html .= '<div class="mp-network-profile-feature-label">' . esc_html__( 'Gutscheine', 'mp' ) . '</div>';
@@ -1764,8 +1764,8 @@ class MP_Multisite {
 
 		if ( 'customer_choice' === $policy ) {
 			$block .= '<p style="margin:0 0 8px">' . esc_html__( 'Dieser Warenkorb enthaelt Produkte aus mehreren Subshops. Du kannst zwischen gebuendeltem Mainshop-Checkout und getrenntem Checkout waehlen.', 'mp' ) . '</p>';
-			$block .= '<label style="display:inline-flex;gap:6px;align-items:center;margin-right:14px"><input type="radio" name="mp_network_checkout_mode" value="bundle"' . checked( 'bundle', $active_mode, false ) . '> ' . esc_html__( 'Mainshop-Buendelung', 'mp' ) . '</label>';
-			$block .= '<label style="display:inline-flex;gap:6px;align-items:center"><input type="radio" name="mp_network_checkout_mode" value="split"' . checked( 'split', $active_mode, false ) . '> ' . esc_html__( 'Getrennt pro Subshop', 'mp' ) . '</label>';
+			$block .= '<label style="display:inline-flex;gap:6px;align-items:center;margin-right:14px"><input type="radio" name="mp_network_checkout_mode" value="bundle"' . checked( 'bundle', $active_mode, false ) . '> ' . esc_html__( 'Mainshop-Netzwerkcheckouts', 'mp' ) . '</label>';
+			$block .= '<label style="display:inline-flex;gap:6px;align-items:center"><input type="radio" name="mp_network_checkout_mode" value="split"' . checked( 'split', $active_mode, false ) . '> ' . esc_html__( 'Subshop Gateways', 'mp' ) . '</label>';
 		} elseif ( 'split_only' === $policy ) {
 			$block .= '<p style="margin:0 0 8px">' . esc_html__( 'Dieser Warenkorb ist auf getrennten Subshop-Checkout erzwungen.', 'mp' ) . '</p>';
 			$block .= '<input type="hidden" name="mp_network_checkout_mode" value="split">';
@@ -1774,7 +1774,7 @@ class MP_Multisite {
 			$block .= '<input type="hidden" name="mp_network_checkout_mode" value="bundle">';
 		}
 
-		$block .= '<p style="margin:8px 0 0;color:#516981;font-size:12px">' . sprintf( esc_html__( 'Buendelung Versandregel: %s', 'mp' ), esc_html( $shipping_label ) ) . '</p>';
+		$block .= '<p style="margin:8px 0 0;color:#516981;font-size:12px">' . sprintf( esc_html__( 'Netzwerkcheckouts Versandregel: %s', 'mp' ), esc_html( $shipping_label ) ) . '</p>';
 		$block .= '</section>';
 
 		return $block . $html;
@@ -1806,7 +1806,7 @@ class MP_Multisite {
 
 		if ( 'split' === $this->resolve_multishop_checkout_mode( $blog_ids ) ) {
 			if ( is_object( $checkout ) && method_exists( $checkout, 'add_error' ) ) {
-				$checkout->add_error( __( 'Getrennter Multi-Shop-Checkout ist aktiv. Die Warenkorb-Aufteilung pro Subshop wird als naechster Schritt verarbeitet; bitte wechsle vorerst auf Mainshop-Buendelung oder aktiviere die Split-Engine.', 'mp' ), 'order-review-payment' );
+				$checkout->add_error( __( 'Getrennter Multi-Shop-Checkout ist aktiv. Die Warenkorb-Aufteilung pro Subshop wird als naechster Schritt verarbeitet; bitte wechsle vorerst auf Mainshop-Netzwerkcheckouts oder aktiviere die Split-Engine.', 'mp' ), 'order-review-payment' );
 			}
 
 			return false;
@@ -1991,11 +1991,6 @@ class MP_Multisite {
 		if ( $withdrawal_management_enabled ) {
 			$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Offene Widerrufe', 'mp' ) . '</span><strong>' . intval( isset( $totals['withdrawal_open'] ) ? $totals['withdrawal_open'] : 0 ) . '</strong></div>';
 		}
-		$support_enabled_hub = class_exists( 'MP_Support_Addon' ) && mp_get_network_setting( 'advanced->network_support_enabled', 0 ) && mp_get_setting( 'support->enabled', 1 );
-		if ( $support_enabled_hub ) {
-			$open_tickets = $this->count_open_customer_tickets( $user_id );
-			$html .= '<div class="mp-hub-kpi"><span>' . esc_html__( 'Offene Tickets', 'mp' ) . '</span><strong>' . intval( $open_tickets ) . '</strong></div>';
-		}
 		$html .= '</div>';
 
 		$html .= '<section class="mp-hub-panel mp-hub-feature">';
@@ -2031,7 +2026,7 @@ class MP_Multisite {
 			}
 			$html .= '</ul>';
 		} else {
-			$html .= '<p class="mp-hub-empty">' . esc_html__( 'Aktuell gibt es keine offenen Bewertungen fuer Dich.', 'mp' ) . '</p>';
+			$html .= '<p class="mp-hub-empty">' . esc_html__( 'Aktuell gibt es keine offenen Bewertungen für Dich.', 'mp' ) . '</p>';
 		}
 		$html .= '</section>';
 
@@ -2100,40 +2095,9 @@ class MP_Multisite {
 			$html .= '</section>';
 		}
 
-		if ( $support_enabled_hub ) {
-			$user_tickets = $this->get_customer_hub_tickets( $user_id );
-			$support_page_id = (int) mp_get_network_setting( 'pages->network_support_center', 0 );
-			$support_url = $support_page_id ? get_permalink( $support_page_id ) : home_url( '/' );
-			$html .= '<section class="mp-hub-panel" style="margin-bottom:12px;">';
-			$html .= '<h3>' . esc_html__( 'Meine Support-Tickets', 'mp' ) . '</h3>';
-			if ( ! empty( $user_tickets ) ) {
-				$html .= '<ul class="mp-hub-list">';
-				foreach ( array_slice( $user_tickets, 0, 5 ) as $ticket ) {
-					$slabels   = array(
-						'open'        => __( 'Offen', 'mp' ),
-						'in_progress' => __( 'In Bearbeitung', 'mp' ),
-						'resolved'    => __( 'Gel\u00f6st', 'mp' ),
-						'closed'      => __( 'Geschlossen', 'mp' ),
-					);
-					$slabel = isset( $slabels[ $ticket['status'] ] ) ? $slabels[ $ticket['status'] ] : __( 'Offen', 'mp' );
-					$html .= '<li>';
-					$html .= '<div class="mp-hub-meta">';
-					$html .= '<strong>' . esc_html( (string) $ticket['title'] ) . '</strong>';
-					$html .= '<span>' . esc_html( $slabel ) . '</span>';
-					$html .= '</div>';
-					$html .= '<a class="mp-hub-cta" href="' . esc_url( $support_url ) . '">' . esc_html__( 'Zum Ticket', 'mp' ) . '</a>';
-					$html .= '</li>';
-				}
-				$html .= '</ul>';
-			} else {
-				$html .= '<p class="mp-hub-empty">' . esc_html__( 'Noch keine Support-Tickets vorhanden.', 'mp' ) . '</p>';
-			}
-			$html .= '<p style="margin-top:8px;"><a href="' . esc_url( $support_url ) . '" class="mp-hub-cta">' . esc_html__( 'Neues Ticket erstellen', 'mp' ) . '</a></p>';
-			$html .= '</section>';
-		}
 
 		$checkout_mode_labels = array(
-			'bundle' => __( 'Buendelung', 'mp' ),
+			'bundle' => __( 'Netzwerkcheckouts', 'mp' ),
 			'split'  => __( 'Getrennt', 'mp' ),
 		);
 		$payout_status_labels = array(
@@ -2142,14 +2106,6 @@ class MP_Multisite {
 			'confirmed' => __( 'Bestaetigt', 'mp' ),
 			'paid'      => __( 'Ausgezahlt', 'mp' ),
 		);
-
-		$settlement_url = '';
-		if ( function_exists( 'mp_root_blog_id' ) ) {
-			$settlement_page_id = (int) mp_get_network_setting( 'pages->network_settlement_dashboard', 0 );
-			if ( $settlement_page_id > 0 ) {
-				$settlement_url = (string) get_permalink( $settlement_page_id );
-			}
-		}
 
 		$html .= '<section class="mp-hub-panel">';
 		$html .= '<h3>' . esc_html__( 'Letzte Bestellungen', 'mp' ) . '</h3>';
@@ -2174,11 +2130,7 @@ class MP_Multisite {
 				$html .= '<td><a href="' . esc_url( $row['url'] ) . '">#' . esc_html( $row['order'] ) . '</a></td>';
 				$html .= '<td>' . esc_html( $status_label ) . '</td>';
 				$html .= '<td>' . esc_html( $checkout_label ) . '</td>';
-				if ( '' !== $settlement_url && '&mdash;' !== $payout_label ) {
-					$html .= '<td><a href="' . esc_url( $settlement_url ) . '">' . esc_html( $payout_label ) . '</a></td>';
-				} else {
-					$html .= '<td>' . esc_html( $payout_label ) . '</td>';
-				}
+				$html .= '<td>' . esc_html( $payout_label ) . '</td>';
 				$html .= '<td>' . esc_html( mp_format_currency( $currency, $row['total'] ) ) . '</td>';
 				$html .= '</tr>';
 			}
@@ -2191,7 +2143,7 @@ class MP_Multisite {
 
 		if ( $show_discover_products ) {
 			$html .= '<section class="mp-hub-panel mp-hub-feature mp-hub-feature-discover">';
-			$html .= '<h3>' . esc_html__( 'Vielleicht interessant fuer Dich', 'mp' ) . '</h3>';
+			$html .= '<h3>' . esc_html__( 'Vielleicht interessant für Dich', 'mp' ) . '</h3>';
 			if ( '' !== trim( (string) $discover_products_html ) ) {
 				$html .= $discover_products_html;
 			} else {
@@ -2206,68 +2158,6 @@ class MP_Multisite {
 	}
 
 	/**
-	 * Count open tickets for a customer (for hub KPI).
-	 *
-	 * @param int $user_id
-	 * @return int
-	 */
-	private function count_open_customer_tickets( $user_id ) {
-		if ( ! post_type_exists( 'mp_support_ticket' ) ) {
-			return 0;
-		}
-
-		$q = new WP_Query( array(
-			'post_type'      => 'mp_support_ticket',
-			'post_status'    => 'publish',
-			'author'         => (int) $user_id,
-			'fields'         => 'ids',
-			'posts_per_page' => 1,
-			'no_found_rows'  => false,
-			'meta_query'     => array( array(
-				'key'     => '_mp_support_status',
-				'value'   => array( 'open', 'in_progress' ),
-				'compare' => 'IN',
-			) ),
-		) );
-
-		return (int) $q->found_posts;
-	}
-
-	/**
-	 * Get recent tickets for a customer for the hub panel.
-	 *
-	 * @param int $user_id
-	 * @return array
-	 */
-	private function get_customer_hub_tickets( $user_id ) {
-		if ( ! post_type_exists( 'mp_support_ticket' ) ) {
-			return array();
-		}
-
-		$q = new WP_Query( array(
-			'post_type'      => 'mp_support_ticket',
-			'post_status'    => 'publish',
-			'author'         => (int) $user_id,
-			'posts_per_page' => 5,
-			'orderby'        => 'date',
-			'order'          => 'DESC',
-			'no_found_rows'  => true,
-		) );
-
-		$result = array();
-		foreach ( (array) $q->posts as $post ) {
-			$result[] = array(
-				'id'       => (int) $post->ID,
-				'title'    => (string) $post->post_title,
-				'status'   => (string) get_post_meta( $post->ID, '_mp_support_status', true ),
-				'priority' => (string) get_post_meta( $post->ID, '_mp_support_priority', true ),
-			);
-		}
-
-		return $result;
-	}
-
-	/**
 	 * Render the optional shop performance overview for shop admins.
 	 *
 	 * @since 1.0
@@ -2279,7 +2169,7 @@ class MP_Multisite {
 		}
 
 		if ( ! is_user_logged_in() || ! current_user_can( 'manage_store_settings' ) ) {
-			return '<p>' . esc_html__( 'Diese Seite ist nur fuer Shopadmins verfuegbar.', 'mp' ) . '</p>';
+			return '<p>' . esc_html__( 'Diese Seite ist nur für Shopadmins verfuegbar.', 'mp' ) . '</p>';
 		}
 
 		$current_blog_id = (int) get_current_blog_id();
@@ -2445,7 +2335,7 @@ class MP_Multisite {
 
 		$html .= '<section class="mp-network-shop-performance">';
 		$html .= '<h2>' . esc_html__( 'Shopuser Performance', 'mp' ) . '</h2>';
-		$html .= '<p class="mp-perf-sub">' . esc_html__( 'E-Commerce Dashboard fuer deinen Shop im Netzwerk mit Flow-Filter und Live-Kennzahlen.', 'mp' ) . '</p>';
+		$html .= '<p class="mp-perf-sub">' . esc_html__( 'E-Commerce Dashboard für deinen Shop im Netzwerk mit Flow-Filter und Live-Kennzahlen.', 'mp' ) . '</p>';
 		$html .= '<div class="mp-flow-filter">' . implode( '', $flow_links ) . '</div>';
 
 		$html .= '<div class="mp-kpi-grid">';
@@ -2474,7 +2364,7 @@ class MP_Multisite {
 		$html .= '</tr></thead><tbody>';
 
 		if ( empty( $top_rows ) ) {
-			$html .= '<tr><td colspan="3">' . esc_html__( 'Keine Daten fuer den gewaelten Flow vorhanden.', 'mp' ) . '</td></tr>';
+			$html .= '<tr><td colspan="3">' . esc_html__( 'Keine Daten für den gewaelten Flow vorhanden.', 'mp' ) . '</td></tr>';
 		} else {
 			foreach ( $top_rows as $shop_row ) {
 				if ( empty( $shop_row['orders'] ) ) {
@@ -2672,8 +2562,6 @@ class MP_Multisite {
 				'network_customer_hub'   => 0,
 				'network_customer_hub_random_products_count' => 4,
 				'network_customer_hub_random_only_when_cart_empty' => 1,
-				'network_support_enabled' => 0,
-				'network_support_mode'   => 'autonomous',
 				'network_withdrawal_management' => 0,
 				'network_shop_performance' => 0,
 				'settlement_enabled'     => 0,

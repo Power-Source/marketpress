@@ -294,7 +294,7 @@
 			cards.push(card('Sync mit Mainshop', [
 				info('Global Cart', 'Aktiv'),
 				info('Hybrid Routing', network.hybrid_routing ? 'Aktiv' : 'Inaktiv'),
-				info('Settlement', network.settlement_enabled ? 'Aktiv' : 'Inaktiv'),
+				info('Freigabe', network.settlement_enabled ? 'Aktiv' : 'Inaktiv'),
 				info('Auto Release', network.auto_release ? 'Aktiv' : 'Inaktiv')
 			]));
 		}

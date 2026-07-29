@@ -1146,6 +1146,9 @@ if ( ! function_exists( 'mp_update_session_value' ) ) :
 	 */
 	function mp_update_session_value( $key, $value ) {
 		mp_public()->start_session();
+		if ( ! isset( $_SESSION ) || ! is_array( $_SESSION ) ) {
+			return;
+		}
 		mp_push_to_array( $_SESSION, $key, $value );
 	}
 
@@ -1345,7 +1348,10 @@ if ( ! function_exists( 'mp_get_store_caps' ) ) :
 			return $store_caps;
 		}
 
-		$store_caps = array( 'manage_store_settings' => 'manage_store_settings' );
+		$store_caps = array(
+			'manage_store_settings'      => 'manage_store_settings',
+			'manage_settlement_approvals' => 'manage_settlement_approvals',
+		);
 		$taxonomies = array( 'product_category', 'product_tag' );
 		$pts        = array( 'product', 'mp_product', 'product_coupon', 'mp_order' );
 

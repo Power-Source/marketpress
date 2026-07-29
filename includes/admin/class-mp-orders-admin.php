@@ -182,7 +182,7 @@ class MP_Orders_Admin {
 		echo '</select>';
 
 		echo '<select name="mp_settlement_status">';
-		echo '<option value="">' . esc_html__( 'Settlement: Alle', 'mp' ) . '</option>';
+		echo '<option value="">' . esc_html__( 'Auszahlungsfreigabe: Alle', 'mp' ) . '</option>';
 		$settlement_options = $this->get_settlement_status_labels();
 		unset( $settlement_options['n/a'] );
 		foreach ( $settlement_options as $value => $label ) {
@@ -1618,8 +1618,8 @@ class MP_Orders_Admin {
 	 */
 	private function get_settlement_status_labels() {
 		return array(
-			'expected_credit' => __( 'Erwartete Gutschrift', 'mp' ),
-			'on_hold'         => __( 'Gesperrt', 'mp' ),
+			'expected_credit' => __( 'Noch offen', 'mp' ),
+			'on_hold'         => __( 'Zurueckgehalten', 'mp' ),
 			'releasable'      => __( 'Freigabefaehig', 'mp' ),
 			'released'        => __( 'Freigegeben', 'mp' ),
 			'n/a'             => __( 'Keine Daten', 'mp' ),
@@ -1634,7 +1634,7 @@ class MP_Orders_Admin {
 	 */
 	private function get_network_checkout_mode_label( $mode ) {
 		$labels = array(
-			'bundle' => __( 'Checkout: Buendelung', 'mp' ),
+			'bundle' => __( 'Checkout: Netzwerkcheckouts', 'mp' ),
 			'split'  => __( 'Checkout: Getrennt', 'mp' ),
 		);
 

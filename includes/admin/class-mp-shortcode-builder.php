@@ -177,7 +177,7 @@ class MP_Shortcode_Builder {
 			'mp_list_products'        => __( 'Zeigt eine Liste oder ein Raster von Produkten an.', 'mp' ),
 			'mp_product'              => __( 'Zeigt ein einzelnes Produkt an.', 'mp' ),
 			'mp_product_image'        => __( 'Zeigt ein einzelnes Produktbild an.', 'mp' ),
-			'mp_buy_button'           => __( 'Zeigt den Kaufen-Button fuer ein einzelnes Produkt an.', 'mp' ),
+			'mp_buy_button'           => __( 'Zeigt den Kaufen-Button für ein einzelnes Produkt an.', 'mp' ),
 			'mp_product_price'        => __( 'Zeigt den Preis eines einzelnen Produkts an.', 'mp' ),
 			'mp_product_meta'         => __( 'Zeigt Kategorien und Tags eines Produkts an.', 'mp' ),
 			'mp_product_sku'          => __( 'Zeigt die SKU eines Produkts an.', 'mp' ),
@@ -273,7 +273,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierreihenfolge fuer Kategorien (aufsteigend oder absteigend).', 'mp' ); ?></span></span> order</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierreihenfolge für Kategorien (aufsteigend oder absteigend).', 'mp' ); ?></span></span> order</th>
 				<td>
 					<select name="order" data-default="ASC">
 						<?php foreach ( array( 'ASC', 'DESC' ) as $value ) : ?>
@@ -336,7 +336,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Setzt eine URI fuer ein Bild (meist ein RSS-Icon), das als Link zum RSS-2-Feed jeder Kategorie dient. Dieser Parameter ueberschreibt den feed-Parameter. Es gibt keinen Standardwert.', 'mp' ); ?></span></span> feed_image</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Setzt eine URI für ein Bild (meist ein RSS-Icon), das als Link zum RSS-2-Feed jeder Kategorie dient. Dieser Parameter ueberschreibt den feed-Parameter. Es gibt keinen Standardwert.', 'mp' ); ?></span></span> feed_image</th>
 				<td>
 					<input type="text" name="feed_image" data-default="" value="" />
 				</td>
@@ -453,7 +453,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierreihenfolge fuer Kategorien (aufsteigend oder absteigend).', 'mp' ); ?></span></span> order</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierreihenfolge für Kategorien (aufsteigend oder absteigend).', 'mp' ); ?></span></span> order</th>
 				<td>
 					<select name="order" data-default="ASC">
 						<?php foreach ( array( 'ASC', 'DESC' ) as $value ) : ?>
@@ -556,25 +556,25 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Welche Kategorie-ID ausgewaehlt ist.', 'mp' ); ?></span></span> selected</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Welche Kategorie-ID ausgewählt ist.', 'mp' ); ?></span></span> selected</th>
 				<td>
 					<input type="text" name="selected" data-default="" value="" />
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Wert des "id"-Attributs fuer das Select-Element. ', 'mp' ); ?></span></span> id</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Wert des "id"-Attributs für das Select-Element. ', 'mp' ); ?></span></span> id</th>
 				<td>
 					<input type="text" name="id" data-default="0" value="0" />
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Wert des "name"-Attributs fuer das Select-Element. ', 'mp' ); ?></span></span> name</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Wert des "name"-Attributs für das Select-Element. ', 'mp' ); ?></span></span> name</th>
 				<td>
 					<input type="text" name="name" data-default="cat" value="cat" />
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Wert des "tabindex"-Attributs fuer das Select-Element. ', 'mp' ); ?></span></span> tab_index</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Wert des "tabindex"-Attributs für das Select-Element. ', 'mp' ); ?></span></span> tab_index</th>
 				<td>
 					<input type="text" name="tab_index" data-default="0" value="0" />
 				</td>
@@ -605,7 +605,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Masseinheit fuer den kleinsten und groessten Wert. Kann jeder CSS-Laengenwert sein, z. B. pt, px, em, %.', 'mp' ); ?></span></span> unit</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Masseinheit für den kleinsten und groessten Wert. Kann jeder CSS-Laengenwert sein, z. B. pt, px, em, %.', 'mp' ); ?></span></span> unit</th>
 				<td>
 					<input type="text" name="unit" data-default="pt" value="pt" />
 				</td>
@@ -710,7 +710,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierrichtung fuer Produkte.', 'mp' ); ?></span></span> order</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierrichtung für Produkte.', 'mp' ); ?></span></span> order</th>
 				<td>
 					<label><input type="radio" name="order" data-default="<?php echo esc_attr( mp_get_setting( 'order' ) ); ?>" value="ASC" <?php checked( 'ASC', mp_get_setting( 'order' ) ); ?> /> <?php _e( 'Aufsteigend', 'mp' ); ?></label> &nbsp; &nbsp;
 					<label><input type="radio" name="order" data-default="<?php echo esc_attr( mp_get_setting( 'order' ) ); ?>" value="DESC" <?php checked( 'DESC', mp_get_setting( 'order' ) ); ?> /> <?php _e( 'Absteigend', 'mp' ); ?></label>
@@ -788,7 +788,7 @@ class MP_Shortcode_Builder {
 		?>
 		<table id="mp-related-products-shortcode" class="form-table" style="display:none">
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Das Produkt, fuer das aehnliche Elemente angezeigt werden sollen.', 'mp' ); ?></span></span> product_id</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Das Produkt, für das aehnliche Elemente angezeigt werden sollen.', 'mp' ); ?></span></span> product_id</th>
 				<td>
 					<input type="text" class="mp-select-product" name="product_id" />
 				</td>
@@ -877,7 +877,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierrichtung fuer Produkte.', 'mp' ); ?></span></span> order</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierrichtung für Produkte.', 'mp' ); ?></span></span> order</th>
 				<td>
 					<label><input type="radio" name="order" data-default="<?php echo esc_attr( mp_get_setting( 'order' ) ); ?>" value="ASC" <?php checked( 'ASC', mp_get_setting( 'order' ) ); ?> /> <?php _e( 'Aufsteigend', 'mp' ); ?></label> &nbsp; &nbsp;
 					<label><input type="radio" name="order" data-default="<?php echo esc_attr( mp_get_setting( 'order' ) ); ?>" value="DESC" <?php checked( 'DESC', mp_get_setting( 'order' ) ); ?> /> <?php _e( 'Absteigend', 'mp' ); ?></label>
@@ -992,7 +992,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Welcher Kontext fuer vordefinierte Groessenoptionen gilt.', 'mp' ); ?></span></span> context</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Welcher Kontext für vordefinierte Groessenoptionen gilt.', 'mp' ); ?></span></span> context</th>
 				<td>
 					<select name="context" data-default="single">
 						<option value="single" selected><?php _e( 'Einzeln', 'mp' ); ?></option>
@@ -1036,7 +1036,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Welcher Kontext fuer die Anzeige gilt.', 'mp' ); ?></span></span> context</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Welcher Kontext für die Anzeige gilt.', 'mp' ); ?></span></span> context</th>
 				<td>
 					<label><input type="radio" value="single" name="context" data-default="single" value="single" checked> <?php _e( 'Einzeln', 'mp' ); ?></label> &nbsp; &nbsp;
 					<label><input type="radio" value="list" name="context" data-default="single" value="list"> <?php _e( 'Liste', 'mp' ); ?></label>
@@ -1131,7 +1131,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>-->
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Welcher Kontext fuer die Anzeige gilt.', 'mp' ); ?></span></span> context</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Welcher Kontext für die Anzeige gilt.', 'mp' ); ?></span></span> context</th>
 				<td>
 					<label><input type="radio" value="single" name="context" data-default="single" value="single" checked> <?php _e( 'Einzeln', 'mp' ); ?></label> &nbsp; &nbsp;
 					<label><input type="radio" value="list" name="context" data-default="single" value="list"> <?php _e( 'Liste', 'mp' ); ?></label>
@@ -1321,7 +1321,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierrichtung fuer Produkte.', 'mp' ); ?></span></span> order</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierrichtung für Produkte.', 'mp' ); ?></span></span> order</th>
 				<td>
 					<label><input type="radio" name="order" data-default="<?php echo esc_attr( mp_get_setting( 'order' ) ); ?>" value="ASC" <?php checked( 'ASC', mp_get_setting( 'order' ) ); ?> /> <?php _e( 'Aufsteigend', 'mp' ); ?></label> &nbsp; &nbsp;
 					<label><input type="radio" name="order" data-default="<?php echo esc_attr( mp_get_setting( 'order' ) ); ?>" value="DESC" <?php checked( 'DESC', mp_get_setting( 'order' ) ); ?> /> <?php _e( 'Absteigend', 'mp' ); ?></label>
@@ -1382,7 +1382,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierreihenfolge fuer Kategorien (aufsteigend oder absteigend).', 'mp' ); ?></span></span> order</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Sortierreihenfolge für Kategorien (aufsteigend oder absteigend).', 'mp' ); ?></span></span> order</th>
 				<td>
 					<select name="order" data-default="ASC">
 						<?php foreach ( array( 'ASC', 'DESC' ) as $value ) : ?>

@@ -112,7 +112,7 @@ class MP_Products_Screen {
 		$metabox->add_field( 'text', array(
 			'name'          => 'product_video_url',
 			'label'         => array( 'text' => __( 'Produktvideo URL (optional)', 'mp' ) ),
-			'desc'          => __( 'Optionales Video fuer die Produktseite. Unterstuetzt YouTube/Vimeo-Links (Embed) sowie direkte MP4/WebM-Dateien.', 'mp' ),
+			'desc'          => __( 'Optionales Video für die Produktseite. Unterstuetzt YouTube/Vimeo-Links (Embed) sowie direkte MP4/WebM-Dateien.', 'mp' ),
 			'custom'        => array( 'placeholder' => 'https://...' ),
 			'save_callback' => array( 'esc_url_raw' ),
 			'conditional'   => array(
