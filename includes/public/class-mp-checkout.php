@@ -856,13 +856,13 @@ class MP_Checkout {
 		wp_enqueue_script( 'mp-checkout', mp_plugin_url( 'ui/js/mp-checkout.js' ), array( 'jquery-payment' ), MP_VERSION, true );
 
 		wp_localize_script( 'mp-checkout', 'mp_checkout_i18n', array(
-			'cc_num'		 => __( 'Please enter a valid credit card number', 'mp' ),
-			'cc_exp'		 => __( 'Please enter a valid card expiration', 'mp' ),
-			'cc_cvc'		 => __( ' Please enter a valid card security code', 'mp' ),
-			'cc_fullname'	 => __( 'Please enter a valid first and last name', 'mp' ),
-			'errors'		 => __( '<h4 class="mp_sub_title">Oops! We found %d %s in the form below.</h4><p>Fields that have errors are highlighted in <span>red</span> below. Entering into a field will reveal the actual error that occurred.</p>', 'mp' ),
-			'error_plural'	 => __( 'errors', 'mp' ),
-			'error_singular' => __( 'error', 'mp' ),
+			'cc_num'		 => __( 'Bitte gib eine gültige Kreditkartennummer ein', 'mp' ),
+			'cc_exp'		 => __( 'Bitte gib ein gültiges Ablaufdatum ein', 'mp' ),
+			'cc_cvc'		 => __( 'Bitte gib einen gültigen Sicherheitscode ein', 'mp' ),
+			'cc_fullname'	 => __( 'Bitte gib einen gültigen Vor- und Nachnamen ein', 'mp' ),
+			'errors'		 => __( '<h4 class="mp_sub_title">Hoppla! Wir haben %d %s im untenstehenden Formular gefunden.</h4><p>Felder, die Fehler enthalten, sind unten in <span>rot</span> hervorgehoben. Das Eintreten in ein Feld zeigt den tatsächlichen aufgetretenen Fehler an.</p>', 'mp' ),
+			'error_plural'	 => __( 'Fehler', 'mp' ),
+			'error_singular' => __( 'Fehler', 'mp' ),
 		) );
 	}
 
@@ -1034,7 +1034,7 @@ class MP_Checkout {
 					break;
 				}
 
-				$text		 = __( '&laquo; Previous Step', 'mp' );
+				$text		 = __( '&laquo; Vorheriger Schritt', 'mp' );
 				$classes[]	 = 'mp_button-secondary';
 				$link = '<a class="' . implode( ' ', $classes ) . '" href="' . $hash . '">' . $text . '</a>';
 				break;
@@ -1042,7 +1042,7 @@ class MP_Checkout {
 			case 'next' :
 				// Prüfe ob dies der letzte Schritt ist (order-review-payment)
 				$is_last_step = ( $section === 'order-review-payment' || $this->_step === 'order-review-payment' );
-				$text		 = $is_last_step ? __( 'Jetzt bestellen', 'mp' ) : __( 'Next Step &raquo;', 'mp' );
+				$text		 = $is_last_step ? __( 'Jetzt bestellen', 'mp' ) : __( 'Nächster Schritt &raquo;', 'mp' );
 				$classes[]	 = 'mp_button-medium';
 				$link = '<button class="' . implode( ' ', $classes ) . '" type="submit">' . $text . '</button>';
 				break;

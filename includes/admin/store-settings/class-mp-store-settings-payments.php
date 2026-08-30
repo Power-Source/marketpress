@@ -114,14 +114,24 @@ class MP_Store_Settings_Payments {
 	 * @action admin_head
 	 */
 	public function print_styles() {
-		if ( 'store-settings_page_store-settings-payments' != get_current_screen()->id || ! ( is_plugin_active_for_network( mp_get_plugin_slug() ) && mp_get_network_setting( 'global_cart' ) ) ) {
-			// bail - either not on payments settings screen or global cart is not enabled
+		if ( 'store-settings_page_store-settings-payments' !== get_current_screen()->id ) {
+			return;
+		}
+
+		if ( ! is_plugin_active_for_network( mp_get_plugin_slug() ) || ! mp_get_network_setting( 'global_cart' ) ) {
+			return;
+		}
+
+		$hybrid = (bool) mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 );
+
+		// In hybrid mode, subshops configure their own gateways.
+		if ( $hybrid && ! is_network_admin() && ! mp_is_main_site() ) {
 			return;
 		}
 
 		echo '<style type="text/css">
 			#mp-settings-payments, #mp-settings-payments + p.submit { display: none; }
-			</style>';
+		</style>';
 	}
 
 	/**

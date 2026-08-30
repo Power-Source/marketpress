@@ -84,8 +84,10 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
-= 1.1.2 =
+= 1.1.3 =
+* Fix DOM text reinterpreted as HTML im Warenkorb
 
+= 1.1.2 =
 * Fix: Auszahlungsfreigabe im Admin robust registriert und erreichbar gemacht; fehlerhafte URL-/Routing-Pfade wurden bereinigt und auf den korrekten Admin-Aufruf konsolidiert.
 * Fix: Zugriff auf die Auszahlungsfreigabe stabilisiert (inkl. Super-Admin-Fallbacks), damit Berechtigungspruefungen nicht mehr inkonsistent blockieren.
 * Neu: Eigenes Recht `manage_settlement_approvals` eingefuehrt und in die Rollenverwaltung integriert (`store-settings-capabilities`) fuer gezielte Freigabe von Auszahlungsaktionen.
@@ -95,7 +97,6 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Fix: Mainshop-/Multisite-Erkennung im Freigabe-Flow an die MarketPress-Logik angepasst, damit die Seite im richtigen Kontext geladen wird.
 
 = 1.1.1 =
-
 * Neu: Netzwerk-Kundenhub deutlich erweitert (globale Warenkorbuebersicht, Discover-Bereich mit zufaelligen Netzwerkprodukten, konfigurierbare Anzahl und Anzeige nur bei leerem Warenkorb).
 * Neu: Shop-Profil im Netzwerk massiv ausgebaut (Tabs für Produkte/Gutscheine/Bewertungen, Shop-Beschreibung, Kategorie-Prefilter, verbesserte Navigation und AJAX-Updatefluss ohne Full-Reload).
 * Neu: Steuerung für Floating-Warenkorb auf Mainshop-Seiten ergaenzt (netzwerkweite Option für Sichtbarkeit/Modus).
@@ -116,12 +117,10 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Fix: Diverse CSS-/Strukturprobleme in den Netzwerkoberflaechen bereinigt; neue Theme-Variante "Modern Cool Compact" vorbereitet und dokumentiert.
 
 = 1.1.0 =
-
 * Neu: Digitale Widerrufs-Kundenzone auf der Bestellstatus-Seite (2-Schritt-Flow mit sofortiger Eingangsbestätigung per E-Mail), inklusive Ausschlusslogik pro Produkt und Snapshot pro Bestellung.
 * Neu: Admin-Metabox in der Bestellbearbeitung für eingegangene Widerrufe; Anfragen sind pro Bestellung übersichtlich einsehbar und mit internem Status/Notiz bearbeitbar.
 
 = 1.0.9 =
-
 * Fix: Beim Wechsel von Produktvarianten bleibt der Beschreibungstext jetzt erhalten; wenn eine Variante keinen eigenen Beschreibungstext oder Excerpt hat, wird automatisch der Standardtext des Hauptprodukts als Fallback verwendet.
 * Verbesserung: Produktbilder- und Video-Uploader bleiben jetzt auch bei variablen Produkten verfuegbar; auf der Produktseite bleibt die Default-Galerie als Slider erhalten und beim Variantenwechsel wird nur das erste Default-Bild durch das Variantenbild ersetzt (ohne gesetztes Variationsbild faellt die Ansicht sauber auf das Default-Bild zurueck).
 * Neu: Addon "Erlaube Produktkommentare" zu einem voll integrierten Bewertungsbereich ausgebaut: neuer Bewertungen-Tab in der Produktansicht mit Durchschnitts-Sterneanzeige, Kommentarformular, Bearbeiten-Funktion und "Hilfreich"-Markierung pro Rezension.
@@ -130,7 +129,6 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Neu: Sortierung `order_by="rating"` für `[mp_list_products]`; Produkte werden nach Durchschnittsbewertung absteigend sortiert, bei Gleichstand gewinnt das Produkt mit mehr Bewertungen. Kombinierbar mit `category`, `tag` und Paginierung.
 
 = 1.0.8 =
-
 * Fix: Kritischer Fehler beim Speichern von Produktattributen behoben; Kategorien-/Term-Daten werden jetzt robust normalisiert und PHP-8-sicher verarbeitet.
 * Fix: Admin-Flow für Varianten-Erstellung stabilisiert; Klick auf "Varianten erstellen" triggert Speichern jetzt sprachunabhaengig und fuehrt direkt in die Variantenmaske.
 * Fix: JavaScript-Abbruch im Produkteditor beseitigt (`mp_product_admin_i18n is not defined`); Script-Lokalisierung erfolgt wieder in korrekter Reihenfolge, inklusive defensivem Fallback.
@@ -141,21 +139,18 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Verbesserung: Varianten-Popups im Produkteditor von Legacy-Colorbox auf `basicLightbox` umgestellt; reduziert jQuery-Migrate-Warnungen und stabilisiert das Modal-Verhalten.
 
 = 1.0.7 =
-
 * Fix: Sehr grosse Produktbilder im Produktbildslider werden jetzt sauber auf die verfuegbare Slidergroesse skaliert, statt ueber den Container hinauszuragen.
 * Fix: Shortcode-Builder im Editor zeigt die Attribut-Optionen wieder korrekt an; die Umschaltung greift jetzt sauber im sichtbaren Modal.
 * Fix: Shortcode-Builder-Modal wird hoeher im Viewport positioniert, damit die Bedienung im Editor besser funktioniert.
 * Fix: PHP-8-Warnings im page_template-Filter behoben; die Template-Erkennung für Store-/Cart-/Checkout-Seiten prueft jetzt robust auf ein fehlendes Post-Objekt und nutzt eine sichere Fallback-Page-ID.
 
 = 1.0.6 =
-
 * Fix: Shortcode-Builder im visuellen Editor zeigt wieder die vollstaendige Shortcode-Auswahl statt einer unvollstaendigen Teilmenge.
 * Fix: Netzwerk-Shortcodes (`mp_list_global_products`, `mp_global_categories_list`, `mp_global_tag_cloud`) werden im Netzwerkmodus wieder korrekt eingeblendet, wenn MarketPress netzwerkweit aktiv ist und die Multisite-Einstellung passt.
 * Verbesserung: Manuelles Zahlungs-Gateway zeigt jetzt klarere Feld-Beschreibungen in den Settings (welche Platzhalter wo funktionieren) und liefert aussagekräftige Beispiel-Texte als Startup-Vorlagen zum individuellen Anpassen.
 * Neu: Produkte unterstuetzen jetzt optional eine Video-URL (`Produktvideo URL`) für die Produktdetailseite; YouTube/Vimeo-Links werden eingebettet, direkte MP4/WebM-Dateien als HTML5-Video angezeigt.
 
 = 1.0.5 =
-
 * Fix: Checkout-AJAX in allen betroffenen Payment-Handlern gehaertet (`free_orders`, `manual_payments`, `paypal-express`, `payfast`, `authorizenet-aim`, `simplify`); Redirects brechen den AJAX-Response nicht mehr ab.
 * Fix: Checkout-Controller verarbeitet Gateway-Rueckgaben robuster und nutzt konsistente Cache-Handoff-Keys für Order/Redirect-URL.
 * Fix: Kostenlose digitale Produkte umgehen den Checkout jetzt komplett und starten direkt den Download.
@@ -166,7 +161,6 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Fix: Syntaxproblem im Gateway `authorizenet-aim` behoben (saubere Funktionsstruktur, keine Parse-Fehler mehr).
 
 = 1.0.4 =
-
 * Neu: Statistik-Addon erfasst jetzt auch Gratis-Downloads; jeder Download-Vorgang wird in der Tabelle `wp_mp_download_events` gespeichert (Felder: Order, Produkt, Nutzer, Betrag, `is_free`-Flag, Zeitstempel). Die Statistikübersicht zeigt Gratis-Downloads als zweites Chart-Dataset auf einer eigenen rechten Y-Achse sowie als eigene KPI-Kachel neben dem Gesamtumsatz.
 * Verbesserung: Berechtigungsseite modernisiert; die bisherige Metabox-Ansicht wurde durch eine eigene, deutlich uebersichtlichere Rollenansicht ersetzt. Rollen lassen sich jetzt per Dropdown umschalten, Berechtigungen sind nach Bereichen gruppiert, verwenden klare uebersetzbare Beschriftungen statt reiner System-Slugs und koennen direkt inline per AJAX gespeichert werden.
 * Security: XSS-Risiko in `basicLightbox.js` geschlossen (CodeQL #3); `elem.innerHTML = html` wurde durch `appendChild(node)` ersetzt. Alle vier Caller (`frontend.js`, `mp-cart.js`, `mp-swiper-init.js`, `shortcode-builder.js`) übergeben jetzt DOM-Nodes statt rohe HTML-Strings – AJAX-Responses werden über `DOMParser` geparst (Scripts werden dabei nicht ausgeführt).
@@ -184,7 +178,6 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Fix: PDF-Lieferscheine verwenden keine extern geladenen Webfonts mehr; stattdessen kommt eine PDF-taugliche Standardschrift zum Einsatz, wodurch Darstellungsprobleme und unerwünschte Dompdf-Font-Artefakte vermieden werden.
 
 = 1.0.3 =
-
 * Fix: Legacy-Datenbank-Upgrade-Trigger für die 1.x-Linie deaktiviert, damit die Meldung "MarketPress requires a database update" bei normalen Plugin-Updates nicht mehr wiederholt erscheint.
 * Security: Gast-Bestellstatus wurde gehärtet; nicht eingeloggte Zugriffe auf Bestelldetails erfordern nun die passende Gast-E-Mail-Prüfung statt nur der Bestellnummer.
 * Security: Öffentliche AJAX-Prüfungen für bestehende Benutzernamen/E-Mails wurden mit zusätzlicher Nonce-Validierung abgesichert.
@@ -199,11 +192,9 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Performance: Post-Select-Feld in psource-metaboxes nutzt ein sinnvolles Standardlimit statt unbegrenzter Abfrage.
 
 = 1.0.2 =
-
 * Fix: Die URL-Logik wurde für Produktlinks vereinheitlicht (Netzwerk-Marktplatz, Produktbilder, Excerpt-Links, Social-Buttons, Widgets und Cart-Export nutzen jetzt konsistent die dynamische Produkt-URL).
 
 = 1.0.1 =
-
 * Neu: Konfigurierbare Kaufen-Button-Texte unter Darstellung für Standard-, Download-, Gratis- und Varianten-Zustände.
 * Fix: Netzwerk-Marktplatz-Produktlinks zeigen nun wieder auf die korrekten Produktseiten der Subshops.
 * Fix: Globale Kategorie- und Tag-Links im Multisite-Marktplatz verwenden nun dynamische Seiten-URLs statt starrer Pfade.
@@ -222,6 +213,5 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 * Fix: Die PHP-8-Kompatibilität wurde verbessert, u.a. durch Ersetzen von `wp_get_sites()` und Entfernen von `utf8_encode()`.
 
 = 1.0.0 =
-
 * Release
 

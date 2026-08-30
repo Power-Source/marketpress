@@ -1661,32 +1661,52 @@ class MP_Multisite {
 	}
 
 	/**
-	 * Filter out gateways that aren't allowed according to network admin settings
+	 * Filter out gateways that aren't allowed according to network admin settings.
+	 *
+	 * Gateway restrictions apply to frontend requests. On the shop payment
+	 * settings page, all registered gateways must remain available so that
+	 * shop administrators can configure their own payment methods.
 	 *
 	 * @since 1.0
 	 * @access public
 	 * @filter mp_gateway_api/get_gateways
+	 *
+	 * @param array $gateways Registered gateways.
+	 * @return array Filtered gateways.
 	 */
 	public function get_gateways( $gateways ) {
+
+		/*
+		* Shop administrators must be able to see and configure all gateways.
+		* Global-cart routing is only relevant when processing the checkout.
+		*/
+		if ( is_admin() ) {
+			$page = mp_get_get_value( 'page' );
+
+			if ( in_array( $page, array( 'store-settings-payments', 'store-setup-wizard' ), true ) ) {
+				return $gateways;
+			}
+		}
+
 		if ( ! is_network_admin() ) {
 			$use_global_gateway = $this->should_use_network_global_gateway();
 
 			if ( $use_global_gateway ) {
 				$code = mp_get_network_setting( 'global_gateway' );
-				if ( ! empty( $code ) ) {
+
+				if ( ! empty( $code ) && isset( $gateways[ $code ] ) ) {
 					$gateways = array( $code => $gateways[ $code ] );
 				} else {
-					//case no gateway picked in the admin
-					//todo show info to admin
+					// No gateway selected in network admin.
 					$gateways = array();
 				}
 			} else {
 				$allowed                = mp_get_network_setting( 'allowed_gateways' );
-				$allowed['free_orders'] = 'full';//Always allow and activate it automatically later if needed
+				$allowed['free_orders'] = 'full';
 
 				if ( is_array( $allowed ) ) {
 					foreach ( $gateways as $code => $gateway ) {
-						if ( isset( $allowed[ $code ] ) && 'none' == $allowed[ $code ] ) {
+						if ( isset( $allowed[ $code ] ) && 'none' === $allowed[ $code ] ) {
 							unset( $gateways[ $code ] );
 						}
 					}
