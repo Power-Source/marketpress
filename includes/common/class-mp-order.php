@@ -1365,8 +1365,10 @@ public $ID = null;
 		do_action( 'mp_order/new_order', $this );
 		do_action( 'mp_product_created', $this->ID );//support for older integrations
 
-		// Empty cart
-		$cart->empty_cart();
+		// Empty cart only after successful payment.
+		if ( $paid ) {
+			$cart->empty_cart();
+		}
 
 		// Remove session variables
 		if ( mp_get_session_value( 'mp_shipping_info' ) ) {
@@ -1375,8 +1377,8 @@ public $ID = null;
 					case 'shipping_option' :
 					case 'shipping_sub_option' :
 					case 'shipping_cost' :
-						unset( $_SESSION[ $key ] );
-						break;
+					unset( $_SESSION[ $key ] );
+					break;
 				}
 			}
 		}

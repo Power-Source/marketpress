@@ -38,19 +38,6 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
         $this->on_creation();
     }
 
-    // Gateway-Initialisierung (z. B. Registrierung)
-    public static function register_gateway( $plugin_name = 'MP_Gateway_PayPal_Marketplace', $args = array() ) {
-        if ( empty( $args ) ) {
-            $args = array(
-                'file'      => __FILE__,
-                'class'     => 'MP_Gateway_PayPal_Marketplace',
-                'name'      => __( 'PayPal Marketplace (Commerce Platform)', 'mp' ),
-                'is_global' => true,
-            );
-        }
-        parent::register_gateway( $plugin_name, $args );
-    }
-
     public function admin_settings( $settings ) {
         $settings[ 'client_id' ] = array(
             'label'       => __( 'PayPal Client-ID', 'mp' ),
@@ -421,21 +408,7 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
     }
 }
 
-// Registrierung IMMER, unabhängig vom Kontext
-add_action('plugins_loaded', function() {
-    MP_Gateway_PayPal_Marketplace::register_gateway();
-}, 1);
 // Hook für das Onboarding im Admin-Bereich
 add_action( 'admin_init', array( MP_Gateway_PayPal_Marketplace::class, 'maybe_handle_onboarding' ) );
 // Webhook-Handler aktivieren
 add_action( 'init', array( MP_Gateway_PayPal_Marketplace::class, 'maybe_handle_webhook' ) );
-// Gateway immer in die Gateway-Liste injizieren (Netzwerk & Shop)
-add_filter('mp_gateways', function($gateways) {
-    $gateways['paypal_marketplace'] = array(
-        'file' => __FILE__,
-        'class' => 'MP_Gateway_PayPal_Marketplace',
-        'name' => __('PayPal Marketplace (Commerce Platform)', 'mp'),
-        'is_global' => true,
-    );
-    return $gateways;
-}, 1);

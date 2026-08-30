@@ -93,20 +93,42 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 			 * @since 1.0
 			 * @param bool $use_network_global_gateway
 			 */
-			$use_network_global_gateway = (bool) apply_filters( 'mp_gateway_api/use_network_global_gateway', $use_network_global_gateway );
+			$use_network_global_gateway = (bool) apply_filters(
+					'mp_gateway_api/use_network_global_gateway',
+					$use_network_global_gateway
+			);
 
-			if ( $use_network_global_gateway && ! is_admin() && mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 ) && function_exists( 'mp_cart' ) ) {
-				$blog_ids = (array) mp_cart()->get_blog_ids();
-				if ( count( $blog_ids ) === 1 && (int) reset( $blog_ids ) !== (int) mp_root_blog_id() ) {
-					$use_network_global_gateway = false;
-				}
+			/*
+			* Hybrid gateway routing:
+			*
+			* Global Cart remains enabled, but a cart containing products
+			* from exactly one subshop uses that shop's local gateways.
+			*
+			* A cart containing products from multiple shops continues
+			* to use the network-global gateway.
+			*/
+			if (
+					$use_network_global_gateway
+					&& ! is_admin()
+					&& mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 )
+					&& function_exists( 'mp_cart' )
+			) {
+					$blog_ids = array_unique( array_map( 'intval', (array) mp_cart()->get_blog_ids() ) );
+
+					if (
+							count( $blog_ids ) === 1
+							&& (int) reset( $blog_ids ) !== (int) mp_root_blog_id()
+					) {
+							$use_network_global_gateway = false;
+					}
 			}
 
 			if ( $use_network_global_gateway ) {
-				//if this is global cart, we will need to get from network admin
-				$gateways = mp_get_network_setting( 'global_gateway' );
+					// Global Cart with multiple shops: use the network gateway.
+					$gateways = mp_get_network_setting( 'global_gateway' );
 			} else {
-				$gateways = mp_get_setting( 'gateways' );
+					// Normal shop checkout: use the current shop's gateways.
+					$gateways = mp_get_setting( 'gateways' );
 			}
 
 			foreach ( self::get_gateways() as $code => $plugin ) {
