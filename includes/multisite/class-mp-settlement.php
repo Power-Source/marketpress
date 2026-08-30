@@ -88,7 +88,7 @@ class MP_Network_Settlement {
 	 */
 	public function add_main_menu() {
 		add_submenu_page(
-			null,
+			'store-settings',
 			__( 'Auszahlungsfreigabe', 'mp' ),
 			__( 'Auszahlungsfreigabe', 'mp' ),
 			'read',

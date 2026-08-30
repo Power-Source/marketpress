@@ -328,20 +328,26 @@ var mp_cart = { };
                     } else {
                         $defaultLinks.each( function() {
                             var defaultHref = $( this ).attr( 'data-mp-default-href' );
+
                             if ( defaultHref ) {
-                                $( this ).attr( 'href', defaultHref );
+                                $( this ).attr( 'href', encodeURI( defaultHref ) );
                             }
                         } );
 
                         $defaultImages.each( function() {
                             var defaultSrc = $( this ).attr( 'data-mp-default-src' );
+
                             if ( defaultSrc ) {
-                                $( this ).attr( 'src', defaultSrc );
+                                $( this ).attr( 'src', encodeURI( defaultSrc ) );
                             }
                         } );
 
                         if ( $defaultImages.first().length > 0 ) {
-                            $( '.mp_product_options_thumb' ).attr( 'src', $defaultImages.first().attr( 'data-mp-default-src' ) );
+                            var defaultSrc = $defaultImages.first().attr( 'data-mp-default-src' );
+
+                            if ( defaultSrc ) {
+                                $( '.mp_product_options_thumb' ).attr( 'src', encodeURI( defaultSrc ) );
+                            }
                         }
                     }
 
