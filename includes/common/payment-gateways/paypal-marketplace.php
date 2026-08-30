@@ -34,6 +34,18 @@ function init_paypal_marketplace_network_settings_metaboxes() {
         'before_field' => '',
     ) );
     $metabox->add_field( 'text', array(
+        'name'         => 'paypal_marketplace_bn_code',
+        'label'        => array(
+            'text' => __( 'PayPal Partner Attribution ID', 'mp' )
+        ),
+        'desc'         => __(
+            'Optionaler PayPal Partner-/BN-Code für API-Anfragen.',
+            'mp'
+        ),
+        'custom'       => array( 'style' => 'width:350px' ),
+        'before_field' => '',
+    ) );
+    $metabox->add_field( 'text', array(
         'name'         => 'paypal_marketplace_webhook_url',
         'label'        => array( 'text' => __( 'Webhook-URL', 'mp' ) ),
         'desc'         => __( 'Diese URL muss bei PayPal als Webhook hinterlegt werden.', 'mp' ),

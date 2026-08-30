@@ -2520,45 +2520,47 @@ class MP_Cart {
 	 * This will exprort the cart to array
 	 */
 	public function export_to_array() {
-		$data            = array();
-		$current_blog_id = get_current_blog_id();
-		foreach ( $this->get_all_items() as $b_id => $items ) {
-			if ( $this->is_global ) {
-				switch_to_blog( $b_id );
-			}
+        $data            = array();
+        $current_blog_id = get_current_blog_id();
 
-			foreach ( $items as $id => $qty ) {
-				$product = new MP_Product( $id );
-				if ( ! $product->is_variation() ) {
-					$data[ $id ][] = array(
-						'SKU'              => $product->get_meta( 'sku' ),
-						'name'             => $product->title( false ),
-						'url'              => $product->url( false ),
-						'price'            => $product->get_price( 'lowest' ),
-						'quantity'         => $this->get_item_qty( $id ),
-						'download'         => $product->is_download(),
-						'before_tax_price' => $product->before_tax_price()
-					);
-				} else {
-					$product_id                 = $product->post_parent;
-					$data[ $product_id ][ $id ] = array(
-						'SKU'              => $product->get_meta( 'sku' ),
-						'name'             => $product->title( false ),
-						'url'              => $product->url( false ),
-						'price'            => $product->get_price( 'lowest' ),
-						'quantity'         => $this->get_item_qty( $id ),
-						'download'         => $product->is_download(),
-						'before_tax_price' => $product->before_tax_price()
-					);
-				}
-			}
+        foreach ( $this->get_all_items() as $b_id => $items ) {
+            if ( $this->is_global ) {
+                switch_to_blog( $b_id );
+            }
 
-			if ( $this->is_global ) {
-				switch_to_blog( $current_blog_id );
-			}
-		}
+            foreach ( $items as $id => $qty ) {
+                $product = new MP_Product( $id );
 
-		return $data;
+                if ( ! $product->is_variation() ) {
+                    $data[ $id ][] = array(
+                        'SKU'   			=> $product->get_meta( 'sku' ),
+                        'name'  			=> $product->title( false ),
+                        'url'   			=> $product->url( false ),
+                        'price' 			=> $product->get_price( 'lowest' ),
+                        'quantity'  		=> $this->get_item_qty( $id ),
+                        'download'  		=> $product->is_download(),
+                        'before_tax_price'  => $product->before_tax_price()
+                    );
+                 } else {
+                    $product_id                 = $product->post_parent;
+                    $data[ $product_id ][ $id ] = array(
+                    	'SKU'              => $product->get_meta( 'sku' ),
+                        'name'             => $product->title( false ),
+                        'url'              => $product->url( false ),
+                        'price'            => $product->get_price( 'lowest' ),
+                        'quantity'         => $this->get_item_qty( $id ),
+                        'download'         => $product->is_download(),
+                        'before_tax_price' => $product->before_tax_price()
+                    );
+                }
+            }
+
+            if ( $this->is_global ) {
+                switch_to_blog( $current_blog_id );
+            }
+        }
+
+        return $data;
 	}
 
 	/**

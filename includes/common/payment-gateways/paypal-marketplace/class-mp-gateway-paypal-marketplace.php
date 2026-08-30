@@ -95,279 +95,981 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
     }
 
     /**
-     * Fängt den Onboarding-Redirect ab und speichert die Merchant-ID (echter Flow)
+     * Get the PayPal API base URL.
+     *
+     * @return string
+     */
+    protected function get_api_base_url() {
+        $sandbox = (bool) mp_get_network_setting(
+            'advanced->paypal_marketplace_sandbox',
+            true
+        );
+
+        return $sandbox
+            ? 'https://api-m.sandbox.paypal.com'
+            : 'https://api-m.paypal.com';
+    }
+
+    /**
+     * Get the PayPal Partner Client ID.
+     *
+     * @return string
+     */
+    protected function get_partner_client_id() {
+        return (string) mp_get_network_setting(
+            'paypal_marketplace_client_id',
+            ''
+        );
+    }
+
+    /**
+     * Get the PayPal Partner Secret.
+     *
+     * @return string
+     */
+    protected function get_partner_secret() {
+        return (string) mp_get_network_setting(
+            'paypal_marketplace_secret',
+            ''
+        );
+    }
+
+        /**
+         * Get a PayPal access token.
+         *
+         * The token is cached until shortly before its expiry.
+         *
+         * @return string|WP_Error
+         */
+        protected function get_paypal_access_token() {
+
+            $client_id = $this->get_partner_client_id();
+            $secret    = $this->get_partner_secret();
+
+            if ( '' === $client_id || '' === $secret ) {
+                return new WP_Error(
+                    'paypal_credentials_missing',
+                    __( 'PayPal Partner-Zugangsdaten fehlen.', 'mp' )
+                );
+            }
+
+            $cache_key = 'paypal_marketplace_access_token_' . md5(
+                $client_id . '|' . $this->get_api_base_url()
+            );
+
+            $cached = wp_cache_get( $cache_key, 'marketpress' );
+
+            if (
+                is_array( $cached ) &&
+                ! empty( $cached['token'] ) &&
+                ! empty( $cached['expires'] ) &&
+                time() < (int) $cached['expires']
+            ) {
+                return $cached['token'];
+            }
+
+            $response = wp_remote_post(
+                $this->get_api_base_url() . '/v1/oauth2/token',
+                array(
+                    'headers' => array(
+                        'Accept'          => 'application/json',
+                        'Accept-Language' => 'en_US',
+                        'Authorization'   => 'Basic ' . base64_encode(
+                            $client_id . ':' . $secret
+                        ),
+                        'Content-Type'    => 'application/x-www-form-urlencoded',
+                    ),
+                    'body' => array(
+                        'grant_type' => 'client_credentials',
+                    ),
+                    'timeout' => 30,
+                )
+            );
+
+            if ( is_wp_error( $response ) ) {
+                $this->log(
+                    'PayPal OAuth HTTP-Fehler: ' .
+                    $response->get_error_message()
+                );
+
+                return $response;
+            }
+
+            $code = wp_remote_retrieve_response_code( $response );
+            $body = wp_remote_retrieve_body( $response );
+            $data = json_decode( $body, true );
+
+            if (
+                200 !== $code ||
+                empty( $data['access_token'] )
+            ) {
+                $message = ! empty( $data['error_description'] )
+                    ? sanitize_text_field( $data['error_description'] )
+                    : __(
+                        'PayPal Authentifizierung fehlgeschlagen.',
+                        'mp'
+                    );
+
+                $this->log(
+                    'Access Token Fehler (' .
+                    $code .
+                    '): ' .
+                    $body
+                );
+
+                return new WP_Error(
+                    'paypal_auth',
+                    $message
+                );
+            }
+
+            $expires_in = ! empty( $data['expires_in'] )
+                ? absint( $data['expires_in'] )
+                : HOUR_IN_SECONDS;
+
+            /*
+            * Token 60 Sekunden vor Ablauf aus dem Cache entfernen.
+            */
+            $cache_expires = max(
+                60,
+                $expires_in - 60
+            );
+
+            wp_cache_set(
+                $cache_key,
+                array(
+                    'token'   => $data['access_token'],
+                    'expires' => time() + $cache_expires,
+                ),
+                'marketpress',
+                $cache_expires
+            );
+
+            return $data['access_token'];
+        }
+
+    /**
+     * Create a PayPal Partner Referral for a MarketPress shop.
+     *
+     * @param int $blog_id Blog ID.
+     * @return string|WP_Error
+     */
+    protected function create_partner_referral( $blog_id ) {
+
+        $access_token = $this->get_paypal_access_token();
+
+        if ( is_wp_error( $access_token ) ) {
+            return $access_token;
+        }
+
+        $tracking_id = 'marketpress-blog-' . absint( $blog_id );
+
+        $return_url = add_query_arg(
+            array(
+                'mp_paypal_onboard' => 1,
+            ),
+            network_admin_url()
+        );
+
+        $payload = array(
+            'tracking_id' => $tracking_id,
+
+            'partner_config_override' => array(
+                'return_url'             => $return_url,
+                'return_url_description' => __( 'MarketPress PayPal-Onboarding', 'mp' ),
+            ),
+
+            'operations' => array(
+                array(
+                    'operation' => 'API_INTEGRATION',
+                    'api_integration_preference' => array(
+                        'rest_api_integration' => array(
+                            'integration_method' => 'PAYPAL',
+                            'integration_type'   => 'THIRD_PARTY',
+                            'third_party_details' => array(
+                                'features' => array(
+                                    'PAYMENT',
+                                    'REFUND',
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+
+            'products' => array(
+                'EXPRESS_CHECKOUT',
+            ),
+
+            'legal_consents' => array(
+                array(
+                    'type'    => 'SHARE_DATA_CONSENT',
+                    'granted' => true,
+                ),
+            ),
+        );
+
+        $response = wp_remote_post(
+            $this->get_api_base_url() . '/v2/customer/partner-referrals',
+            array(
+                'headers' => array(
+                    'Content-Type'                  => 'application/json',
+                    'Authorization'                 => 'Bearer ' . $access_token,
+                    'PayPal-Partner-Attribution-Id' => mp_get_network_setting(
+                        'paypal_marketplace_bn_code',
+                        ''
+                    ),
+                ),
+                'body'    => wp_json_encode( $payload ),
+                'timeout' => 30,
+            )
+        );
+
+        if ( is_wp_error( $response ) ) {
+            return $response;
+        }
+
+        $code = wp_remote_retrieve_response_code( $response );
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( 201 !== $code ) {
+            $this->log(
+                'Partner Referral Fehler (' . $code . '): ' . $body
+            );
+
+            return new WP_Error(
+                'paypal_partner_referral',
+                __( 'PayPal Partner-Onboarding konnte nicht gestartet werden.', 'mp' )
+            );
+        }
+
+        foreach ( (array) mp_arr_get_value( 'links', $data ) as $link ) {
+            if (
+                isset( $link['rel'], $link['href'] )
+                && 'action_url' === $link['rel']
+            ) {
+                return esc_url_raw( $link['href'] );
+            }
+        }
+
+        return new WP_Error(
+            'paypal_partner_referral_url',
+            __( 'PayPal hat keine Onboarding-URL zurückgegeben.', 'mp' )
+        );
+    }
+
+    /**
+     * Startet bzw. verarbeitet das PayPal Partner-Onboarding.
+     *
+     * @return void
      */
     public static function maybe_handle_onboarding() {
-        if ( isset( $_GET['mp_paypal_onboard'] ) && current_user_can( 'manage_options' ) ) {
-            // ECHTER PAYPAL OAUTH-FLOW (Partner Onboarding)
-            $client_id = get_site_option('mp_paypal_marketplace_partner_client_id', ''); // Muss im Netzwerk-Admin hinterlegt werden
-            $redirect_uri = admin_url(); // Muss mit PayPal App übereinstimmen
-            $scope = 'openid https://uri.paypal.com/services/paypalattributes https://uri.paypal.com/services/partnermerchant onboarding';
-            // 1. Wenn kein Code vorhanden: Weiterleitung zu PayPal
-            if ( ! isset($_GET['code']) ) {
-                $state = wp_create_nonce('mp_paypal_onboard');
-                $onboard_url = 'https://www.sandbox.paypal.com/connect?flowEntry=static&client_id=' . urlencode($client_id)
-                    . '&scope=' . urlencode($scope)
-                    . '&redirect_uri=' . urlencode($redirect_uri)
-                    . '&state=' . urlencode($state);
-                wp_redirect($onboard_url);
-                exit;
-            }
-            // 2. Rückkehr von PayPal: Code gegen Merchant-ID tauschen
-            if ( isset($_GET['code']) && isset($_GET['state']) && wp_verify_nonce($_GET['state'], 'mp_paypal_onboard') ) {
-                $code = sanitize_text_field($_GET['code']);
-                $client_secret = get_site_option('mp_paypal_marketplace_partner_secret', '');
-                $token_url = 'https://api.sandbox.paypal.com/v1/oauth2/token';
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $token_url);
-                curl_setopt($ch, CURLOPT_USERPWD, $client_id . ':' . $client_secret);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, 'grant_type=authorization_code&code=' . urlencode($code));
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1 );
-                curl_setopt($ch, CURLOPT_POST, 1 );
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
-                $result = curl_exec($ch);
-                $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                if ($result === false || $httpcode !== 200) {
-                    curl_close($ch);
-                    wp_die(__('PayPal Onboarding fehlgeschlagen: ', 'mp') . curl_error($ch));
-                }
-                $data = json_decode($result, true);
-                curl_close($ch);
-                if (isset($data['merchant_id'])) {
-                    update_option('mp_paypal_marketplace_merchant_id_' . get_current_blog_id(), sanitize_text_field($data['merchant_id']));
-                    wp_safe_redirect(admin_url('options-general.php?page=paypal-marketplace-payout&onboard=1'));
-                    exit;
-                } else {
-                    wp_die(__('PayPal-Onboarding-Flow: Keine Merchant-ID erhalten.', 'mp'));
-                }
-            }
-            wp_die( __( 'PayPal-Onboarding-Flow: Fehler oder abgebrochen.', 'mp' ) );
+
+        if ( ! isset( $_GET['mp_paypal_onboard'] ) ) {
+            return;
         }
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die(
+                esc_html__( 'Keine Berechtigung.', 'mp' )
+            );
+        }
+
+        $gateway = new self();
+
+        /*
+        * Schritt 1:
+        * PayPal-Rückgabe fehlt → Partner Referral erzeugen.
+        */
+        if ( ! isset( $_GET['merchantIdInPayPal'] ) ) {
+
+            $blog_id = get_current_blog_id();
+
+            $onboard_url = $gateway->create_partner_referral( $blog_id );
+
+            if ( is_wp_error( $onboard_url ) ) {
+
+                $gateway->log(
+                    'Onboarding-Fehler: ' .
+                    $onboard_url->get_error_message()
+                );
+
+                wp_die(
+                    esc_html( $onboard_url->get_error_message() )
+                );
+            }
+
+            wp_safe_redirect( $onboard_url );
+            exit;
+        }
+
+        /*
+        * Schritt 2:
+        * PayPal gibt Merchant-ID und Tracking-ID zurück.
+        */
+        $merchant_id = sanitize_text_field(
+            wp_unslash( $_GET['merchantIdInPayPal'] )
+        );
+
+        $tracking_id = isset( $_GET['tracking_id'] )
+            ? sanitize_text_field( wp_unslash( $_GET['tracking_id'] ) )
+            : '';
+
+        if ( '' === $merchant_id ) {
+
+            wp_die(
+                esc_html__(
+                    'PayPal hat keine Merchant-ID zurückgegeben.',
+                    'mp'
+                )
+            );
+        }
+
+        /*
+        * Die Tracking-ID ist unsere Zuordnung zum Shop.
+        *
+        * Erwartetes Format:
+        * marketpress-blog-{BLOG_ID}
+        */
+        if (
+            ! preg_match(
+                '/^marketpress-blog-(\d+)$/',
+                $tracking_id,
+                $matches
+            )
+        ) {
+
+            $gateway->log(
+                'Ungültige PayPal-Tracking-ID: ' .
+                $tracking_id
+            );
+
+            wp_die(
+                esc_html__(
+                    'Die PayPal-Onboarding-Antwort konnte keinem Shop zugeordnet werden.',
+                    'mp'
+                )
+            );
+        }
+
+        $blog_id = absint( $matches[1] );
+
+        if ( $blog_id < 1 ) {
+
+            wp_die(
+                esc_html__(
+                    'Ungültige Shop-ID beim PayPal-Onboarding.',
+                    'mp'
+                )
+            );
+        }
+
+        /*
+        * Merchant-ID dauerhaft für den Shop speichern.
+        */
+        update_option(
+            'mp_paypal_marketplace_merchant_id_' . $blog_id,
+            $merchant_id
+        );
+
+        $gateway->log(
+            'PayPal-Onboarding erfolgreich. Blog ' .
+            $blog_id .
+            ', Merchant-ID ' .
+            $merchant_id
+        );
+
+        /*
+        * Zur PayPal-Auszahlungsseite des Shops zurück.
+        */
+        switch_to_blog( $blog_id );
+
+        $redirect_url = admin_url(
+            'options-general.php?page=paypal-marketplace-payout&onboard=1'
+        );
+
+        restore_current_blog();
+
+        wp_safe_redirect( $redirect_url );
+        exit;
     }
 
     /**
-     * Liest die Provision aus den Netzwerk-Einstellungen (wie bei Chained)
+     * Liest die Marketplace-Provision aus den Network Settings.
+     *
+     * @return float Provision als Dezimalwert, z. B. 0.02 für 2 %.
      */
     protected function get_network_provision() {
-        $settings = get_site_option('mp_network_settings', array());
-        $provision = 0.0;
-        if (isset($settings['gateways']['paypal_marketplace']['provision'])) {
-            $provision = floatval(str_replace(',', '.', $settings['gateways']['paypal_marketplace']['provision'])) / 100;
-        }
-        return $provision;
+        $provision = mp_get_network_setting(
+            'provision',
+            0
+        );
+
+        $provision = (float) str_replace( ',', '.', $provision );
+
+        return max( 0, min( 1, $provision / 100 ) );
     }
 
     /**
-     * Ermittelt Seller und deren Anteile für Split Payments im globalen Warenkorb
-     * Gibt ein Array mit Merchant-IDs und Beträgen zurück
+     * Ermittelt Seller und deren Bruttobeträge für Split Payments.
+     *
+     * Die Blog-ID wird direkt aus dem globalen MarketPress-Cart
+     * übernommen. Dadurch funktioniert die Zuordnung auch bei
+     * mehreren Shops im globalen Warenkorb.
+     *
+     * @param MP_Cart|array $cart Warenkorb.
+     *
+     * @return array Merchant-ID => Betrag.
      */
     public function get_split_payments( $cart ) {
-        $splits = array();
-        if ( ! is_array( $cart ) ) return $splits;
-        foreach ( $cart as $item ) {
-            $blog_id = isset( $item['blog_id'] ) ? $item['blog_id'] : get_current_blog_id();
-            $merchant_id = get_option( 'mp_paypal_marketplace_merchant_id_' . $blog_id );
-            if ( ! $merchant_id ) {
-                $this->log('Fehlende Merchant-ID für Blog ' . $blog_id);
+
+        $seller_totals = array();
+
+        if ( ! is_object( $cart ) || ! method_exists( $cart, 'get_all_items' ) ) {
+            return $seller_totals;
+        }
+
+        $current_blog_id = get_current_blog_id();
+
+        foreach ( $cart->get_all_items() as $blog_id => $items ) {
+
+            if ( empty( $items ) || ! is_array( $items ) ) {
                 continue;
             }
-            if ( ! isset( $splits[ $merchant_id ] ) ) {
-                $splits[ $merchant_id ] = 0;
+
+            switch_to_blog( absint( $blog_id ) );
+
+            $merchant_id = get_option(
+                'mp_paypal_marketplace_merchant_id_' . absint( $blog_id )
+            );
+
+            if ( ! $merchant_id ) {
+
+                $this->log(
+                    'Fehlende Merchant-ID für Blog ' . absint( $blog_id )
+                );
+
+                restore_current_blog();
+                continue;
             }
-            $splits[ $merchant_id ] += floatval( $item['price'] ) * intval( $item['qty'] );
-        }
-        // Provision aus Netzwerk-Einstellungen holen
-        $provision = $this->get_network_provision();
-        if ($provision > 0) {
-            foreach ($splits as $merchant_id => &$amount) {
-                $amount = round($amount * (1 - $provision), 2);
-            }
-            unset($amount);
-            // Marktplatz-Betreiber als eigenen Payee hinzufügen
-            $network_merchant = get_option('mp_paypal_marketplace_merchant_id_network');
-            if ($network_merchant) {
-                $total = 0;
-                foreach ($cart as $item) {
-                    $total += floatval( $item['price'] ) * intval( $item['qty'] );
+
+            foreach ( $items as $product_id => $qty ) {
+
+                $qty = max( 1, absint( $qty ) );
+
+                if ( $qty <= 0 ) {
+                    continue;
                 }
-                $splits[$network_merchant] = round($total * $provision, 2);
+
+                $product = new MP_Product( absint( $product_id ) );
+
+                if ( ! $product->ID ) {
+                    continue;
+                }
+
+                /*
+                * Den im Cart verwendeten Verkaufspreis verwenden.
+                * Bei Varianten wird MP_Product selbst über die Produkt-ID
+                * aufgelöst.
+                */
+                $price = max( 0, (float) $product->get_price( 'lowest' ) );
+
+                $amount = round( $price * $qty, 2 );
+
+                if ( $amount <= 0 ) {
+                    continue;
+                }
+
+                if ( ! isset( $seller_totals[ $merchant_id ] ) ) {
+                    $seller_totals[ $merchant_id ] = 0.00;
+                }
+
+                $seller_totals[ $merchant_id ] += $amount;
             }
+
+            restore_current_blog();
         }
-        return $splits;
+
+        return $seller_totals;
     }
 
     /**
-     * Erstellt eine PayPal-Order mit mehreren Payees (Split Payment)
-     * $cart: Array mit Warenkorb-Items
-     * $order: MarketPress-Bestellung
-     * Gibt die vorbereiteten Daten für die PayPal-API zurück
+     * Erstellt die PayPal-Order-Daten für einen globalen Warenkorb.
+     *
+     * Jeder Seller erhält eine eigene Purchase Unit.
+     * Die Marketplace-Provision wird bereits in get_split_payments()
+     * berücksichtigt.
+     *
+     * @param MP_Cart|array $cart  Warenkorb.
+     * @param MP_Order      $order MarketPress-Bestellung.
+     *
+     * @return array
      */
     public function create_paypal_order_data( $cart, $order ) {
-        // Get cart items properly from MP_Cart object
+
         $cart_items = array();
-        if ( is_object( $cart ) && method_exists( $cart, 'get_items' ) ) {
-            $cart_items = $cart->get_items();
+
+        if ( is_object( $cart ) && method_exists( $cart, 'get_all_items' ) ) {
+            $cart_items = $cart->get_all_items();
         } elseif ( is_array( $cart ) ) {
             $cart_items = $cart;
         }
-        
-        // Get currency from order or default to store currency
-        $currency = 'EUR';
-        if ( $order && is_object( $order ) && isset( $order->currency ) ) {
-            $currency = $order->currency;
-        } else {
-            $currency = mp_get_setting( 'currency', 'EUR' );
+
+        if ( empty( $cart_items ) ) {
+            return array();
         }
-        
-        $splits = $this->get_split_payments( $cart );
-        $items = array();
-        foreach ( $cart_items as $item ) {
-            // Skip if item is not properly structured
-            if ( ! is_array( $item ) ) {
+
+        $currency = mp_get_setting( 'currency', 'EUR' );
+
+        if (
+            $order &&
+            is_object( $order ) &&
+            isset( $order->currency ) &&
+            $order->currency
+        ) {
+            $currency = $order->currency;
+        }
+
+        $currency = strtoupper( sanitize_text_field( $currency ) );
+
+        /*
+        * Seller-Beträge zunächst ohne Provision ermitteln.
+        */
+        $seller_totals = array();
+
+        foreach ( $cart_items as $blog_id => $items ) {
+
+            if ( ! is_array( $items ) || empty( $items ) ) {
                 continue;
             }
-            
-            $items[] = array(
-                'name' => isset( $item['name'] ) ? $item['name'] : 'Product',
-                'unit_amount' => array(
-                    'currency_code' => $currency,
-                    'value' => number_format( floatval( isset( $item['price'] ) ? $item['price'] : 0 ), 2, '.', '' ),
-                ),
-                'quantity' => intval( isset( $item['qty'] ) ? $item['qty'] : 1 ),
+
+            $blog_id = absint( $blog_id );
+
+            $merchant_id = get_option(
+                'mp_paypal_marketplace_merchant_id_' . $blog_id
             );
+
+            if ( ! $merchant_id ) {
+                $this->log(
+                    'Fehlende Merchant-ID für Blog ' . $blog_id
+                );
+                continue;
+            }
+
+            foreach ( $items as $product_id => $qty ) {
+
+                $qty = max( 1, absint( $qty ) );
+
+                $product = new MP_Product( absint( $product_id ) );
+
+                if ( ! $product->ID ) {
+                    continue;
+                }
+
+                $price = max( 0, (float) $product->get_price( 'lowest' ) );
+                $amount = round( $price * $qty, 2 );
+
+                if ( $amount <= 0 ) {
+                    continue;
+                }
+
+                if ( ! isset( $seller_totals[ $merchant_id ] ) ) {
+                    $seller_totals[ $merchant_id ] = 0.00;
+                }
+
+                $seller_totals[ $merchant_id ] += $amount;
+            }
         }
-        $payees = array();
-        foreach ( $splits as $merchant_id => $amount ) {
-            $payees[] = array(
-                'payee' => array('merchant_id' => $merchant_id),
+
+        /*
+        * Marketplace-Provision.
+        */
+        $provision = $this->get_network_provision();
+
+        if ( $provision < 0 ) {
+            $provision = 0;
+        }
+
+        if ( $provision > 1 ) {
+            $provision = 1;
+        }
+
+        /*
+        * Netzwerk-Merchant für die Platform Fee.
+        */
+        $network_merchant = get_option(
+            'mp_paypal_marketplace_merchant_id_network'
+        );
+
+        $purchase_units = array();
+
+        foreach ( $seller_totals as $merchant_id => $seller_total ) {
+
+            $seller_total = round( $seller_total, 2 );
+
+            if ( $seller_total <= 0 ) {
+                continue;
+            }
+
+            /*
+            * Provision dieses Sellers.
+            */
+            $platform_fee = round(
+                $seller_total * $provision,
+                2
+            );
+
+            /*
+            * Seller erhält den ursprünglichen Betrag.
+            *
+            * Die Platform Fee wird von PayPal separat
+            * an den Plattformbetreiber abgeführt.
+            */
+            $purchase_unit = array(
+                'reference_id' => 'seller-' . sanitize_key( $merchant_id ),
+
                 'amount' => array(
                     'currency_code' => $currency,
-                    'value' => number_format( floatval( $amount ), 2, '.', '' ),
+                    'value'         => number_format(
+                        $seller_total,
+                        2,
+                        '.',
+                        ''
+                    ),
+                ),
+
+                'payee' => array(
+                    'merchant_id' => sanitize_text_field(
+                        $merchant_id
+                    ),
                 ),
             );
+
+            /*
+            * Platform Fee nur hinzufügen, wenn:
+            * - eine Provision konfiguriert ist
+            * - ein Netzwerk-Merchant vorhanden ist
+            */
+            if (
+                $platform_fee > 0 &&
+                $network_merchant
+            ) {
+                $purchase_unit['payment_instruction'] = array(
+                    'platform_fees' => array(
+                        array(
+                            'amount' => array(
+                                'currency_code' => $currency,
+                                'value' => number_format(
+                                    $platform_fee,
+                                    2,
+                                    '.',
+                                    ''
+                                ),
+                            ),
+                        ),
+                    ),
+                    'disbursement_mode' => 'INSTANT',
+                );
+            }
+
+            $purchase_units[] = $purchase_unit;
         }
-        $order_data = array(
+
+        if ( empty( $purchase_units ) ) {
+            return array();
+        }
+
+        return array(
             'intent' => 'CAPTURE',
-            'purchase_units' => $payees,
-            'items' => $items,
-            // Weitere Felder wie shipping, payer etc. können ergänzt werden
+            'purchase_units' => $purchase_units,
         );
-        // Hier müsste der echte API-Call zu PayPal erfolgen
-        // $response = $this->paypal_api_create_order( $order_data );
-        // return $response;
-        return $order_data;
     }
 
     /**
-     * Erstellt eine Order bei PayPal via REST-API und gibt die Approval-URL zurück
+     * Erstellt eine PayPal-Order über die REST API.
+     *
+     * @param array $order_data PayPal Order-Daten.
+     *
+     * @return array|WP_Error
      */
     public function paypal_api_create_order( $order_data ) {
-        $client_id = $this->get_setting( 'client_id', '' );
-        $secret    = $this->get_setting( 'secret', '' );
-        $sandbox   = true; // TODO: Option für Live/Sandbox
-        $api_base  = $sandbox ? 'https://api.sandbox.paypal.com' : 'https://api.paypal.com';
 
-        // 1. Access Token holen
-        $ch = curl_init();
-        curl_setopt( $ch, CURLOPT_URL, $api_base . '/v1/oauth2/token' );
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, array( 'Accept: application/json', 'Accept-Language: de_DE' ) );
-        curl_setopt( $ch, CURLOPT_USERPWD, $client_id . ':' . $secret );
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, 'grant_type=client_credentials' );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        curl_setopt( $ch, CURLOPT_POST, 1 );
-        $result = curl_exec( $ch );
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if ($result === false || $httpcode !== 200) {
-            curl_close($ch);
-            return new WP_Error('paypal_auth', 'PayPal Auth fehlgeschlagen: ' . curl_error($ch));
+        if ( empty( $order_data ) || empty( $order_data['purchase_units'] ) ) {
+            return new WP_Error(
+                'paypal_invalid_order',
+                __( 'Die PayPal-Bestellung enthält keine gültigen Zahlungsdaten.', 'mp' )
+            );
         }
-        $token_data = json_decode( $result, true );
-        curl_close($ch);
-        $access_token = $token_data['access_token'];
 
-        // 2. Order anlegen
-        $ch = curl_init();
-        curl_setopt( $ch, CURLOPT_URL, $api_base . '/v2/checkout/orders' );
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $access_token,
-        ) );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        curl_setopt( $ch, CURLOPT_POST, 1 );
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $order_data ) );
-        $result = curl_exec( $ch );
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if ($result === false || ($httpcode !== 201 && $httpcode !== 200)) {
-            $err = curl_error($ch);
-            curl_close($ch);
-            return new WP_Error('paypal_order', 'PayPal Order fehlgeschlagen: ' . $err . ' | Antwort: ' . $result);
+        $access_token = $this->get_paypal_access_token();
+
+        if ( is_wp_error( $access_token ) ) {
+            return $access_token;
         }
-        $response = json_decode( $result, true );
-        curl_close($ch);
-        // Approval-Link extrahieren
+
+        /*
+        * Eindeutige Request-ID verhindert bei Wiederholungen
+        * eine versehentliche doppelte PayPal-Order.
+        */
+        $request_id = wp_generate_uuid4();
+
+        $headers = array(
+            'Content-Type'                  => 'application/json',
+            'Accept'                        => 'application/json',
+            'Authorization'                 => 'Bearer ' . $access_token,
+            'PayPal-Request-Id'             => $request_id,
+            'PayPal-Partner-Attribution-Id' => mp_get_network_setting(
+                'paypal_marketplace_bn_code',
+                ''
+            ),
+        );
+
+        $response = wp_remote_post(
+            $this->get_api_base_url() . '/v2/checkout/orders',
+            array(
+                'headers' => $headers,
+                'body'    => wp_json_encode( $order_data ),
+                'timeout' => 30,
+            )
+        );
+
+        if ( is_wp_error( $response ) ) {
+            $this->log(
+                'PayPal Order HTTP-Fehler: ' .
+                $response->get_error_message()
+            );
+
+            return new WP_Error(
+                'paypal_order_request',
+                __( 'PayPal konnte nicht erreicht werden.', 'mp' )
+            );
+        }
+
+        $code = wp_remote_retrieve_response_code( $response );
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( 201 !== $code || empty( $data['id'] ) ) {
+
+            $this->log(
+                'PayPal Order Fehler (' . $code . '): ' . $body
+            );
+
+            $message = __( 'PayPal konnte die Bestellung nicht erstellen.', 'mp' );
+
+            if ( ! empty( $data['details'][0]['description'] ) ) {
+                $message = sanitize_text_field(
+                    $data['details'][0]['description']
+                );
+            } elseif ( ! empty( $data['message'] ) ) {
+                $message = sanitize_text_field(
+                    $data['message']
+                );
+            }
+
+            return new WP_Error(
+                'paypal_order',
+                $message
+            );
+        }
+
+        /*
+        * Approval-Link suchen.
+        */
         $approval_url = '';
-        if ( isset( $response['links'] ) ) {
-            foreach ( $response['links'] as $link ) {
-                if ( $link['rel'] === 'approve' ) {
-                    $approval_url = $link['href'];
+
+        if ( ! empty( $data['links'] ) && is_array( $data['links'] ) ) {
+
+            foreach ( $data['links'] as $link ) {
+
+                if (
+                    isset( $link['rel'], $link['href'] ) &&
+                    'approve' === $link['rel']
+                ) {
+                    $approval_url = esc_url_raw( $link['href'] );
                     break;
                 }
             }
         }
-        if ( ! $approval_url ) {
-            return new WP_Error('paypal_no_approval', 'Keine Approval-URL von PayPal erhalten.');
+
+        if ( '' === $approval_url ) {
+
+            $this->log(
+                'PayPal Order ' . $data['id'] .
+                ' wurde erstellt, aber keine Approval-URL gefunden.'
+            );
+
+            return new WP_Error(
+                'paypal_no_approval',
+                __( 'PayPal hat keine Weiterleitungs-URL zurückgegeben.', 'mp' )
+            );
         }
+
+        $this->log(
+            'PayPal Order erfolgreich erstellt: ' . $data['id']
+        );
+
         return array(
-            'id' => $response['id'],
+            'id'           => sanitize_text_field( $data['id'] ),
             'approval_url' => $approval_url,
-            'raw' => $response,
+            'raw'          => $data,
         );
     }
 
     /**
-     * Wird beim Checkout aufgerufen: Erstellt die PayPal-Order und gibt die Redirect-URL zurück
+     * Verarbeitet die PayPal-Zahlung.
+     *
+     * Erstellt zunächst die MarketPress-Bestellung, danach die
+     * PayPal-Order und speichert die Zuordnung zwischen beiden.
+     *
      * @param MP_Cart $cart
-     * @param array $billing_info
-     * @param array $shipping_info
+     * @param array   $billing_info
+     * @param array   $shipping_info
+     *
+     * @return void
      */
     public function process_payment( $cart, $billing_info, $shipping_info ) {
-        // Create the order first so we have an order object
+
+        /*
+        * MarketPress-Bestellung erzeugen.
+        */
         $order = new MP_Order();
+
         $order_id = $order->save(
             array(
-                'cart'         => $cart,
+                'cart' => $cart,
+
                 'payment_info' => array(
                     'gateway_public_name'  => $this->public_name,
                     'gateway_private_name' => $this->admin_name,
                     'gateway_plugin_name'  => $this->plugin_name,
                     'method'               => __( 'PayPal', 'mp' ),
                     'transaction_id'       => '',
-                    'currency'             => mp_get_setting( 'currency' ),
+                    'currency'             => mp_get_setting( 'currency', 'EUR' ),
                 ),
-                'paid'         => false,
+
+                'paid' => false,
             )
         );
-        
+
         if ( ! $order_id ) {
-            mp_checkout()->add_error( __( 'Order creation failed', 'mp' ), 'general' );
+
+            $this->log(
+                'MarketPress-Bestellung konnte nicht erstellt werden.'
+            );
+
+            mp_checkout()->add_error(
+                __( 'Die Bestellung konnte nicht erstellt werden.', 'mp' ),
+                'general'
+            );
+
             return;
         }
-        
-        $order_data = $this->create_paypal_order_data( $cart, $order );
-        $api_result = $this->paypal_api_create_order( $order_data );
+
+        /*
+        * PayPal Order-Daten erzeugen.
+        */
+        $order_data = $this->create_paypal_order_data(
+            $cart,
+            $order
+        );
+
+        if ( empty( $order_data ) ) {
+
+            $this->log(
+                'Keine gültigen PayPal-Order-Daten für MarketPress-Order ' .
+                $order_id
+            );
+
+            mp_checkout()->add_error(
+                __(
+                    'Für diese Bestellung konnten keine gültigen PayPal-Zahlungsdaten erstellt werden.',
+                    'mp'
+                ),
+                'general'
+            );
+
+            return;
+        }
+
+        /*
+        * PayPal Order erstellen.
+        */
+        $api_result = $this->paypal_api_create_order(
+            $order_data
+        );
+
         if ( is_wp_error( $api_result ) ) {
-            mp_checkout()->add_error( $api_result->get_error_message(), 'general' );
+
+            $this->log(
+                'PayPal Order Fehler für MarketPress-Order ' .
+                $order_id . ': ' .
+                $api_result->get_error_message()
+            );
+
+            mp_checkout()->add_error(
+                $api_result->get_error_message(),
+                'general'
+            );
+
             return;
         }
-        // Order-ID in der Bestellung speichern
-        if ( $order && isset( $order->ID ) ) {
-            update_post_meta( $order->ID, '_paypal_marketplace_order_id', $api_result['id'] );
-        }
-        
-        // Store order in cache and set PayPal redirect URL
-        // The checkout handler will send the approval_url to the frontend
-        wp_cache_set( 'order_object', $order, 'mp', 3600 );
-        wp_cache_set( 'order_paypal_redirect_url', $api_result['approval_url'], 'mp', 3600 );
+
+        /*
+        * PayPal Order-ID mit der MarketPress-Bestellung verknüpfen.
+        */
+        update_post_meta(
+            $order_id,
+            '_paypal_marketplace_order_id',
+            $api_result['id']
+        );
+
+        /*
+        * Zusätzlich den aktuellen Zahlungsstatus festhalten.
+        */
+        update_post_meta(
+            $order_id,
+            '_paypal_marketplace_status',
+            'CREATED'
+        );
+
+        /*
+        * Bestellung und Redirect-URL für den Checkout bereitstellen.
+        *
+        * class-mp-checkout.php erwartet "order_redirect_url".
+        */
+        wp_cache_set(
+            'order_object',
+            $order,
+            'mp',
+            HOUR_IN_SECONDS
+        );
+
+        wp_cache_set(
+            'order_redirect_url',
+            $api_result['approval_url'],
+            'mp',
+            HOUR_IN_SECONDS
+        );
+
+        /*
+        * Rückwärtskompatibilität für eventuell vorhandene
+        * Integrationen beibehalten.
+        */
+        wp_cache_set(
+            'order_paypal_redirect_url',
+            $api_result['approval_url'],
+            'mp',
+            HOUR_IN_SECONDS
+        );
+
+        $this->log(
+            'Checkout vorbereitet. MP-Order ' .
+            $order_id .
+            ' → PayPal-Order ' .
+            $api_result['id']
+        );
     }
 
     /**
