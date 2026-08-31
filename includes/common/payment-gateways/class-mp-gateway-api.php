@@ -108,28 +108,60 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 			* to use the network-global gateway.
 			*/
 			if (
-					$use_network_global_gateway
-					&& ! is_admin()
-					&& mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 )
-					&& function_exists( 'mp_cart' )
+				$use_network_global_gateway
+				&& ! is_admin()
+				&& mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 )
+				&& function_exists( 'mp_cart' )
 			) {
-					$blog_ids = array_unique( array_map( 'intval', (array) mp_cart()->get_blog_ids() ) );
+				$blog_ids = array_unique(
+					array_map(
+						'intval',
+						(array) mp_cart()->get_blog_ids()
+					)
+				);
 
-					if (
-							count( $blog_ids ) === 1
-							&& (int) reset( $blog_ids ) !== (int) mp_root_blog_id()
-					) {
-							$use_network_global_gateway = false;
-					}
+				if ( count( $blog_ids ) === 1 ) {
+					$use_network_global_gateway = false;
+				}
 			}
 
 			if ( $use_network_global_gateway ) {
-					// Global Cart with multiple shops: use the network gateway.
-					$gateways = mp_get_network_setting( 'global_gateway' );
+				// Multi-shop checkout: use network gateway configuration.
+				$gateways = mp_get_network_setting( 'global_gateway' );
 			} else {
-					// Normal shop checkout: use the current shop's gateways.
-					$gateways = mp_get_setting( 'gateways' );
-			}
+				// Single-shop checkout: load the gateways from the shop in the cart.
+				$gateway_blog_id = get_current_blog_id();
+
+				if ( function_exists( 'mp_cart' ) ) {
+					$blog_ids = array_values(
+						array_unique(
+							array_filter(
+								array_map(
+									'intval',
+									(array) mp_cart()->get_blog_ids()
+								)
+							)
+						)
+					);
+
+					if ( count( $blog_ids ) === 1 ) {
+						$gateway_blog_id = (int) reset( $blog_ids );
+					}
+				}
+
+				$switched = false;
+
+				if ( is_multisite() && (int) get_current_blog_id() !== $gateway_blog_id ) {
+						switch_to_blog( $gateway_blog_id );
+						$switched = true;
+				}
+
+				$gateways = mp_get_setting( 'gateways' );
+
+				if ( $switched ) {
+						restore_current_blog();
+				}
+		}
 
 			foreach ( self::get_gateways() as $code => $plugin ) {
 				$class = $plugin[0];

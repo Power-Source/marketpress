@@ -436,9 +436,9 @@ class MP_Checkout {
 				),
 				array(
 					'type'			 => 'select',
-					'label'			 => __( 'Country', 'mp' ),
+					'label'			 => __( 'Land', 'mp' ),
 					'name'			 => $this->field_name( 'country', $type ),
-					'options'		 => array_merge( array( '' => __( 'Select One', 'mp' ) ), $countries ), //array_merge(array('' => __('Select One', 'mp')), $this->currencies),
+					'options'		 => array_merge( array( '' => __( 'Land wählen', 'mp' ) ), $countries ), //array_merge(array('' => __('Select One', 'mp')), $this->currencies),
 					'value'			 => $country,
 					'default_value'	 => '',
 					'atts'			 => array(
@@ -450,7 +450,7 @@ class MP_Checkout {
 				),
 				array(
 					'type'	 => 'text',
-					'label'	 => __( 'Phone', 'mp' ),
+					'label'	 => __( 'Telefon', 'mp' ),
 					'name'	 => $this->field_name( 'phone', $type ),
 					'value'	 => mp_get_user_address_part( 'phone', $type ),
 					'atts'	 => array(

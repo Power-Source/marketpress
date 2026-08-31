@@ -65,7 +65,6 @@ class MP_Multisite {
 		add_filter( 'mp_gateway_api/use_network_global_gateway', array( &$this, 'filter_use_network_global_gateway' ) );
 		add_action( 'init', array( &$this, 'capture_network_multishop_checkout_choice' ), 1 );
 		add_filter( 'mp_checkout/order_review', array( &$this, 'inject_multishop_checkout_selector' ) );
-		add_filter( 'mp_can_checkout', array( &$this, 'guard_split_checkout_until_cart_partition' ), 10, 5 );
 		add_action( 'mp_order/new_order', array( &$this, 'annotate_network_multishop_order' ), 20 );
 
 		$settings = get_site_option( 'mp_network_settings', array() );
@@ -1701,7 +1700,7 @@ class MP_Multisite {
 					$gateways = array();
 				}
 			} else {
-				$allowed                = mp_get_network_setting( 'allowed_gateways' );
+				$allowed = mp_get_network_setting( 'allowed_gateways' );
 				$allowed['free_orders'] = 'full';
 
 				if ( is_array( $allowed ) ) {
@@ -1801,41 +1800,6 @@ class MP_Multisite {
 	}
 
 	/**
-	 * Prevent unintended combined payment when split mode is selected for multi-shop carts.
-	 *
-	 * @param bool        $can_checkout
-	 * @param MP_Checkout $checkout
-	 * @param MP_Cart     $cart
-	 * @param array       $billing_info
-	 * @param array       $shipping_info
-	 * @return bool
-	 */
-	public function guard_split_checkout_until_cart_partition( $can_checkout, $checkout, $cart, $billing_info, $shipping_info ) {
-		if ( ! $can_checkout || ! is_multisite() || ! mp_get_network_setting( 'global_cart', 0 ) ) {
-			return $can_checkout;
-		}
-
-		if ( ! is_object( $cart ) || ! method_exists( $cart, 'get_blog_ids' ) ) {
-			return $can_checkout;
-		}
-
-		$blog_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) $cart->get_blog_ids() ) ) ) );
-		if ( count( $blog_ids ) <= 1 ) {
-			return $can_checkout;
-		}
-
-		if ( 'split' === $this->resolve_multishop_checkout_mode( $blog_ids ) ) {
-			if ( is_object( $checkout ) && method_exists( $checkout, 'add_error' ) ) {
-				$checkout->add_error( __( 'Getrennter Multi-Shop-Checkout ist aktiv. Die Warenkorb-Aufteilung pro Subshop wird als naechster Schritt verarbeitet; bitte wechsle vorerst auf Mainshop-Netzwerkcheckouts oder aktiviere die Split-Engine.', 'mp' ), 'order-review-payment' );
-			}
-
-			return false;
-		}
-
-		return $can_checkout;
-	}
-
-	/**
 	 * Resolve whether current request should use network-global gateway routing.
 	 *
 	 * @return bool
@@ -1850,14 +1814,9 @@ class MP_Multisite {
 			$blog_ids = array_values( array_unique( array_filter( array_map( 'intval', (array) mp_cart()->get_blog_ids() ) ) ) );
 		}
 
-		$root_blog_id = (int) mp_root_blog_id();
-		$hybrid       = (bool) mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 );
+		$hybrid = (bool) mp_get_network_setting( 'advanced->hybrid_gateway_routing', 0 );
 
-		if ( $hybrid && count( $blog_ids ) === 1 && (int) reset( $blog_ids ) !== $root_blog_id ) {
-			return false;
-		}
-
-		if ( count( $blog_ids ) > 1 && 'split' === $this->resolve_multishop_checkout_mode( $blog_ids ) ) {
+		if ( $hybrid && count( $blog_ids ) === 1 ) {
 			return false;
 		}
 
