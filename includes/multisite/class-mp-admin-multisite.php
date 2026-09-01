@@ -194,9 +194,15 @@ class MP_Admin_Multisite {
 		) );
 		if ( function_exists( 'psource_support_insert_ticket' ) && function_exists( 'psource_support_get_ticket_categories' ) ) {
 			$priority_options = array();
+			$faq_options      = array();
 			if ( function_exists( 'psource_support' ) ) {
 				foreach ( (array) psource_support()::$ticket_priority as $priority => $label ) {
 					$priority_options[ (string) $priority ] = $label;
+				}
+			}
+			if ( function_exists( 'psource_support_get_faqs' ) ) {
+				foreach ( (array) psource_support_get_faqs( array( 'per_page' => -1, 'orderby' => 'question' ) ) as $faq ) {
+					$faq_options[ (string) $faq->faq_id ] = $faq->question;
 				}
 			}
 
@@ -214,16 +220,26 @@ class MP_Admin_Multisite {
 			) );
 			$metabox->add_field( 'checkbox', array(
 				'name'    => 'advanced[ps_support_customer_faq_button]',
-				'label'   => array( 'text' => __( 'FAQ-Button in der Kundenzone anzeigen?', 'mp' ) ),
-				'desc'    => __( 'Verlinkt die von PS Support bereitgestellte zentrale FAQ-Seite der Hauptseite.', 'mp' ),
-				'message' => __( 'FAQ-Button anzeigen', 'mp' ),
+				'label'   => array( 'text' => __( 'Produkt-FAQs in der Kundenzone anzeigen?', 'mp' ) ),
+				'desc'    => __( 'Zeigt an Bestellungen einen Link zu den FAQs der enthaltenen Produkte.', 'mp' ),
+				'message' => __( 'Produkt-FAQs anzeigen', 'mp' ),
 			) );
 			$metabox->add_field( 'checkbox', array(
 				'name'    => 'advanced[ps_support_product_links]',
-				'label'   => array( 'text' => __( 'Support und FAQs an Produkten anzeigen?', 'mp' ) ),
-				'desc'    => __( 'Zeigt den zentralen Hauptseiten-Support und eine optional am Produkt ausgewählte FAQ an.', 'mp' ),
+				'label'   => array( 'text' => __( 'Support und Produkt-FAQs an Produkten anzeigen?', 'mp' ) ),
+				'desc'    => __( 'Zeigt Support und die am Produkt ausgewählten FAQs an.', 'mp' ),
 				'message' => __( 'Produkt-Supportlinks anzeigen', 'mp' ),
 			) );
+			if ( ! empty( $faq_options ) ) {
+				$metabox->add_field( 'advanced_select', array(
+					'name'        => 'advanced[ps_support_standard_faq_ids]',
+					'label'       => array( 'text' => __( 'Standard-FAQs für Produkte', 'mp' ) ),
+					'desc'        => __( 'Markiert vorhandene FAQs, etwa zu Versand, Transport oder Widerrufsrecht, für die separate Auswahl in der Produktbearbeitung.', 'mp' ),
+					'options'     => $faq_options,
+					'multiple'    => true,
+					'placeholder' => __( 'Standard-FAQs auswählen', 'mp' ),
+				) );
+			}
 			if ( ! empty( $priority_options ) ) {
 				$metabox->add_field( 'select', array(
 					'name'          => 'advanced[ps_support_priority]',

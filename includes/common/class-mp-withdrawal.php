@@ -23,7 +23,6 @@ class MP_Withdrawal {
 	private function __construct() {
 		add_action( 'mp_order/new_order', array( $this, 'save_order_withdrawal_snapshot' ), 20 );
 		add_filter( 'mp_order/details', array( $this, 'append_customer_zone_to_order_details' ), 20, 2 );
-		add_filter( 'mp_order/status_html', array( $this, 'append_customer_zone_to_status_page' ), 20, 3 );
 		add_filter( 'mp_order/status_url', array( $this, 'add_withdrawal_token_for_guest_orders' ), 20, 2 );
 		add_filter( 'mp_store_navigation', array( $this, 'append_navigation_link' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ), 20 );
@@ -152,32 +151,6 @@ class MP_Withdrawal {
 
 		$zone_html = $this->render_customer_zone( $order );
 		return $html . $zone_html;
-	}
-
-	/**
-	 * Append customer zone intro panel to order status page output.
-	 *
-	 * @param string        $html
-	 * @param MP_Order|null $order
-	 * @param array         $args
-	 *
-	 * @return string
-	 */
-	public function append_customer_zone_to_status_page( $html, $order, $args ) {
-		if ( ! mp_is_shop_page( 'order_status' ) || ! $this->is_enabled() ) {
-			return $html;
-		}
-
-		if ( is_object( $order ) && method_exists( $order, 'exists' ) && $order->exists() ) {
-			return $html;
-		}
-
-		$intro  = '<section class="mp_customer_zone_intro">';
-		$intro .= '<h2>' . esc_html__( 'Kundenzone', 'mp' ) . '</h2>';
-		$intro .= '<p>' . esc_html( $policy ) . '</p>';
-		$intro .= '</section>';
-
-		return $intro . $html;
 	}
 
 	/**
