@@ -228,7 +228,16 @@ class MP_Checkout {
 	 * @return string
 	 */
 	public function address_fields( $type, $value_only = false ) {
-		$country = mp_get_user_address_part( 'country', $type );
+
+		// Use billing data as the shipping address when no separate
+		// shipping address has been enabled.
+		$value_type = $type;
+
+		if ( 'shipping' === $type && ! mp_get_session_value( 'enable_shipping_address' ) ) {
+			$value_type = 'billing';
+		}
+
+		$country = mp_get_user_address_part( 'country', $value_type );
 
 		// Country list
 		if ( is_array( mp_get_setting( 'shipping->allowed_countries', '' ) ) ) {
@@ -256,11 +265,11 @@ class MP_Checkout {
 		$states				 = mp_get_states( $country );
 		$state_zip_fields[]	 = array(
 			'type'		 => 'select',
-			'label'		 => __( 'State/Province', 'mp' ),
+			'label'		 => __( 'Bundesland/Provinz', 'mp' ),
 			'name'		 => $this->field_name( 'state', $type ),
 			'options'	 => $states,
 			'hidden'	 => ( empty( $states ) ),
-			'value'		 => mp_get_user_address_part( 'state', $type ),
+			'value'		 => mp_get_user_address_part( 'state', $value_type ),
 			'atts'		 => array(
 				'class' => 'mp_select2_search',
 			),
@@ -273,7 +282,7 @@ class MP_Checkout {
 			'type'		 => 'text',
 			'label'		 => mp_get_setting( 'zip_label' ),
 			'name'		 => $this->field_name( 'zip', $type ),
-			'value'		 => mp_get_user_address_part( 'zip', $type ),
+			'value'		 => mp_get_user_address_part( 'zip', $value_type ),
 			'hidden'	 => array_key_exists( $country, mp()->countries_no_postcode ),
 			'validation' => array(
 				'required' => true,
@@ -294,18 +303,18 @@ class MP_Checkout {
 					'subfields'	 => array(
 						array(
 							'type'	 => 'text',
-							'label'	 => __( 'First', 'mp' ),
+							'label'	 => __( 'Vorname', 'mp' ),
 							'name'	 => $this->field_name( 'first_name', $type ),
-							'value'	 => mp_get_user_address_part( 'first_name', $type ),
+							'value'	 => mp_get_user_address_part( 'first_name', $value_type ),
 							'atts'	 => array(
 								'class' => 'mp_form_input',
 							),
 						),
 						array(
 							'type'	 => 'text',
-							'label'	 => __( 'Last', 'mp' ),
+							'label'	 => __( 'Nachname', 'mp' ),
 							'name'	 => $this->field_name( 'last_name', $type ),
-							'value'	 => mp_get_user_address_part( 'last_name', $type ),
+							'value'	 => mp_get_user_address_part( 'last_name', $value_type ),
 							'atts'	 => array(
 								'class' => 'mp_form_input',
 							),
@@ -314,9 +323,9 @@ class MP_Checkout {
 				),
 				array(
 					'type'		 => 'text',
-					'label'		 => __( 'Email Address', 'mp' ),
+					'label'		 => __( 'E-Mail-Adresse', 'mp' ),
 					'name'		 => $this->field_name( 'email', $type ),
-					'value'		 => mp_get_user_address_part( 'email', $type ),
+					'value'		 => mp_get_user_address_part( 'email', $value_type ),
 					'validation' => array(
 						'required'	 => true,
 						'email'		 => true,
@@ -327,18 +336,18 @@ class MP_Checkout {
 				),
 				array(
 					'type'	 => 'text',
-					'label'	 => __( 'Company', 'mp' ),
+					'label'	 => __( 'Firma', 'mp' ),
 					'name'	 => $this->field_name( 'company_name', $type ),
-					'value'	 => mp_get_user_address_part( 'company_name', $type ),
+					'value'	 => mp_get_user_address_part( 'company_name', $value_type ),
 					'atts'	 => array(
 						'class' => 'mp_form_input',
 					),
 				),
 				array(
 					'type'	 => 'text',
-					'label'	 => __( 'Phone', 'mp' ),
+					'label'	 => __( 'Telefon', 'mp' ),
 					'name'	 => $this->field_name( 'phone', $type ),
-					'value'	 => mp_get_user_address_part( 'phone', $type ),
+					'value'	 => mp_get_user_address_part( 'phone', $value_type ),
 					'atts'	 => array(
 						'class' => 'mp_form_input',
 					),
@@ -355,18 +364,18 @@ class MP_Checkout {
 					'subfields'	 => array(
 						array(
 							'type'	 => 'text',
-							'label'	 => __( 'First', 'mp' ),
+							'label'	 => __( 'Vorname', 'mp' ),
 							'name'	 => $this->field_name( 'first_name', $type ),
-							'value'	 => mp_get_user_address_part( 'first_name', $type ),
+							'value'	 => mp_get_user_address_part( 'first_name', $value_type ),
 							'atts'	 => array(
 								'class' => 'mp_form_input',
 							),
 						),
 						array(
 							'type'	 => 'text',
-							'label'	 => __( 'Last', 'mp' ),
+							'label'	 => __( 'Nachname', 'mp' ),
 							'name'	 => $this->field_name( 'last_name', $type ),
-							'value'	 => mp_get_user_address_part( 'last_name', $type ),
+							'value'	 => mp_get_user_address_part( 'last_name', $value_type ),
 							'atts'	 => array(
 								'class' => 'mp_form_input',
 							),
@@ -375,9 +384,9 @@ class MP_Checkout {
 				),
 				array(
 					'type'		 => 'text',
-					'label'		 => __( 'Email Address', 'mp' ),
+					'label'		 => __( 'E-Mail-Adresse', 'mp' ),
 					'name'		 => $this->field_name( 'email', $type ),
-					'value'		 => mp_get_user_address_part( 'email', $type ),
+					'value'		 => mp_get_user_address_part( 'email', $value_type ),
 					'validation' => array(
 						'required'	 => true,
 						'email'		 => true,
@@ -388,20 +397,20 @@ class MP_Checkout {
 				),
 				array(
 					'type'	 => 'text',
-					'label'	 => __( 'Company', 'mp' ),
+					'label'	 => __( 'Firma', 'mp' ),
 					'name'	 => $this->field_name( 'company_name', $type ),
-					'value'	 => mp_get_user_address_part( 'company_name', $type ),
+					'value'	 => mp_get_user_address_part( 'company_name', $value_type ),
 					'atts'	 => array(
 						'class' => 'mp_form_input',
 					),
 				),
 				array(
 					'type'		 => 'text',
-					'label'		 => __( 'Address Line 1', 'mp' ),
+					'label'		 => __( 'Adresszeile 1', 'mp' ),
 					'name'		 => $this->field_name( 'address1', $type ),
-					'value'		 => mp_get_user_address_part( 'address1', $type ),
+					'value'		 => mp_get_user_address_part( 'address1', $value_type ),
 					'atts'		 => array(
-						'placeholder'	 => __( 'Street address, P.O. box, company name, c/o', 'mp' ),
+						'placeholder'	 => __( 'Straße, Postfach, Firmenname, z.H.', 'mp' ),
 						'class'			 => 'mp_form_input',
 					),
 					'validation' => array(
@@ -410,19 +419,19 @@ class MP_Checkout {
 				),
 				array(
 					'type'	 => 'text',
-					'label'	 => __( 'Address Line 2', 'mp' ),
+					'label'	 => __( 'Adresszeile 2', 'mp' ),
 					'name'	 => $this->field_name( 'address2', $type ),
-					'value'	 => mp_get_user_address_part( 'address2', $type ),
+					'value'	 => mp_get_user_address_part( 'address2', $value_type ),
 					'atts'	 => array(
-						'placeholder'	 => __( 'Apartment, suite, unit, building, floor, etc', 'mp' ),
+						'placeholder'	 => __( 'Wohnung, Suite, Einheit, Gebäude, Etage, etc.', 'mp' ),
 						'class'			 => 'mp_form_input',
 					),
 				),
 				array(
 					'type'		 => 'text',
-					'label'		 => __( 'Town/City', 'mp' ),
+					'label'		 => __( 'Stadt', 'mp' ),
 					'name'		 => $this->field_name( 'city', $type ),
-					'value'		 => mp_get_user_address_part( 'city', $type ),
+					'value'		 => mp_get_user_address_part( 'city', $value_type ),
 					'validation' => array(
 						'required' => true,
 					),
@@ -452,7 +461,7 @@ class MP_Checkout {
 					'type'	 => 'text',
 					'label'	 => __( 'Telefon', 'mp' ),
 					'name'	 => $this->field_name( 'phone', $type ),
-					'value'	 => mp_get_user_address_part( 'phone', $type ),
+					'value'	 => mp_get_user_address_part( 'phone', $value_type ),
 					'atts'	 => array(
 						'class' => 'mp_form_input',
 					),
