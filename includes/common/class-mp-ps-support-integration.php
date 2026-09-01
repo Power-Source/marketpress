@@ -14,6 +14,7 @@ class MP_PS_Support_Integration {
 
 	private function __construct() {
 		add_filter( 'mp_order/details', array( $this, 'append_support_actions' ), 120, 2 );
+		add_filter( 'mp_order/history_actions', array( $this, 'append_support_actions' ), 120, 2 );
 		add_action( 'admin_post_mp_create_order_support_ticket', array( $this, 'handle_create_ticket' ) );
 		add_action( 'psource_support_front_ticket_context', array( $this, 'render_ticket_context' ) );
 		add_filter( 'support_network_ticket_details_fields', array( $this, 'append_admin_ticket_context' ), 20, 2 );
@@ -25,42 +26,45 @@ class MP_PS_Support_Integration {
 	}
 
 	public function append_support_actions( $html, $order ) {
-		if ( is_admin() || ! $this->integration_is_enabled() || ! $order instanceof MP_Order || (int) $order->post_author !== (int) get_current_user_id() ) {
+		if ( is_admin() || ! $order instanceof MP_Order || (int) $order->post_author !== (int) get_current_user_id() ) {
 			return $html;
 		}
 
 		$shops = $this->get_order_shops( $order );
-		if ( empty( $shops ) ) {
+		$status = class_exists( 'MP_Withdrawal' ) ? MP_Withdrawal::get_instance()->get_customer_order_status( $order ) : array();
+		if ( empty( $shops ) && empty( $status['label'] ) ) {
 			return $html;
 		}
 
 		$order_key = (string) $order->get_id();
-		$status = class_exists( 'MP_Withdrawal' ) ? MP_Withdrawal::get_instance()->get_customer_order_status( $order ) : array();
 		$html .= '<aside class="mp-order-footer" aria-label="' . esc_attr__( 'Hilfe und Widerrufsstatus', 'mp' ) . '">';
-		$html .= '<div class="mp-order-support"><h4>' . esc_html__( 'Hilfe zur Bestellung', 'mp' ) . '</h4>';
-		$html .= '<div class="mp-order-support-actions">';
-		foreach ( $shops as $blog_id => $shop_name ) {
-			if ( $this->is_enabled() && $this->can_create_ticket( $order ) ) {
-				$label = count( $shops ) > 1 ? sprintf( __( 'Support von %s kontaktieren', 'mp' ), $shop_name ) : __( 'Support kontaktieren', 'mp' );
-				$html .= '<details class="mp-order-support-form"><summary class="mp-order-footer-button">' . esc_html( $label ) . '</summary>';
-				$html .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
-				$html .= '<input type="hidden" name="action" value="mp_create_order_support_ticket">';
-				$html .= '<input type="hidden" name="order_id" value="' . esc_attr( $order->ID ) . '">';
-				$html .= '<input type="hidden" name="shop_blog_id" value="' . esc_attr( $blog_id ) . '">';
-				$html .= wp_nonce_field( 'mp_order_support_' . $order->ID . '_' . $blog_id, '_mp_support_nonce', true, false );
-				$html .= '<p><label>' . esc_html__( 'Betreff', 'mp' ) . '<br><input type="text" name="subject" required value="' . esc_attr( sprintf( __( 'Frage zur Bestellung %s', 'mp' ), $order_key ) ) . '"></label></p>';
-				$html .= '<p><label>' . esc_html__( 'Nachricht', 'mp' ) . '<br><textarea name="message" rows="5" required></textarea></label></p>';
-				$html .= '<p><button type="submit" class="mp-order-footer-button mp-order-footer-button-primary">' . esc_html__( 'Supportanfrage senden', 'mp' ) . '</button></p>';
-				$html .= '</form></details>';
-			}
-			if ( mp_get_network_setting( 'advanced->ps_support_customer_faq_button', 0 ) && function_exists( 'psource_support_get_faqs_page_url' ) ) {
-				$faq_url = psource_support_get_faqs_page_url( $blog_id );
-				if ( $faq_url ) {
-					$html .= '<a class="mp-order-footer-button mp-order-faq-link" href="' . esc_url( $faq_url ) . '">' . esc_html( sprintf( __( 'FAQs von %s', 'mp' ), $shop_name ) ) . '</a>';
+		if ( $this->integration_is_enabled() && ! empty( $shops ) ) {
+			$html .= '<div class="mp-order-support"><h4>' . esc_html__( 'Hilfe zur Bestellung', 'mp' ) . '</h4>';
+			$html .= '<div class="mp-order-support-actions">';
+			foreach ( $shops as $blog_id => $shop_name ) {
+				$support_blog_id = $this->get_support_blog_id( $blog_id );
+				if ( $this->is_enabled() && $this->can_create_ticket( $order, $support_blog_id ) ) {
+					$label = count( $shops ) > 1 ? sprintf( __( 'Support von %s kontaktieren', 'mp' ), $shop_name ) : __( 'Support kontaktieren', 'mp' );
+					$html .= '<details class="mp-order-support-form"><summary class="mp-order-footer-button">' . esc_html( $label ) . '</summary>';
+					$html .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+					$html .= '<input type="hidden" name="action" value="mp_create_order_support_ticket">';
+					$html .= '<input type="hidden" name="order_id" value="' . esc_attr( $order->ID ) . '">';
+					$html .= '<input type="hidden" name="shop_blog_id" value="' . esc_attr( $blog_id ) . '">';
+					$html .= wp_nonce_field( 'mp_order_support_' . $order->ID . '_' . $blog_id, '_mp_support_nonce', true, false );
+					$html .= '<p><label>' . esc_html__( 'Betreff', 'mp' ) . '<br><input type="text" name="subject" required value="' . esc_attr( sprintf( __( 'Frage zur Bestellung %s', 'mp' ), $order_key ) ) . '"></label></p>';
+					$html .= '<p><label>' . esc_html__( 'Nachricht', 'mp' ) . '<br><textarea name="message" rows="5" required></textarea></label></p>';
+					$html .= '<p><button type="submit" class="mp-order-footer-button mp-order-footer-button-primary">' . esc_html__( 'Supportanfrage senden', 'mp' ) . '</button></p>';
+					$html .= '</form></details>';
 				}
 			}
+			if ( mp_get_network_setting( 'advanced->ps_support_customer_faq_button', 0 ) && function_exists( 'psource_support_get_faqs_page_url' ) ) {
+				$faq_url = psource_support_get_faqs_page_url( $this->get_support_blog_id() );
+				if ( $faq_url ) {
+					$html .= '<a class="mp-order-footer-button mp-order-faq-link" href="' . esc_url( $faq_url ) . '">' . esc_html__( 'Zentrale FAQs', 'mp' ) . '</a>';
+				}
+			}
+			$html .= '</div></div>';
 		}
-		$html .= '</div></div>';
 		if ( ! empty( $status['label'] ) ) {
 			$state = sanitize_html_class( (string) mp_arr_get_value( 'state', $status, 'unavailable' ) );
 			$html .= '<div class="mp-order-withdrawal-summary"><h4>' . esc_html__( 'Widerrufsstatus', 'mp' ) . '</h4>';
@@ -75,6 +79,14 @@ class MP_PS_Support_Integration {
 		return $html;
 	}
 
+	public function get_support_url( $shop_blog_id = 0 ) {
+		if ( ! $this->integration_is_enabled() || ! function_exists( 'psource_support_get_support_page_url' ) ) {
+			return false;
+		}
+
+		return psource_support_get_support_page_url( $this->get_support_blog_id( $shop_blog_id ) );
+	}
+
 	public function handle_create_ticket() {
 		if ( ! $this->is_enabled() || ! is_user_logged_in() ) {
 			wp_die( esc_html__( 'Support ist derzeit nicht verfügbar.', 'mp' ), 403 );
@@ -83,7 +95,7 @@ class MP_PS_Support_Integration {
 		$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 		$blog_id = isset( $_POST['shop_blog_id'] ) ? absint( $_POST['shop_blog_id'] ) : 0;
 		$order = new MP_Order( $order_id );
-		if ( ! $order->exists() || ! $this->can_create_ticket( $order ) ) {
+		if ( ! $order->exists() || ! $this->can_create_ticket( $order, $this->get_support_blog_id( $blog_id ) ) ) {
 			wp_die( esc_html__( 'Diese Bestellung ist nicht verfügbar.', 'mp' ), 403 );
 		}
 
@@ -104,16 +116,17 @@ class MP_PS_Support_Integration {
 			$priority = 0;
 		}
 
+		$support_blog_id = $this->get_support_blog_id( $blog_id );
 		$args = array(
-			'blog_id'        => $blog_id,
+			'blog_id'        => $support_blog_id,
 			'user_id'        => get_current_user_id(),
 			'ticket_priority' => $priority,
 			'title'          => $subject,
 			'message'        => $message,
 		);
-		$switched = is_multisite() && get_current_blog_id() !== $blog_id;
+		$switched = is_multisite() && get_current_blog_id() !== $support_blog_id;
 		if ( $switched ) {
-			switch_to_blog( $blog_id );
+			switch_to_blog( $support_blog_id );
 		}
 		$ticket_id = psource_support_insert_ticket( $args );
 		if ( $switched ) {
@@ -128,7 +141,7 @@ class MP_PS_Support_Integration {
 		psource_support_update_ticket_meta( $ticket_id, 'marketpress_shop_blog_id', $blog_id );
 		psource_support_update_ticket_meta( $ticket_id, 'marketpress_shop_order_id', $this->get_shop_order_id( $order, $blog_id ) );
 
-		$redirect_url = function_exists( 'psource_support_get_support_page_url' ) ? psource_support_get_support_page_url( $blog_id ) : false;
+		$redirect_url = function_exists( 'psource_support_get_support_page_url' ) ? psource_support_get_support_page_url( $support_blog_id ) : false;
 		if ( ! $redirect_url ) {
 			$redirect_url = wp_get_referer() ?: home_url( '/' );
 		}
@@ -212,15 +225,16 @@ class MP_PS_Support_Integration {
 			return $html;
 		}
 		$links = array();
+		$support_blog_id = $this->get_support_blog_id( get_current_blog_id() );
 		if ( get_post_meta( $product_id, '_mp_ps_support_link', true ) && function_exists( 'psource_support_get_support_page_url' ) ) {
-			$url = psource_support_get_support_page_url( get_current_blog_id() );
+			$url = psource_support_get_support_page_url( $support_blog_id );
 			if ( $url ) {
 				$links[] = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Support', 'mp' ) . '</a>';
 			}
 		}
 		$faq_id = absint( get_post_meta( $product_id, '_mp_ps_support_faq_id', true ) );
 		if ( $faq_id && function_exists( 'psource_support_get_faqs_page_url' ) ) {
-			$url = psource_support_get_faqs_page_url( get_current_blog_id(), $faq_id );
+			$url = psource_support_get_faqs_page_url( $support_blog_id, $faq_id );
 			if ( $url ) {
 				$links[] = '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Häufige Frage zu diesem Produkt', 'mp' ) . '</a>';
 			}
@@ -241,9 +255,39 @@ class MP_PS_Support_Integration {
 			&& (bool) mp_get_network_setting( 'advanced->ps_support_customer_button', 0 );
 	}
 
-	private function can_create_ticket( MP_Order $order ) {
-		return (int) $order->post_author === (int) get_current_user_id()
-			&& psource_support_current_user_can( 'insert_ticket' );
+	private function can_create_ticket( MP_Order $order, $support_blog_id = 0 ) {
+		if ( (int) $order->post_author !== (int) get_current_user_id() ) {
+			return false;
+		}
+
+		$switched = is_multisite() && $support_blog_id && get_current_blog_id() !== (int) $support_blog_id;
+		if ( $switched ) {
+			switch_to_blog( $support_blog_id );
+		}
+		$allowed = psource_support_current_user_can( 'insert_ticket' );
+		if ( $switched ) {
+			restore_current_blog();
+		}
+
+		return (bool) $allowed;
+	}
+
+	private function get_support_blog_id( $shop_blog_id = 0 ) {
+		if ( ! is_multisite() ) {
+			return get_current_blog_id();
+		}
+
+		$support_blog_id = function_exists( 'psource_support_get_setting' )
+			? absint( psource_support_get_setting( 'psource_support_blog_id' ) )
+			: 0;
+		if ( ! $support_blog_id && function_exists( 'get_main_site_id' ) ) {
+			$support_blog_id = absint( get_main_site_id( get_current_network_id() ) );
+		}
+		if ( ! $support_blog_id ) {
+			$support_blog_id = absint( $shop_blog_id );
+		}
+
+		return $support_blog_id && get_blog_details( $support_blog_id ) ? $support_blog_id : get_current_blog_id();
 	}
 
 	private function get_order_shops( MP_Order $order ) {

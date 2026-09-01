@@ -2318,6 +2318,7 @@ class MP_Multisite {
 
 		$html .= '<section class="mp-hub-panel">';
 		$html .= '<h3>' . esc_html__( 'Letzte Bestellungen', 'mp' ) . '</h3>';
+		$support_url = class_exists( 'MP_PS_Support_Integration' ) ? MP_PS_Support_Integration::get_instance()->get_support_url() : false;
 		if ( ! empty( $rows ) ) {
 			$html .= '<table class="mp-hub-orders"><thead><tr>';
 			$html .= '<th>' . esc_html__( 'Shop', 'mp' ) . '</th>';
@@ -2325,7 +2326,11 @@ class MP_Multisite {
 			$html .= '<th>' . esc_html__( 'Status', 'mp' ) . '</th>';
 			$html .= '<th>' . esc_html__( 'Checkout', 'mp' ) . '</th>';
 			$html .= '<th>' . esc_html__( 'Auszahlung', 'mp' ) . '</th>';
+			$html .= '<th>' . esc_html__( 'Widerruf', 'mp' ) . '</th>';
 			$html .= '<th>' . esc_html__( 'Betrag', 'mp' ) . '</th>';
+			if ( $support_url ) {
+				$html .= '<th>' . esc_html__( 'Hilfe', 'mp' ) . '</th>';
+			}
 			$html .= '</tr></thead><tbody>';
 
 			foreach ( array_slice( $rows, 0, 20 ) as $row ) {
@@ -2340,7 +2345,11 @@ class MP_Multisite {
 				$html .= '<td>' . esc_html( $status_label ) . '</td>';
 				$html .= '<td>' . esc_html( $checkout_label ) . '</td>';
 				$html .= '<td>' . esc_html( $payout_label ) . '</td>';
+				$html .= '<td>' . esc_html( isset( $row['withdrawal_status_text'] ) ? $row['withdrawal_status_text'] : __( 'Kein Widerruf', 'mp' ) ) . '</td>';
 				$html .= '<td>' . esc_html( mp_format_currency( $currency, $row['total'] ) ) . '</td>';
+				if ( $support_url ) {
+					$html .= '<td><a href="' . esc_url( $support_url ) . '">' . esc_html__( 'Support', 'mp' ) . '</a></td>';
+				}
 				$html .= '</tr>';
 			}
 

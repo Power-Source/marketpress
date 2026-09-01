@@ -461,6 +461,8 @@ class MP_Customer_Portal_API {
 
 			$withdrawal_entry = $this->get_order_withdrawal_entry( $order_id, $order->get_id(), '', $order->tracking_url( false ) );
 			$withdrawal_status = isset( $withdrawal_entry['status'] ) ? $withdrawal_entry['status'] : 'none';
+			$orders[ count( $orders ) - 1 ]['withdrawal_status'] = $withdrawal_status;
+			$orders[ count( $orders ) - 1 ]['withdrawal_status_text'] = isset( $withdrawal_entry['status_label'] ) ? $withdrawal_entry['status_label'] : __( 'Kein Widerruf', 'mp' );
 			if ( isset( $withdrawal_data['counts'][ $withdrawal_status ] ) ) {
 				$withdrawal_data['counts'][ $withdrawal_status ]++;
 			}
@@ -649,6 +651,8 @@ class MP_Customer_Portal_API {
 
 				$withdrawal_entry = $this->get_order_withdrawal_entry( $post_id, $order->get_id(), $shop_name, $order->tracking_url( false, $blog_id ) );
 				$withdrawal_status = isset( $withdrawal_entry['status'] ) ? $withdrawal_entry['status'] : 'none';
+				$rows[ count( $rows ) - 1 ]['withdrawal_status'] = $withdrawal_status;
+				$rows[ count( $rows ) - 1 ]['withdrawal_status_text'] = isset( $withdrawal_entry['status_label'] ) ? $withdrawal_entry['status_label'] : __( 'Kein Widerruf', 'mp' );
 				if ( isset( $withdrawal_data['counts'][ $withdrawal_status ] ) ) {
 					$withdrawal_data['counts'][ $withdrawal_status ]++;
 				}
@@ -1075,10 +1079,10 @@ class MP_Customer_Portal_API {
 	 */
 	private function get_cache_key( $scope, $user_id, $blog_id ) {
 		if ( 'network' === $scope ) {
-			return 'mp_portal_snapshot_network_' . $user_id;
+			return 'mp_portal_snapshot_v2_network_' . $user_id;
 		}
 
-		return 'mp_portal_snapshot_single_' . $user_id . '_' . $blog_id;
+		return 'mp_portal_snapshot_v2_single_' . $user_id . '_' . $blog_id;
 	}
 
 	/**

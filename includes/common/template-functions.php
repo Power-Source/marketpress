@@ -649,6 +649,7 @@ if ( ! function_exists( '_mp_order_status_overview' ) ) :
 
 				$html .= '<div class="mp_order">';
 				$html .= $order->header( false );
+				$html = apply_filters( 'mp_order/history_actions', $html, $order );
 				$html .= '</div><!-- end mo_order -->';
 			}
 

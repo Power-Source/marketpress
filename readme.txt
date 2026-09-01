@@ -2,10 +2,10 @@
 Contributors: PSOURCE
 Tags: E-commerce, ecommerce, storefront, sell, store, shopping, cart, payment gateways, digital downloads, online store
 Requires at least: 4.9
-Requires PHP: 7.4
-Tested up to: 6.8.1
-ClassicPress: 2.7.0
-Stable tag: 1.1.2
+Requires PHP: 8.0
+Tested up to: 7.1.0
+ClassicPress: 2.7.1
+Stable tag: 1.1.3
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -85,7 +85,15 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 == Changelog ==
 
 = 1.1.3 =
-* Fix DOM text reinterpreted as HTML im Warenkorb
+* Security: Warenkorb-Ausgaben gegen DOM-basierte HTML-Neuinterpretation gehaertet; dynamische Texte werden nicht mehr unbeabsichtigt als HTML verarbeitet.
+* Fix: PS-Support-Tickets aus Hauptshop und Subshops werden zentral an den konfigurierten Support der Hauptseite geroutet; der zustaendige Shop bleibt als Bestellkontext erhalten.
+* Fix: Support-Berechtigungen werden im Kontext der zentralen Support-Seite geprueft; Support-, FAQ- und Produktlinks verwenden konsistent die Hauptseiten-Routen.
+* Verbesserung: Zentrale FAQs werden in der Kundenzone nur einmal angezeigt, auch wenn eine Bestellung mehrere Shops umfasst.
+* Fix: Der Widerrufsstatus ist nicht mehr von einer aktiven PS-Support-Integration abhaengig und erscheint nun auch in der lokalen Bestellhistorie.
+* Verbesserung: Der Netzwerk-Kundenhub zeigt den Widerrufsstatus je Bestellung und bietet einen direkten Link zum zentralen Hauptseiten-Support.
+* Fix: Kundenportal-Snapshots enthalten den Widerrufsstatus pro Bestellung; eine neue Cache-Version verwirft automatisch veraltete Snapshot-Daten.
+* ClassicPress: eWay-Logo- und Bannerfelder auf validierte URL-Eingaben umgestellt; dadurch werden auf Zahlungsseiten keine veralteten jQuery-UI-Abhaengigkeiten mehr ueber die Medienbibliothek geladen.
+* Verbesserung: Die eWay-Beschriftung fuer den Seitenbanner wurde korrigiert und gespeicherte Bild-URLs werden sicher bereinigt.
 
 = 1.1.2 =
 * Fix: Auszahlungsfreigabe im Admin robust registriert und erreichbar gemacht; fehlerhafte URL-/Routing-Pfade wurden bereinigt und auf den korrekten Admin-Aufruf konsolidiert.

@@ -172,21 +172,10 @@ class MP_Withdrawal {
 			return $html;
 		}
 
-		$policy = (string) mp_get_setting( 'withdrawal->policy_text', '' );
-		if ( '' === trim( $policy ) ) {
-			$policy = __( 'Du kannst Deinen Widerruf hier digital erklären. Wähle Positionen, Grund und sende direkt ab. Danach siehst Du jederzeit den Status.', 'mp' );
-		}
-
 		$intro  = '<section class="mp_customer_zone_intro">';
 		$intro .= '<h2>' . esc_html__( 'Kundenzone', 'mp' ) . '</h2>';
 		$intro .= '<p>' . esc_html( $policy ) . '</p>';
 		$intro .= '</section>';
-
-		if ( is_user_logged_in() ) {
-			$intro .= '<p class="mp_customer_zone_intro_hint">' . esc_html__( 'Wähle eine Bestellung aus Deiner Historie aus, um einen Widerruf zu starten.', 'mp' ) . '</p>';
-		} else {
-			$intro .= '<p class="mp_customer_zone_intro_hint">' . esc_html__( 'Nutze die Bestellsuche, öffne Deine Bestellung und widerrufe widerrufsfähige Positionen direkt online.', 'mp' ) . '</p>';
-		}
 
 		return $intro . $html;
 	}

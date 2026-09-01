@@ -434,15 +434,17 @@ class MP_Gateway_eWay_Shared extends MP_Gateway_API {
 			'label' => array('text' => __('Seitenfuß (optional)', 'mp')),
 			'desc' => __('Der Text im Seitenfuß kann angepasst werden und erscheint unter den Bestelldetails des Kunden. Praktisch für Kontaktdaten.', 'mp'),
 		));
-		$metabox->add_field('file', array(
+		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('CompanyLogo'),
 			'label' => array('text' => __('Firmenlogo (optional)', 'mp')),
 			'desc' => __('Die Bild-URL kann auf Deiner Website liegen und sollte als sichere https://-Adresse angegeben werden. Das Bild erscheint oben auf der Seite (zweiter Bildbereich) und ist auf 960px x 65px begrenzt. Wenn nichts gesetzt ist, wird ein Standardbild verwendet.', 'mp'),
+			'save_callback' => array('esc_url_raw'),
 		));
-		$metabox->add_field('file', array(
+		$metabox->add_field('text', array(
 			'name' => $this->get_field_name('PageBanner'),
-			'label' => array('text' => __('Firmenlogo (optional)', 'mp')),
+			'label' => array('text' => __('Seitenbanner (optional)', 'mp')),
 			'desc' => __('Die Bild-URL kann auf Deiner Website liegen und sollte als sichere https://-Adresse angegeben werden. Das Bild erscheint oben auf der Seite (zweiter Bildbereich) und ist auf 960px x 65px begrenzt. Wenn nichts gesetzt ist, wird ein Standardbild verwendet.', 'mp'),
+			'save_callback' => array('esc_url_raw'),
 		));
 	}
 		

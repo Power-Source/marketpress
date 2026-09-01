@@ -203,7 +203,7 @@ class MP_Admin_Multisite {
 			$metabox->add_field( 'checkbox', array(
 				'name'    => 'advanced[ps_support_integration]',
 				'label'   => array( 'text' => __( 'PS Support mit MarketPress verbinden?', 'mp' ) ),
-				'desc'    => __( 'Erstellt bestellbezogene Tickets über PS Support und routet sie an den zuständigen Shop.', 'mp' ),
+				'desc'    => __( 'Erstellt bestellbezogene Tickets im zentralen Support der Hauptseite und speichert den zuständigen Shop als Bestellkontext.', 'mp' ),
 				'message' => __( 'PS-Support-Integration aktivieren', 'mp' ),
 			) );
 			$metabox->add_field( 'checkbox', array(
@@ -215,13 +215,13 @@ class MP_Admin_Multisite {
 			$metabox->add_field( 'checkbox', array(
 				'name'    => 'advanced[ps_support_customer_faq_button]',
 				'label'   => array( 'text' => __( 'FAQ-Button in der Kundenzone anzeigen?', 'mp' ) ),
-				'desc'    => __( 'Verlinkt je beteiligtem Shop dessen von PS Support bereitgestellte FAQ-Seite.', 'mp' ),
+				'desc'    => __( 'Verlinkt die von PS Support bereitgestellte zentrale FAQ-Seite der Hauptseite.', 'mp' ),
 				'message' => __( 'FAQ-Button anzeigen', 'mp' ),
 			) );
 			$metabox->add_field( 'checkbox', array(
 				'name'    => 'advanced[ps_support_product_links]',
 				'label'   => array( 'text' => __( 'Support und FAQs an Produkten anzeigen?', 'mp' ) ),
-				'desc'    => __( 'Zeigt den Shop-Support und eine optional am Produkt ausgewählte FAQ an.', 'mp' ),
+				'desc'    => __( 'Zeigt den zentralen Hauptseiten-Support und eine optional am Produkt ausgewählte FAQ an.', 'mp' ),
 				'message' => __( 'Produkt-Supportlinks anzeigen', 'mp' ),
 			) );
 			if ( ! empty( $priority_options ) ) {
