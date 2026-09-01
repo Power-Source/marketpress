@@ -58,6 +58,7 @@ class MP_Admin_Multisite {
 			add_action( 'admin_enqueue_scripts', array( &$this, 'enqueue_styles_scripts' ) );
 			add_filter( 'psource_field/after_field', array( &$this, 'display_create_page_button' ), 10, 2 );
 			add_action( 'psource_field/print_scripts', array( &$this, 'create_store_page_js' ) );
+			add_action( 'admin_footer', array( &$this, 'update_global_currency_symbol' ) );
 		}
 		add_action( 'wp_ajax_mp_index_products', array( &$this, 'index_products' ) );
 		add_action( 'wp_ajax_mp_network_snapshot_controls', array( &$this, 'ajax_network_snapshot_controls' ) );
@@ -400,6 +401,11 @@ class MP_Admin_Multisite {
 				$options[ $key ] = esc_attr( $value[ 0 ] ) . ' - ' . mp_format_currency( $key );
 			}
 
+			$global_currency = mp_get_network_setting( 'global_currency' );
+			if ( empty( $global_currency ) ) {
+				$global_currency = 'EUR';
+			}
+
 			$metabox->add_field( 'advanced_select', array(
 				'name'			 => 'global_currency',
 				'placeholder'	 => __( 'Wähle eine Währung', 'mp' ),
@@ -415,10 +421,10 @@ class MP_Admin_Multisite {
 				'default_value'	 => '3',
 				'orientation'	 => 'horizontal',
 				'options'		 => array(
-					'1'	 => '<span class="mp-currency-symbol">' . mp_format_currency( mp_get_network_setting( 'global_currency', 'EUR' ) ) . '</span>100',
-					'2'	 => '<span class="mp-currency-symbol">' . mp_format_currency( mp_get_network_setting( 'global_currency', 'EUR' ) ) . '</span> 100',
-					'3'	 => '100<span class="mp-currency-symbol">' . mp_format_currency( mp_get_network_setting( 'global_currency', 'EUR' ) ) . '</span>',
-					'4'	 => '100 <span class="mp-currency-symbol">' . mp_format_currency( mp_get_network_setting( 'global_currency', 'EUR' ) ) . '</span>',
+					'1'	 => '<span class="mp-currency-symbol">' . mp_format_currency( $global_currency ) . '</span>100',
+					'2'	 => '<span class="mp-currency-symbol">' . mp_format_currency( $global_currency ) . '</span> 100',
+					'3'	 => '100<span class="mp-currency-symbol">' . mp_format_currency( $global_currency ) . '</span>',
+					'4'	 => '100 <span class="mp-currency-symbol">' . mp_format_currency( $global_currency ) . '</span>',
 				)
 			) );
 
@@ -450,6 +456,35 @@ class MP_Admin_Multisite {
 	}
 
 	/**
+	 * Update the network currency symbol previews when the currency changes.
+	 *
+	 */
+	public function update_global_currency_symbol() {
+		$symbols = array();
+		foreach ( array_keys( mp()->currencies ) as $currency ) {
+			$symbols[ $currency ] = mp_format_currency( $currency );
+		}
+		?>
+		<script type="text/javascript">
+			(function() {
+				var symbols = <?php echo wp_json_encode( $symbols ); ?>;
+
+				document.addEventListener( 'change', function( event ) {
+					if ( ! event.target.matches( 'select[name="global_currency"]' ) ) {
+						return;
+					}
+
+					var symbol = symbols[event.target.value] || '';
+					document.querySelectorAll( '.mp-currency-symbol' ).forEach( function( element ) {
+						element.innerHTML = symbol;
+					} );
+				}, true );
+			}());
+		</script>
+		<?php
+	}
+
+	/**
 	 * Fetch currency values
 	 */
 	public function global_currency_options( $value, $post_id, $raw, $field ){
@@ -460,7 +495,14 @@ class MP_Admin_Multisite {
 			'global_curr_decimal'
 		);
 
-		return in_array( $field->args['name'], $currency_global_options_indexers ) ? mp_get_network_setting( $field->args['name'] ) : $value;
+		if ( ! in_array( $field->args['name'], $currency_global_options_indexers, true ) ) {
+			return $value;
+		}
+
+		$default = isset( $field->args['default_value'] ) ? $field->args['default_value'] : $value;
+		$network_value = mp_get_network_setting( $field->args['name'], $default );
+
+		return $network_value === '' || $network_value === null ? $default : $network_value;
 	}
 
 	/**

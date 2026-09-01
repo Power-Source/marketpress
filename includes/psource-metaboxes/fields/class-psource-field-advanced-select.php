@@ -70,6 +70,11 @@ class PSOURCE_Field_Advanced_Select extends PSOURCE_Field {
 							       allowDeselect: true,
 							       showSearch: true,
 							       closeOnSelect: !el.hasAttribute('multiple'),
+							       events: {
+								       afterChange: function() {
+									       el.dispatchEvent(new Event('change', { bubbles: true }));
+								       }
+							       },
 						       });
 					       }
 				       }

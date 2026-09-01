@@ -84,6 +84,10 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 == Changelog ==
 
+= 1.1.4 =
+* Fix: Die Währungssymbole im Netzwerk-Admin werden beim Wechsel der Netzwerkwährung sofort aktualisiert, ohne dass die Einstellungen zuvor gespeichert werden müssen.
+* Fix: Leere Netzwerk-Währungseinstellungen verwenden wieder sinnvolle Standardwerte für Währungssymbol, Preisformat und Dezimalstellen.
+
 = 1.1.3 =
 * Security: Warenkorb-Ausgaben gegen DOM-basierte HTML-Neuinterpretation gehaertet; dynamische Texte werden nicht mehr unbeabsichtigt als HTML verarbeitet.
 * Fix: PS-Support-Tickets aus Hauptshop und Subshops werden zentral an den konfigurierten Support der Hauptseite geroutet; der zustaendige Shop bleibt als Bestellkontext erhalten.
