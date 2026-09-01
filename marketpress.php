@@ -220,10 +220,8 @@ class Marketpress {
 	 *
 	 * @since 1.0
 	 * @access public
-	 * @uses $wp_version
 	 */
 	public function register_custom_types() {
-		global $wp_version;
 
 		// Register product_category taxonomy.
 		register_taxonomy( 'product_category', MP_Product::get_post_type(), apply_filters( 'mp_register_product_category', array(
@@ -316,12 +314,12 @@ class Marketpress {
 			'show_ui'            => true,
 			'publicly_queryable' => true,
 			'capability_type'    => array( 'product', 'products' ),
-			'menu_icon'          => ( version_compare( $wp_version, '3.8', '>=' ) ) ? 'dashicons-cart' : mp_plugin_url( 'ui/images/marketpress-icon.png' ),
+			'menu_icon' 		 => 'dashicons-cart',
 			'hierarchical'       => false,
 			'map_meta_cap'       => true,
 			'rewrite'            => array(
-				'slug'       => rtrim( mp_store_page_uri( 'products', false ), '/' ),
-				'with_front' => false,
+				'slug'       	 => rtrim( mp_store_page_uri( 'products', false ), '/' ),
+				'with_front' 	 => false,
 			),
 			'query_var'          => true,
 			'supports'           => array(
@@ -1072,7 +1070,6 @@ class Marketpress {
 		require_once $this->plugin_dir( 'includes/addons/class-mp-addons.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-order.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-product.php' );
-		require_once $this->plugin_dir( 'includes/common/class-mp-installer.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-cart.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-withdrawal.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-customer-portal-api.php' );
@@ -1178,36 +1175,132 @@ function mp_plugin_activate() {
 }
 
 function mp_plugin_uninstall() {
-	if ( is_multisite() && is_network_admin() ) {
-		$settings = get_site_option('mp_network_settings');
-	} else {
-		$settings = get_option('mp_settings');
-	}
-	if (empty($settings['advanced']['delete_on_uninstall'])) {
-		return;
-	}
-    global $wpdb;
+        global $wpdb;
 
-    $table = $wpdb->prefix . 'mp_product_attributes';
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '$table'" ) == $table ) {
-        // Tabelle existiert, Query ausführen
-        $results = $wpdb->get_results( "SELECT * FROM $table" );
-    }
-    $sql_attr = "DROP TABLE IF EXISTS $table;";
-    $wpdb->query( $sql_attr );
+        if ( is_multisite() ) {
+                $settings = get_site_option( 'mp_network_settings', array() );
+        } else {
+                $settings = get_option( 'mp_settings', array() );
+        }
 
-    $table_attr_terms = $wpdb->prefix . 'mp_product_attributes_terms';
-    $sql_attr_terms = "DROP TABLE IF EXISTS $table_attr_terms;";
-    $wpdb->query( $sql_attr_terms );
+        /*
+         * Respect the "Delete data on uninstall" setting.
+         * If disabled, leave all MarketPress data intact.
+         */
+        if ( empty( $settings['advanced']['delete_on_uninstall'] ) ) {
+                return;
+        }
 
-    //delete_site_option( 'mp_deprecated_gateway_notice_showed' );
-    delete_site_option( 'mp_flush_rewrites' );
-    delete_site_option( 'mp_flush_rewrites_30' );
-    delete_site_option( 'mp_needs_pages' );
-    delete_site_option( 'mp_needs_quick_setup' );
-    delete_site_option( 'mp_plugin_do_activation_redirect' );
-    delete_site_option( 'mp_settings' );
-    delete_site_option( 'mp_version' );
+        /*
+         * Multisite: remove site-specific MarketPress data from every blog.
+         */
+        if ( is_multisite() ) {
+                $current_blog_id = get_current_blog_id();
+                $blog_ids        = get_sites(
+                        array(
+                                'fields' => 'ids',
+                        )
+                );
+
+                foreach ( $blog_ids as $blog_id ) {
+                        switch_to_blog( (int) $blog_id );
+
+                        mp_plugin_uninstall_site_data();
+
+                        restore_current_blog();
+                }
+
+                /*
+                 * Remove network-wide MarketPress options and caches.
+                 */
+                delete_site_option( 'mp_network_settings' );
+                delete_site_option( 'mp_product_category' );
+                delete_site_option( 'mp_product_tag' );
+                delete_site_option( 'mp_global_order_index' );
+                delete_site_option( 'mp_network_build' );
+                delete_site_option( 'mp_global_terms_cache_version' );
+                delete_site_option( 'mp_network_snapshot_cleanup_settings' );
+
+                delete_site_transient( 'mp_network_settings_snapshot_v1' );
+                wp_clear_scheduled_hook( 'mp_network_snapshot_cleanup_event' );
+
+                /*
+                 * Network-wide MarketPress tables.
+                 */
+                $network_tables = array(
+                        $wpdb->base_prefix . 'mp_products',
+                        $wpdb->base_prefix . 'mp_terms',
+                        $wpdb->base_prefix . 'mp_term_relationships',
+                        $wpdb->base_prefix . 'mp_settlement_ledger',
+                );
+
+                foreach ( $network_tables as $table ) {
+                        $wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
+                }
+
+                /*
+                 * Return to the blog from which uninstall was initiated.
+                 */
+                switch_to_blog( $current_blog_id );
+                restore_current_blog();
+
+        } else {
+                mp_plugin_uninstall_site_data();
+        }
+}
+
+/**
+ * Remove MarketPress data belonging to the current site.
+ */
+function mp_plugin_uninstall_site_data() {
+        global $wpdb;
+
+        /*
+         * MarketPress site-specific tables.
+         */
+        $tables = array(
+                $wpdb->prefix . 'mp_product_attributes',
+                $wpdb->prefix . 'mp_product_attributes_terms',
+        );
+
+        foreach ( $tables as $table ) {
+                $wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
+        }
+
+        /*
+         * MarketPress site options.
+         */
+        $options = array(
+                'mp_settings',
+                'mp_settings_legacy',
+                'mp_coupons',
+                'mp_coupons_legacy',
+                'mp_db_update_required',
+                'mp_deprecated_gateway_notice_showed',
+                'mp_flush_rewrites',
+                'mp_flush_rewrites_30',
+                'mp_global_terms_cache_version',
+                'mp_needs_pages',
+                'mp_needs_quick_setup',
+                'mp_plugin_do_activation_redirect',
+                'mp_previous_version',
+                'mp_st_db_version',
+                'mp_subsite_need_redirect',
+                'mp_version',
+                'mp_shop_profile_settings',
+                'widget_mp_global_product_list_widget',
+                'payfast_pending_status',
+        );
+
+        foreach ( $options as $option ) {
+                delete_option( $option );
+        }
+
+        /*
+         * PayPal Marketplace stores these options per blog.
+         */
+        delete_option( 'mp_paypal_marketplace_merchant_id_' . get_current_blog_id() );
+        delete_option( 'mp_paypal_marketplace_onboard_error_' . get_current_blog_id() );
 }
 
 function mp_plugin_redirect() {

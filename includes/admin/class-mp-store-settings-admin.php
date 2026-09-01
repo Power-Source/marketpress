@@ -107,10 +107,8 @@ private function __construct() {
 	 *
 	 * @since 1.0
 	 * @access public
-	 * @uses $wp_version
 	 */
 	public function add_menu_items() {
-		global $wp_version;
 	
 		$cap = apply_filters( 'mp_store_settings_cap', 'manage_store_settings' );
 	

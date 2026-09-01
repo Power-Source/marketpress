@@ -278,6 +278,62 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 		) );
 	}
 
+	/**
+	 * Initialize the network settings metabox
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public function init_network_settings_metabox() {
+        $metabox = new PSOURCE_Metabox( array(
+            'id'              => $this->generate_metabox_id(),
+            'page_slugs'      => array( 'network-store-settings-payments' ),
+    		'title'           => sprintf( __( '%s Einstellungen', 'mp' ), $this->admin_name ),
+            'site_option_name' => 'mp_network_settings',
+            'desc'            => __( 'Stripe ermöglicht Dir, Kreditkartenzahlungen sicher zu akzeptieren. Kunden werden zu Stripe weitergeleitet, um die Zahlung abzuschließen, und dann zurück auf Deine Website geleitet.', 'mp' ),
+        ) );
+
+        $metabox->add_field( 'checkbox', array(
+            'name'  => $this->get_field_name( 'is_ssl' ),
+            'label' => array( 'text' => __( 'SSL erzwingen?', 'mp' ) ),
+            'desc'  => __( 'Im Live-Modus empfiehlt Stripe ein SSL-Zertifikat für die Seite, auf der das Checkout-Formular angezeigt wird.', 'mp' ),
+        ) );
+
+        $creds = $metabox->add_field( 'complex', array(
+            'name'  => $this->get_field_name( 'api_credentials' ),
+            'label' => array( 'text' => __( 'API-Zugangsdaten', 'mp' ) ),
+            'desc'  => __( 'Melde Dich bei Stripe an, um Deine API-Zugangsdaten zu erhalten.', 'mp' ),
+        ) );
+
+        if ( $creds instanceof PSOURCE_Field ) {
+            $creds->add_field( 'text', array(
+                'name'       => 'secret_key',
+                'label'      => array( 'text' => __( 'Secret Key', 'mp' ) ),
+                'validation' => array(
+                    'required' => true,
+                ),
+            ) );
+
+            $creds->add_field( 'text', array(
+                'name'       => 'publishable_key',
+                'label'      => array( 'text' => __( 'Publishable Key', 'mp' ) ),
+                'validation' => array(
+                    'required' => true,
+                ),
+            ) );
+        }
+
+        $metabox->add_field( 'advanced_select', array(
+                'name'          => $this->get_field_name( 'currency' ),
+                'label'         => array( 'text' => __( 'Währung', 'mp' ) ),
+                'multiple'      => false,
+                'width'         => 'element',
+                'options'       => $this->currencies,
+                'default_value' => mp_get_network_setting( 'gateways->' . $this->plugin_name . '->currency', mp_get_setting( 'currency' ) ),
+                'desc'          => __( 'Die Netzwerk-Währung für Stripe.', 'mp' ),
+        ) );
+	}
+
 	public function process_payment( $cart, $billing_info, $shipping_info ) {
 		// Debug: Log die Shipping Info
 		error_log( 'Stripe: Billing Info: ' . print_r( $billing_info, true ) );
@@ -656,7 +712,7 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 }
 
 //register payment gateway plugin
-mp_register_gateway_plugin( 'MP_Gateway_Stripe', 'stripe', __( 'Stripe', 'mp' ) );
+mp_register_gateway_plugin( 'MP_Gateway_Stripe', 'stripe', __( 'Stripe', 'mp' ), true );
 
 /**
  * Verifiziert Stripe-Zahlung für eine Order

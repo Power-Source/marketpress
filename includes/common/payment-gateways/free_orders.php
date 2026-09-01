@@ -147,11 +147,11 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 			'title'			 => sprintf( __( '%s Einstellungen', 'mp' ), $this->admin_name ),
 			'option_name'	 => 'mp_settings',
 			'desc'			 => __( "Dieses Gateway wird automatisch aktiviert, wenn die Bestellung 0 beträgt, und kann nicht deaktiviert werden", 'mp' ),
-		/* 'conditional'	 => array(
-		  'name'	 => 'gateways[allowed][' . $this->plugin_name . ']',
-		  'value'	 => 1,
-		  'action' => 'show',
-		  ), */
+			 'conditional'	 => array(
+		  		'name'	 => 'gateways[allowed][' . $this->plugin_name . ']',
+		  		'value'	 => 1,
+		  		'action' => 'show',
+		  	), 
 		) );
 
 		$metabox->add_field( 'checkbox', array(
@@ -192,6 +192,59 @@ class MP_Gateway_FREE_Orders extends MP_Gateway_API {
 		) );
 	}
 
+	/**
+	 * Initialize the network settings metabox
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public function init_network_settings_metabox() {
+
+        $metabox = new PSOURCE_Metabox( array(
+            'id'              => $this->generate_metabox_id(),
+            'page_slugs'      => array( 'network-store-settings-payments' ),
+            'title'           => sprintf( __( '%s Einstellungen', 'mp' ), $this->admin_name ),
+            'site_option_name' => 'mp_network_settings',
+            'desc'            => __( 'Dieses Gateway wird automatisch aktiviert, wenn die Netzwerkbestellung 0 beträgt, und kann nicht deaktiviert werden.', 'mp' ),
+        ) );
+
+        $metabox->add_field( 'checkbox', array(
+            'name'          => $this->get_field_name( 'automatic_payment_status_paid' ),
+            'label'         => array( 'text' => __( 'Zahlungsstatus', 'mp' ) ),
+            'message'       => __( 'Ja', 'mp' ),
+            'value'         => 'yes',
+            'default_value' => 'yes',
+            'desc'          => __( 'Wenn aktiviert, werden kostenlose Netzwerkbestellungen automatisch als bezahlt markiert.', 'mp' ),
+        ) );
+
+        $metabox->add_field( 'text', array(
+            'name'          => $this->get_field_name( 'name' ),
+            'default_value' => $this->public_name,
+            'label'         => array( 'text' => __( 'Methodenname', 'mp' ) ),
+            'desc'          => __( 'Gib einen öffentlichen Namen für diese Zahlungsmethode ein, der den Kunden angezeigt wird.', 'mp' ),
+            'save_callback' => array( 'strip_tags' ),
+        ) );
+
+        $metabox->add_field( 'wysiwyg', array(
+            'name'  => $this->get_field_name( 'instruction' ),
+            'label' => array( 'text' => __( 'Zahlungsinformationen', 'mp' ) ),
+            'desc'  => __( 'Diese Informationen werden beim Zahlungsvorgang angezeigt.', 'mp' ),
+        ) );
+
+        $metabox->add_field( 'wysiwyg', array(
+            'name'  => $this->get_field_name( 'confirmation' ),
+            'label' => array( 'text' => __( 'Bestätigungsinformationen für Benutzer', 'mp' ) ),
+            'desc'  => __( 'Diese Informationen werden auf dem Bestätigungsbildschirm für kostenlose Netzwerkbestellungen angezeigt. TOTAL wird durch den Gesamtbetrag der Bestellung ersetzt.', 'mp' ),
+        ) );
+
+        $metabox->add_field( 'textarea', array(
+            'name'          => $this->get_field_name( 'email' ),
+            'label'         => array( 'text' => __( 'Bestätigungs-E-Mail für Bestellungen', 'mp' ) ),
+            'desc'          => __( 'E-Mail-Text für kostenlose Netzwerkbestellungen. Verfügbare Platzhalter: CUSTOMERNAME, ORDERID, ORDERINFO, SHIPPINGINFO, PAYMENTINFO, TOTAL, TRACKINGURL. Kein HTML erlaubt.', 'mp' ),
+            'custom'        => array( 'rows' => 10 ),
+            'save_callback' => array( 'strip_tags' ),
+        ) );
+	}
 }
 
-mp_register_gateway_plugin( 'MP_Gateway_FREE_Orders', 'free_orders', __( 'Kostenlose Bestellung', 'mp' ) );
+mp_register_gateway_plugin( 'MP_Gateway_FREE_Orders', 'free_orders', __( 'Kostenlose Bestellung', 'mp' ), true );

@@ -500,7 +500,7 @@ class MP_Admin_Multisite {
 	public function init_global_gateway_settings_metabox() {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'               => 'mp-network-settings-global-gateway',
-			'page_slugs'       => array( 'network-store-settings' ),
+			'page_slugs' => array( 'network-store-settings-payments' ),
 			'title'            => __( 'Netzwerk Zahlungsgateway', 'mp' ),
 			'site_option_name' => 'mp_network_settings',
 			'order'            => 0,
@@ -540,7 +540,7 @@ class MP_Admin_Multisite {
 	public function init_gateway_permissions_metabox() {
 		$metabox = new PSOURCE_Metabox( array(
 			'id'               => 'mp-network-settings-gateway-permissions',
-			'page_slugs'       => array( 'network-store-settings' ),
+			'page_slugs' => array( 'network-store-settings-payments' ),
 			'title'            => __( 'Gateway-Berechtigungen', 'mp' ),
 			'site_option_name' => 'mp_network_settings',
 			'order'            => 0,
@@ -629,24 +629,101 @@ class MP_Admin_Multisite {
 	 * @access public
 	 */
 	public function add_menu_items() {
-		add_menu_page(
-			__( 'PS MarketPress Netzwerk', 'mp' ),
-			__( 'PS MarketPress', 'mp' ),
-			'manage_network_options',
-			self::NETWORK_MENU_SLUG,
-			array( &$this, 'network_store_settings' ),
-			'dashicons-store',
-			58.5
-		);
+        add_menu_page(
+                __( 'PS MarketPress Netzwerk', 'mp' ),
+                __( 'PS MarketPress', 'mp' ),
+                'manage_network_options',
+                self::NETWORK_MENU_SLUG,
+                array( &$this, 'network_store_settings' ),
+                'dashicons-store',
+                58.5
+        );
 
-		add_submenu_page(
-			self::NETWORK_MENU_SLUG,
-			__( 'Shopnetzwerk Einstellungen', 'mp' ),
-			__( 'Einstellungen', 'mp' ),
-			'manage_network_options',
-			self::NETWORK_MENU_SLUG,
-			array( &$this, 'network_store_settings' )
-		);
+        add_submenu_page(
+                self::NETWORK_MENU_SLUG,
+                __( 'Shopnetzwerk Einstellungen', 'mp' ),
+                __( 'Einstellungen', 'mp' ),
+                'manage_network_options',
+                self::NETWORK_MENU_SLUG,
+                array( &$this, 'network_store_settings' )
+        );
+
+        add_submenu_page(
+                self::NETWORK_MENU_SLUG,
+                __( 'Netzwerk Zahlungen', 'mp' ),
+                __( 'Zahlungen', 'mp' ),
+                'manage_network_options',
+                'network-store-settings-payments',
+                array( &$this, 'network_store_settings_payments' )
+        );
+	}
+
+	/**
+	 * Displays the network payment settings.
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	public function network_store_settings_payments() {
+        $all_gateways     = MP_Gateway_API::get_gateways();
+        $network_gateways = array();
+
+        foreach ( $all_gateways as $code => $gateway ) {
+            if ( empty( $gateway[2] ) || 'free_orders' === $code ) {
+                continue;
+            }
+
+            $network_gateways[ $code ] = $gateway;
+        }
+        ?>
+        <div class="wrap mp-wrap mp-network-settings-modern">
+
+            <h1 class="mp-settings-title">
+                <?php esc_html_e( 'Netzwerk Zahlungen', 'mp' ); ?>
+            </h1>
+
+            <div class="mp-network-intro">
+                <h3><?php esc_html_e( 'Netzwerk-Zahlungsgateways', 'mp' ); ?></h3>
+                <p>
+                    <?php esc_html_e( 'Wähle die Zahlungsgateways aus, die für den Netzwerk-Warenkorb zur Verfügung stehen.', 'mp' ); ?>
+                </p>
+            </div>
+
+            <?php if ( empty( $network_gateways ) ) : ?>
+
+                <div class="notice notice-warning">
+                    <p>
+                        <?php esc_html_e( 'Es wurden keine globalen Zahlungsgateways gefunden.', 'mp' ); ?>
+                    </p>
+                </div>
+
+            <?php else : ?>
+
+                <?php
+                $metabox = new PSOURCE_Metabox( array(
+                    'id'               => 'mp-network-payment-gateways',
+                    'page_slugs'       => array( 'network-store-settings-payments' ),
+                    'title'            => __( 'Verfügbare Zahlungsgateways', 'mp' ),
+                    'site_option_name' => 'mp_network_settings',
+                    'order'            => 0,
+                ) );
+
+                foreach ( $network_gateways as $code => $gateway ) {
+                    $metabox->add_field( 'checkbox', array(
+                        'name'  => 'gateways[allowed][' . $code . ']',
+                        'label' => array(
+                        'text' => $gateway[1],
+                    ),
+                    ) );
+                }
+                ?>
+
+                <?php do_action( 'psource_metabox/render_settings_metaboxes' ); ?>
+
+            <?php endif; ?>
+
+        </div>
+        <?php
 	}
 
 	/**

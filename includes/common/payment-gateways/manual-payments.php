@@ -178,4 +178,4 @@ Die Bestellung verfolgst du hier: TRACKINGURL', 'mp' ),
 
 }
 
-mp_register_gateway_plugin( 'MP_Gateway_ManualPayments', 'manual_payments', __( 'Manuelle Zahlung', 'mp' ) );
+mp_register_gateway_plugin( 'MP_Gateway_ManualPayments', 'manual_payments', __( 'Manuelle Zahlung', 'mp' ), true );
