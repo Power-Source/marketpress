@@ -82,6 +82,36 @@
 				text-transform: none;
 			}
 		}
+
+		&_payment_retry {
+			background: lighten($color--warning, 38%);
+			border-left: 4px solid $color--warning;
+			border-radius: 4px;
+			padding: $space--m;
+
+			h5 {
+				font-size: $font__size;
+				font-weight: 600;
+				letter-spacing: 0;
+				margin-bottom: $space--xs;
+				text-transform: none;
+			}
+
+			label span {
+				font-size: $font__size--s;
+				font-weight: 600;
+			}
+
+			select {
+				min-height: 38px;
+				width: 100%;
+			}
+
+			&_error {
+				color: $color--error;
+				font-weight: 600;
+			}
+		}
 	}
 
 	// Order Confirmation Text

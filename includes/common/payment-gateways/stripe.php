@@ -486,10 +486,75 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	public function get_return_url( $order ) {
 		if ( ! $order || ! method_exists( $order, 'tracking_url' ) ) {
 			// Fallback, falls wirklich nichts da ist
-			return home_url( '/shop' );
+			return set_url_scheme( home_url( '/shop' ), 'https' );
 		}
 		// liefert z.B. /shop/bestellstatus/{order_key}/
-		return $order->tracking_url( false );
+		return set_url_scheme( $order->tracking_url( false ), 'https' );
+	}
+
+	/**
+	 * Start another Stripe Checkout attempt for an existing unpaid order.
+	 *
+	 * @param MP_Order $order
+	 * @return string|WP_Error
+	 */
+	public function retry_payment( $order ) {
+		if ( ! $order instanceof MP_Order || ! $order->exists() || 'order_received' !== $order->post_status ) {
+			return new WP_Error( 'invalid_order', __( 'Diese Bestellung kann nicht erneut bezahlt werden.', 'mp' ) );
+		}
+
+		$secret_key = (string) $this->secret_key;
+		if ( '' === $secret_key ) {
+			$secret_key = (string) $this->get_network_setting( 'api_credentials->secret_key', '' );
+		}
+		if ( '' === $secret_key ) {
+			return new WP_Error( 'missing_credentials', __( 'Stripe ist derzeit nicht verfügbar.', 'mp' ) );
+		}
+
+		$currency = strtoupper( (string) $order->get_meta( 'mp_payment_info->currency', mp_get_setting( 'currency', 'EUR' ) ) );
+		$total    = (float) $order->get_meta( 'mp_order_total', 0 );
+		$email    = sanitize_email( (string) $order->get_meta( 'mp_billing_info->email', '' ) );
+		if ( $total <= 0 || '' === $currency ) {
+			return new WP_Error( 'invalid_total', __( 'Der offene Betrag ist ungültig.', 'mp' ) );
+		}
+
+		if ( ! class_exists( '\Stripe\Stripe' ) ) {
+			require_once mp_plugin_dir( 'vendor/autoload.php' );
+		}
+		\Stripe\Stripe::setApiKey( $secret_key );
+
+		try {
+			$session_args = array(
+				'payment_method_types' => array( 'card' ),
+				'line_items' => array( array(
+					'price_data' => array(
+						'currency' => strtolower( $currency ),
+						'product_data' => array( 'name' => __( 'Bestellung', 'mp' ) . ' #' . $order->get_id() ),
+						'unit_amount' => $this->config_amount( $total ),
+					),
+					'quantity' => 1,
+				) ),
+				'mode' => 'payment',
+				'success_url' => $this->get_return_url( $order ),
+				'cancel_url' => $order->tracking_url( false ),
+				'metadata' => array( 'order_id' => $order->get_id() ),
+			);
+			if ( $email ) {
+				$session_args['customer_email'] = $email;
+			}
+
+			$session = \Stripe\Checkout\Session::create( $session_args );
+			update_post_meta( $order->ID, '_stripe_checkout_session_id', $session->id );
+
+			$pending_orders = get_transient( 'stripe_pending_orders' );
+			$pending_orders = is_array( $pending_orders ) ? $pending_orders : array();
+			$pending_orders[ $order->get_id() ] = $session->id;
+			set_transient( 'stripe_pending_orders', $pending_orders, DAY_IN_SECONDS );
+
+			return (string) $session->url;
+		} catch ( \Throwable $e ) {
+			return new WP_Error( 'stripe_retry_failed', __( 'Stripe Checkout konnte nicht gestartet werden.', 'mp' ) );
+		}
 	}
 
 	/**
@@ -502,8 +567,8 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 		// Fallback: Order-ID aus URL extrahieren (falls query_var nicht funktioniert)
 		if ( ! $order_id && isset( $_SERVER['REQUEST_URI'] ) ) {
 			$uri = sanitize_text_field( $_SERVER['REQUEST_URI'] );
-			// URL-Pattern: /shop/bestellstatus/{order_id}/
-			preg_match( '#/bestellstatus/([a-zA-Z0-9]+)/?(\?|$)#', $uri, $matches );
+			// URL-Pattern: /shop/bestellstatus/{order_id}/{optional_guest_hash}/
+			preg_match( '#/bestellstatus/([^/?]+)(?:/|\?|$)#', $uri, $matches );
 			if ( ! empty( $matches[1] ) ) {
 				$order_id = $matches[1];
 			}
@@ -648,25 +713,22 @@ function mp_stripe_verify_payment( $order ) {
 	}
 	
 	$order_id = $order->get_id();
-	
-	// Prüfe ob diese Order in der Stripe Transient ist
+
+	// Use the session stored on the order; the transient is only a legacy fallback.
+	$session_id = (string) get_post_meta( $order->ID, '_stripe_checkout_session_id', true );
 	$pending_orders = get_transient( 'stripe_pending_orders' );
-	if ( ! is_array( $pending_orders ) || ! isset( $pending_orders[ $order_id ] ) ) {
-		return; // Keine Stripe-Zahlung pending
+	if ( ! $session_id && is_array( $pending_orders ) && isset( $pending_orders[ $order_id ] ) ) {
+		$session_id = (string) $pending_orders[ $order_id ];
 	}
-	
-	// Hole Session-ID
-	$session_id = $pending_orders[ $order_id ];
-	
-	// Hole Stripe Gateway Settings
-	$gateways = MP_Gateway_API::get_active_gateways();
-	if ( ! isset( $gateways['stripe'] ) ) {
+	if ( ! $session_id ) {
 		return;
 	}
 	
-	$gateway = $gateways['stripe'];
-	$secret_key = $gateway->get_setting( 'api_credentials->secret_key' );
-	
+	// Existing orders must remain verifiable independently of current checkout routing.
+	$secret_key = (string) mp_get_setting( 'gateways->stripe->api_credentials->secret_key', '' );
+	if ( ! $secret_key ) {
+		$secret_key = (string) mp_get_network_setting( 'gateways->stripe->api_credentials->secret_key', '' );
+	}
 	if ( ! $secret_key ) {
 		return;
 	}
@@ -681,6 +743,7 @@ function mp_stripe_verify_payment( $order ) {
 		$session = \Stripe\Checkout\Session::retrieve( $session_id );
 		
 		if ( $session->payment_status === 'paid' ) {
+			$stored_payment_info = (array) $order->get_meta( 'mp_payment_info', array() );
 			// Betrag berechnen
 			$amount = $session->amount_total;
 			if ( ! in_array( strtoupper( $session->currency ), ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'] ) ) {
@@ -689,9 +752,9 @@ function mp_stripe_verify_payment( $order ) {
 			
 			// Payment Info erstellen
 			$payment_info = array(
-				'gateway_public_name'  => $gateway->public_name,
-				'gateway_private_name' => $gateway->admin_name,
-				'gateway_plugin_name'  => $gateway->plugin_name,
+				'gateway_public_name'  => mp_arr_get_value( 'gateway_public_name', $stored_payment_info, __( 'Kreditkarte', 'mp' ) ),
+				'gateway_private_name' => mp_arr_get_value( 'gateway_private_name', $stored_payment_info, __( 'Stripe', 'mp' ) ),
+				'gateway_plugin_name'  => 'stripe',
 				'method'               => __( 'Stripe Checkout', 'mp' ),
 				'transaction_id'       => $session->payment_intent,
 				'status'               => array( time() => __( 'Bezahlt', 'mp' ) ),
@@ -707,8 +770,10 @@ function mp_stripe_verify_payment( $order ) {
 			$order->change_status( 'order_paid', true );
 			
 			// Order aus pending entfernen
-			unset( $pending_orders[ $order_id ] );
-			set_transient( 'stripe_pending_orders', $pending_orders, DAY_IN_SECONDS );
+			if ( is_array( $pending_orders ) ) {
+				unset( $pending_orders[ $order_id ] );
+				set_transient( 'stripe_pending_orders', $pending_orders, DAY_IN_SECONDS );
+			}
 			
 			// Cache leeren
 			clean_post_cache( $order->ID );

@@ -30,8 +30,11 @@ class MP_Customer_Portal_API {
 		add_action( 'wp_ajax_mp_customer_portal_sync', array( $this, 'ajax_sync_snapshot' ) );
 		add_action( 'wp_ajax_nopriv_mp_customer_portal_snapshot', array( $this, 'ajax_guest_forbidden' ) );
 		add_action( 'wp_ajax_nopriv_mp_customer_portal_sync', array( $this, 'ajax_guest_forbidden' ) );
+		add_action( 'admin_post_mp_retry_order_payment', array( $this, 'handle_retry_payment' ) );
+		add_filter( 'mp_order/header', array( $this, 'append_payment_retry' ), 20, 2 );
 
 		add_action( 'transition_post_status', array( $this, 'invalidate_after_order_status_change' ), 10, 3 );
+		add_action( 'mp_order/new_order', array( $this, 'invalidate_after_new_order' ), 10, 1 );
 		add_action( 'comment_post', array( $this, 'invalidate_after_comment_change' ), 10, 2 );
 		add_action( 'edit_comment', array( $this, 'invalidate_after_comment_edit' ), 10, 1 );
 		add_action( 'wp_set_comment_status', array( $this, 'invalidate_after_comment_edit' ), 10, 1 );
@@ -44,6 +47,137 @@ class MP_Customer_Portal_API {
 	 */
 	public function ajax_guest_forbidden() {
 		wp_send_json_error( array( 'message' => __( 'Bitte melde Dich an.', 'mp' ) ), 401 );
+	}
+
+	/**
+	 * Append a payment retry form to an unpaid customer order.
+	 *
+	 * @param string   $html
+	 * @param MP_Order $order
+	 * @return string
+	 */
+	public function append_payment_retry( $html, $order ) {
+		if ( is_admin() || ! is_user_logged_in() || ! $order instanceof MP_Order || 'order_received' !== $order->post_status ) {
+			return $html;
+		}
+
+		if ( (int) $order->post_author !== (int) get_current_user_id() ) {
+			return $html;
+		}
+
+		$gateways = $this->get_retry_gateways();
+		if ( empty( $gateways ) ) {
+			return $html;
+		}
+
+		$form  = '<div class="mp_order_payment_retry">';
+		$form .= '<h5>' . esc_html__( 'Zahlung ausstehend', 'mp' ) . '</h5>';
+		$form .= '<p>' . esc_html__( 'Die Bestellung ist gespeichert. Du kannst die Zahlung jetzt erneut starten.', 'mp' ) . '</p>';
+		if ( 'failed' === sanitize_key( (string) mp_get_get_value( 'mp_payment_retry', '' ) ) ) {
+			$form .= '<p class="mp_order_payment_retry_error">' . esc_html__( 'Die Zahlung konnte nicht gestartet werden. Bitte versuche es erneut oder wähle eine andere Zahlungsart.', 'mp' ) . '</p>';
+		}
+		$form .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		$form .= '<input type="hidden" name="action" value="mp_retry_order_payment">';
+		$form .= '<input type="hidden" name="order_id" value="' . (int) $order->ID . '">';
+		$form .= wp_nonce_field( 'mp_retry_order_payment_' . (int) $order->ID, 'mp_retry_order_payment_nonce', true, false );
+		$form .= '<label><span>' . esc_html__( 'Zahlungsart', 'mp' ) . '</span><select name="payment_method">';
+		foreach ( $gateways as $code => $label ) {
+			$form .= '<option value="' . esc_attr( $code ) . '">' . esc_html( $label ) . '</option>';
+		}
+		$form .= '</select></label>';
+		$form .= '<button class="mp_button" type="submit">' . esc_html__( 'Zahlung erneut versuchen', 'mp' ) . '</button>';
+		$form .= '</form></div>';
+
+		return $html . $form;
+	}
+
+	/**
+	 * Start a new gateway attempt for an existing unpaid order.
+	 */
+	public function handle_retry_payment() {
+		if ( ! is_user_logged_in() ) {
+			auth_redirect();
+		}
+
+		$order_id = absint( mp_get_post_value( 'order_id', 0 ) );
+		$order    = new MP_Order( $order_id );
+		if ( ! $order->exists() || (int) $order->post_author !== (int) get_current_user_id() || 'order_received' !== $order->post_status ) {
+			wp_die( esc_html__( 'Diese Bestellung kann nicht erneut bezahlt werden.', 'mp' ), 403 );
+		}
+
+		check_admin_referer( 'mp_retry_order_payment_' . $order_id, 'mp_retry_order_payment_nonce' );
+
+		$gateway_code = sanitize_key( (string) mp_get_post_value( 'payment_method', '' ) );
+		$gateways     = $this->get_retry_gateways();
+		$registered   = $this->get_registered_gateways();
+		if ( ! isset( $gateways[ $gateway_code ], $registered[ $gateway_code ][0] ) ) {
+			$this->redirect_retry_error( $order );
+		}
+
+		$class   = $registered[ $gateway_code ][0];
+		$gateway = new $class();
+		$result  = $gateway->retry_payment( $order );
+		if ( is_wp_error( $result ) || ! is_string( $result ) || '' === $result ) {
+			$this->redirect_retry_error( $order );
+		}
+
+		wp_redirect( esc_url_raw( $result ) );
+		exit;
+	}
+
+	/**
+	 * Get enabled gateways that support retrying an existing order.
+	 *
+	 * @return array
+	 */
+	private function get_retry_gateways() {
+		$options = array();
+		foreach ( $this->get_registered_gateways() as $code => $gateway ) {
+			$class = isset( $gateway[0] ) ? $gateway[0] : '';
+			if ( ! $class || ! method_exists( $class, 'retry_payment' ) ) {
+				continue;
+			}
+
+			$network_enabled = (bool) mp_get_network_setting( 'gateways->allowed->' . $code, 0 );
+			$local_enabled   = (bool) mp_get_setting( 'gateways->allowed->' . $code, 0 );
+			if ( ! $network_enabled && ! $local_enabled ) {
+				continue;
+			}
+
+			$options[ $code ] = isset( $gateway[1] ) ? (string) $gateway[1] : $code;
+		}
+
+		return (array) apply_filters( 'mp_customer_portal_retry_gateways', $options );
+	}
+
+	/**
+	 * Read the gateway registry before checkout routing restrictions are applied.
+	 *
+	 * @return array
+	 */
+	private function get_registered_gateways() {
+		$multisite = null;
+		if ( is_multisite() && class_exists( 'MP_Multisite' ) ) {
+			$multisite = MP_Multisite::get_instance();
+			remove_filter( 'mp_gateway_api/get_gateways', array( $multisite, 'get_gateways' ) );
+		}
+
+		$gateways = MP_Gateway_API::get_gateways();
+		if ( $multisite ) {
+			add_filter( 'mp_gateway_api/get_gateways', array( $multisite, 'get_gateways' ) );
+		}
+
+		return $gateways;
+	}
+
+	/**
+	 * Redirect back to the order after a failed retry attempt.
+	 *
+	 * @param MP_Order $order
+	 */
+	private function redirect_retry_error( $order ) {
+		wp_safe_redirect( add_query_arg( 'mp_payment_retry', 'failed', $order->tracking_url( false ) ) );
+		exit;
 	}
 
 	/**
@@ -157,6 +291,22 @@ class MP_Customer_Portal_API {
 	}
 
 	/**
+	 * Invalidate snapshots after an order has been added to customer history.
+	 *
+	 * @param MP_Order $order
+	 */
+	public function invalidate_after_new_order( $order ) {
+		if ( ! is_object( $order ) || ! isset( $order->ID ) ) {
+			return;
+		}
+
+		$post = get_post( (int) $order->ID );
+		if ( $post && (int) $post->post_author > 0 ) {
+			$this->invalidate_user_cache( (int) $post->post_author, (int) get_current_blog_id() );
+		}
+	}
+
+	/**
 	 * Invalidate snapshots after comment creation.
 	 *
 	 * @param int $comment_id
@@ -213,6 +363,10 @@ class MP_Customer_Portal_API {
 	private function invalidate_user_cache( $user_id, $blog_id ) {
 		delete_transient( $this->get_cache_key( 'single', $user_id, $blog_id ) );
 		delete_transient( $this->get_cache_key( 'network', $user_id, $blog_id ) );
+		delete_user_meta( $user_id, '_mp_customer_portal_single_snapshot_' . $blog_id );
+		delete_user_meta( $user_id, '_mp_customer_portal_single_synced_at_' . $blog_id );
+		delete_user_meta( $user_id, '_mp_customer_portal_network_snapshot' );
+		delete_user_meta( $user_id, '_mp_customer_portal_network_synced_at' );
 	}
 
 	/**

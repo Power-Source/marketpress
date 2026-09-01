@@ -415,6 +415,15 @@
 			return;
 		}
 
+		var requestedStatus = new URLSearchParams(window.location.search).get('post_status');
+		var kanbanStatuses = ['order_received', 'order_paid', 'order_shipped', 'order_closed'];
+		if (requestedStatus && kanbanStatuses.indexOf(requestedStatus) === -1) {
+			document.documentElement.classList.remove('mp-orders-pref-kanban');
+			document.documentElement.classList.add('mp-orders-pref-table');
+			body.classList.add('mp-orders-ready');
+			return;
+		}
+
 		body.classList.add('mp-modern-admin');
 
 		var wrap = document.querySelector('.wrap');

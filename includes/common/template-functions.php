@@ -2379,6 +2379,12 @@ if ( ! function_exists( 'mp_order_status' ) ) :
 
 		extract( $args );
 
+		// Compatibility for guest tracking URLs generated without a slash between order ID and access hash.
+		if ( empty( $guest_email ) && is_string( $order_id ) && preg_match( '/^([a-f0-9]{12})([a-f0-9]{32})$/i', $order_id, $legacy_parts ) ) {
+			$order_id    = $legacy_parts[1];
+			$guest_email = $legacy_parts[2];
+		}
+
 		$html = '';
 
 		//check does user logged in
@@ -2393,6 +2399,9 @@ if ( ! function_exists( 'mp_order_status' ) ) :
 						$html .= __( 'Hoppla! Wir konnten keine Bestellungen finden, die dieser Bestellnummer entsprechen. Bitte überprüfe die Bestellnummer und versuche es erneut.', 'mp' );
 						$html .= _mp_order_status_overview();
 					} else {
+						if ( function_exists( 'mp_stripe_verify_payment' ) ) {
+							mp_stripe_verify_payment( $order );
+						}
 						$html .= $order->details( false );
 					}
 				} else {
@@ -2411,7 +2420,9 @@ if ( ! function_exists( 'mp_order_status' ) ) :
 					$guest_hash = is_string( $guest_email ) ? trim( $guest_email ) : '';
 
 					if ( 'guest' === $order->get_meta( 'mp_user_kind', '' ) && ( hash_equals( $billing_email_hash, $guest_hash ) || hash_equals( $normalized_billing_email_hash, $guest_hash ) ) ) {
-						mp_stripe_verify_payment( $order );
+						if ( function_exists( 'mp_stripe_verify_payment' ) ) {
+							mp_stripe_verify_payment( $order );
+						}
 						$html .= $order->details( false );
 					} else {
 						$html .= __( 'Hoppla! Wir konnten keine Bestellungen finden, die dieser Bestellnummer entsprechen. Bitte überprüfe die Bestellnummer und versuche es erneut.', 'mp' );

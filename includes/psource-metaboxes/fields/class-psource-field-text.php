@@ -17,6 +17,7 @@ class PSOURCE_Field_Text extends PSOURCE_Field {
 		$this->args = array_replace_recursive(array(
 			'before_field' => '',
 			'after_field' => '',
+			'input_type' => 'text',
 		), $args);
 	}
 	
@@ -30,7 +31,7 @@ class PSOURCE_Field_Text extends PSOURCE_Field {
 	public function display( $post_id ) {
 		$this->before_field();
 		?>
-		<input type="text" <?php echo $this->parse_atts(); ?> value="<?php echo $this->get_value($post_id); ?>" />
+		<input type="<?php echo esc_attr( $this->args['input_type'] ); ?>" <?php echo $this->parse_atts(); ?> value="<?php echo $this->get_value($post_id); ?>" />
 		<?php
 		$this->after_field();
 	}

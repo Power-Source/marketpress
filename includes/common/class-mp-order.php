@@ -1552,7 +1552,7 @@ public $ID = null;
 
 		// Append the email to the tracking URL for orders made by guest users (hashed so it's not sent directly in the URL)
 		if( 'guest' === $this->get_meta( 'mp_user_kind', '' ) ) {
-			$url .= md5( $this->get_meta( 'mp_billing_info->email', '' ) );
+			$url .= md5( strtolower( trim( $this->get_meta( 'mp_billing_info->email', '' ) ) ) ) . '/';
 		}
 
 		/**

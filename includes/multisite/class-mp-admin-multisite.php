@@ -272,18 +272,22 @@ class MP_Admin_Multisite {
 			'desc'    => __( 'Wenn aktiv, werden freigabefaehige Positionen nach Ablauf aller Gates automatisch auf freigegeben gesetzt.', 'mp' ),
 			'message' => __( 'Auto-Release aktivieren', 'mp' ),
 		) );
-		$metabox->add_field( 'number', array(
+		$metabox->add_field( 'text', array(
 			'name'          => 'advanced[settlement_hold_days]',
 			'label'         => array( 'text' => __( 'Hold-Tage', 'mp' ) ),
 			'desc'          => __( 'Wartezeit in Tagen bis eine Position ohne Konflikte freigabefaehig wird (Standard: 14).', 'mp' ),
 			'default_value' => 14,
+			'input_type'    => 'number',
+			'style'         => 'width: 100%;',
 			'custom'        => array( 'min' => 0, 'step' => 1 ),
 		) );
-		$metabox->add_field( 'number', array(
+		$metabox->add_field( 'text', array(
 			'name'          => 'advanced[settlement_commission_rate]',
 			'label'         => array( 'text' => __( 'Netzwerkprovision (%)', 'mp' ) ),
 			'desc'          => __( 'Globaler Provisionssatz fuer neue Netzwerkbestellungen.', 'mp' ),
 			'default_value' => 0,
+			'input_type'    => 'number',
+			'style'         => 'width: 100%;',
 			'custom'        => array( 'min' => 0, 'max' => 100, 'step' => '0.01' ),
 		) );
 		$metabox->add_field( 'select', array(
@@ -296,11 +300,13 @@ class MP_Admin_Multisite {
 			),
 			'default_value' => 'product_net',
 		) );
-		$metabox->add_field( 'number', array(
+		$metabox->add_field( 'text', array(
 			'name'          => 'advanced[settlement_commission_tax_rate]',
 			'label'         => array( 'text' => __( 'Umsatzsteuer auf Provision (%)', 'mp' ) ),
 			'desc'          => __( 'Steuersatz fuer die Abrechnung der Netzwerkprovision.', 'mp' ),
 			'default_value' => 0,
+			'input_type'    => 'number',
+			'style'         => 'width: 100%;',
 			'custom'        => array( 'min' => 0, 'max' => 100, 'step' => '0.01' ),
 		) );
 		// HIER die neue Option:
