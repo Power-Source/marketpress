@@ -2820,6 +2820,8 @@ if ( ! function_exists( 'mp_product' ) ) {
 				$return .= mp_category_list( $product_id, '<div class="mp_product_categories">' . __( 'Kategorisiert in ', 'mp' ), ', ', '</div>' );
 			}
 
+			$return .= apply_filters( 'mp_single_product_support_meta', '', $product_id );
+
 			$return .= '</div><!-- end mp_product_meta-->';
 
 			// Callout

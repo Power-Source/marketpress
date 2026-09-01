@@ -168,6 +168,10 @@ class MP_Withdrawal {
 			return $html;
 		}
 
+		if ( is_object( $order ) && method_exists( $order, 'exists' ) && $order->exists() ) {
+			return $html;
+		}
+
 		$policy = (string) mp_get_setting( 'withdrawal->policy_text', '' );
 		if ( '' === trim( $policy ) ) {
 			$policy = __( 'Du kannst Deinen Widerruf hier digital erklären. Wähle Positionen, Grund und sende direkt ab. Danach siehst Du jederzeit den Status.', 'mp' );
@@ -177,10 +181,6 @@ class MP_Withdrawal {
 		$intro .= '<h2>' . esc_html__( 'Kundenzone', 'mp' ) . '</h2>';
 		$intro .= '<p>' . esc_html( $policy ) . '</p>';
 		$intro .= '</section>';
-
-		if ( is_object( $order ) && method_exists( $order, 'exists' ) && $order->exists() ) {
-			return $intro . $html;
-		}
 
 		if ( is_user_logged_in() ) {
 			$intro .= '<p class="mp_customer_zone_intro_hint">' . esc_html__( 'Wähle eine Bestellung aus Deiner Historie aus, um einen Widerruf zu starten.', 'mp' ) . '</p>';
@@ -224,6 +224,11 @@ class MP_Withdrawal {
 
 		if ( ! $this->can_access_order( $order, $access_token ) ) {
 			wp_send_json_error( array( 'message' => __( 'Bestellung nicht gefunden oder kein Zugriff.', 'mp' ) ) );
+		}
+
+		$customer_status = $this->get_customer_order_status( $order );
+		if ( 'expired' === mp_arr_get_value( 'state', $customer_status, '' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Die Widerrufsfrist für diese Bestellung ist abgelaufen.', 'mp' ) ) );
 		}
 
 		$items = mp_get_post_value( 'items', array() );
@@ -387,6 +392,8 @@ class MP_Withdrawal {
 		wp_localize_script( 'mp-withdrawal-zone', 'mp_withdrawal_i18n', array(
 			'ajaxurl' => mp_get_ajax_url(),
 			'messages' => array(
+				'openForm'    => __( 'Widerruf starten', 'mp' ),
+				'closeForm'   => __( 'Formular schließen', 'mp' ),
 				'selectItems' => __( 'Bitte wähle mindestens eine Position aus.', 'mp' ),
 				'selectReason' => __( 'Bitte wähle einen Widerrufsgrund aus.', 'mp' ),
 				'noteTooLong'  => __( 'Bitte kürze die Begründung auf die maximal erlaubte Länge.', 'mp' ),
@@ -509,6 +516,7 @@ class MP_Withdrawal {
 		$allow_reason_note = $this->allow_custom_reason();
 		$max_reason_len    = $this->get_reason_max_length();
 		$status_entries    = $this->get_withdrawal_entries_for_customer( $order );
+		$customer_status   = $this->get_customer_order_status( $order );
 
 		$eligible_count = 0;
 		$blocked_count  = 0;
@@ -550,10 +558,7 @@ class MP_Withdrawal {
 				</div>
 			</div>
 
-			<div class="mp_withdrawal_panel">
-				<h3><?php esc_html_e( 'Digitaler Widerruf', 'mp' ); ?></h3>
-				<p class="mp_withdrawal_hint"><?php esc_html_e( 'Wähle Positionen, nenne den Grund und sende den Widerruf direkt ab.', 'mp' ); ?></p>
-
+			<div class="mp_withdrawal_section">
 				<?php if ( ! empty( $status_entries ) ) : ?>
 					<div class="mp_withdrawal_status_block">
 						<h4><?php esc_html_e( 'Dein Widerrufsstatus', 'mp' ); ?></h4>
@@ -578,7 +583,19 @@ class MP_Withdrawal {
 					</div>
 				<?php endif; ?>
 
-				<form class="mp_withdrawal_form" data-order-id="<?php echo esc_attr( (string) $order->get_id() ); ?>" data-max-note="<?php echo esc_attr( (string) $max_reason_len ); ?>">
+				<div class="mp_withdrawal_start">
+					<div>
+						<h3><?php esc_html_e( 'Digitaler Widerruf', 'mp' ); ?></h3>
+						<p><?php esc_html_e( 'Wähle bei Bedarf die betroffenen Positionen aus.', 'mp' ); ?></p>
+					</div>
+					<?php if ( $eligible_count > 0 && 'expired' !== mp_arr_get_value( 'state', $customer_status, '' ) ) : ?>
+						<button type="button" class="mp_button mp_button-primary mp_withdrawal_toggle" aria-expanded="false" aria-controls="mp-withdrawal-form-<?php echo esc_attr( (string) $order->get_id() ); ?>">
+							<?php esc_html_e( 'Widerruf starten', 'mp' ); ?>
+						</button>
+					<?php endif; ?>
+				</div>
+
+				<form id="mp-withdrawal-form-<?php echo esc_attr( (string) $order->get_id() ); ?>" class="mp_withdrawal_form" data-order-id="<?php echo esc_attr( (string) $order->get_id() ); ?>" data-max-note="<?php echo esc_attr( (string) $max_reason_len ); ?>" hidden>
 					<input type="hidden" name="action" value="mp_submit_withdrawal">
 					<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>">
 					<input type="hidden" name="nonce" value="<?php echo esc_attr( $nonce ); ?>">
@@ -809,6 +826,86 @@ class MP_Withdrawal {
 		$labels = $this->get_admin_status_options();
 
 		return isset( $labels[ $status ] ) ? (string) $labels[ $status ] : (string) __( 'Unbekannt', 'mp' );
+	}
+
+	/**
+	 * Return the customer-facing withdrawal state for an order.
+	 *
+	 * @param MP_Order $order
+	 *
+	 * @return array
+	 */
+	public function get_customer_order_status( $order ) {
+		if ( ! $order instanceof MP_Order || ! $order->exists() ) {
+			return array(
+				'state'  => 'unavailable',
+				'label'  => __( 'Widerrufsstatus nicht verfügbar', 'mp' ),
+				'detail' => '',
+			);
+		}
+
+		$entries = $this->get_withdrawal_entries_for_customer( $order );
+		if ( ! empty( $entries ) ) {
+			$latest = reset( $entries );
+			$status = sanitize_key( (string) mp_arr_get_value( 'status', $latest, 'requested' ) );
+			$states = array(
+				'requested' => array( 'in_review', __( 'Widerruf in Bearbeitung', 'mp' ) ),
+				'in_review' => array( 'in_review', __( 'Widerruf in Bearbeitung', 'mp' ) ),
+				'approved'  => array( 'approved', __( 'Widerruf genehmigt', 'mp' ) ),
+				'rejected'  => array( 'rejected', __( 'Widerruf abgelehnt', 'mp' ) ),
+				'refunded'  => array( 'refunded', __( 'Betrag erstattet', 'mp' ) ),
+				'closed'    => array( 'closed', __( 'Widerruf abgeschlossen', 'mp' ) ),
+			);
+
+			if ( isset( $states[ $status ] ) ) {
+				return array(
+					'state'  => $states[ $status ][0],
+					'label'  => $states[ $status ][1],
+					'detail' => (string) mp_arr_get_value( 'date_text', $latest, '' ),
+				);
+			}
+		}
+
+		$snapshot = $this->get_snapshot( $order );
+		$eligible = array_filter( $snapshot, function( $row ) {
+			return empty( $row['withdrawal_excluded'] );
+		} );
+		if ( empty( $eligible ) ) {
+			return array(
+				'state'  => 'excluded',
+				'label'  => __( 'Nicht widerrufsfähig', 'mp' ),
+				'detail' => '',
+			);
+		}
+
+		$is_download_only = method_exists( $order, 'get_cart' ) && $order->get_cart()->is_download_only();
+		$starts_at = $is_download_only
+			? (int) $order->get_meta( 'mp_paid_time', $order->get_meta( 'mp_received_time', 0 ) )
+			: (int) $order->get_meta( 'mp_shipped_time', 0 );
+
+		if ( ! $starts_at ) {
+			return array(
+				'state'  => 'eligible',
+				'label'  => __( 'Noch widerrufsfähig', 'mp' ),
+				'detail' => $is_download_only ? '' : __( 'Die Frist beginnt nach dem Versand.', 'mp' ),
+			);
+		}
+
+		$period_days = max( 1, (int) apply_filters( 'mp_withdrawal_period_days', 14, $order ) );
+		$deadline = $starts_at + ( $period_days * DAY_IN_SECONDS );
+		if ( time() > $deadline ) {
+			return array(
+				'state'  => 'expired',
+				'label'  => __( 'Widerrufsfrist abgelaufen', 'mp' ),
+				'detail' => sprintf( __( 'Fristende: %s', 'mp' ), date_i18n( get_option( 'date_format' ), $deadline ) ),
+			);
+		}
+
+		return array(
+			'state'  => 'eligible',
+			'label'  => __( 'Noch widerrufsfähig', 'mp' ),
+			'detail' => sprintf( __( 'Bis %s', 'mp' ), date_i18n( get_option( 'date_format' ), $deadline ) ),
+		);
 	}
 
 	/**

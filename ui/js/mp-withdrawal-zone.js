@@ -27,6 +27,30 @@
     }
   }
 
+  $(document).on('click', '.mp_withdrawal_toggle', function () {
+    var $toggle = $(this);
+    var $form = $('#' + $toggle.attr('aria-controls'));
+    var isOpen = $toggle.attr('aria-expanded') === 'true';
+
+    if (!$form.length) {
+      return;
+    }
+
+    $toggle.attr('aria-expanded', isOpen ? 'false' : 'true');
+    $toggle.text(getI18nMessage(isOpen ? 'openForm' : 'closeForm', isOpen ? 'Widerruf starten' : 'Formular schließen'));
+
+    if (isOpen) {
+      $form.stop(true, true).slideUp(180, function () {
+        $form.prop('hidden', true);
+      });
+      return;
+    }
+
+    $form.prop('hidden', false).hide().stop(true, true).slideDown(180, function () {
+      $form.find('input[name="items[]"]:enabled').first().trigger('focus');
+    });
+  });
+
   $(document).on('change', '.mp_withdrawal_form input[name="items[]"]', function () {
     var $form = $(this).closest('.mp_withdrawal_form');
     updateReasonBlock($form);

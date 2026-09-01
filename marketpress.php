@@ -1073,6 +1073,7 @@ class Marketpress {
 		require_once $this->plugin_dir( 'includes/common/class-mp-cart.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-withdrawal.php' );
 		require_once $this->plugin_dir( 'includes/common/class-mp-customer-portal-api.php' );
+		require_once $this->plugin_dir( 'includes/common/class-mp-ps-support-integration.php' );
 		require_once $this->plugin_dir( 'includes/common/template-functions.php' );
 		//require_once $this->plugin_dir( 'includes/common/class-mp-taxes.php' );
 

@@ -1,16 +1,16 @@
 #mp-customer-zone.mp_customer_zone-modern {
   margin-top: 24px;
   border: 1px solid #d7e3ec;
-  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
-  border-radius: 14px;
+  background: #fff;
+  border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 8px 24px rgba(22, 53, 78, 0.08);
+  box-shadow: 0 4px 14px rgba(22, 53, 78, 0.08);
 }
 
 .mp_customer_zone_intro {
   margin: 16px 0;
   border: 1px solid #d7e3ec;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #f8fbfe;
   padding: 14px;
 }
@@ -49,8 +49,8 @@
 #mp-customer-zone .mp_stat_card {
   background: #0f2a3d;
   color: #fff;
-  border-radius: 12px;
-  padding: 14px;
+  border-radius: 6px;
+  padding: 12px;
 }
 
 #mp-customer-zone .mp_stat_value {
@@ -65,23 +65,48 @@
   opacity: 0.9;
 }
 
-#mp-customer-zone .mp_withdrawal_panel {
+#mp-customer-zone .mp_withdrawal_section {
   margin-top: 16px;
-  border: 1px solid #dbe8f2;
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
+  border-top: 1px solid #dbe8f2;
+  padding-top: 16px;
 }
 
-#mp-customer-zone .mp_withdrawal_panel h3 {
-  margin-top: 0;
+#mp-customer-zone .mp_withdrawal_start {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+#mp-customer-zone .mp_withdrawal_start h3 {
+  margin: 0 0 3px;
+  font-size: 1.1rem;
+}
+
+#mp-customer-zone .mp_withdrawal_start p {
+  margin: 0;
+  color: #3e5b72;
+}
+
+#mp-customer-zone .mp_withdrawal_toggle {
+  flex: 0 0 auto;
+}
+
+#mp-customer-zone .mp_withdrawal_form {
+  margin-top: 16px;
+  border-top: 1px solid #dbe8f2;
+  padding-top: 16px;
+}
+
+#mp-customer-zone .mp_withdrawal_form[hidden] {
+  display: none;
 }
 
 #mp-customer-zone .mp_withdrawal_status_block {
-  margin-bottom: 14px;
+  margin: 0 0 16px;
   padding: 10px;
   border: 1px solid #dbe8f2;
-  border-radius: 10px;
+  border-radius: 6px;
   background: #fbfdff;
 }
 
@@ -151,7 +176,7 @@
 
 #mp-customer-zone .mp_withdrawal_item {
   border: 1px solid #d8e5ee;
-  border-radius: 10px;
+  border-radius: 6px;
   padding: 10px;
   background: #fdfefe;
 }
@@ -237,5 +262,14 @@
 @media (max-width: 768px) {
   #mp-customer-zone .mp_customer_zone_stats {
     grid-template-columns: 1fr;
+  }
+
+  #mp-customer-zone .mp_withdrawal_start {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #mp-customer-zone .mp_withdrawal_toggle {
+    width: 100%;
   }
 }

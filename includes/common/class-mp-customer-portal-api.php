@@ -61,6 +61,10 @@ class MP_Customer_Portal_API {
 			return $html;
 		}
 
+		if ( (float) $order->get_meta( 'mp_order_total', 0 ) <= 0 ) {
+			return $html;
+		}
+
 		if ( (int) $order->post_author !== (int) get_current_user_id() ) {
 			return $html;
 		}
@@ -101,7 +105,7 @@ class MP_Customer_Portal_API {
 
 		$order_id = absint( mp_get_post_value( 'order_id', 0 ) );
 		$order    = new MP_Order( $order_id );
-		if ( ! $order->exists() || (int) $order->post_author !== (int) get_current_user_id() || 'order_received' !== $order->post_status ) {
+		if ( ! $order->exists() || (int) $order->post_author !== (int) get_current_user_id() || 'order_received' !== $order->post_status || (float) $order->get_meta( 'mp_order_total', 0 ) <= 0 ) {
 			wp_die( esc_html__( 'Diese Bestellung kann nicht erneut bezahlt werden.', 'mp' ), 403 );
 		}
 

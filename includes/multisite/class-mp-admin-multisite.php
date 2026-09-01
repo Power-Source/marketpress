@@ -192,6 +192,47 @@ class MP_Admin_Multisite {
 			'desc'    => __( 'Aktiviert die optionale Kundenzentrale im Mainshop per Netzwerkseite/Shortcode.', 'mp' ),
 			'message' => __( 'Kundenzentrale aktivieren', 'mp' ),
 		) );
+		if ( function_exists( 'psource_support_insert_ticket' ) && function_exists( 'psource_support_get_ticket_categories' ) ) {
+			$priority_options = array();
+			if ( function_exists( 'psource_support' ) ) {
+				foreach ( (array) psource_support()::$ticket_priority as $priority => $label ) {
+					$priority_options[ (string) $priority ] = $label;
+				}
+			}
+
+			$metabox->add_field( 'checkbox', array(
+				'name'    => 'advanced[ps_support_integration]',
+				'label'   => array( 'text' => __( 'PS Support mit MarketPress verbinden?', 'mp' ) ),
+				'desc'    => __( 'Erstellt bestellbezogene Tickets über PS Support und routet sie an den zuständigen Shop.', 'mp' ),
+				'message' => __( 'PS-Support-Integration aktivieren', 'mp' ),
+			) );
+			$metabox->add_field( 'checkbox', array(
+				'name'    => 'advanced[ps_support_customer_button]',
+				'label'   => array( 'text' => __( 'Supportbutton in der Kundenzone anzeigen?', 'mp' ) ),
+				'desc'    => __( 'Zeigt pro beteiligtem Shop einen sicheren Supportdialog an der Bestellung.', 'mp' ),
+				'message' => __( 'Supportbutton anzeigen', 'mp' ),
+			) );
+			$metabox->add_field( 'checkbox', array(
+				'name'    => 'advanced[ps_support_customer_faq_button]',
+				'label'   => array( 'text' => __( 'FAQ-Button in der Kundenzone anzeigen?', 'mp' ) ),
+				'desc'    => __( 'Verlinkt je beteiligtem Shop dessen von PS Support bereitgestellte FAQ-Seite.', 'mp' ),
+				'message' => __( 'FAQ-Button anzeigen', 'mp' ),
+			) );
+			$metabox->add_field( 'checkbox', array(
+				'name'    => 'advanced[ps_support_product_links]',
+				'label'   => array( 'text' => __( 'Support und FAQs an Produkten anzeigen?', 'mp' ) ),
+				'desc'    => __( 'Zeigt den Shop-Support und eine optional am Produkt ausgewählte FAQ an.', 'mp' ),
+				'message' => __( 'Produkt-Supportlinks anzeigen', 'mp' ),
+			) );
+			if ( ! empty( $priority_options ) ) {
+				$metabox->add_field( 'select', array(
+					'name'          => 'advanced[ps_support_priority]',
+					'label'         => array( 'text' => __( 'Standardpriorität für Bestelltickets', 'mp' ) ),
+					'options'       => $priority_options,
+					'default_value' => '0',
+				) );
+			}
+		}
 		$metabox->add_field( 'select', array(
 			'name'    => 'advanced[network_customer_hub_random_products_count]',
 			'label'   => array( 'text' => __( 'Anzahl Zufallsprodukte im Kundenhub', 'mp' ) ),

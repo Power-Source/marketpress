@@ -12,6 +12,191 @@
 	color: #b00020;
 }
 
+.mp-order-footer {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 24px;
+	align-items: start;
+	margin-top: 18px;
+	padding: 14px 0 4px;
+	border-top: 1px solid #d8dee4;
+	color: #4d5963;
+	font-size: 13px;
+	line-height: 1.45;
+}
+
+.mp-order-footer h4 {
+	margin: 0 0 8px;
+	color: #26343e;
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0;
+}
+
+.mp-order-support-actions {
+	display: flex;
+	gap: 8px;
+	align-items: flex-start;
+	flex-wrap: wrap;
+}
+
+.mp-order-footer-button {
+	display: inline-flex;
+	min-height: 34px;
+	box-sizing: border-box;
+	align-items: center;
+	justify-content: center;
+	margin: 0;
+	padding: 7px 12px;
+	border: 1px solid #aebbc5;
+	border-radius: 4px;
+	background: #fff;
+	color: #263f52;
+	font: inherit;
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.mp-order-footer-button:hover,
+.mp-order-footer-button:focus {
+	border-color: #58758b;
+	background: #f1f5f8;
+	color: #172c3c;
+	text-decoration: none;
+}
+
+.mp-order-footer-button-primary {
+	border-color: #263f52;
+	background: #263f52;
+	color: #fff;
+}
+
+.mp-order-footer-button-primary:hover,
+.mp-order-footer-button-primary:focus {
+	border-color: #172c3c;
+	background: #172c3c;
+	color: #fff;
+}
+
+.mp-order-support-form > summary {
+	list-style: none;
+}
+
+.mp-order-support-form > summary::-webkit-details-marker {
+	display: none;
+}
+
+.mp-order-support-form[open] {
+	flex: 1 1 100%;
+}
+
+.mp-order-support-form form {
+	max-width: 560px;
+	margin-top: 10px;
+	padding: 12px;
+	border-left: 2px solid #b8c8d4;
+	background: #f7f9fa;
+}
+
+.mp-order-support-form form p {
+	margin: 0 0 10px;
+}
+
+.mp-order-support-form form p:last-child {
+	margin-bottom: 0;
+}
+
+.mp-order-support-form input[type="text"],
+.mp-order-support-form textarea {
+	width: 100%;
+	box-sizing: border-box;
+	margin-top: 4px;
+}
+
+.mp-order-withdrawal-summary {
+	min-width: 190px;
+	text-align: right;
+}
+
+.mp-order-withdrawal-state,
+.mp-order-withdrawal-detail {
+	display: block;
+}
+
+.mp-order-withdrawal-state {
+	font-weight: 600;
+}
+
+.mp-order-withdrawal-state::before {
+	display: inline-block;
+	width: 7px;
+	height: 7px;
+	margin-right: 6px;
+	border-radius: 50%;
+	background: #647582;
+	content: "";
+	vertical-align: 1px;
+}
+
+.mp-order-withdrawal-state.state-eligible,
+.mp-order-withdrawal-state.state-approved,
+.mp-order-withdrawal-state.state-refunded,
+.mp-order-withdrawal-state.state-closed {
+	color: #25633d;
+}
+
+.mp-order-withdrawal-state.state-eligible::before,
+.mp-order-withdrawal-state.state-approved::before,
+.mp-order-withdrawal-state.state-refunded::before,
+.mp-order-withdrawal-state.state-closed::before {
+	background: #3a8b59;
+}
+
+.mp-order-withdrawal-state.state-in_review {
+	color: #875b12;
+}
+
+.mp-order-withdrawal-state.state-in_review::before {
+	background: #d39a32;
+}
+
+.mp-order-withdrawal-state.state-expired,
+.mp-order-withdrawal-state.state-excluded,
+.mp-order-withdrawal-state.state-rejected {
+	color: #8a3d3d;
+}
+
+.mp-order-withdrawal-state.state-expired::before,
+.mp-order-withdrawal-state.state-excluded::before,
+.mp-order-withdrawal-state.state-rejected::before {
+	background: #b65a5a;
+}
+
+.mp-order-withdrawal-detail {
+	margin-top: 2px;
+	color: #6a7680;
+	font-size: 12px;
+}
+
+@media (max-width: 640px) {
+	.mp-order-footer {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+
+	.mp-order-withdrawal-summary {
+		min-width: 0;
+		text-align: left;
+	}
+
+	.mp-order-footer-button {
+		width: 100%;
+	}
+}
+
 .mp-network-shop-profile {
 	display: grid;
 	gap: 18px;
