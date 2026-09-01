@@ -262,7 +262,7 @@ add_action('init', function () {
     }
 });
 
-mp_register_gateway_plugin('MP_Gateway_Paypal_Express', 'paypal_express', __('PayPal Express', 'mp'));
+mp_register_gateway_plugin('MP_Gateway_Paypal_Express', 'paypal_express', __('PayPal Express', 'mp'), true);
 
 
 

@@ -2,6 +2,9 @@
 
 class MP_Network_Settlement {
 
+	const DB_VERSION = 2;
+	const CRON_HOOK = 'mp_settlement_recheck_open_rows';
+
 	/**
 	 * @var MP_Network_Settlement|null
 	 */
@@ -35,16 +38,51 @@ class MP_Network_Settlement {
 		add_action( 'mp_order/new_order', array( $this, 'sync_order_ledger' ), 30 );
 		add_action( 'transition_post_status', array( $this, 'maybe_sync_on_status_change' ), 20, 3 );
 		add_action( 'save_post_mp_order', array( $this, 'maybe_sync_on_order_save' ), 20, 2 );
+		add_action( 'mp_order/refunded', array( $this, 'record_order_refund' ), 10, 3 );
 
 		add_shortcode( 'mp_network_settlement_dashboard', array( $this, 'render_frontend_dashboard_shortcode' ) );
 
 		if ( is_admin() && ! is_network_admin() ) {
-			add_action( 'admin_menu', array( $this, 'add_main_menu' ) );
+			if ( mp_is_main_site() ) {
+				add_action( 'admin_menu', array( $this, 'add_main_menu' ) );
+			}
+			add_action( 'admin_menu', array( $this, 'add_shop_menu' ) );
 		}
 
 		add_action( 'init', array( $this, 'redirect_direct_settlement_paths' ), 1 );
 
 		add_action( 'admin_post_mp_settlement_decision', array( $this, 'handle_admin_decision' ) );
+		add_action( 'init', array( $this, 'maybe_schedule_recheck' ) );
+		add_action( self::CRON_HOOK, array( $this, 'recheck_open_rows' ) );
+	}
+
+	/**
+	 * Schedule one network settlement recheck on the main site.
+	 */
+	public function maybe_schedule_recheck() {
+		if ( ! mp_is_main_site() || ! mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
+			return;
+		}
+		if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', self::CRON_HOOK );
+		}
+	}
+
+	/**
+	 * Re-evaluate open ledger rows after time-based holds expire.
+	 */
+	public function recheck_open_rows() {
+		if ( ! mp_is_main_site() || ! mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
+			return;
+		}
+
+		global $wpdb;
+		$order_ids = (array) $wpdb->get_col(
+			"SELECT DISTINCT order_post_id FROM {$this->table_name} WHERE status IN ('expected_credit','on_hold','releasable') LIMIT 500"
+		);
+		foreach ( $order_ids as $order_id ) {
+			$this->sync_order_ledger_by_id( (int) $order_id );
+		}
 	}
 
 	/**
@@ -52,6 +90,10 @@ class MP_Network_Settlement {
 	 */
 	public function maybe_create_table() {
 		global $wpdb;
+
+		if ( (int) get_site_option( 'mp_settlement_db_version', 0 ) === self::DB_VERSION ) {
+			return;
+		}
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -64,13 +106,20 @@ class MP_Network_Settlement {
 			customer_user_id bigint(20) unsigned NOT NULL DEFAULT 0,
 			customer_email varchar(190) NOT NULL DEFAULT '',
 			currency varchar(12) NOT NULL DEFAULT '',
+			product_amount decimal(18,6) NOT NULL DEFAULT 0,
+			discount_amount decimal(18,6) NOT NULL DEFAULT 0,
+			shipping_amount decimal(18,6) NOT NULL DEFAULT 0,
+			tax_amount decimal(18,6) NOT NULL DEFAULT 0,
 			gross_amount decimal(18,6) NOT NULL DEFAULT 0,
+			commission_amount decimal(18,6) NOT NULL DEFAULT 0,
+			payout_amount decimal(18,6) NOT NULL DEFAULT 0,
 			status varchar(20) NOT NULL DEFAULT 'expected_credit',
 			gate_reason varchar(100) NOT NULL DEFAULT '',
 			rule_snapshot longtext NULL,
 			manual_decision varchar(20) NOT NULL DEFAULT '',
 			manual_note text NULL,
 			released_at datetime NULL,
+			paid_out_at datetime NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY  (id),
@@ -81,6 +130,7 @@ class MP_Network_Settlement {
 		) $charset_collate;";
 
 		dbDelta( $sql );
+		update_site_option( 'mp_settlement_db_version', self::DB_VERSION );
 	}
 
 	/**
@@ -91,9 +141,23 @@ class MP_Network_Settlement {
 			'store-settings',
 			__( 'Auszahlungsfreigabe', 'mp' ),
 			__( 'Auszahlungsfreigabe', 'mp' ),
-			'read',
+			$this->get_required_capability(),
 			'store-settings-settlement',
 			array( $this, 'render_main_admin_page' )
+		);
+	}
+
+	/**
+	 * Add the read-only settlement account for the current shop.
+	 */
+	public function add_shop_menu() {
+		add_submenu_page(
+			'store-settings',
+			__( 'Abrechnung', 'mp' ),
+			__( 'Abrechnung', 'mp' ),
+			apply_filters( 'mp_store_settings_cap', 'manage_store_settings' ),
+			'store-settings-settlement-account',
+			array( $this, 'render_shop_admin_page' )
 		);
 	}
 
@@ -118,16 +182,12 @@ class MP_Network_Settlement {
 			return true;
 		}
 
-		if ( current_user_can( 'manage_network_options' ) || current_user_can( 'manage_options' ) ) {
+		if ( current_user_can( 'manage_network_options' ) ) {
 			return true;
 		}
 
 		$required_cap = $this->get_required_capability();
 		if ( '' !== $required_cap && current_user_can( $required_cap ) ) {
-			return true;
-		}
-
-		if ( current_user_can( apply_filters( 'mp_store_settings_cap', 'manage_store_settings' ) ) ) {
 			return true;
 		}
 
@@ -201,12 +261,91 @@ class MP_Network_Settlement {
 	}
 
 	/**
+	 * Render the settlement account for the current shop only.
+	 */
+	public function render_shop_admin_page() {
+		if ( ! $this->current_user_can_view_shop_settlement() ) {
+			wp_die( esc_html__( 'Keine Berechtigung.', 'mp' ) );
+		}
+
+		echo '<div class="wrap">';
+		echo '<h1>' . esc_html__( 'Abrechnung', 'mp' ) . '</h1>';
+		if ( ! mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
+			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Die Netzwerkabrechnung ist aktuell deaktiviert.', 'mp' ) . '</p></div>';
+		} else {
+			echo $this->render_shop_settlement_dashboard( get_current_blog_id() );
+		}
+		echo '</div>';
+	}
+
+	/**
 	 * Frontend moderation/dashboard shortcode.
 	 *
 	 * @return string
 	 */
 	public function render_frontend_dashboard_shortcode() {
-		return '';
+		if ( ! is_user_logged_in() ) {
+			return '<p>' . esc_html__( 'Bitte melde Dich an, um die Abrechnung zu sehen.', 'mp' ) . '</p>';
+		}
+		if ( ! $this->current_user_can_view_shop_settlement() ) {
+			return '<p>' . esc_html__( 'Keine Berechtigung.', 'mp' ) . '</p>';
+		}
+		if ( ! mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
+			return '<p>' . esc_html__( 'Die Netzwerkabrechnung ist aktuell deaktiviert.', 'mp' ) . '</p>';
+		}
+
+		return '<section class="mp-settlement-dashboard">' . $this->render_shop_settlement_dashboard( get_current_blog_id() ) . '</section>';
+	}
+
+	/**
+	 * Check whether the current user may view this shop's own settlement data.
+	 *
+	 * @return bool
+	 */
+	private function current_user_can_view_shop_settlement() {
+		if ( is_multisite() && is_super_admin() ) {
+			return true;
+		}
+
+		return current_user_can( apply_filters( 'mp_store_settings_cap', 'manage_store_settings' ) ) || current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Render totals and ledger rows for one shop.
+	 *
+	 * @param int $blog_id Shop blog ID.
+	 * @return string
+	 */
+	private function render_shop_settlement_dashboard( $blog_id ) {
+		$rows = $this->get_queue_rows( 'all', (int) $blog_id );
+		$totals = array(
+			'gross'      => 0.0,
+			'commission' => 0.0,
+			'open'       => 0.0,
+			'paid_out'   => 0.0,
+		);
+		$currency = '';
+
+		foreach ( $rows as $row ) {
+			$currency = (string) $row['currency'];
+			$totals['gross'] += (float) $row['gross_amount'];
+			$totals['commission'] += (float) $row['commission_amount'];
+			if ( 'paid_out' === $row['status'] ) {
+				$totals['paid_out'] += (float) $row['payout_amount'];
+			} else {
+				$totals['open'] += (float) $row['payout_amount'];
+			}
+		}
+
+		$html  = '<div class="mp-settlement-summary">';
+		$html .= '<p><strong>' . esc_html__( 'Bruttoumsatz:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( $currency, $totals['gross'] ) ) . '</p>';
+		$html .= '<p><strong>' . esc_html__( 'Provision:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( $currency, $totals['commission'] ) ) . '</p>';
+		$html .= '<p><strong>' . esc_html__( 'Offener Auszahlungsanspruch:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( $currency, $totals['open'] ) ) . '</p>';
+		$html .= '<p><strong>' . esc_html__( 'Ausgezahlt:', 'mp' ) . '</strong> ' . esc_html( mp_format_currency( $currency, $totals['paid_out'] ) ) . '</p>';
+		$html .= '</div>';
+		$html .= $this->render_rows_table( $rows, false );
+
+		return $html;
 	}
 
 	/**
@@ -249,11 +388,45 @@ class MP_Network_Settlement {
 	}
 
 	/**
+	 * Persist a gateway-confirmed refund on the master order.
+	 *
+	 * @param MP_Order $order Order being refunded.
+	 * @param float    $amount Refunded amount.
+	 * @param string   $reference Gateway refund reference.
+	 */
+	public function record_order_refund( $order, $amount = 0, $reference = '' ) {
+		if ( ! $order instanceof MP_Order || ! $order->exists() ) {
+			return;
+		}
+
+		$order->update_meta( 'mp_settlement_refund', array(
+			'amount'    => round( max( 0, (float) $amount ), 2 ),
+			'reference' => sanitize_text_field( (string) $reference ),
+			'refunded_at' => gmdate( 'Y-m-d H:i:s' ),
+		) );
+		$this->sync_order_ledger_by_id( (int) $order->ID );
+	}
+
+	/**
 	 * Build/update settlement lines for a specific order.
 	 */
 	public function sync_order_ledger_by_id( $order_post_id ) {
+		if ( ! mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
+			return;
+		}
+		if ( ! empty( $GLOBALS['mp_creating_network_suborder'] ) ) {
+			return;
+		}
+		if ( get_post_meta( $order_post_id, '_mp_network_master_order_id', true ) ) {
+			return;
+		}
+
 		$order = new MP_Order( $order_post_id );
 		if ( ! $order->exists() ) {
+			return;
+		}
+		$snapshot = $order->get_meta( 'mp_settlement_snapshot', array() );
+		if ( is_array( $snapshot ) && 'automatic' === mp_arr_get_value( 'settlement_mode', $snapshot, 'manual' ) ) {
 			return;
 		}
 
@@ -278,10 +451,19 @@ class MP_Network_Settlement {
 				'customer_user_id'  => $customer_id,
 				'customer_email'    => $customer_mail,
 				'currency'          => $currency,
+				'product_amount'    => isset( $split['base_subtotal'] ) ? $split['base_subtotal'] : 0,
+				'discount_amount'   => isset( $split['discount_total'] ) ? $split['discount_total'] : 0,
+				'shipping_amount'   => isset( $split['shipping_total'] ) ? $split['shipping_total'] : 0,
+				'tax_amount'        => isset( $split['tax_total'] ) ? $split['tax_total'] : 0,
 				'gross_amount'      => $split['gross_amount'],
+				'commission_amount' => isset( $split['commission_amount'] ) ? $split['commission_amount'] : 0,
+				'payout_amount'     => isset( $split['payout_amount'] ) ? $split['payout_amount'] : $split['gross_amount'],
 				'status'            => $rule['status'],
 				'gate_reason'       => $rule['gate_reason'],
-				'rule_snapshot'     => wp_json_encode( $rule ),
+				'rule_snapshot'     => wp_json_encode( array(
+					'rule'  => $rule,
+					'split' => $split,
+				) ),
 				'manual_decision'   => isset( $rule['manual_decision'] ) ? $rule['manual_decision'] : '',
 				'manual_note'       => isset( $rule['manual_note'] ) ? $rule['manual_note'] : '',
 				'released_at'       => isset( $rule['released_at'] ) ? $rule['released_at'] : null,
@@ -297,6 +479,49 @@ class MP_Network_Settlement {
 	 * @return array
 	 */
 	private function calculate_shop_splits( MP_Order $order ) {
+		$snapshot = $order->get_meta( 'mp_settlement_snapshot', array() );
+		if ( is_array( $snapshot ) && ! empty( $snapshot['shops'] ) && is_array( $snapshot['shops'] ) ) {
+			$splits = array();
+
+			foreach ( $snapshot['shops'] as $blog_id => $shop ) {
+				$lines                  = isset( $shop['lines'] ) && is_array( $shop['lines'] ) ? $shop['lines'] : array();
+				$has_physical           = false;
+				$all_withdrawal_excluded = ! empty( $lines );
+				$all_warranty_excluded   = ! empty( $lines );
+
+				foreach ( $lines as $line ) {
+					if ( empty( $line['is_download'] ) ) {
+						$has_physical = true;
+					}
+					if ( empty( $line['withdrawal_excluded'] ) ) {
+						$all_withdrawal_excluded = false;
+					}
+					if ( empty( $line['warranty_excluded'] ) ) {
+						$all_warranty_excluded = false;
+					}
+				}
+
+				$splits[ (int) $blog_id ] = array(
+					'base_subtotal'          => round( (float) mp_arr_get_value( 'product_total', $shop, 0 ), 2 ),
+					'product_original'       => round( (float) mp_arr_get_value( 'product_original', $shop, 0 ), 2 ),
+					'discount_total'         => round( (float) mp_arr_get_value( 'discount_total', $shop, 0 ), 2 ),
+					'shipping_total'         => round( (float) mp_arr_get_value( 'shipping_total', $shop, 0 ), 2 ),
+					'shipping_tax'           => round( (float) mp_arr_get_value( 'shipping_tax', $shop, 0 ), 2 ),
+					'tax_total'              => round( (float) mp_arr_get_value( 'tax_total', $shop, 0 ), 2 ),
+					'reconciliation_adjustment' => round( (float) mp_arr_get_value( 'reconciliation_adjustment', $shop, 0 ), 2 ),
+					'gross_amount'           => round( (float) mp_arr_get_value( 'gross_amount', $shop, 0 ), 2 ),
+					'commission_amount'      => round( (float) mp_arr_get_value( 'commission->total_amount', $shop, 0 ), 2 ),
+					'payout_amount'          => round( (float) mp_arr_get_value( 'payout_amount', $shop, mp_arr_get_value( 'gross_amount', $shop, 0 ) ), 2 ),
+					'has_physical'           => $has_physical,
+					'no_withdrawal_rule'     => $all_withdrawal_excluded,
+					'no_warranty_rule'       => $all_warranty_excluded,
+					'source'                 => 'order_snapshot',
+				);
+			}
+
+			return array_filter( $splits );
+		}
+
 		$cart = $order->get_cart();
 		if ( ! $cart instanceof MP_Cart ) {
 			return array();
@@ -404,24 +629,30 @@ class MP_Network_Settlement {
 			'released_at'     => null,
 			'context'         => array(),
 		);
+		$order_status = (string) get_post_status( $order->ID );
+		$is_reversed  = 'trash' === $order_status || $this->has_recorded_refund( $order );
 
 		if ( is_array( $current_row ) && ! empty( $current_row['manual_decision'] ) ) {
 			$rule['manual_decision'] = $current_row['manual_decision'];
 			$rule['manual_note']     = $current_row['manual_note'];
+			if ( 'paid_out' === $current_row['manual_decision'] ) {
+				$rule['status']      = $is_reversed ? 'recovery_required' : 'paid_out';
+				$rule['gate_reason'] = $is_reversed ? 'refund_after_payout' : 'manual_paid_out';
+				$rule['released_at'] = $current_row['released_at'];
+				return $rule;
+			}
 			if ( 'hold' === $current_row['manual_decision'] ) {
 				$rule['status']      = 'on_hold';
 				$rule['gate_reason'] = 'manual_hold';
 				return $rule;
 			}
-			if ( 'release' === $current_row['manual_decision'] ) {
-				$rule['status']      = 'released';
-				$rule['gate_reason'] = 'manual_release';
-				$rule['released_at'] = gmdate( 'Y-m-d H:i:s' );
-				return $rule;
-			}
 		}
 
-		$order_status = (string) get_post_status( $order->ID );
+		if ( $is_reversed ) {
+			$rule['status']      = 'on_hold';
+			$rule['gate_reason'] = 'refunded_or_cancelled';
+			return $rule;
+		}
 		if ( ! in_array( $order_status, array( 'order_paid', 'order_shipped' ), true ) ) {
 			$rule['status']      = 'expected_credit';
 			$rule['gate_reason'] = 'payment_pending';
@@ -455,6 +686,13 @@ class MP_Network_Settlement {
 			$rule['status']      = 'on_hold';
 			$rule['gate_reason'] = 'hold_period';
 			$rule['context']     = array( 'hold_until' => gmdate( 'Y-m-d H:i:s', $hold_until ) );
+			return $rule;
+		}
+
+		if ( 'release' === $rule['manual_decision'] ) {
+			$rule['status']      = 'released';
+			$rule['gate_reason'] = 'manual_release';
+			$rule['released_at'] = ! empty( $current_row['released_at'] ) ? $current_row['released_at'] : gmdate( 'Y-m-d H:i:s' );
 			return $rule;
 		}
 
@@ -496,6 +734,26 @@ class MP_Network_Settlement {
 	}
 
 	/**
+	 * Check whether any persisted order data confirms a refund.
+	 *
+	 * @param MP_Order $order Order to inspect.
+	 * @return bool
+	 */
+	private function has_recorded_refund( MP_Order $order ) {
+		if ( $order->get_meta( 'mp_settlement_refund', false ) ) {
+			return true;
+		}
+
+		foreach ( (array) $order->get_meta( 'mp_withdrawal_requests', array() ) as $request ) {
+			if ( 'refunded' === strtolower( (string) mp_arr_get_value( 'status', (array) $request, '' ) ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Upsert ledger row.
 	 */
 	private function upsert_row( $data ) {
@@ -509,7 +767,13 @@ class MP_Network_Settlement {
 				$this->table_name,
 				array(
 					'currency'        => $data['currency'],
+					'product_amount'  => $data['product_amount'],
+					'discount_amount' => $data['discount_amount'],
+					'shipping_amount' => $data['shipping_amount'],
+					'tax_amount'      => $data['tax_amount'],
 					'gross_amount'    => $data['gross_amount'],
+					'commission_amount' => $data['commission_amount'],
+					'payout_amount'   => $data['payout_amount'],
 					'status'          => $data['status'],
 					'gate_reason'     => $data['gate_reason'],
 					'rule_snapshot'   => $data['rule_snapshot'],
@@ -519,14 +783,14 @@ class MP_Network_Settlement {
 					'updated_at'      => $now,
 				),
 				array( 'id' => (int) $existing['id'] ),
-				array( '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ),
+				array( '%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s' ),
 				array( '%d' )
 			);
 
 			return;
 		}
 
-		$wpdb->insert(
+		$inserted = $wpdb->insert(
 			$this->table_name,
 			array(
 				'order_post_id'    => (int) $data['order_post_id'],
@@ -535,7 +799,13 @@ class MP_Network_Settlement {
 				'customer_user_id' => (int) $data['customer_user_id'],
 				'customer_email'   => $data['customer_email'],
 				'currency'         => $data['currency'],
+				'product_amount'   => $data['product_amount'],
+				'discount_amount'  => $data['discount_amount'],
+				'shipping_amount'  => $data['shipping_amount'],
+				'tax_amount'       => $data['tax_amount'],
 				'gross_amount'     => $data['gross_amount'],
+				'commission_amount' => $data['commission_amount'],
+				'payout_amount'    => $data['payout_amount'],
 				'status'           => $data['status'],
 				'gate_reason'      => $data['gate_reason'],
 				'rule_snapshot'    => $data['rule_snapshot'],
@@ -545,8 +815,12 @@ class MP_Network_Settlement {
 				'created_at'       => $now,
 				'updated_at'       => $now,
 			),
-			array( '%d', '%s', '%d', '%d', '%s', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+			array( '%d', '%s', '%d', '%d', '%s', '%s', '%f', '%f', '%f', '%f', '%f', '%f', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
+
+		if ( false === $inserted && $this->get_row_by_order_and_blog( (int) $data['order_post_id'], (int) $data['shop_blog_id'] ) ) {
+			$this->upsert_row( $data );
+		}
 	}
 
 	/**
@@ -568,16 +842,20 @@ class MP_Network_Settlement {
 	/**
 	 * Get queue rows.
 	 */
-	private function get_queue_rows( $status = 'open' ) {
+	private function get_queue_rows( $status = 'open', $blog_id = 0 ) {
 		global $wpdb;
 
-		$where = '';
+		$conditions = array();
 		if ( 'open' === $status ) {
-			$where = "WHERE status IN ('expected_credit','on_hold','releasable')";
+			$conditions[] = "status IN ('expected_credit','on_hold','releasable')";
 		} elseif ( 'all' !== $status ) {
-			$where = $wpdb->prepare( 'WHERE status = %s', $status );
+			$conditions[] = $wpdb->prepare( 'status = %s', $status );
+		}
+		if ( $blog_id ) {
+			$conditions[] = $wpdb->prepare( 'shop_blog_id = %d', (int) $blog_id );
 		}
 
+		$where = empty( $conditions ) ? '' : 'WHERE ' . implode( ' AND ', $conditions );
 		$sql = "SELECT * FROM {$this->table_name} {$where} ORDER BY updated_at DESC LIMIT 300";
 		return (array) $wpdb->get_results( $sql, ARRAY_A );
 	}
@@ -592,7 +870,7 @@ class MP_Network_Settlement {
 
 		$html  = '<table class="widefat striped">';
 		$html .= '<thead><tr>';
-		$html .= '<th>ID</th><th>' . esc_html__( 'Bestellung', 'mp' ) . '</th><th>' . esc_html__( 'Shop', 'mp' ) . '</th><th>' . esc_html__( 'Status', 'mp' ) . '</th><th>' . esc_html__( 'Grund', 'mp' ) . '</th><th>' . esc_html__( 'Betrag', 'mp' ) . '</th><th>' . esc_html__( 'Aktion', 'mp' ) . '</th>';
+		$html .= '<th>ID</th><th>' . esc_html__( 'Bestellung', 'mp' ) . '</th><th>' . esc_html__( 'Shop', 'mp' ) . '</th><th>' . esc_html__( 'Status', 'mp' ) . '</th><th>' . esc_html__( 'Grund', 'mp' ) . '</th><th>' . esc_html__( 'Brutto', 'mp' ) . '</th><th>' . esc_html__( 'Provision', 'mp' ) . '</th><th>' . esc_html__( 'Auszahlung', 'mp' ) . '</th><th>' . esc_html__( 'Aktion', 'mp' ) . '</th>';
 		$html .= '</tr></thead><tbody>';
 
 		foreach ( $rows as $row ) {
@@ -612,9 +890,11 @@ class MP_Network_Settlement {
 			$html .= '<td>' . esc_html( $status_label ) . '</td>';
 			$html .= '<td>' . esc_html( $reason_label ) . '</td>';
 			$html .= '<td>' . esc_html( mp_format_currency( $row['currency'], (float) $row['gross_amount'] ) ) . '</td>';
+			$html .= '<td>' . esc_html( mp_format_currency( $row['currency'], (float) $row['commission_amount'] ) ) . '</td>';
+			$html .= '<td>' . esc_html( mp_format_currency( $row['currency'], (float) $row['payout_amount'] ) ) . '</td>';
 			$html .= '<td>';
 
-			if ( $allow_actions ) {
+			if ( $allow_actions && ! in_array( $row['status'], array( 'paid_out', 'recovery_required' ), true ) ) {
 				$hold_url = wp_nonce_url(
 					admin_url( 'admin-post.php?action=mp_settlement_decision&row=' . (int) $row['id'] . '&decision=hold' ),
 					'mp_settlement_decision_' . (int) $row['id']
@@ -624,7 +904,16 @@ class MP_Network_Settlement {
 					'mp_settlement_decision_' . (int) $row['id']
 				);
 				$html .= '<a class="button" href="' . esc_url( $hold_url ) . '">' . esc_html__( 'Zurueckhalten', 'mp' ) . '</a> ';
-				$html .= '<a class="button button-primary" href="' . esc_url( $release_url ) . '">' . esc_html__( 'Freigeben', 'mp' ) . '</a>';
+				if ( 'releasable' === $row['status'] ) {
+					$html .= '<a class="button button-primary" href="' . esc_url( $release_url ) . '">' . esc_html__( 'Freigeben', 'mp' ) . '</a>';
+				}
+				if ( 'released' === $row['status'] ) {
+					$paid_out_url = wp_nonce_url(
+						admin_url( 'admin-post.php?action=mp_settlement_decision&row=' . (int) $row['id'] . '&decision=paid_out' ),
+						'mp_settlement_decision_' . (int) $row['id']
+					);
+					$html .= ' <a class="button" href="' . esc_url( $paid_out_url ) . '">' . esc_html__( 'Als ausgezahlt markieren', 'mp' ) . '</a>';
+				}
 			} else {
 				$html .= '&mdash;';
 			}
@@ -650,6 +939,8 @@ class MP_Network_Settlement {
 			'on_hold'         => __( 'Zurueckgehalten', 'mp' ),
 			'releasable'      => __( 'Freigabefaehig', 'mp' ),
 			'released'        => __( 'Freigegeben', 'mp' ),
+			'paid_out'        => __( 'Ausgezahlt', 'mp' ),
+			'recovery_required' => __( 'Rueckforderung erforderlich', 'mp' ),
 		);
 
 		$status = sanitize_key( (string) $status );
@@ -680,6 +971,9 @@ class MP_Network_Settlement {
 			'ready_for_release'      => __( 'Bereit zur Freigabe', 'mp' ),
 			'manual_hold'            => __( 'Manuell zurueckgehalten', 'mp' ),
 			'manual_release'         => __( 'Manuell freigegeben', 'mp' ),
+			'manual_paid_out'        => __( 'Manuell als ausgezahlt markiert', 'mp' ),
+			'refunded_or_cancelled'  => __( 'Rueckerstattet oder storniert', 'mp' ),
+			'refund_after_payout'    => __( 'Rueckerstattung nach Auszahlung', 'mp' ),
 			'invalid_order'          => __( 'Ungueltige Bestellung', 'mp' ),
 			'no_shop_split'          => __( 'Keine Shop-Aufteilung gefunden', 'mp' ),
 			'objection_open'         => __( 'Offener Einwand', 'mp' ),
@@ -711,7 +1005,7 @@ class MP_Network_Settlement {
 		$row_id   = (int) mp_get_get_value( 'row', 0 );
 		$decision = sanitize_key( (string) mp_get_get_value( 'decision', '' ) );
 
-		if ( ! in_array( $decision, array( 'hold', 'release' ), true ) || ! $row_id ) {
+		if ( ! in_array( $decision, array( 'hold', 'release', 'paid_out' ), true ) || ! $row_id ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=store-settings-settlement' ) );
 			exit;
 		}
@@ -719,6 +1013,15 @@ class MP_Network_Settlement {
 		check_admin_referer( 'mp_settlement_decision_' . $row_id );
 
 		global $wpdb;
+		$row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT * FROM {$this->table_name} WHERE id = %d LIMIT 1", $row_id ),
+			ARRAY_A
+		);
+		if ( ! is_array( $row ) || ( 'paid_out' === $decision && 'released' !== $row['status'] ) || ( 'release' === $decision && 'releasable' !== $row['status'] ) ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=store-settings-settlement' ) );
+			exit;
+		}
+
 		$payload = array(
 			'manual_decision' => $decision,
 			'updated_at'      => gmdate( 'Y-m-d H:i:s' ),
@@ -727,10 +1030,14 @@ class MP_Network_Settlement {
 		if ( 'hold' === $decision ) {
 			$payload['status']      = 'on_hold';
 			$payload['gate_reason'] = 'manual_hold';
-		} else {
+		} elseif ( 'release' === $decision ) {
 			$payload['status']      = 'released';
 			$payload['gate_reason'] = 'manual_release';
 			$payload['released_at'] = gmdate( 'Y-m-d H:i:s' );
+		} else {
+			$payload['status']      = 'paid_out';
+			$payload['gate_reason'] = 'manual_paid_out';
+			$payload['paid_out_at'] = gmdate( 'Y-m-d H:i:s' );
 		}
 
 		$wpdb->update( $this->table_name, $payload, array( 'id' => $row_id ) );

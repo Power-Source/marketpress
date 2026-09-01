@@ -335,13 +335,8 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	}
 
 	public function process_payment( $cart, $billing_info, $shipping_info ) {
-		// Debug: Log die Shipping Info
-		error_log( 'Stripe: Billing Info: ' . print_r( $billing_info, true ) );
-		error_log( 'Stripe: Shipping Info: ' . print_r( $shipping_info, true ) );
-		
 		// Falls Shipping-Adresse leer ist (außer Email/Name), verwende Billing-Adresse
 		if ( empty( $shipping_info['address1'] ) && ! empty( $billing_info['address1'] ) ) {
-			error_log( 'Stripe: Shipping-Adresse leer, verwende Billing-Adresse' );
 			$shipping_info = array_merge( $shipping_info, array(
 				'first_name'   => $billing_info['first_name'],
 				'last_name'    => $billing_info['last_name'],
@@ -356,6 +351,18 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 			) );
 		}
 		
+		if ( empty( $this->secret_key ) ) {
+			mp_checkout()->add_error( __( 'Stripe ist noch nicht vollständig konfiguriert.', 'mp' ), 'general' );
+			return;
+		}
+
+		$currency = strtoupper( sanitize_key( (string) $this->currency ) );
+		$order_total = round( (float) $cart->total(), 2 );
+		if ( '' === $currency || $order_total <= 0 ) {
+			mp_checkout()->add_error( __( 'Die Stripe-Zahlung konnte nicht vorbereitet werden.', 'mp' ), 'general' );
+			return;
+		}
+
 		// Stripe initialisieren
 		if ( ! class_exists( '\Stripe\Stripe' ) ) {
 			require_once mp_plugin_dir( 'vendor/autoload.php' );
@@ -370,7 +377,7 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 			'method'               => __( 'Stripe Checkout', 'mp' ),
 			'status'               => array( time() => __( 'Ausstehend', 'mp' ) ),
 			'total'                => $cart->total(),
-			'currency'             => $this->currency,
+			'currency'             => $currency,
 		);
 
 		// Bestellung erstellen
@@ -399,67 +406,18 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 		$order = new MP_Order( $saved_order_id );
 		$order_id = $order->get_id(); // Dies ist der post_name (Order-Key)
 		
-		// Line Items für Stripe Checkout vorbereiten
-		$line_items = [];
-		$items = $cart->get_items_as_objects();
-		
-		foreach ( $items as $item ) {
-			$line_items[] = [
-				'price_data' => [
-					'currency'     => strtolower( $this->currency ),
-					'product_data' => [
-						'name' => $item->title(),
-					],
-					'unit_amount'  => $this->config_amount( $item->get_price() ),
-				],
-				'quantity'   => $item->qty,
-			];
-		}
-
-		// Fallback: Falls keine Items gefunden, verwende Gesamtbetrag
-		if ( empty( $line_items ) ) {
-			error_log( 'Stripe: Keine Line Items gefunden, verwende Gesamtbetrag als Fallback' );
-			$line_items[] = [
-				'price_data' => [
-					'currency'     => strtolower( $this->currency ),
-					'product_data' => [
+		$line_items = array(
+			array(
+				'price_data' => array(
+					'currency'     => strtolower( $currency ),
+					'product_data' => array(
 						'name' => __( 'Bestellung', 'mp' ) . ' #' . $order_id,
-					],
-					'unit_amount'  => $this->config_amount( $cart->total() ),
-				],
-				'quantity'   => 1,
-			];
-		} else {
-			// Versandkosten hinzufügen, falls vorhanden
-			$shipping_total = $cart->shipping_total( false );
-			if ( $shipping_total > 0 ) {
-				$line_items[] = [
-					'price_data' => [
-						'currency'     => strtolower( $this->currency ),
-						'product_data' => [
-							'name' => __( 'Versand', 'mp' ),
-						],
-						'unit_amount'  => $this->config_amount( $shipping_total ),
-					],
-					'quantity'   => 1,
-				];
-			}
-
-			// Steuern hinzufügen, falls vorhanden
-			$tax_total = $cart->tax_total( false );
-			if ( $tax_total > 0 ) {
-				$line_items[] = [
-					'price_data' => [
-						'currency'     => strtolower( $this->currency ),
-						'product_data' => [
-							'name' => __( 'Steuern', 'mp' ),
-						],
-						'unit_amount'  => $this->config_amount( $tax_total ),
-					],
-					'quantity'   => 1,
-				];
-			}
-		}
+					),
+					'unit_amount'  => $this->config_amount( $order_total ),
+				),
+				'quantity' => 1,
+			),
+		);
 
 		try {
 			// Stripe Checkout Session erstellen
@@ -486,9 +444,6 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 			}
 			$pending_orders[ $order_id ] = $session->id;
 		set_transient( 'stripe_pending_orders', $pending_orders, DAY_IN_SECONDS ); // 24 Stunden
-			error_log( 'Stripe: Bestellung erstellt - Order-ID: ' . $order_id . ', Post-ID: ' . $order->ID . ', Session-ID: ' . $session->id );
-			error_log( 'Stripe: Transient gespeichert. Pending Orders: ' . implode( ', ', array_keys( $pending_orders ) ) );
-
 			// Bei AJAX: JSON-Antwort mit Redirect-URL
 			if ( wp_doing_ajax() ) {
 				wp_send_json_success( array(
@@ -500,8 +455,10 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 				exit;
 			}
 
-		} catch ( \Exception $e ) {
-			error_log( 'Stripe Checkout Fehler: ' . $e->getMessage() );
+		} catch ( \Throwable $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'Stripe Checkout konnte nicht gestartet werden.' );
+			}
 			
 			if ( wp_doing_ajax() ) {
 				wp_send_json_error( array(
@@ -539,12 +496,8 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 	 * INS and payment return
 	 */
 	function process_ipn_return() {
-		error_log( '=== Stripe IPN AUFGERUFEN ===' );
-		error_log( 'REQUEST_URI: ' . ( isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : 'N/A' ) );
-		
 		// Versuche erst Order-ID über WordPress Query Var zu extrahieren
 		$order_id = get_query_var( 'mp_order_id' );
-		error_log( 'Stripe IPN: get_query_var("mp_order_id") = ' . ( $order_id ? $order_id : 'LEER' ) );
 		
 		// Fallback: Order-ID aus URL extrahieren (falls query_var nicht funktioniert)
 		if ( ! $order_id && isset( $_SERVER['REQUEST_URI'] ) ) {
@@ -553,44 +506,33 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 			preg_match( '#/bestellstatus/([a-zA-Z0-9]+)/?(\?|$)#', $uri, $matches );
 			if ( ! empty( $matches[1] ) ) {
 				$order_id = $matches[1];
-				error_log( 'Stripe IPN: Order-ID aus Regex extrahiert: ' . $order_id );
 			}
 		}
 
 		// Nur verarbeiten wenn Order-ID gefunden
 		if ( ! $order_id ) {
-			error_log( 'Stripe IPN: KEINE Order-ID gefunden, skip' );
 			return; // Keine Order-ID gefunden
 		}
 
-		error_log( 'Stripe IPN: Verarbeite Order-ID: ' . $order_id );
-
 		// Prüfen ob diese Order gerade bezahlt wurde
 		$pending_orders = get_transient( 'stripe_pending_orders' );
-		error_log( 'Stripe IPN: Transient stripe_pending_orders: ' . ( $pending_orders ? implode( ', ', array_keys( $pending_orders ) ) : 'LEER' ) );
 		
 		if ( ! is_array( $pending_orders ) ) {
-			error_log( 'Stripe IPN: Keine pending orders im Transient gefunden' );
 			return;
 		}
 
 		if ( ! isset( $pending_orders[ $order_id ] ) ) {
-			error_log( 'Stripe IPN: Order ' . $order_id . ' nicht in pending orders. Verfügbar: ' . implode( ', ', array_keys( $pending_orders ) ) );
 			return; // Diese Order ist nicht pending
 		}
 
 		// Order laden und prüfen ob sie bereits bezahlt ist
 		$order = new MP_Order( $order_id );
-		
-		error_log( 'Stripe IPN: Order existiert: ' . ( $order->exists() ? 'ja' : 'nein' ) . ', Status: ' . ( $order->exists() ? $order->post_status : 'N/A' ) );
 
 		if ( ! $order->exists() ) {
-			error_log( 'Stripe IPN: Order ' . $order_id . ' existiert nicht!' );
 			return;
 		}
 
 		if ( $order->post_status === 'order_paid' ) {
-			error_log( 'Stripe IPN: Order ' . $order_id . ' ist bereits als "paid" markiert' );
 			unset( $pending_orders[ $order_id ] );
 			set_transient( 'stripe_pending_orders', $pending_orders, DAY_IN_SECONDS ); // 24 Stunden
 			return;
@@ -598,7 +540,6 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 
 		// Stripe Session-ID aus Transient holen
 		$session_id = $pending_orders[ $order_id ];
-		error_log( 'Stripe IPN: Session-ID: ' . $session_id );
 
 		// Stripe initialisieren
 		if ( ! class_exists( '\Stripe\Stripe' ) ) {
@@ -610,14 +551,7 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 			// Session von Stripe abrufen
 			$session = \Stripe\Checkout\Session::retrieve( $session_id );
 
-			error_log( 'Stripe IPN: Session Status: ' . $session->payment_status );
-
 			if ( $session->payment_status === 'paid' ) {
-				error_log( 'Stripe IPN: Payment Status ist PAID' );
-				
-				// Payment Intent Details abrufen
-				$payment_intent = \Stripe\PaymentIntent::retrieve( $session->payment_intent );
-
 				// Betrag korrekt berechnen
 				$amount = $session->amount_total;
 				if ( ! in_array( strtoupper( $session->currency ), ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'] ) ) {
@@ -638,21 +572,8 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 				);
 
 				// Bestellung als bezahlt markieren
-				error_log( 'Stripe IPN: Speichere Payment Info für Order #' . $order->ID );
 				update_post_meta( $order->ID, 'mp_payment_info', $payment_info );
-				error_log( 'Stripe IPN: Payment Info gespeichert. Prüfe Datenbank...' );
-				$saved_payment_info = get_post_meta( $order->ID, 'mp_payment_info', true );
-				error_log( 'Stripe IPN: Payment Info aus DB: ' . print_r( $saved_payment_info, true ) );
-				
-				error_log( 'Stripe IPN: Vor Status-Änderung - Status ist: ' . $order->post_status );
 				$order->change_status( 'order_paid', true );
-				error_log( 'Stripe IPN: Nach change_status() - Status sollte sein: order_paid' );
-				
-				// Neu laden um zu prüfen
-				$order_check = new MP_Order( $order_id );
-				error_log( 'Stripe IPN: Nach Neu-Laden - Status ist: ' . $order_check->post_status );
-
-				error_log( 'Stripe: Zahlung erfolgreich für Bestellung ' . $order->get_id() . ' (ID #' . $order->ID . '), Betrag: ' . $amount . ' ' . strtoupper( $session->currency ) );
 				
 				// Warenkorb leeren
 				mp_cart()->empty_cart();
@@ -665,13 +586,11 @@ class MP_Gateway_Stripe extends MP_Gateway_API {
 				// Order aus pending entfernen
 				unset( $pending_orders[ $order_id ] );
 				set_transient( 'stripe_pending_orders', $pending_orders, HOUR_IN_SECONDS );
-				
-				error_log( 'Stripe IPN: Verarbeitung abgeschlossen für Order ' . $order_id );
-			} else {
-				error_log( 'Stripe IPN: Unerwarteter Status: ' . $session->payment_status );
 			}
-		} catch ( \Exception $e ) {
-			error_log( 'Stripe IPN Fehler: ' . $e->getMessage() );
+		} catch ( \Throwable $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'Stripe-Rückkehr konnte nicht verarbeitet werden.' );
+			}
 		}
 	}
 
@@ -739,12 +658,9 @@ function mp_stripe_verify_payment( $order ) {
 	// Hole Session-ID
 	$session_id = $pending_orders[ $order_id ];
 	
-	error_log( 'Stripe Verify: Prüfe Zahlung für Order ' . $order_id . ', Session: ' . $session_id );
-	
 	// Hole Stripe Gateway Settings
 	$gateways = MP_Gateway_API::get_active_gateways();
 	if ( ! isset( $gateways['stripe'] ) ) {
-		error_log( 'Stripe Verify: Stripe Gateway nicht aktiv!' );
 		return;
 	}
 	
@@ -752,7 +668,6 @@ function mp_stripe_verify_payment( $order ) {
 	$secret_key = $gateway->get_setting( 'api_credentials->secret_key' );
 	
 	if ( ! $secret_key ) {
-		error_log( 'Stripe Verify: Secret Key nicht gefunden!' );
 		return;
 	}
 	
@@ -764,8 +679,6 @@ function mp_stripe_verify_payment( $order ) {
 	try {
 		// Session von Stripe abrufen
 		$session = \Stripe\Checkout\Session::retrieve( $session_id );
-		
-		error_log( 'Stripe Verify: Session Status: ' . $session->payment_status );
 		
 		if ( $session->payment_status === 'paid' ) {
 			// Betrag berechnen
@@ -793,8 +706,6 @@ function mp_stripe_verify_payment( $order ) {
 			// Status ändern
 			$order->change_status( 'order_paid', true );
 			
-			error_log( 'Stripe Verify: Zahlung bestätigt für Order ' . $order_id . ', Betrag: ' . $amount . ' ' . strtoupper( $session->currency ) );
-			
 			// Order aus pending entfernen
 			unset( $pending_orders[ $order_id ] );
 			set_transient( 'stripe_pending_orders', $pending_orders, DAY_IN_SECONDS );
@@ -805,7 +716,9 @@ function mp_stripe_verify_payment( $order ) {
 			// Warenkorb leeren
 			mp_cart()->empty_cart();
 		}
-	} catch ( \Exception $e ) {
-		error_log( 'Stripe Verify Fehler: ' . $e->getMessage() );
+	} catch ( \Throwable $e ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'Stripe-Zahlung konnte nicht verifiziert werden.' );
+		}
 	}
 }

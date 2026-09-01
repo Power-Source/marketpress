@@ -45,6 +45,20 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 		private static $_active_gateways = array();
 
 		/**
+		 * Whether gateway instances created in the current request use network settings.
+		 *
+		 * @var bool
+		 */
+		private static $_network_gateway_context = false;
+
+		/**
+		 * Whether this gateway instance reads network-level settings.
+		 *
+		 * @var bool
+		 */
+		protected $use_network_settings = false;
+
+		/**
 		 * Registers a gateway
 		 *
 		 * @since 1.0
@@ -126,8 +140,17 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 			}
 
 			if ( $use_network_global_gateway ) {
-				// Multi-shop checkout: use network gateway configuration.
-				$gateways = mp_get_network_setting( 'global_gateway' );
+				// Multi-shop checkout: use enabled network gateway configurations.
+				$gateways = array_filter( (array) mp_get_network_setting( 'gateways->allowed', array() ) );
+				if ( empty( $gateways ) ) {
+					$gateways = array_filter( (array) mp_get_network_setting( 'network_gateways', array() ) );
+				}
+				if ( empty( $gateways ) ) {
+					$legacy_gateway = sanitize_key( (string) mp_get_network_setting( 'global_gateway', '' ) );
+					if ( $legacy_gateway ) {
+						$gateways = array( $legacy_gateway => 1 );
+					}
+				}
 			} else {
 				// Single-shop checkout: load the gateways from the shop in the cart.
 				$gateway_blog_id = get_current_blog_id();
@@ -163,6 +186,10 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 				}
 		}
 
+			$is_network_payments_page = is_network_admin()
+				&& 'network-store-settings-payments' === mp_get_get_value( 'page' );
+
+			self::$_network_gateway_context = $use_network_global_gateway || $is_network_payments_page;
 			foreach ( self::get_gateways() as $code => $plugin ) {
 				$class = $plugin[0];
 
@@ -170,8 +197,10 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 					continue;
 				}
 
+				if ( $is_network_payments_page && ! empty( $plugin[2] ) ) {
+					self::$_active_gateways[ $code ] = new $class;
 				//in global mode, we only load one gateway for all
-				if ( $use_network_global_gateway && $code == $gateways ) {
+				} elseif ( $use_network_global_gateway && ! empty( $gateways[ $code ] ) ) {
 					self::$_active_gateways[ $code ] = new $class;
 				} else {
 					if ( is_admin() && ( 'store-settings-payments' == mp_get_get_value( 'page' ) || 'store-setup-wizard' == mp_get_get_value( 'page' ) ) ) {
@@ -182,8 +211,9 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 					}
 				}
 			}
+			self::$_network_gateway_context = false;
 
-			if ( 'store-settings-payments' !== mp_get_get_value( 'page' ) ) {
+			if ( 'store-settings-payments' !== mp_get_get_value( 'page' ) && ! $is_network_payments_page ) {
 				self::$_active_gateways['free_orders'] = new MP_Gateway_FREE_Orders();
 			}
 		}
@@ -478,6 +508,10 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 		 * @return mixed
 		 */
 		public function get_setting( $setting, $default = false ) {
+			if ( $this->use_network_settings || is_network_admin() ) {
+				return $this->get_network_setting( $setting, $default );
+			}
+
 			return mp_get_setting( "gateways->" . $this->plugin_name . "->{$setting}", $default );
 		}
 
@@ -501,6 +535,10 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 		 * @access public
 		 */
 		public final function maybe_update() {
+			if ( $this->use_network_settings || is_network_admin() ) {
+				return;
+			}
+
 			if ( !is_null( $this->build ) && $this->build != $this->get_setting( 'build' ) ) {
 				$old_settings											 = get_option( 'mp_settings' );
 				$settings												 = $this->update( $old_settings );
@@ -523,6 +561,7 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 
 		//DO NOT override the construct! instead use the on_creation() method.
 		function __construct() {
+			$this->use_network_settings = self::$_network_gateway_context || is_network_admin();
 			$this->maybe_update();
 
 			$this->_generate_ipn_url();
@@ -552,9 +591,6 @@ if ( !class_exists( 'MP_Gateway_API' ) ) :
 				$this->init_settings_metabox();
 			}
 
-			if ( is_network_admin() ) {
-				$this->init_network_settings_metabox();
-			}
 		}
 
 	}

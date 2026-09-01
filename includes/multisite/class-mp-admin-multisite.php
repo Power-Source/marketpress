@@ -65,11 +65,6 @@ class MP_Admin_Multisite {
 		add_action( 'init', array( &$this, 'sync_network_snapshot_cleanup_cron' ) );
 		add_action( self::NETWORK_SNAPSHOT_CLEANUP_CRON_HOOK, array( &$this, 'cron_clear_network_settings_snapshot_cache' ) );
 		if ( mp_get_network_setting( 'global_cart' ) ) {
-			add_filter( 'psource_field/get_value/gateways[allowed][' . mp_get_network_setting( 'global_gateway', '' ) . ']', array(
-				&$this,
-				'force_check_global_gateway'
-			), 10, 4 );
-
 			add_filter('psource_field/before_get_value', array(&$this, 'global_currency_options'), 10, 4);
 		}
 		//On blog status change update blog_public status
@@ -83,17 +78,6 @@ class MP_Admin_Multisite {
 		add_action( 'deactivate_blog', array( $this, 'unset_blog_public_global_products' ) );
 		add_action( 'archive_blog', array( $this, 'unset_blog_public_global_products' ) );
 		add_action( 'make_spam_blog', array( $this, 'unset_blog_public_global_products' ) );
-	}
-
-	/**
-	 * Force check the global gateway
-	 *
-	 * @since 1.0
-	 * @access public
-	 * @filter psource_field/get_value/gateways[allowed][ {global_gateway} ]
-	 */
-	public function force_check_global_gateway( $value, $post_id, $raw, $field ) {
-		return 1;
 	}
 
 	/**
@@ -202,38 +186,6 @@ class MP_Admin_Multisite {
 			'desc'    => __( 'Wenn aktiviert, nutzt ein Warenkorb mit nur einem Subshop dessen lokale Gateways. Bei Multi-Shop-Warenkörben werden weiterhin die Mainshop-Gateways verwendet.', 'mp' ),
 			'message' => __( 'Single-Subshop-Kauf nutzt lokale Gateways', 'mp' ),
 		) );
-		$metabox->add_field( 'select', array(
-			'name'    => 'advanced[network_multishop_checkout_mode]',
-			'label'   => array( 'text' => __( 'Multi-Shop Checkout-Modus', 'mp' ) ),
-			'desc'    => __( 'Steuert, wie Warenkörbe mit Produkten aus mehreren Subshops ausgecheckt werden: gebündelt im Mainshop, strikt getrennt oder per Kundenauswahl.', 'mp' ),
-			'options' => array(
-				'bundle_only'    => __( 'Nur Mainshop-Netzwerkcheckouts', 'mp' ),
-				'split_only'      => __( 'Nur getrennt pro Subshop', 'mp' ),
-				'customer_choice' => __( 'Kunde wählt im Checkout', 'mp' ),
-			),
-			'default_value' => 'bundle_only',
-		) );
-		$metabox->add_field( 'select', array(
-			'name'    => 'advanced[network_multishop_checkout_default]',
-			'label'   => array( 'text' => __( 'Standardmodus bei Kundenauswahl', 'mp' ) ),
-			'desc'    => __( 'Nur relevant, wenn der Modus "Kunde wählt im Checkout" aktiv ist.', 'mp' ),
-			'options' => array(
-				'bundle' => __( 'Netzwerkcheckouts (Mainshop)', 'mp' ),
-				'split'  => __( 'Subshop Gateways', 'mp' ),
-			),
-			'default_value' => 'bundle',
-		) );
-		$metabox->add_field( 'select', array(
-			'name'    => 'advanced[network_bundle_shipping_mode]',
-			'label'   => array( 'text' => __( 'Versandregel bei Netzwerkcheckouts', 'mp' ) ),
-			'desc'    => __( 'Legt fest, wie Versandkosten bei Mainshop-Netzwerkcheckouts behandelt werden.', 'mp' ),
-			'options' => array(
-				'per_shop'          => __( 'Pro Subshop getrennt berechnen', 'mp' ),
-				'combined'          => __( 'Netzwerkweit zusammenfassen', 'mp' ),
-				'combined_discount' => __( 'Zusammenfassen mit Bundle-Rabatt', 'mp' ),
-			),
-			'default_value' => 'per_shop',
-		) );
 		$metabox->add_field( 'checkbox', array(
 			'name'    => 'advanced[network_customer_hub]',
 			'label'   => array( 'text' => __( 'Zentrale Kundenseite im Mainshop aktivieren?', 'mp' ) ),
@@ -326,6 +278,30 @@ class MP_Admin_Multisite {
 			'desc'          => __( 'Wartezeit in Tagen bis eine Position ohne Konflikte freigabefaehig wird (Standard: 14).', 'mp' ),
 			'default_value' => 14,
 			'custom'        => array( 'min' => 0, 'step' => 1 ),
+		) );
+		$metabox->add_field( 'number', array(
+			'name'          => 'advanced[settlement_commission_rate]',
+			'label'         => array( 'text' => __( 'Netzwerkprovision (%)', 'mp' ) ),
+			'desc'          => __( 'Globaler Provisionssatz fuer neue Netzwerkbestellungen.', 'mp' ),
+			'default_value' => 0,
+			'custom'        => array( 'min' => 0, 'max' => 100, 'step' => '0.01' ),
+		) );
+		$metabox->add_field( 'select', array(
+			'name'          => 'advanced[settlement_commission_basis]',
+			'label'         => array( 'text' => __( 'Provisionsbasis', 'mp' ) ),
+			'options'       => array(
+				'product_net'   => __( 'Artikel netto', 'mp' ),
+				'product_gross' => __( 'Artikel brutto', 'mp' ),
+				'shop_gross'    => __( 'Gesamter Shopanteil inklusive Versand', 'mp' ),
+			),
+			'default_value' => 'product_net',
+		) );
+		$metabox->add_field( 'number', array(
+			'name'          => 'advanced[settlement_commission_tax_rate]',
+			'label'         => array( 'text' => __( 'Umsatzsteuer auf Provision (%)', 'mp' ) ),
+			'desc'          => __( 'Steuersatz fuer die Abrechnung der Netzwerkprovision.', 'mp' ),
+			'default_value' => 0,
+			'custom'        => array( 'min' => 0, 'max' => 100, 'step' => '0.01' ),
 		) );
 		// HIER die neue Option:
 		$metabox->add_field( 'checkbox', array(
@@ -498,37 +474,55 @@ class MP_Admin_Multisite {
 	 * @access public
 	 */
 	public function init_global_gateway_settings_metabox() {
+		$settings = get_site_option( 'mp_network_settings', array() );
+		$settings_changed = false;
+		$enabled_gateways = (array) mp_arr_get_value( 'gateways->allowed', $settings, array() );
+		if ( empty( $enabled_gateways ) ) {
+			$enabled_gateways = array_filter( (array) mp_arr_get_value( 'network_gateways', $settings, array() ) );
+			if ( empty( $enabled_gateways ) && ! empty( $settings['global_gateway'] ) ) {
+				$enabled_gateways[ sanitize_key( (string) $settings['global_gateway'] ) ] = 1;
+			}
+			if ( ! empty( $enabled_gateways ) ) {
+				if ( ! isset( $settings['gateways'] ) || ! is_array( $settings['gateways'] ) ) {
+					$settings['gateways'] = array();
+				}
+				$settings['gateways']['allowed'] = $enabled_gateways;
+				$settings_changed = true;
+			}
+		}
+		if ( array_key_exists( 'network_gateways', $settings ) ) {
+			unset( $settings['network_gateways'] );
+			$settings_changed = true;
+		}
+		if ( ! empty( $settings['global_gateway'] ) ) {
+			$settings['global_gateway'] = '';
+			$settings_changed = true;
+		}
+		if ( $settings_changed ) {
+			update_site_option( 'mp_network_settings', $settings );
+		}
+
 		$metabox = new PSOURCE_Metabox( array(
 			'id'               => 'mp-network-settings-global-gateway',
 			'page_slugs' => array( 'network-store-settings-payments' ),
 			'title'            => __( 'Netzwerk Zahlungsgateway', 'mp' ),
 			'site_option_name' => 'mp_network_settings',
 			'order'            => 0,
-			'conditional'      => array(
-				'name'   => 'global_cart',
-				'value'  => '1',
-				'action' => 'show',
-			),
 		) );
 
-		$all_gateways = MP_Gateway_API::get_gateways();
-		$gateways     = array( '' => __( 'Wähle ein Gateway', 'mp' ) );
+		$gateways = MP_Gateway_API::get_gateways();
 
-		foreach ( $all_gateways as $code => $gateway ) {
-
-			if ( ! $gateway[2] ) {
-				// Skip non-global gateways
+		foreach ( $gateways as $code => $gateway ) {
+			if ( 'free_orders' === $code ) {
 				continue;
 			}
 
-			$gateways[ $code ] = $gateway[1];
+			$metabox->add_field( 'checkbox', array(
+				'name'    => 'gateways[allowed][' . $code . ']',
+				'label'   => array( 'text' => $gateway[1] ),
+				'message' => sprintf( __( '%s im Netzwerk-Checkout anbieten', 'mp' ), $gateway[1] ),
+			) );
 		}
-
-		$metabox->add_field( 'select', array(
-			'name'    => 'global_gateway',
-			'label'   => array( 'text' => __( 'Wähle ein Gateway', 'mp' ) ),
-			'options' => $gateways,
-		) );
 	}
 
 	/**
@@ -544,11 +538,6 @@ class MP_Admin_Multisite {
 			'title'            => __( 'Gateway-Berechtigungen', 'mp' ),
 			'site_option_name' => 'mp_network_settings',
 			'order'            => 0,
-			'conditional'      => array(
-				'name'   => 'global_cart',
-				'value'  => '1',
-				'action' => 'hide',
-			),
 		) );
 
 		$options_permissions = array(
@@ -665,16 +654,6 @@ class MP_Admin_Multisite {
 	 * @access public
 	 */
 	public function network_store_settings_payments() {
-        $all_gateways     = MP_Gateway_API::get_gateways();
-        $network_gateways = array();
-
-        foreach ( $all_gateways as $code => $gateway ) {
-            if ( empty( $gateway[2] ) || 'free_orders' === $code ) {
-                continue;
-            }
-
-            $network_gateways[ $code ] = $gateway;
-        }
         ?>
         <div class="wrap mp-wrap mp-network-settings-modern">
 
@@ -685,42 +664,15 @@ class MP_Admin_Multisite {
             <div class="mp-network-intro">
                 <h3><?php esc_html_e( 'Netzwerk-Zahlungsgateways', 'mp' ); ?></h3>
                 <p>
-                    <?php esc_html_e( 'Wähle die Zahlungsgateways aus, die für den Netzwerk-Warenkorb zur Verfügung stehen.', 'mp' ); ?>
+					<?php esc_html_e( 'Konfiguriere das Zahlungsgateway für den Netzwerk-Warenkorb.', 'mp' ); ?>
                 </p>
             </div>
 
-            <?php if ( empty( $network_gateways ) ) : ?>
-
-                <div class="notice notice-warning">
-                    <p>
-                        <?php esc_html_e( 'Es wurden keine globalen Zahlungsgateways gefunden.', 'mp' ); ?>
-                    </p>
-                </div>
-
-            <?php else : ?>
-
-                <?php
-                $metabox = new PSOURCE_Metabox( array(
-                    'id'               => 'mp-network-payment-gateways',
-                    'page_slugs'       => array( 'network-store-settings-payments' ),
-                    'title'            => __( 'Verfügbare Zahlungsgateways', 'mp' ),
-                    'site_option_name' => 'mp_network_settings',
-                    'order'            => 0,
-                ) );
-
-                foreach ( $network_gateways as $code => $gateway ) {
-                    $metabox->add_field( 'checkbox', array(
-                        'name'  => 'gateways[allowed][' . $code . ']',
-                        'label' => array(
-                        'text' => $gateway[1],
-                    ),
-                    ) );
-                }
-                ?>
-
-                <?php do_action( 'psource_metabox/render_settings_metaboxes' ); ?>
-
-            <?php endif; ?>
+			<div class="mp-settings">
+				<form id="mp-main-form" method="post" action="<?php echo esc_url( add_query_arg( array() ) ); ?>">
+					<?php do_action( 'psource_metabox/render_settings_metaboxes' ); ?>
+				</form>
+			</div>
 
         </div>
         <?php

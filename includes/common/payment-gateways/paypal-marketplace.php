@@ -7,16 +7,33 @@ require_once dirname(__FILE__) . '/paypal-marketplace/class-mp-gateway-paypal-ma
 if ( ! function_exists('mp_register_gateway_plugin') ) return;
 mp_register_gateway_plugin( 'MP_Gateway_PayPal_Marketplace', 'paypal_marketplace', __( 'PayPal Marketplace (Commerce Platform)', 'mp' ), true );
 
+function mp_paypal_marketplace_is_network_gateway() {
+    $network_gateways = array_filter( (array) mp_get_network_setting( 'gateways->allowed', array() ) );
+    if ( empty( $network_gateways ) ) {
+        $network_gateways = array_filter( (array) mp_get_network_setting( 'network_gateways', array() ) );
+    }
+    if ( ! empty( $network_gateways ) ) {
+        return ! empty( $network_gateways['paypal_marketplace'] );
+    }
+
+    return 'paypal_marketplace' === mp_get_network_setting( 'global_gateway', '' );
+}
+
 // Netzwerk-Metabox für PayPal Marketplace Gateway-Settings
 add_action( 'mp_multisite_init_metaboxes', 'init_paypal_marketplace_network_settings_metaboxes' );
 function init_paypal_marketplace_network_settings_metaboxes() {
     $metabox = new PSOURCE_Metabox( array(
         'id'               => 'mp-network-settings-paypal-marketplace',
-        'page_slugs'       => array( 'network-store-settings' ),
+        'page_slugs'       => array( 'network-store-settings-payments' ),
         'title'            => __( 'PayPal Marketplace (Commerce Platform)', 'mp' ),
         'desc'             => __( 'Hier können Sie die API-Zugangsdaten für das PayPal Marketplace Gateway für alle Shops im Netzwerk hinterlegen.', 'mp' ),
         'site_option_name' => 'mp_network_settings',
         'order'            => 17,
+        'conditional'      => array(
+            'name'   => 'gateways[allowed][paypal_marketplace]',
+            'value'  => 1,
+            'action' => 'show',
+        ),
     ) );
 
     $metabox->add_field( 'text', array(
@@ -54,6 +71,13 @@ function init_paypal_marketplace_network_settings_metaboxes() {
         'default_value'=> home_url( '/?mp_paypal_marketplace_webhook=1' ),
     ) );
     $metabox->add_field( 'text', array(
+        'name'         => 'paypal_marketplace_webhook_id',
+        'label'        => array( 'text' => __( 'PayPal Webhook-ID', 'mp' ) ),
+        'desc'         => __( 'Die ID des im PayPal Developer Dashboard angelegten Webhooks. Sie wird zur Signaturpruefung benoetigt.', 'mp' ),
+        'custom'       => array( 'style' => 'width:350px' ),
+        'before_field' => '',
+    ) );
+    $metabox->add_field( 'text', array(
         'name'         => 'provision',
         'label'        => array( 'text' => __( 'Marktplatz-Provision (%)', 'mp' ) ),
         'desc'         => __( 'Gib den Prozentsatz an, den der Marktplatzbetreiber pro Transaktion erhält (z.B. 2 für 2%).', 'mp' ),
@@ -77,7 +101,7 @@ function init_paypal_marketplace_shop_settings_metaboxes() {
     if (
         function_exists('mp_get_network_setting') &&
         mp_get_network_setting('global_cart') &&
-        mp_get_network_setting('global_gateway') === 'paypal_marketplace'
+        mp_paypal_marketplace_is_network_gateway()
     ) {
         $metabox = new PSOURCE_Metabox( array(
             'id'               => 'mp-settings-gateway-paypal-marketplace',
@@ -119,7 +143,7 @@ add_action( 'admin_menu', function() {
         current_user_can('manage_options') &&
         function_exists('mp_get_network_setting') &&
         mp_get_network_setting('global_cart') &&
-        mp_get_network_setting('global_gateway') === 'paypal_marketplace'
+        mp_paypal_marketplace_is_network_gateway()
     ) {
         add_submenu_page(
             'options-general.php',

@@ -244,4 +244,4 @@ class MP_Gateway_Mollie extends MP_Gateway_API {
 }
 
 //register payment gateway plugin
-mp_register_gateway_plugin( 'MP_Gateway_Mollie', 'mollie', __( 'Mollie', 'mp' ) );
+mp_register_gateway_plugin( 'MP_Gateway_Mollie', 'mollie', __( 'Mollie', 'mp' ), true );

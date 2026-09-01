@@ -86,7 +86,7 @@ class MP_Coupons_Addon {
 			}
 
 			add_filter( 'mp_product/get_price', array( &$this, 'product_price' ), 10, 2 );
-			add_filter( 'mp_cart/product_total', array( &$this, 'product_total' ), 10, 2 );
+			add_filter( 'mp_cart/product_total', array( &$this, 'product_total' ), 10, 3 );
 			add_filter( 'mp_cart/total', array( &$this, 'cart_total' ), 10, 3 );
 
 			add_filter( 'mp_cart/tax_total', array( &$this, 'tax_total' ), 10, 3 );
@@ -311,14 +311,14 @@ class MP_Coupons_Addon {
 
 		$html .= '
 			<div class="mp_cart_resume_item mp_cart_resume_item-coupons">
-				<span class="mp_cart_resume_item_label">' . __( 'Coupon Discounts', 'mp' ) . '</span>
+				<span class="mp_cart_resume_item_label">' . __( 'Gutscheinrabatte', 'mp' ) . '</span>
 				<span class="mp_cart_resume_item_amount mp_cart_resume_item_amount-total">' . mp_format_currency( '', $this->get_total_discount_amt() ) . '</span>
 				<ul class="mp_cart_resume_coupons_list">';
 
 		foreach ( $coupons as $coupon ) {
 			$html .= '
 					<li class="mp_cart_coupon">
-						<span class="mp_cart_resume_item_label">' . $coupon->post_title . ( ( $cart->is_editable ) ? ' <a class="mp_cart_coupon_remove_item" href="javascript:mp_coupons.remove(' . $coupon->ID . ', ' . $cart->get_blog_id() . ');">(' . __( 'Remove', 'mp' ) . ')</a>' : '' ) . '</span>
+						<span class="mp_cart_resume_item_label">' . $coupon->post_title . ( ( $cart->is_editable ) ? ' <a class="mp_cart_coupon_remove_item" href="javascript:mp_coupons.remove(' . $coupon->ID . ', ' . $cart->get_blog_id() . ');">(' . __( 'Entfernen', 'mp' ) . ')</a>' : '' ) . '</span>
 						<span class="mp_cart_resume_item_amount">' . $coupon->discount_amt( false ) . '</span>
 					</li><!-- end mp_cart_coupon -->';
 		}
@@ -1164,9 +1164,12 @@ class MP_Coupons_Addon {
 	 * @filter mp_cart/product_total
 	 * @return float
 	 */
-	public function product_total( $total, $items ) {
-		
-		$total = (float) mp_cart()->product_original_total() + (float) $this->get_total_discount_amt();	
+	public function product_total( $total, $items, $cart = null ) {
+		if ( ! $cart instanceof MP_Cart ) {
+			$cart = mp_cart();
+		}
+
+		$total = (float) $cart->product_original_total() + (float) $this->get_total_discount_amt();
 		
 		return (float) round( $total, 2 );
 	}
@@ -1174,7 +1177,7 @@ class MP_Coupons_Addon {
 	/**
 	 * Defines the column headers for the product coupon list table
 	 *
-	 * @since 1.0
+	 * @since 1.0S
 	 * @access public
 	 * @action manage_product_coupon_posts_columns
 	 *

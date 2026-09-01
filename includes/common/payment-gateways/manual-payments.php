@@ -77,6 +77,7 @@ class MP_Gateway_ManualPayments extends MP_Gateway_API {
 			'payment_info'	 => $payment_info,
 			'paid'			 => false
 		) );
+		$cart->empty_cart();
 
 		// AJAX-safe: Bei AJAX Order im Cache speichern (Checkout Handler verarbeitet es)
 		if ( wp_doing_ajax() ) {

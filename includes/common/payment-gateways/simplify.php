@@ -294,4 +294,4 @@ class MP_Gateway_Simplify extends MP_Gateway_API {
 	}
 }
 
-mp_register_gateway_plugin('MP_Gateway_Simplify', 'simplify', __('Simplify Commerce by MasterCard', 'mp'));
+mp_register_gateway_plugin('MP_Gateway_Simplify', 'simplify', __('Simplify Commerce by MasterCard', 'mp'), true);

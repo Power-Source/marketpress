@@ -39,38 +39,47 @@
 		
 		&_head {
 			font-size: $font__size--h4;
+			font-weight: 600;
+			letter-spacing: 0;
 		}
 		
 		// Detail
 		&_detail {
-			@include j-cf();
 			background: $color--light;
-			border: 1px solid $color--gray;;
+			border: 1px solid $color--gray;
+			border-radius: 6px;
 			font-size: $font__size--m;
-			padding: $space--m;
+			padding: $space;
 			position: relative;
-			text-align: center;
+			text-align: left;
 			
 			&_item {
-				@include j-stack();
-				margin-bottom: $space--m;
-				
-				&:last-child {
-					margin-bottom: 0;
-				}
-
-				@include bp(desktop) {
-					@include j-unstack();
-					@include j-column(1/3);
-					margin-bottom: 0;
-				}
+				border-left: 3px solid $color--gray;
+				padding: $space--xs $space--m;
 				
 				h5 {
 					display: block;
-					font-size: $font__size;
+					font-size: $font__size--s;
+					font-weight: 600;
+					letter-spacing: 0;
 					margin: 0 0 $space--xs;
-					text-transform: uppercase;
+					text-transform: none;
 				}
+			}
+		}
+
+		&_manual_notice {
+			background: lighten($color--info, 42%);
+			border-left: 4px solid $color--info;
+			border-radius: 4px;
+			padding: $space--m;
+
+			h5 {
+				font-size: $font__size;
+				font-weight: 600;
+				letter-spacing: 0;
+				margin-bottom: $space--xs;
+				text-transform: none;
 			}
 		}
 	}

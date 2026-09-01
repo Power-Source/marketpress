@@ -468,10 +468,12 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
         /*
         * Merchant-ID dauerhaft für den Shop speichern.
         */
+        switch_to_blog( $blog_id );
         update_option(
             'mp_paypal_marketplace_merchant_id_' . $blog_id,
             $merchant_id
         );
+        restore_current_blog();
 
         $gateway->log(
             'PayPal-Onboarding erfolgreich. Blog ' .
@@ -645,6 +647,7 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
             }
 
             $blog_id = absint( $blog_id );
+            switch_to_blog( $blog_id );
 
             $merchant_id = get_option(
                 'mp_paypal_marketplace_merchant_id_' . $blog_id
@@ -654,6 +657,7 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
                 $this->log(
                     'Fehlende Merchant-ID für Blog ' . $blog_id
                 );
+                restore_current_blog();
                 continue;
             }
 
@@ -680,6 +684,8 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
 
                 $seller_totals[ $merchant_id ] += $amount;
             }
+
+            restore_current_blog();
         }
 
         /*
@@ -1073,40 +1079,117 @@ class MP_Gateway_PayPal_Marketplace extends MP_Gateway_API {
     }
 
     /**
-     * Webhook-Handler für PayPal: Logging und Fehlerbehandlung
+     * Verify a PayPal webhook signature through the PayPal API.
+     *
+     * @param array $event Decoded webhook event.
+     * @return bool
+     */
+    protected function verify_webhook_signature( $event ) {
+        $webhook_id = (string) mp_get_network_setting( 'paypal_marketplace_webhook_id', '' );
+        if ( '' === $webhook_id ) {
+            return false;
+        }
+
+        $headers = array(
+            'transmission_id'   => isset( $_SERVER['HTTP_PAYPAL_TRANSMISSION_ID'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_PAYPAL_TRANSMISSION_ID'] ) ) : '',
+            'transmission_time' => isset( $_SERVER['HTTP_PAYPAL_TRANSMISSION_TIME'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_PAYPAL_TRANSMISSION_TIME'] ) ) : '',
+            'transmission_sig'  => isset( $_SERVER['HTTP_PAYPAL_TRANSMISSION_SIG'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_PAYPAL_TRANSMISSION_SIG'] ) ) : '',
+            'cert_url'          => isset( $_SERVER['HTTP_PAYPAL_CERT_URL'] ) ? esc_url_raw( wp_unslash( $_SERVER['HTTP_PAYPAL_CERT_URL'] ) ) : '',
+            'auth_algo'         => isset( $_SERVER['HTTP_PAYPAL_AUTH_ALGO'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_PAYPAL_AUTH_ALGO'] ) ) : '',
+        );
+        if ( in_array( '', $headers, true ) ) {
+            return false;
+        }
+
+        $access_token = $this->get_paypal_access_token();
+        if ( is_wp_error( $access_token ) ) {
+            return false;
+        }
+
+        $response = wp_remote_post(
+            $this->get_api_base_url() . '/v1/notifications/verify-webhook-signature',
+            array(
+                'headers' => array(
+                    'Authorization' => 'Bearer ' . $access_token,
+                    'Content-Type'  => 'application/json',
+                ),
+                'body'    => wp_json_encode( array_merge( $headers, array(
+                    'webhook_id'    => $webhook_id,
+                    'webhook_event' => $event,
+                ) ) ),
+                'timeout' => 30,
+            )
+        );
+        if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+            return false;
+        }
+
+        $result = json_decode( wp_remote_retrieve_body( $response ), true );
+        return is_array( $result ) && 'SUCCESS' === mp_arr_get_value( 'verification_status', $result, '' );
+    }
+
+    /**
+     * Handle verified PayPal payment webhooks.
      */
     public static function maybe_handle_webhook() {
-        if ( isset( $_GET['mp_paypal_marketplace_webhook'] ) ) {
-            $body = file_get_contents('php://input');
-            $data = json_decode( $body, true );
-            $order_id = isset( $data['resource']['id'] ) ? $data['resource']['id'] : '';
-            $status   = isset( $data['resource']['status'] ) ? $data['resource']['status'] : '';
-            // MarketPress-Bestellung finden
-            $args = array(
-                'post_type'  => 'mp_order',
-                'meta_query' => array(
-                    array(
-                        'key'   => '_paypal_marketplace_order_id',
-                        'value' => $order_id,
-                    ),
-                ),
-            );
-            $orders = get_posts( $args );
-            if ( ! empty( $orders ) ) {
-                $mp_order_id = $orders[0]->ID;
-                $mp_status = ($status === 'COMPLETED') ? 'paid' : strtolower($status);
-                update_post_meta( $mp_order_id, 'mp_status', $mp_status );
-                if ( defined('WP_DEBUG') && WP_DEBUG ) {
-                    error_log('[MP PayPal Marketplace] Webhook: Order ' . $mp_order_id . ' Status: ' . $mp_status);
-                }
-            } else {
-                if ( defined('WP_DEBUG') && WP_DEBUG ) {
-                    error_log('[MP PayPal Marketplace] Webhook: Keine Bestellung gefunden für PayPal-Order ' . $order_id);
-                }
-            }
-            http_response_code(200);
+        if ( ! isset( $_GET['mp_paypal_marketplace_webhook'] ) ) {
+            return;
+        }
+
+        $body = file_get_contents( 'php://input' );
+        $event = json_decode( $body, true );
+        if ( ! is_array( $event ) ) {
+            status_header( 400 );
             exit;
         }
+
+        $gateway = new self();
+        if ( ! $gateway->verify_webhook_signature( $event ) ) {
+            status_header( 401 );
+            exit;
+        }
+
+        $event_type = sanitize_text_field( (string) mp_arr_get_value( 'event_type', $event, '' ) );
+        if ( ! in_array( $event_type, array( 'PAYMENT.CAPTURE.COMPLETED', 'PAYMENT.CAPTURE.REFUNDED' ), true ) ) {
+            status_header( 200 );
+            exit;
+        }
+
+        $order_id = sanitize_text_field( (string) mp_arr_get_value(
+            'resource->supplementary_data->related_ids->order_id',
+            $event,
+            mp_arr_get_value( 'resource->id', $event, '' )
+        ) );
+        $orders = get_posts( array(
+            'post_type'      => 'mp_order',
+            'post_status'    => 'any',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'meta_query'     => array(
+                array(
+                    'key'   => '_paypal_marketplace_order_id',
+                    'value' => $order_id,
+                ),
+            ),
+        ) );
+        if ( ! empty( $orders ) ) {
+            $order = new MP_Order( (int) reset( $orders ) );
+            if ( 'PAYMENT.CAPTURE.REFUNDED' === $event_type ) {
+                $amount = (float) mp_arr_get_value( 'resource->amount->value', $event, 0 );
+                $reference = (string) mp_arr_get_value( 'resource->id', $event, '' );
+                do_action( 'mp_order/refunded', $order, $amount, $reference );
+                update_post_meta( $order->ID, '_paypal_marketplace_status', 'REFUNDED' );
+            } else {
+                $old_status = (string) get_post_status( $order->ID );
+                if ( $order->exists() && ! in_array( $old_status, array( 'order_paid', 'order_shipped', 'order_closed' ), true ) ) {
+                    $order->change_status( 'order_paid', true, $old_status );
+                }
+                update_post_meta( $order->ID, '_paypal_marketplace_status', 'COMPLETED' );
+            }
+        }
+
+        status_header( 200 );
+        exit;
     }
 }
 

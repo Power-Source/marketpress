@@ -1074,9 +1074,9 @@ public $ID = null;
 		if ( $this->_post->post_status === 'order_received' && $payment_gateway === 'manual_payments' ) {
 			$instruction = mp_get_setting( 'gateways->manual_payments->instruction', '' );
 			if ( $instruction ) {
-				$html .= '<div class="mp_order_manual_notice" style="margin-top:15px; padding:12px; border:1px dashed #e0a800; background:#fff8e1;">';
-				$html .= '<strong>' . __( 'Ausstehend: Bitte Zahlung abschließen', 'mp' ) . '</strong><br />';
-				$html .= wpautop( wp_kses_post( $instruction ) );
+				$html .= '<div class="mp_order_manual_notice">';
+				$html .= '<h5>' . __( 'Zahlung ausstehend', 'mp' ) . '</h5>';
+				$html .= '<div class="mp_order_manual_notice_content">' . wpautop( wp_kses_post( $instruction ) ) . '</div>';
 				$html .= '</div>';
 			}
 		}
@@ -1177,6 +1177,27 @@ public $ID = null;
 			return false;
 		}
 
+		$settlement_snapshot = array();
+		$gateway_code = sanitize_key( (string) mp_arr_get_value( 'gateway_plugin_name', $payment_info, mp_get_post_value( 'payment_method', '' ) ) );
+		if ( $gateway_code && empty( $payment_info['gateway_plugin_name'] ) ) {
+			$payment_info['gateway_plugin_name'] = $gateway_code;
+		}
+		$network_gateways = array_filter( (array) mp_get_network_setting( 'gateways->allowed', array() ) );
+		if ( empty( $network_gateways ) ) {
+			$network_gateways = array_filter( (array) mp_get_network_setting( 'network_gateways', array() ) );
+		}
+		if ( empty( $network_gateways ) ) {
+			$legacy_gateway = sanitize_key( (string) mp_get_network_setting( 'global_gateway', '' ) );
+			if ( $legacy_gateway ) {
+				$network_gateways = array( $legacy_gateway => 1 );
+			}
+		}
+		if ( is_multisite() && $cart instanceof MP_Cart && $cart->is_global && ! empty( $network_gateways[ $gateway_code ] ) ) {
+			$settlement_snapshot = $cart->get_settlement_snapshot( mp_arr_get_value( 'total', $payment_info, 0 ) );
+			$settlement_snapshot['gateway_code'] = $gateway_code;
+			$settlement_snapshot['settlement_mode'] = ( 'paypal_marketplace' === $gateway_code ) ? 'automatic' : 'manual';
+		}
+
 		// Generate a unique order ID first
 		$order_id = $this->_generate_id();
 
@@ -1213,6 +1234,9 @@ public $ID = null;
 		// Save cart info
 		update_post_meta( $this->ID, 'mp_cart_info', $cart );
 		update_post_meta( $this->ID, 'mp_cart_items', $cart->export_to_array() );
+		if ( ! empty( $settlement_snapshot ) ) {
+			update_post_meta( $this->ID, 'mp_settlement_snapshot', $settlement_snapshot );
+		}
 		// Save shipping info
 		update_post_meta( $this->ID, 'mp_shipping_info', $shipping_info );
 		// Save billing info

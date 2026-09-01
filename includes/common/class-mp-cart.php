@@ -125,6 +125,25 @@ class MP_Cart {
 	}
 
 	/**
+	 * Create a read-only cart for a persisted order without checkout side effects.
+	 *
+	 * @param array $items Product IDs mapped to quantities.
+	 * @param int   $blog_id Owning shop blog ID.
+	 * @return MP_Cart
+	 */
+	public static function create_order_cart( $items, $blog_id ) {
+		$blog_id = (int) $blog_id;
+		$cart = new MP_Cart( false );
+		$cart->_items = array( $blog_id => (array) $items );
+		$cart->_id = $blog_id;
+		$cart->_id_original = null;
+		$cart->is_global = false;
+		$cart->is_editable = false;
+
+		return $cart;
+	}
+
+	/**
 	 * Add an item to the cart
 	 *
 	 * @since 1.0
@@ -1643,7 +1662,7 @@ class MP_Cart {
 				 * @param array The current cart items.
 				 */
 
-				$this->_total['product'] += (float) apply_filters( 'mp_cart/product_total', $total, $items );
+				$this->_total['product'] += (float) apply_filters( 'mp_cart/product_total', $total, $items, $this );
 
 				if ( ( $this->is_global && false === current( $blog_ids ) ) || ! $this->is_global ) {
 					$this->reset_id();
@@ -2561,6 +2580,154 @@ class MP_Cart {
         }
 
         return $data;
+	}
+
+	/**
+	 * Build immutable per-shop totals for a network order.
+	 *
+	 * @param float $order_total Total charged by the selected gateway.
+	 * @return array
+	 */
+	public function get_settlement_snapshot( $order_total ) {
+		$all_items = array_filter( (array) $this->get_all_items() );
+		if ( empty( $all_items ) ) {
+			return array();
+		}
+
+		$snapshot = array(
+			'currency'    => (string) mp_get_setting( 'currency', 'EUR' ),
+			'order_total' => round( (float) $order_total, 2 ),
+			'commission'  => array(
+				'rate'     => max( 0, min( 100, (float) mp_get_network_setting( 'advanced->settlement_commission_rate', 0 ) ) ),
+				'basis'    => sanitize_key( (string) mp_get_network_setting( 'advanced->settlement_commission_basis', 'product_net' ) ),
+				'tax_rate' => max( 0, min( 100, (float) mp_get_network_setting( 'advanced->settlement_commission_tax_rate', 0 ) ) ),
+			),
+			'shops'       => array(),
+		);
+		$calculated_total = 0.0;
+
+		foreach ( $all_items as $blog_id => $items ) {
+			$blog_id = (int) $blog_id;
+			if ( ! $blog_id || empty( $items ) ) {
+				continue;
+			}
+
+			switch_to_blog( $blog_id );
+
+			$shop_cart             = new MP_Cart( false );
+			$shop_cart->is_editable = false;
+			$shop_cart->_items      = array( $blog_id => $items );
+			$shop_cart->_id         = $blog_id;
+
+			$session_shipping = isset( $_SESSION['mp_shipping_info'] ) && is_array( $_SESSION['mp_shipping_info'] )
+				? $_SESSION['mp_shipping_info']
+				: array();
+			if ( isset( $session_shipping['shipping_option'][ $blog_id ] ) ) {
+				$_SESSION['mp_shipping_info']['shipping_option'] = $session_shipping['shipping_option'][ $blog_id ];
+			}
+			if ( isset( $session_shipping['shipping_sub_option'][ $blog_id ] ) ) {
+				$_SESSION['mp_shipping_info']['shipping_sub_option'] = $session_shipping['shipping_sub_option'][ $blog_id ];
+			}
+
+			$product_original = round( (float) $shop_cart->product_original_total(), 2 );
+			$product_total    = round( (float) $shop_cart->product_total(), 2 );
+			$shipping_total   = $shop_cart->shipping_total();
+			$shipping_total   = is_numeric( $shipping_total ) ? round( (float) $shipping_total, 2 ) : 0.0;
+			$shipping_tax     = round( (float) $shop_cart->shipping_tax_total(), 2 );
+			$tax_total        = round( (float) $shop_cart->tax_total(), 2 );
+			$shop_total       = round( (float) $shop_cart->total(), 2 );
+			$lines            = array();
+			$product_net      = 0.0;
+
+			foreach ( $shop_cart->get_items_as_objects() as $product ) {
+				$price = (array) $product->get_price();
+				$product_net += (float) $product->before_tax_price() * (float) $product->qty;
+				$lines[] = array(
+					'product_id'       => (int) $product->ID,
+					'parent_product_id' => (int) $product->post_parent,
+					'sku'              => (string) $product->get_meta( 'sku' ),
+					'name'             => (string) $product->title( false ),
+					'quantity'         => (float) $product->qty,
+					'unit_price'       => round( (float) mp_arr_get_value( 'lowest', $price, 0 ), 2 ),
+					'original_price'   => round( (float) mp_arr_get_value( 'before_coupon', $price, mp_arr_get_value( 'lowest', $price, 0 ) ), 2 ),
+					'before_tax_price' => round( (float) $product->before_tax_price(), 2 ),
+					'is_download'      => (bool) $product->is_download(),
+					'withdrawal_excluded' => (bool) $product->get_meta( 'mp_withdrawal_excluded' ),
+					'warranty_excluded'   => (bool) $product->get_meta( 'mp_warranty_excluded' ),
+				);
+			}
+
+			$snapshot['shops'][ $blog_id ] = array(
+				'blog_id'                   => $blog_id,
+				'lines'                     => $lines,
+				'product_original'          => $product_original,
+				'product_total'             => $product_total,
+				'product_net'               => round( $product_net, 2 ),
+				'discount_total'            => round( max( 0, $product_original - $product_total ), 2 ),
+				'shipping_total'            => $shipping_total,
+				'shipping_tax'              => $shipping_tax,
+				'tax_total'                 => $tax_total,
+				'gross_amount'              => $shop_total,
+				'reconciliation_adjustment' => 0.0,
+			);
+			$calculated_total += $shop_total;
+
+			if ( isset( $_SESSION ) && is_array( $_SESSION ) ) {
+				$_SESSION['mp_shipping_info'] = $session_shipping;
+			}
+			restore_current_blog();
+		}
+
+		if ( ! empty( $snapshot['shops'] ) ) {
+			$adjustment   = round( $snapshot['order_total'] - $calculated_total, 2 );
+			$shop_blog_ids = array_keys( $snapshot['shops'] );
+			$last_blog_id = end( $shop_blog_ids );
+			$snapshot['shops'][ $last_blog_id ]['reconciliation_adjustment'] = $adjustment;
+			$snapshot['shops'][ $last_blog_id ]['gross_amount'] = round(
+				$snapshot['shops'][ $last_blog_id ]['gross_amount'] + $adjustment,
+				2
+			);
+		}
+
+		foreach ( $snapshot['shops'] as $blog_id => &$shop ) {
+			$commission_rule = (array) apply_filters(
+				'mp_settlement_commission_rule',
+				$snapshot['commission'],
+				(int) $blog_id,
+				$shop,
+				$this
+			);
+			$rate     = max( 0, min( 100, (float) mp_arr_get_value( 'rate', $commission_rule, 0 ) ) );
+			$tax_rate = max( 0, min( 100, (float) mp_arr_get_value( 'tax_rate', $commission_rule, 0 ) ) );
+			$basis    = sanitize_key( (string) mp_arr_get_value( 'basis', $commission_rule, 'product_net' ) );
+
+			if ( 'shop_gross' === $basis ) {
+				$commission_basis = (float) $shop['gross_amount'];
+			} elseif ( 'product_gross' === $basis ) {
+				$commission_basis = max( 0, (float) $shop['gross_amount'] - (float) $shop['shipping_total'] - (float) $shop['reconciliation_adjustment'] );
+			} else {
+				$basis            = 'product_net';
+				$commission_basis = (float) $shop['product_net'];
+			}
+
+			$commission_net   = round( $commission_basis * ( $rate / 100 ), 2 );
+			$commission_tax   = round( $commission_net * ( $tax_rate / 100 ), 2 );
+			$commission_total = round( $commission_net + $commission_tax, 2 );
+
+			$shop['commission'] = array(
+				'rate'         => $rate,
+				'basis'        => $basis,
+				'basis_amount' => round( $commission_basis, 2 ),
+				'net_amount'   => $commission_net,
+				'tax_rate'     => $tax_rate,
+				'tax_amount'   => $commission_tax,
+				'total_amount' => $commission_total,
+			);
+			$shop['payout_amount'] = round( max( 0, (float) $shop['gross_amount'] - $commission_total ), 2 );
+		}
+		unset( $shop );
+
+		return $snapshot;
 	}
 
 	/**

@@ -216,6 +216,8 @@ class MP_PDF_Invoice {
 		$order_items  = $order->get_meta( 'mp_cart_items' );
 		$order_details = array();
 		$cart          = $order->get_cart();
+		$shop_snapshot = $order->get_meta( '_mp_network_shop_snapshot', array() );
+		$is_network_suborder = is_array( $shop_snapshot ) && ! empty( $shop_snapshot );
 
 		$total_discount_value = 0;
 		if ( $coupons = $order->get_meta( 'mp_discount_info' ) ) {
@@ -230,8 +232,8 @@ class MP_PDF_Invoice {
 			foreach ( $order_items as $product_id => $items ){
 				foreach ( $items as $item ){
 					// Berechne Einzelpreis und Gesamtpreis
-					$unit_price = $item['price'] / $item['quantity'];
-					$total_price = $item['price'];
+					$unit_price = (float) $item['price'];
+					$total_price = $unit_price * (float) $item['quantity'];
 					
 					$order_details[] = sprintf( 
 						'<tr><td>%s</td><td class="align-right" style="text-align: center;">%s</td><td class="align-right">%s</td><td class="align-right">%s</td></tr>', 
@@ -243,18 +245,22 @@ class MP_PDF_Invoice {
 				}								
 			}
 			
+			$subtotal = $is_network_suborder
+				? mp_format_currency( '', (float) mp_arr_get_value( 'product_original', $shop_snapshot, 0 ) )
+				: $cart->product_total( true );
+
 			//times for the subtotal
 			$order_details[] = sprintf( 
 				'<tr class="subtotal"><td colspan="3" class="no-border align-right"><strong>%s:</strong></td><td class="align-right"><strong>%s</strong></td></tr>', 
 				__( "Zwischensumme", "mp" ), 
-				$cart->product_total( true ) 
+				$subtotal
 			);
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_subtotal', $order_details, $order, $cart, $type );
 
 			if ( $total_discount_value !== 0 ) {
-				$order_details[] = sprintf( 
-					'<tr><td colspan="3" class="no-border align-right">%s:</td><td class="align-right">%s</td></tr>', 
+				$order_details[] = sprintf(
+					'<tr><td colspan="3" class="no-border align-right">%s:</td><td class="align-right">%s</td></tr>',
 					__( "Rabatt", "mp" ), 
 					mp_format_currency( '', $total_discount_value ) 
 				);
@@ -262,11 +268,12 @@ class MP_PDF_Invoice {
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_discount', $order_details, $order, $cart, $type );
 
-			if ( $cart->shipping_total() > 0 ) {
+			$shipping_total = $is_network_suborder ? (float) $order->get_meta( 'mp_shipping_total', 0 ) : $cart->shipping_total();
+			if ( $shipping_total > 0 ) {
 				$order_details[] = sprintf( 
 					'<tr><td colspan="3" class="no-border align-right">%s:</td><td class="align-right">%s</td></tr>', 
 					__( "Versandkosten", "mp" ), 
-					$cart->shipping_total( true ) 
+					$is_network_suborder ? mp_format_currency( '', $shipping_total ) : $cart->shipping_total( true )
 				);
 			}
 
@@ -275,11 +282,12 @@ class MP_PDF_Invoice {
 			$tax_label = mp_get_setting( 'tax->label', __( 'MwSt.', 'mp' ) );
 			$is_small_business = mp_get_setting( 'legal->small_business', false );
 
-			if ( $cart->tax_total() && !$is_small_business ) {
-				$order_details[] = sprintf( 
-					'<tr><td colspan="3" class="no-border align-right">%s (19%%):</td><td class="align-right">%s</td></tr>', 
-					$tax_label, 
-					$cart->tax_total( true ) 
+			$tax_total = $is_network_suborder ? (float) $order->get_meta( 'mp_tax_total', 0 ) : $cart->tax_total();
+			if ( $tax_total && !$is_small_business ) {
+				$order_details[] = sprintf(
+					'<tr><td colspan="3" class="no-border align-right">%s:</td><td class="align-right">%s</td></tr>',
+					$tax_label,
+					$is_network_suborder ? mp_format_currency( '', $tax_total ) : $cart->tax_total( true )
 				);
 			}
 
@@ -290,7 +298,7 @@ class MP_PDF_Invoice {
 			$order_details[] = sprintf( 
 				'<tr class="total"><td colspan="3" class="align-right"><strong>%s:</strong></td><td class="align-right"><strong>%s</strong></td></tr>', 
 				__( "Gesamtbetrag", "mp" ), 
-				$cart->total( true ) 
+				$is_network_suborder ? mp_format_currency( '', (float) $order->get_meta( 'mp_order_total', 0 ) ) : $cart->total( true )
 			);
 
 			$order_details = apply_filters( 'mp_pdf_invoice/order_details/after_total', $order_details, $order, $cart, $type );
