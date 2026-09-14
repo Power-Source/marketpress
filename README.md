@@ -4,7 +4,7 @@
 
 **Die vollständige E-Commerce- und Marketplace-Lösung für ClassicPress und Multisite.**
 
-[![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.1-03768e.svg)](https://www.classicpress.net/)
+[![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.2-03768e.svg)](https://www.classicpress.net/)
 [![PHP](https://img.shields.io/badge/PHP-%3E%3D%208.0-777bb4.svg)](https://www.php.net/)
 [![Lizenz](https://img.shields.io/badge/Lizenz-GPL--3.0--or--later-2ea44f.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![Release](https://img.shields.io/github/v/release/Power-Source/marketpress?display_name=tag)](https://github.com/Power-Source/marketpress/releases/latest)

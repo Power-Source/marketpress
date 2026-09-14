@@ -96,16 +96,25 @@
 	}
 
 	var initShortcodeModal = function() {
-		$('body').on('click', '.mp-shortcode-builder-button', function(){
-			var $form = $('#mp-shortcode-builder-form');
-			if ($form.length === 0) return;
-			var $modalForm = $($form[0].cloneNode(true));
-			var $modalRoot = $('<div class="mp-shortcode-builder-modal-root"></div>').append($modalForm);
+		$('body').on('click', '.mp-shortcode-builder-button', function(e){
+			e.preventDefault();
 
-			bindShortCodeBuilder($modalForm);
-			initSelect2($modalForm);
-			initProductSearchField($modalForm);
-			initToolTips($modalForm);
+			if (typeof window.basicLightbox === 'undefined') {
+				return;
+			}
+
+			var $form = $('#mp-shortcode-builder-form');
+			if ($form.length === 0) {
+				return;
+			}
+
+			var $placeholder = $('<span class="mp-shortcode-builder-placeholder"></span>').insertBefore($form);
+			var $modalRoot = $('<div class="mp-shortcode-builder-modal-root"></div>').append($form.detach());
+
+			bindShortCodeBuilder($form);
+			initSelect2($form);
+			initProductSearchField($form);
+			initToolTips($form);
 
 			shortcodeModalInstance = basicLightbox.create($modalRoot[0], {
 				onShow: function(instance) {
@@ -122,6 +131,9 @@
 					});
 
 					$instanceForm.find('[name="shortcode"]').trigger('change');
+				},
+				onClose: function() {
+					$placeholder.replaceWith($form.detach());
 				}
 			});
 			shortcodeModalInstance.show();
@@ -160,6 +172,20 @@
 	var initProductSearchField = function($context) {
 		$context = $context || $(document);
 		var selects = $context[0].querySelectorAll('select.mp-select-product');
+		var requestProducts = function(search) {
+			return new Promise(function(resolve) {
+				$.get(MP_ShortCode_Builder.ajax_url, {
+					action: 'mp_shortcode_builder_search_products',
+					search_term: search,
+					per_page: 20
+				}).done(function(response) {
+					resolve(response && response.posts ? response.posts : []);
+				}).fail(function() {
+					resolve([]);
+				});
+			});
+		};
+
 		selects.forEach(function(el) {
 			if (typeof SlimSelect !== 'undefined' && !el.slimSelect) {
 				el.slimSelect = new SlimSelect({
@@ -167,7 +193,26 @@
 					placeholder: (typeof MP_ShortCode_Builder !== 'undefined' && MP_ShortCode_Builder.select_product) ? MP_ShortCode_Builder.select_product : '',
 					allowDeselect: true,
 					showSearch: true,
-					closeOnSelect: true
+					closeOnSelect: true,
+					events: {
+						afterOpen: function() {
+							if (el.dataset.mpProductsLoaded || typeof MP_ShortCode_Builder === 'undefined') {
+								return;
+							}
+
+							el.dataset.mpProductsLoaded = '1';
+							requestProducts('').then(function(products) {
+								el.slimSelect.setData(products);
+							});
+						},
+						search: function(search) {
+							if (!search || search.length < 2 || typeof MP_ShortCode_Builder === 'undefined') {
+								return [];
+							}
+
+							return requestProducts(search);
+						}
+					}
 				});
 			}
 		});

@@ -1441,9 +1441,18 @@ public $content_tabs = array();
 
 		if ( abs( $amount ) < 0.00001 ) {
 			$free_price_text = trim( (string) mp_get_setting( 'price_text_free', '' ) );
-			if ( $free_price_text !== '' ) {
-				return esc_html( $free_price_text );
+			if ( '' === $free_price_text ) {
+				$setting_key     = $this->is_download() ? 'btn_text_free_download' : 'btn_text_free';
+				$free_price_text = trim( (string) mp_get_setting( $setting_key, '' ) );
 			}
+
+			if ( '' === $free_price_text ) {
+				$free_price_text = $this->is_download()
+					? __( 'Kostenloser Download', 'mp' )
+					: __( 'Kostenlos', 'mp' );
+			}
+
+			return esc_html( $free_price_text );
 		}
 
 		return mp_format_currency( '', $amount );

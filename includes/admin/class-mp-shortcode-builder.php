@@ -221,9 +221,9 @@ class MP_Shortcode_Builder {
 		<div id="mp-shortcode-builder" style="display:none">
 			<form id="mp-shortcode-builder-form">
 				<h3><?php _e( 'E-Commerce-Shortcode', 'mp' ); ?></h3>
-				<strong><?php _e( 'Was moechtest du tun?', 'mp' ); ?></strong><br />
+				<strong><?php _e( 'Was möchtest du tun?', 'mp' ); ?></strong><br />
 				<select name="shortcode">
-					<option value=""><?php _e( 'Aktion auswaehlen', 'mp' ); ?></option>
+					<option value=""><?php _e( 'Aktion auswählen', 'mp' ); ?></option>
 					<?php foreach ( $shortcodes as $shortcode => $label ) : ?>
 						<option value="<?php echo esc_attr( $shortcode ); ?>"><?php echo '[' . $shortcode . '] ' . $label; ?></option>
 					<?php endforeach; ?>
@@ -935,19 +935,21 @@ class MP_Shortcode_Builder {
 		?>
 		<table id="mp-product-shortcode" class="form-table" style="display:none">
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Die ID des anzuzeigenden Produkts.', 'mp' ); ?></span></span> product_id</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Wähle das Produkt aus, das angezeigt werden soll.', 'mp' ); ?></span></span> <?php esc_html_e( 'Produkt-ID', 'mp' ); ?></th>
 				<td>
-					<input type="text" name="product_id" data-default="" class="mp-select-product" />
+					<select name="product_id" data-default="" class="mp-select-product" data-placeholder="<?php echo esc_attr__( 'Produkt suchen', 'mp' ); ?>">
+						<option value=""></option>
+					</select>
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Ob der Produkttitel angezeigt werden soll.', 'mp' ); ?></span></span> title</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Ob der Produkttitel angezeigt werden soll.', 'mp' ); ?></span></span> <?php esc_html_e( 'Titel', 'mp' ); ?></th>
 				<td>
 					<input type="checkbox" name="title" data-default="0" value="1" />
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Ob und welche Art von Inhalt angezeigt werden soll.', 'mp' ); ?></span></span> content</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Ob und welche Art von Inhalt angezeigt werden soll.', 'mp' ); ?></span></span> <?php esc_html_e( 'Inhalt', 'mp' ); ?></th>
 				<td>
 					<select name="content" data-default="full">
 						<option value="0"><?php _e( 'Keine', 'mp' ); ?></option>
@@ -957,7 +959,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Ob und in welchem Kontext die Bildgroesse angezeigt werden soll.', 'mp' ); ?></span></span> image</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Ob und in welchem Kontext die Bildgroesse angezeigt werden soll.', 'mp' ); ?></span></span> <?php esc_html_e( 'Bild', 'mp' ); ?></th>
 				<td>
 					<select name="image" data-default="single">
 						<option value="0"><?php _e( 'Keine', 'mp' ); ?></option>
@@ -967,7 +969,7 @@ class MP_Shortcode_Builder {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Ob Produkt-Metadaten (z. B. Preis, Kaufen-Button) angezeigt werden sollen.', 'mp' ); ?></span></span> meta</th>
+				<th scope="row"><span class="mp-tooltip dashicons dashicons-editor-help"><span><?php _e( 'Ob Produkt-Metadaten (z. B. Preis, Kaufen-Button) angezeigt werden sollen.', 'mp' ); ?></span></span> <?php esc_html_e( 'Produktdetails', 'mp' ); ?></th>
 				<td>
 					<input type="checkbox" name="meta" data-default="0" value="1" />
 				</td>
@@ -1464,7 +1466,7 @@ class MP_Shortcode_Builder {
 	 */
 	public function enqueue_styles_scripts() {
 		if ( isset( $_GET['page'] ) ) {
-			$page = isset( $_GET['page'] );
+			$page = sanitize_key( wp_unslash( $_GET['page'] ) );
 		} else {
 			$page = '';
 		}
@@ -1485,10 +1487,20 @@ class MP_Shortcode_Builder {
 			|| ( isset( $_GET['post_type'] ) && ($_GET['post_type'] == 'mp_coupon' || $_GET['post_type'] == 'mp_order' || $_GET['post_type'] == 'product' || $_GET['post_type'] == 'page') ) 
 			|| ( isset( $screenpage->post_type ) && ( $screenpage->post_type == "product" || $screenpage->post_type == "incsub_event" || $screenpage->post_type == "post" || $screenpage->post_type == "mp_order" || $screenpage->post_type == "mp_coupon" || $screenpage->post_type == "page") ) )  {
 
-			   wp_enqueue_script( 'mp-shortcode-builder', mp_plugin_url( 'includes/admin/ui/js/shortcode-builder.js' ), array(), MP_VERSION );
-		wp_localize_script( 'mp-shortcode-builder', 'MP_ShortCode_Builder', array(
-			'select_product' => __( 'Produkt auswaehlen', 'mp' ),
-		) );		}
+			wp_enqueue_style( 'basiclightbox' );
+			wp_enqueue_style( 'mp-slim-select' );
+			wp_enqueue_script(
+				'mp-shortcode-builder',
+				mp_plugin_url( 'includes/admin/ui/js/shortcode-builder.js' ),
+				array( 'jquery', 'basiclightbox', 'mp-slim-select' ),
+				filemtime( mp_plugin_dir( 'includes/admin/ui/js/shortcode-builder.js' ) ),
+				true
+			);
+			wp_localize_script( 'mp-shortcode-builder', 'MP_ShortCode_Builder', array(
+				'select_product' => __( 'Produkt auswaehlen', 'mp' ),
+				'ajax_url'       => admin_url( 'admin-ajax.php' ),
+			) );
+		}
 	}
 
 	/**

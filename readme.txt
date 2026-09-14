@@ -4,8 +4,8 @@ Tags: E-commerce, ecommerce, storefront, sell, store, shopping, cart, payment ga
 Requires at least: 4.9
 Requires PHP: 8.0
 Tested up to: 7.1.0
-ClassicPress: 2.7.1
-Stable tag: 1.1.3
+ClassicPress: 2.7.2
+Stable tag: 1.1.4
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -87,6 +87,10 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 = 1.1.4 =
 * Fix: Die Währungssymbole im Netzwerk-Admin werden beim Wechsel der Netzwerkwährung sofort aktualisiert, ohne dass die Einstellungen zuvor gespeichert werden müssen.
 * Fix: Leere Netzwerk-Währungseinstellungen verwenden wieder sinnvolle Standardwerte für Währungssymbol, Preisformat und Dezimalstellen.
+* Fix: Der Shortcode-Builder lädt seine JavaScript-Abhängigkeiten jetzt zuverlässig und verwendet dateibasierte Versionsparameter, damit Live-Deployments nicht durch alte Browser- oder CDN-Caches blockiert werden.
+* Verbesserung: Der Shortcode-Builder öffnet schneller, da das Formular nicht mehr bei jedem Klick vollständig geklont wird; die Produktauswahl ist übersetzbar, durchsuchbar und lädt Treffer paginiert nach.
+* Fix: Die Produktsuche im Shortcode-Builder gibt ein SlimSelect-kompatibles Promise zurück und funktioniert dadurch auch in der Live-Umgebung zuverlässig.
+* Fix: Kostenlose Produkte zeigen im Frontend den individuellen Preistext oder das passende Gratis-/Gratis-Download-Label statt `0,00`; die Standardtexte der Kaufen-Buttons sind in den Darstellungs-Einstellungen vorausgefüllt.
 
 = 1.1.3 =
 * Security: Warenkorb-Ausgaben gegen DOM-basierte HTML-Neuinterpretation gehaertet; dynamische Texte werden nicht mehr unbeabsichtigt als HTML verarbeitet.
