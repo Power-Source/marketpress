@@ -83,7 +83,7 @@ class MP_Shortcode_Builder {
 		$data	 = array( 'posts' => array(), 'posts_per_page' => $per_page, 'total' => $query->found_posts );
 
 		while ( $query->have_posts() ) : $query->the_post();
-			$data[ 'posts' ][] = array( 'id' => get_the_ID(), 'text' => get_the_title() );
+			$data[ 'posts' ][] = array( 'value' => (string) get_the_ID(), 'text' => get_the_title() );
 		endwhile;
 
 		wp_send_json( $data );

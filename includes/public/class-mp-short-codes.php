@@ -480,6 +480,10 @@ class MP_Short_Codes {
 		), $atts );
 
 		$atts	 = $this->_parse_atts( $atts );
+		if ( ! is_numeric( $atts['product_id'] ) && '' !== $atts['product_id'] ) {
+			$product = get_page_by_title( $atts['product_id'], OBJECT, MP_Product::get_post_type() );
+			$atts['product_id'] = $product ? $product->ID : $atts['product_id'];
+		}
 
 		extract( $atts );
 

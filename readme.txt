@@ -5,7 +5,7 @@ Requires at least: 4.9
 Requires PHP: 8.0
 Tested up to: 7.1.0
 ClassicPress: 2.7.2
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -83,6 +83,12 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 
 == Changelog ==
+
+= 1.1.5 =
+* Fix: Unbenutzte Tom-Select-Assets werden nicht mehr global im Admin geladen; dadurch beeinflussen deren CSS-Variablen das Dashboard nicht mehr.
+* Fix: Die basicLightbox-Abhaengigkeit des Shortcode-Builders wird im Admin wieder zuverlaessig geladen.
+* Fix: Die Produktsuche im Shortcode-Builder liefert SlimSelect-kompatible Produkt-IDs, sodass eingefuegte `[mp_product]`-Shortcodes wieder das gewaehlte Produkt anzeigen.
+* Fix: Bereits mit einem Produkttitel statt einer ID erzeugte `[mp_product]`-Shortcodes werden kompatibel auf das zugehoerige Produkt aufgeloest.
 
 = 1.1.4 =
 * Fix: Die Währungssymbole im Netzwerk-Admin werden beim Wechsel der Netzwerkwährung sofort aktualisiert, ohne dass die Einstellungen zuvor gespeichert werden müssen.
