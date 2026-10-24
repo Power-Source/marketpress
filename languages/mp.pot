@@ -2,9 +2,9 @@
 # This file is distributed under the same license as the PS MarketPress package.
 msgid ""
 msgstr ""
-"Project-Id-Version: PS MarketPress 1.1.4\n"
+"Project-Id-Version: PS MarketPress 1.1.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/marketpress\n"
-"POT-Creation-Date: 2026-09-14 14:59:55+00:00\n"
+"POT-Creation-Date: 2026-10-24 16:11:19+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -37,7 +37,7 @@ msgstr ""
 #: includes/admin/class-mp-orders-admin.php:1586
 #: includes/common/class-mp-withdrawal.php:692
 #: includes/multisite/class-mp-multisite.php:2326
-#: includes/multisite/class-mp-settlement.php:873
+#: includes/multisite/class-mp-settlement.php:878
 msgid "Status"
 msgstr ""
 
@@ -1057,7 +1057,7 @@ msgstr ""
 #: includes/common/payment-gateways/stripe.php:414
 #: includes/common/payment-gateways/stripe.php:532
 #: includes/multisite/class-mp-multisite.php:2325
-#: includes/multisite/class-mp-settlement.php:873 marketpress.php:343
+#: includes/multisite/class-mp-settlement.php:878 marketpress.php:343
 msgid "Bestellung"
 msgstr ""
 
@@ -1500,55 +1500,55 @@ msgstr ""
 msgid "Download &raquo;"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:360
+#: includes/admin/class-mp-admin.php:334
 msgid "Creating variations, please wait..."
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:362
+#: includes/admin/class-mp-admin.php:336
 msgid "Update prices for %s product variants"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:363
+#: includes/admin/class-mp-admin.php:337
 msgid "Update price for %s product variant"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:364
+#: includes/admin/class-mp-admin.php:338
 msgid "Update inventory for %s product variants"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:365
+#: includes/admin/class-mp-admin.php:339
 msgid "Update inventory for %s product variant"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:366
+#: includes/admin/class-mp-admin.php:340
 msgid "Delete %s product variants"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:367
+#: includes/admin/class-mp-admin.php:341
 msgid "Delete %s product variant"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:369
+#: includes/admin/class-mp-admin.php:343
 msgid "Valid number is required"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:370
+#: includes/admin/class-mp-admin.php:344
 msgid "Input is required"
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:371
+#: includes/admin/class-mp-admin.php:345
 msgid "Please wait...saving in progress..."
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:477
+#: includes/admin/class-mp-admin.php:451
 msgid "Custom field updated."
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:478
+#: includes/admin/class-mp-admin.php:452
 msgid "Custom field deleted."
 msgstr ""
 
-#: includes/admin/class-mp-admin.php:482
+#: includes/admin/class-mp-admin.php:456
 msgid "Page saved."
 msgstr ""
 
@@ -2333,22 +2333,22 @@ msgid "Muell"
 msgstr ""
 
 #: includes/admin/class-mp-orders-admin.php:1621
-#: includes/multisite/class-mp-settlement.php:938
+#: includes/multisite/class-mp-settlement.php:943
 msgid "Noch offen"
 msgstr ""
 
 #: includes/admin/class-mp-orders-admin.php:1622
-#: includes/multisite/class-mp-settlement.php:939
+#: includes/multisite/class-mp-settlement.php:944
 msgid "Zurueckgehalten"
 msgstr ""
 
 #: includes/admin/class-mp-orders-admin.php:1623
-#: includes/multisite/class-mp-settlement.php:940
+#: includes/multisite/class-mp-settlement.php:945
 msgid "Freigabefaehig"
 msgstr ""
 
 #: includes/admin/class-mp-orders-admin.php:1624
-#: includes/multisite/class-mp-settlement.php:941
+#: includes/multisite/class-mp-settlement.php:946
 msgid "Freigegeben"
 msgstr ""
 
@@ -3077,7 +3077,7 @@ msgstr ""
 #: includes/admin/class-mp-setup-wizard.php:418
 #: includes/admin/store-settings/class-mp-store-settings-shipping.php:117
 #: includes/multisite/class-mp-multisite.php:1362
-#: includes/multisite/class-mp-settlement.php:256
+#: includes/multisite/class-mp-settlement.php:248
 #: includes/psource-metaboxes/fields/class-psource-field-custom-variations.php:112
 msgid "Alle"
 msgstr ""
@@ -4001,7 +4001,7 @@ msgstr ""
 #: includes/common/template-functions.php:1017
 #: includes/multisite/class-mp-multisite.php:2324
 #: includes/multisite/class-mp-multisite.php:2579
-#: includes/multisite/class-mp-settlement.php:873
+#: includes/multisite/class-mp-settlement.php:878
 msgid "Shop"
 msgstr ""
 
@@ -6308,10 +6308,10 @@ msgstr ""
 #: includes/common/class-mp-withdrawal.php:641
 #: includes/common/payment-gateways/paypal-marketplace/class-mp-gateway-paypal-marketplace.php:375
 #: includes/multisite/class-mp-admin-multisite.php:1204
-#: includes/multisite/class-mp-settlement.php:237
-#: includes/multisite/class-mp-settlement.php:268
-#: includes/multisite/class-mp-settlement.php:291
-#: includes/multisite/class-mp-settlement.php:1002
+#: includes/multisite/class-mp-settlement.php:229
+#: includes/multisite/class-mp-settlement.php:260
+#: includes/multisite/class-mp-settlement.php:296
+#: includes/multisite/class-mp-settlement.php:1007
 msgid "Keine Berechtigung."
 msgstr ""
 
@@ -6362,8 +6362,8 @@ msgid "In Prüfung"
 msgstr ""
 
 #: includes/common/class-mp-withdrawal.php:790
-#: includes/multisite/class-mp-settlement.php:953
-#: includes/multisite/class-mp-settlement.php:991
+#: includes/multisite/class-mp-settlement.php:958
+#: includes/multisite/class-mp-settlement.php:996
 msgid "Unbekannt"
 msgstr ""
 
@@ -10092,7 +10092,7 @@ msgid "Bestaetigt"
 msgstr ""
 
 #: includes/multisite/class-mp-multisite.php:2316
-#: includes/multisite/class-mp-settlement.php:942
+#: includes/multisite/class-mp-settlement.php:947
 msgid "Ausgezahlt"
 msgstr ""
 
@@ -10105,7 +10105,7 @@ msgid "Checkout"
 msgstr ""
 
 #: includes/multisite/class-mp-multisite.php:2328
-#: includes/multisite/class-mp-settlement.php:873
+#: includes/multisite/class-mp-settlement.php:878
 msgid "Auszahlung"
 msgstr ""
 
@@ -10211,153 +10211,157 @@ msgstr ""
 msgid "Flow-Kontext:"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:142
-#: includes/multisite/class-mp-settlement.php:143
-#: includes/multisite/class-mp-settlement.php:242
-#: includes/multisite/class-mp-settlement.php:252
+#: includes/multisite/class-mp-settlement.php:139
+#: includes/multisite/class-mp-settlement.php:140
+#: includes/multisite/class-mp-settlement.php:234
+#: includes/multisite/class-mp-settlement.php:244
 msgid "Auszahlungsfreigabe"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:156
-#: includes/multisite/class-mp-settlement.php:157
-#: includes/multisite/class-mp-settlement.php:272
+#: includes/multisite/class-mp-settlement.php:148
+#: includes/multisite/class-mp-settlement.php:149
+#: includes/multisite/class-mp-settlement.php:264
 msgid "Abrechnung"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:243
+#: includes/multisite/class-mp-settlement.php:235
 msgid ""
 "Die Auszahlungsfreigabe ist aktuell deaktiviert. Aktiviere sie in den "
 "Netzwerk-Einstellungen unter MarketPress."
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:253
+#: includes/multisite/class-mp-settlement.php:245
 msgid ""
 "Liste offener Auszahlungen, die zurueckgehalten oder freigegeben werden "
 "koennen."
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:255
+#: includes/multisite/class-mp-settlement.php:247
 msgid "Nur offene"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:274
-#: includes/multisite/class-mp-settlement.php:294
+#: includes/multisite/class-mp-settlement.php:266
+#: includes/multisite/class-mp-settlement.php:299
 msgid "Die Netzwerkabrechnung ist aktuell deaktiviert."
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:288
+#: includes/multisite/class-mp-settlement.php:268
+msgid "Abrechnung aller Shops im Netzwerk."
+msgstr ""
+
+#: includes/multisite/class-mp-settlement.php:293
 msgid "Bitte melde Dich an, um die Abrechnung zu sehen."
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:341
+#: includes/multisite/class-mp-settlement.php:346
 msgid "Bruttoumsatz:"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:342
+#: includes/multisite/class-mp-settlement.php:347
 msgid "Provision:"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:343
+#: includes/multisite/class-mp-settlement.php:348
 msgid "Offener Auszahlungsanspruch:"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:344
+#: includes/multisite/class-mp-settlement.php:349
 msgid "Ausgezahlt:"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:868
+#: includes/multisite/class-mp-settlement.php:873
 msgid "Keine offenen Auszahlungen zur Freigabe."
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:873
+#: includes/multisite/class-mp-settlement.php:878
 msgid "Grund"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:873
+#: includes/multisite/class-mp-settlement.php:878
 msgid "Brutto"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:873
+#: includes/multisite/class-mp-settlement.php:878
 msgid "Provision"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:873
+#: includes/multisite/class-mp-settlement.php:878
 msgid "Aktion"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:906
+#: includes/multisite/class-mp-settlement.php:911
 msgid "Zurueckhalten"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:908
+#: includes/multisite/class-mp-settlement.php:913
 msgid "Freigeben"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:915
+#: includes/multisite/class-mp-settlement.php:920
 msgid "Als ausgezahlt markieren"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:943
+#: includes/multisite/class-mp-settlement.php:948
 msgid "Rueckforderung erforderlich"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:967
+#: includes/multisite/class-mp-settlement.php:972
 msgid "Zahlung noch offen"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:968
+#: includes/multisite/class-mp-settlement.php:973
 msgid "Wartet auf Versandabschluss"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:969
+#: includes/multisite/class-mp-settlement.php:974
 msgid "Wartet auf Widerrufsfrist"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:970
+#: includes/multisite/class-mp-settlement.php:975
 msgid "Wartet auf Gewaehrleistungsfrist"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:971
+#: includes/multisite/class-mp-settlement.php:976
 msgid "Bereit zur Freigabe"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:972
+#: includes/multisite/class-mp-settlement.php:977
 msgid "Manuell zurueckgehalten"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:973
+#: includes/multisite/class-mp-settlement.php:978
 msgid "Manuell freigegeben"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:974
+#: includes/multisite/class-mp-settlement.php:979
 msgid "Manuell als ausgezahlt markiert"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:975
+#: includes/multisite/class-mp-settlement.php:980
 msgid "Rueckerstattet oder storniert"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:976
+#: includes/multisite/class-mp-settlement.php:981
 msgid "Rueckerstattung nach Auszahlung"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:977
+#: includes/multisite/class-mp-settlement.php:982
 msgid "Ungueltige Bestellung"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:978
+#: includes/multisite/class-mp-settlement.php:983
 msgid "Keine Shop-Aufteilung gefunden"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:979
+#: includes/multisite/class-mp-settlement.php:984
 msgid "Offener Einwand"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:980
+#: includes/multisite/class-mp-settlement.php:985
 msgid "Chargeback offen"
 msgstr ""
 
-#: includes/multisite/class-mp-settlement.php:981
+#: includes/multisite/class-mp-settlement.php:986
 msgid "Rueckerstattung offen"
 msgstr ""
 
@@ -11121,11 +11125,11 @@ msgstr ""
 msgid "product_id muss definiert sein"
 msgstr ""
 
-#: includes/public/class-mp-short-codes.php:636
+#: includes/public/class-mp-short-codes.php:640
 msgid "Unbegrenzter Vorrat"
 msgstr ""
 
-#: includes/public/class-mp-short-codes.php:639
+#: includes/public/class-mp-short-codes.php:643
 msgid "Nur noch %s auf Lager..."
 msgstr ""
 
@@ -11384,7 +11388,7 @@ msgid ""
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://psource.eimen.net/wiki/ps-marketpress-dokumentation/"
+msgid "https://psource.eimen.net/psource/ps-marketpress/"
 msgstr ""
 
 #. Description of the plugin/theme

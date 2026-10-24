@@ -42,11 +42,8 @@ class MP_Network_Settlement {
 
 		add_shortcode( 'mp_network_settlement_dashboard', array( $this, 'render_frontend_dashboard_shortcode' ) );
 
-		if ( is_admin() && ! is_network_admin() ) {
-			if ( mp_is_main_site() ) {
-				add_action( 'admin_menu', array( $this, 'add_main_menu' ) );
-			}
-			add_action( 'admin_menu', array( $this, 'add_shop_menu' ) );
+		if ( is_admin() && is_network_admin() ) {
+			add_action( 'network_admin_menu', array( $this, 'add_network_menu' ), 20 );
 		}
 
 		add_action( 'init', array( $this, 'redirect_direct_settlement_paths' ), 1 );
@@ -134,30 +131,25 @@ class MP_Network_Settlement {
 	}
 
 	/**
-	 * Main site admin menu.
+	 * Add settlement pages to the MarketPress network menu.
 	 */
-	public function add_main_menu() {
+	public function add_network_menu() {
 		add_submenu_page(
-			'store-settings',
+			MP_Admin_Multisite::NETWORK_MENU_SLUG,
 			__( 'Auszahlungsfreigabe', 'mp' ),
 			__( 'Auszahlungsfreigabe', 'mp' ),
-			$this->get_required_capability(),
+			'manage_network_options',
 			'store-settings-settlement',
 			array( $this, 'render_main_admin_page' )
 		);
-	}
 
-	/**
-	 * Add the read-only settlement account for the current shop.
-	 */
-	public function add_shop_menu() {
 		add_submenu_page(
-			'store-settings',
+			MP_Admin_Multisite::NETWORK_MENU_SLUG,
 			__( 'Abrechnung', 'mp' ),
 			__( 'Abrechnung', 'mp' ),
-			apply_filters( 'mp_store_settings_cap', 'manage_store_settings' ),
+			'manage_network_options',
 			'store-settings-settlement-account',
-			array( $this, 'render_shop_admin_page' )
+			array( $this, 'render_network_accounting_page' )
 		);
 	}
 
@@ -213,13 +205,17 @@ class MP_Network_Settlement {
 			'/store-settings-settlement',
 			'/wp-admin/store-settings-settlement',
 			'/wp-admin/network/network-settlement-moderation',
+			'/wp-admin/network/store-settings-settlement',
+			'/wp-admin/network/store-settings-settlement-account',
 		);
 
 		if ( ! in_array( $normalized_path, $bad_paths, true ) ) {
 			return;
 		}
 
-		$target = admin_url( 'admin.php?page=store-settings-settlement' );
+		$target = '/wp-admin/network/store-settings-settlement-account' === $normalized_path
+			? $this->get_network_accounting_url()
+			: $this->get_network_settlement_url();
 		if ( is_user_logged_in() ) {
 			wp_safe_redirect( $target, 302 );
 			exit;
@@ -252,8 +248,8 @@ class MP_Network_Settlement {
 		echo '<h1>' . esc_html__( 'Auszahlungsfreigabe', 'mp' ) . '</h1>';
 		echo '<p>' . esc_html__( 'Liste offener Auszahlungen, die zurueckgehalten oder freigegeben werden koennen.', 'mp' ) . '</p>';
 		echo '<p>';
-		echo '<a class="button" href="' . esc_url( admin_url( 'admin.php?page=store-settings-settlement&status=open' ) ) . '">' . esc_html__( 'Nur offene', 'mp' ) . '</a> ';
-		echo '<a class="button" href="' . esc_url( admin_url( 'admin.php?page=store-settings-settlement&status=all' ) ) . '">' . esc_html__( 'Alle', 'mp' ) . '</a>';
+		echo '<a class="button" href="' . esc_url( $this->get_network_settlement_url( array( 'status' => 'open' ) ) ) . '">' . esc_html__( 'Nur offene', 'mp' ) . '</a> ';
+		echo '<a class="button" href="' . esc_url( $this->get_network_settlement_url( array( 'status' => 'all' ) ) ) . '">' . esc_html__( 'Alle', 'mp' ) . '</a>';
 		echo '</p>';
 
 		echo $this->render_rows_table( $rows, true );
@@ -261,10 +257,10 @@ class MP_Network_Settlement {
 	}
 
 	/**
-	 * Render the settlement account for the current shop only.
+	 * Render the network-wide settlement ledger.
 	 */
-	public function render_shop_admin_page() {
-		if ( ! $this->current_user_can_view_shop_settlement() ) {
+	public function render_network_accounting_page() {
+		if ( ! $this->current_user_can_access_settlement() ) {
 			wp_die( esc_html__( 'Keine Berechtigung.', 'mp' ) );
 		}
 
@@ -273,9 +269,31 @@ class MP_Network_Settlement {
 		if ( ! mp_get_network_setting( 'advanced->settlement_enabled', 0 ) ) {
 			echo '<div class="notice notice-warning"><p>' . esc_html__( 'Die Netzwerkabrechnung ist aktuell deaktiviert.', 'mp' ) . '</p></div>';
 		} else {
-			echo $this->render_shop_settlement_dashboard( get_current_blog_id() );
+			echo '<p>' . esc_html__( 'Abrechnung aller Shops im Netzwerk.', 'mp' ) . '</p>';
+			echo $this->render_rows_table( $this->get_queue_rows( 'all' ), false );
 		}
 		echo '</div>';
+	}
+
+	/**
+	 * Build the canonical network-admin URL for settlement moderation.
+	 *
+	 * @param array $args Additional query arguments.
+	 * @return string
+	 */
+	private function get_network_settlement_url( $args = array() ) {
+		$url = network_admin_url( 'admin.php?page=store-settings-settlement' );
+
+		return empty( $args ) ? $url : add_query_arg( $args, $url );
+	}
+
+	/**
+	 * Build the canonical network-admin URL for the settlement ledger.
+	 *
+	 * @return string
+	 */
+	private function get_network_accounting_url() {
+		return network_admin_url( 'admin.php?page=store-settings-settlement-account' );
 	}
 
 	/**
@@ -426,7 +444,7 @@ class MP_Network_Settlement {
 			return;
 		}
 		$snapshot = $order->get_meta( 'mp_settlement_snapshot', array() );
-		if ( is_array( $snapshot ) && 'automatic' === mp_arr_get_value( 'settlement_mode', $snapshot, 'manual' ) ) {
+		if ( ! $this->is_manual_network_settlement_snapshot( $snapshot ) ) {
 			return;
 		}
 
@@ -480,7 +498,7 @@ class MP_Network_Settlement {
 	 */
 	private function calculate_shop_splits( MP_Order $order ) {
 		$snapshot = $order->get_meta( 'mp_settlement_snapshot', array() );
-		if ( is_array( $snapshot ) && ! empty( $snapshot['shops'] ) && is_array( $snapshot['shops'] ) ) {
+		if ( $this->is_manual_network_settlement_snapshot( $snapshot ) ) {
 			$splits = array();
 
 			foreach ( $snapshot['shops'] as $blog_id => $shop ) {
@@ -522,99 +540,21 @@ class MP_Network_Settlement {
 			return array_filter( $splits );
 		}
 
-		$cart = $order->get_cart();
-		if ( ! $cart instanceof MP_Cart ) {
-			return array();
-		}
+		return array();
+	}
 
-		$all_items = (array) $cart->get_all_items();
-		$all_items = array_filter( $all_items );
-		if ( empty( $all_items ) ) {
-			$all_items = array( get_current_blog_id() => (array) $cart->get_items() );
-		}
-
-		$order_total = (float) $order->get_meta( 'mp_order_total', 0 );
-		$shop_data   = array();
-		$total_base  = 0.0;
-
-		foreach ( $all_items as $blog_id => $items ) {
-			$blog_id = (int) $blog_id;
-			if ( empty( $items ) ) {
-				continue;
-			}
-
-			$current_blog_id = get_current_blog_id();
-			if ( $blog_id !== $current_blog_id ) {
-				switch_to_blog( $blog_id );
-			}
-
-			$subtotal               = 0.0;
-			$has_physical           = false;
-			$all_withdrawal_excl    = true;
-			$all_warranty_excl      = true;
-
-			foreach ( $items as $product_id => $qty ) {
-				$product = new MP_Product( (int) $product_id, $blog_id );
-				if ( ! method_exists( $product, 'exists' ) || ! $product->exists() ) {
-					continue;
-				}
-
-				$price = (float) $product->get_price( 'lowest' );
-				$qty   = max( 1, (int) $qty );
-				$subtotal += ( $price * $qty );
-
-				if ( ! $product->is_download() ) {
-					$has_physical = true;
-				}
-
-				if ( ! (bool) get_post_meta( (int) $product_id, 'mp_withdrawal_excluded', true ) ) {
-					$all_withdrawal_excl = false;
-				}
-
-				if ( ! (bool) get_post_meta( (int) $product_id, 'mp_warranty_excluded', true ) ) {
-					$all_warranty_excl = false;
-				}
-			}
-
-			if ( $blog_id !== $current_blog_id ) {
-				restore_current_blog();
-			}
-
-			if ( $subtotal <= 0 ) {
-				continue;
-			}
-
-			$shop_data[ $blog_id ] = array(
-				'base_subtotal'       => $subtotal,
-				'has_physical'        => $has_physical,
-				'no_withdrawal_rule'  => $all_withdrawal_excl,
-				'no_warranty_rule'    => $all_warranty_excl,
-			);
-			$total_base += $subtotal;
-		}
-
-		if ( empty( $shop_data ) ) {
-			return array();
-		}
-
-		$allocated = array();
-		$running   = 0.0;
-		$idx       = 0;
-		$count     = count( $shop_data );
-
-		foreach ( $shop_data as $blog_id => $data ) {
-			$idx ++;
-			if ( $idx === $count ) {
-				$gross = round( max( 0, $order_total - $running ), 2 );
-			} else {
-				$gross = $total_base > 0 ? round( $order_total * ( $data['base_subtotal'] / $total_base ), 2 ) : round( $order_total / $count, 2 );
-				$running += $gross;
-			}
-
-			$allocated[ $blog_id ] = array_merge( $data, array( 'gross_amount' => $gross ) );
-		}
-
-		return $allocated;
+	/**
+	 * Determine whether an order belongs to the manual network-gateway settlement flow.
+	 *
+	 * @param mixed $snapshot Settlement snapshot stored on the master order.
+	 * @return bool
+	 */
+	private function is_manual_network_settlement_snapshot( $snapshot ) {
+		return is_array( $snapshot )
+			&& ! empty( $snapshot['gateway_code'] )
+			&& ! empty( $snapshot['shops'] )
+			&& is_array( $snapshot['shops'] )
+			&& 'manual' === mp_arr_get_value( 'settlement_mode', $snapshot, 'manual' );
 	}
 
 	/**
@@ -856,8 +796,14 @@ class MP_Network_Settlement {
 		}
 
 		$where = empty( $conditions ) ? '' : 'WHERE ' . implode( ' AND ', $conditions );
-		$sql = "SELECT * FROM {$this->table_name} {$where} ORDER BY updated_at DESC LIMIT 300";
-		return (array) $wpdb->get_results( $sql, ARRAY_A );
+		$sql  = "SELECT * FROM {$this->table_name} {$where} ORDER BY updated_at DESC LIMIT 300";
+		$rows = (array) $wpdb->get_results( $sql, ARRAY_A );
+
+		return array_values( array_filter( $rows, function ( $row ) {
+			$order = new MP_Order( (int) $row['order_post_id'] );
+
+			return $order->exists() && $this->is_manual_network_settlement_snapshot( $order->get_meta( 'mp_settlement_snapshot', array() ) );
+		} ) );
 	}
 
 	/**
@@ -1006,7 +952,7 @@ class MP_Network_Settlement {
 		$decision = sanitize_key( (string) mp_get_get_value( 'decision', '' ) );
 
 		if ( ! in_array( $decision, array( 'hold', 'release', 'paid_out' ), true ) || ! $row_id ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=store-settings-settlement' ) );
+			wp_safe_redirect( $this->get_network_settlement_url() );
 			exit;
 		}
 
@@ -1018,7 +964,7 @@ class MP_Network_Settlement {
 			ARRAY_A
 		);
 		if ( ! is_array( $row ) || ( 'paid_out' === $decision && 'released' !== $row['status'] ) || ( 'release' === $decision && 'releasable' !== $row['status'] ) ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=store-settings-settlement' ) );
+			wp_safe_redirect( $this->get_network_settlement_url() );
 			exit;
 		}
 
@@ -1042,7 +988,7 @@ class MP_Network_Settlement {
 
 		$wpdb->update( $this->table_name, $payload, array( 'id' => $row_id ) );
 
-		wp_safe_redirect( admin_url( 'admin.php?page=store-settings-settlement' ) );
+		wp_safe_redirect( $this->get_network_settlement_url() );
 		exit;
 	}
 }

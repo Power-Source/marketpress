@@ -105,7 +105,7 @@ function mp_st_enqueue_scripts( $hook ) {
         return;
     }
 
-    wp_enqueue_script( 'chart-js',    'https://cdn.jsdelivr.net/npm/chart.js', [], null, true );
+    wp_enqueue_script( 'chart-js', plugins_url( 'chart.umd.min.js', __FILE__ ), [], '4.4.3', true );
     wp_enqueue_script( 'mp-stats-js', plugins_url( 'mp-stats.js', __FILE__ ), [ 'jquery', 'chart-js' ], null, true );
 
     wp_localize_script( 'mp-stats-js', 'mpStatsAjax', [

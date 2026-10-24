@@ -1,13 +1,16 @@
 # PS MarketPress
 
+**Deutsch** | [English](README.en.md)
+
+[![Version](https://img.shields.io/badge/Version-1.1.6-2271b1?style=flat-square)](readme.txt)
+![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4?style=flat-square&logo=php&logoColor=white)
+![WordPress](https://img.shields.io/badge/WordPress-bis%207.1.0-21759b?style=flat-square&logo=wordpress&logoColor=white)
+![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.4-03768e?style=flat-square)
+[![Lizenz](https://img.shields.io/badge/Lizenz-GPL--2.0--or--later-2ea44f?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
+
 ![PS MarketPress](ui/images/marketpress-icon.png)
 
 **Die vollständige E-Commerce- und Marketplace-Lösung für ClassicPress und Multisite.**
-
-[![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.2-03768e.svg)](https://www.classicpress.net/)
-[![PHP](https://img.shields.io/badge/PHP-%3E%3D%208.0-777bb4.svg)](https://www.php.net/)
-[![Lizenz](https://img.shields.io/badge/Lizenz-GPL--3.0--or--later-2ea44f.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
-[![Release](https://img.shields.io/github/v/release/Power-Source/marketpress?display_name=tag)](https://github.com/Power-Source/marketpress/releases/latest)
 
 PS MarketPress betreibt sowohl eigenständige Onlineshops als auch komplette Shop-Netzwerke. Produkte, Varianten, Bestellungen, Zahlungen, Versand, digitale Downloads und Kundenprozesse sind direkt enthalten. Im Multisite-Betrieb wird daraus eine zentrale Marketplace-Plattform mit globalem Warenkorb, Shopprofilen, Kundenhub, Provisionsabrechnung und gezielter Rechteverwaltung.
 

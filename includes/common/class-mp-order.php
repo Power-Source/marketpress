@@ -1192,7 +1192,11 @@ public $ID = null;
 				$network_gateways = array( $legacy_gateway => 1 );
 			}
 		}
-		if ( is_multisite() && $cart instanceof MP_Cart && $cart->is_global && ! empty( $network_gateways[ $gateway_code ] ) ) {
+		$uses_network_gateway = (bool) apply_filters(
+			'mp_gateway_api/use_network_global_gateway',
+			is_multisite() && $cart instanceof MP_Cart && $cart->is_global
+		);
+		if ( $uses_network_gateway && ! empty( $network_gateways[ $gateway_code ] ) ) {
 			$settlement_snapshot = $cart->get_settlement_snapshot( mp_arr_get_value( 'total', $payment_info, 0 ) );
 			$settlement_snapshot['gateway_code'] = $gateway_code;
 			$settlement_snapshot['settlement_mode'] = ( 'paypal_marketplace' === $gateway_code ) ? 'automatic' : 'manual';

@@ -4,7 +4,7 @@ Tags: E-commerce, ecommerce, storefront, sell, store, shopping, cart, payment ga
 Requires at least: 4.9
 Requires PHP: 8.0
 Tested up to: 7.1.0
-ClassicPress: 2.7.2
+ClassicPress: 2.7.4
 Stable tag: 1.1.5
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
@@ -83,6 +83,13 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 
 == Changelog ==
+
+= 1.1.6 =
+* Fix: Auszahlungsfreigabe und Netzwerk-Abrechnung werden im PS-MarketPress-Netzwerk-Dashboard registriert und sind für Netzwerk-Administratoren erreichbar.
+* Fix: Direkte Aufrufe der fehlerhaften Netzwerkpfade für Auszahlungsfreigabe und Abrechnung werden auf die zugehörigen `admin.php?page=…`-Seiten weitergeleitet, statt einen 404-Fehler auszulösen.
+* Fix: Die Netzwerk-Abrechnung berücksichtigt ausschließlich Bestellungen, die tatsächlich über ein manuelles, erlaubtes Netzwerk-Gateway abgewickelt wurden.
+* Fix: Bei aktiviertem Hybrid-Gateway-Routing erzeugen Einkäufe aus genau einem Subshop über dessen lokales Gateway keinen Netzwerk-Settlement-Snapshot und erscheinen nicht in der zentralen Auszahlungsfreigabe.
+* Fix: Der lokale Warenkorb-Fallback der Settlement-Logik wurde entfernt, damit Bestellungen aus Subshops mit eigenem Gateway nicht versehentlich in das Netzwerk-Ledger übernommen werden.
 
 = 1.1.5 =
 * Fix: Unbenutzte Tom-Select-Assets werden nicht mehr global im Admin geladen; dadurch beeinflussen deren CSS-Variablen das Dashboard nicht mehr.
@@ -236,4 +243,3 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 = 1.0.0 =
 * Release
-
