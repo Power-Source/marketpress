@@ -478,6 +478,26 @@ class MP_Setup_Wizard {
 					'action' => 'hide',
 				),
 			) );
+			$metabox->add_field( 'checkbox', array(
+				'name'    => 'legal[small_business]',
+				'label'   => array( 'text' => __( 'Kleinunternehmerregelung (§19 UStG)', 'mp' ) ),
+				'message' => __( 'Keine Umsatzsteuer ausweisen', 'mp' ),
+				'conditional' => array(
+					'name'   => 'base_country',
+					'value'  => 'DE',
+					'action' => 'show',
+				),
+			) );
+			$metabox->add_field( 'checkbox', array(
+				'name'    => 'legal[tax_exempt]',
+				'label'   => array( 'text' => __( 'Umsatzsteuerbefreiung', 'mp' ) ),
+				'message' => __( 'Keine Umsatzsteuer berechnen oder ausweisen', 'mp' ),
+				'conditional' => array(
+					'name'   => 'base_country',
+					'value'  => 'DE',
+					'action' => 'hide',
+				),
+			) );
 
 			// Create field for each canadian province
 			foreach ( mp()->provinces['CA'] as $key => $label ) {

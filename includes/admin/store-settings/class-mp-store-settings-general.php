@@ -52,6 +52,7 @@ class MP_Store_Settings_General {
 		add_action( 'psource_field/print_scripts/base_country', array( &$this, 'update_states_dropdown' ) );
 		add_action( 'psource_field/print_scripts/currency', array( &$this, 'update_currency_symbol' ) );
 		add_action( 'psource_metabox/after_settings_metabox_saved', array( &$this, 'update_product_post_type' ) );
+		add_action( 'psource_metabox/after_settings_metabox_saved', array( &$this, 'enforce_tax_exemption_settings' ) );
 		add_action( 'init', array( &$this, 'init_metaboxes' ) );
 
 		add_filter( 'psource_field/format_value/tax[rate]', array( &$this, 'format_tax_rate_value' ), 10, 2 );
@@ -70,9 +71,9 @@ class MP_Store_Settings_General {
 	 * @access public
 	 */
 	public function init_metaboxes() {
-		$this->init_legal_settings(); 
-		$this->init_withdrawal_settings();
 		$this->init_location_settings();
+		$this->init_legal_settings();
+		$this->init_withdrawal_settings();
 		$this->init_tax_settings();
 		if( ! is_multisite() || ! mp_cart()->is_global ) $this->init_currency_settings();
 		$this->init_digital_settings();
@@ -107,6 +108,46 @@ class MP_Store_Settings_General {
 
 		$wpdb->update( $wpdb->posts, array( 'post_type' => $new_product_post_type ), array( 'post_type' => $old_product_post_type ) );
 		update_option( 'mp_flush_rewrites', 1 );
+	}
+
+	/**
+	 * Enforce tax-free settings for the selected legal tax regime.
+	 *
+	 * @param PSOURCE_Metabox $metabox Settings metabox.
+	 */
+	public function enforce_tax_exemption_settings( $metabox ) {
+		if ( empty( $metabox->args['option_name'] ) || 'mp_settings' !== $metabox->args['option_name'] ) {
+			return;
+		}
+
+		$settings  = (array) get_option( 'mp_settings', array() );
+		$legal     = isset( $settings['legal'] ) ? (array) $settings['legal'] : array();
+		$country   = isset( $settings['base_country'] ) ? (string) $settings['base_country'] : '';
+		$is_exempt = ( 'DE' === $country && ! empty( $legal['small_business'] ) ) || ( 'DE' !== $country && ! empty( $legal['tax_exempt'] ) );
+
+		if ( 'DE' !== $country ) {
+			$settings['legal']['small_business'] = 0;
+		}
+
+		if ( $is_exempt ) {
+			$settings['tax'] = array_merge( isset( $settings['tax'] ) ? (array) $settings['tax'] : array(), array(
+				'rate'          => 0,
+				'tax_shipping'  => 0,
+				'tax_inclusive' => 0,
+				'include_tax'   => 0,
+				'tax_label'     => 0,
+				'tax_digital'   => 0,
+			) );
+
+			if ( 'DE' === $country && empty( $settings['legal']['custom_note'] ) ) {
+				$settings['legal']['custom_note'] = __( 'Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.', 'mp' );
+			}
+			if ( 'DE' !== $country && ! empty( $settings['legal']['tax_exempt_note'] ) ) {
+				$settings['legal']['custom_note'] = sanitize_textarea_field( $settings['legal']['tax_exempt_note'] );
+			}
+		}
+
+		update_option( 'mp_settings', $settings );
 	}
 
 	/**
@@ -701,6 +742,31 @@ class MP_Store_Settings_General {
 			'name'    => 'legal[small_business]',
 			'label'   => array( 'text' => __( 'Kleinunternehmerregelung (§19 UStG)', 'mp' ) ),
 			'message' => __( 'Ich bin Kleinunternehmer gemäß §19 UStG (keine Umsatzsteuer ausgewiesen)', 'mp' ),
+			'conditional' => array(
+				'name'   => 'base_country',
+				'value'  => 'DE',
+				'action' => 'show',
+			),
+		) );
+		$metabox->add_field( 'checkbox', array(
+			'name'    => 'legal[tax_exempt]',
+			'label'   => array( 'text' => __( 'Umsatzsteuerbefreiung', 'mp' ) ),
+			'message' => __( 'Keine Umsatzsteuer berechnen oder ausweisen', 'mp' ),
+			'conditional' => array(
+				'name'   => 'base_country',
+				'value'  => 'DE',
+				'action' => 'hide',
+			),
+		) );
+		$metabox->add_field( 'textarea', array(
+			'name'  => 'legal[tax_exempt_note]',
+			'label' => array( 'text' => __( 'Hinweis zur Umsatzsteuerbefreiung', 'mp' ) ),
+			'desc'  => __( 'Gib den rechtlich erforderlichen Hinweis für Rechnungen in Deinem Basisland ein.', 'mp' ),
+			'conditional' => array(
+				'name'   => 'legal[tax_exempt]',
+				'value'  => '1',
+				'action' => 'show',
+			),
 		) );
 		$metabox->add_field( 'textarea', array(
 			'name'  => 'legal[custom_note]',
