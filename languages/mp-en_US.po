@@ -1617,7 +1617,7 @@ msgstr "Unbegrenzt"
 
 #: includes/admin/class-mp-ajax.php:286
 msgid "Richte einen Verkauf für dieses Produkt ein"
-msgstr "Select One"
+msgstr "Set up a sale for this product"
 
 #: includes/admin/class-mp-ajax.php:289
 msgid "Gib den Verkaufspreis ein"
@@ -1625,7 +1625,7 @@ msgstr "Gib den Verkaufspreis ein"
 
 #: includes/admin/class-mp-ajax.php:290
 msgid "Prozentualer Rabatt"
-msgstr "Select One"
+msgstr "Discount percentage"
 
 #: includes/admin/class-mp-ajax.php:291
 #: includes/admin/class-mp-products-admin.php:1739
@@ -1642,7 +1642,7 @@ msgstr "Enddatum (falls zutreffend)"
 #: includes/admin/class-mp-ajax.php:304
 #: includes/admin/class-mp-products-admin.php:1749
 msgid "Steuern berechnen (Sondertarif)"
-msgstr "Select One"
+msgstr "Apply a special tax rate"
 
 #: includes/admin/class-mp-ajax.php:307
 #: includes/admin/class-mp-products-admin.php:2193
@@ -2648,7 +2648,7 @@ msgstr "Changes saved successfully"
 #: includes/admin/class-mp-products-admin.php:1534
 #: includes/common/class-mp-product.php:3018
 msgid "Verwandte Produkte"
-msgstr "Sale Price (if applicable)"
+msgstr "Related products"
 
 #: includes/admin/class-mp-products-admin.php:1537
 msgid "Wenn Du möchtest, kannst Du bestimmte verwandte Produkte auswählen, anstatt die von PS MarketPress generierten zu verwenden"
@@ -2660,11 +2660,11 @@ msgstr "Sale Price (if applicable)"
 
 #: includes/admin/class-mp-products-admin.php:1561
 msgid "Empfohlenes Produkt"
-msgstr "Sale Price (if applicable)"
+msgstr "Featured product"
 
 #: includes/admin/class-mp-products-admin.php:1568
 msgid "Ist empfohlen?"
-msgstr "Ist empfohlen?"
+msgstr "Feature this product"
 
 #: includes/admin/class-mp-products-admin.php:1581
 msgid "Produkttyp %1$s(Physisches Produkt, Digital, etc)%2$s"
@@ -2713,7 +2713,7 @@ msgstr "Sale Price (if applicable)"
 
 #: includes/admin/class-mp-products-admin.php:1653
 msgid "%1$sPreis, Inventar & Varianten%2$s %3$sPreis festlegen, Inventar verwalten und Produktvarianten erstellen (falls für Ihr Produkt geeignet).%2$s"
-msgstr "%1$sProduct Images%2$s %3$sAdd images of the product. The first image on the list is the featured image for this product (you can reorder images on the list)%2$s"
+msgstr "%1$sPrice, inventory & variations%2$s %3$sSet prices, manage inventory, and create product variations when needed.%2$s"
 
 #: includes/admin/class-mp-products-admin.php:1662
 msgid "Gib die Artikelnummer (SKU) ein"
@@ -2729,21 +2729,21 @@ msgstr "This product has a multiple variations %1$s(e.g. Multiple colors, sizes)
 
 #: includes/admin/class-mp-products-admin.php:1697
 msgid "Verkauf für dieses Produkt einrichten"
-msgstr "Sale Price (if applicable)"
+msgstr "Set up a sale for this product"
 
 #: includes/admin/class-mp-products-admin.php:1718
 msgid "Gib den Angebotspreis ein"
-msgstr "Gib den Angebotspreis ein"
+msgstr "Enter the sale price"
 
 #: includes/admin/class-mp-products-admin.php:1775
 msgid "Wenn Du möchtest, dass für dieses Produkt ein besonderer Steuersatz gilt, gib ihn hier ein. Wenn Du das „%“-Symbol weglässt, wird der Preis als fester Betrag für jedes dieser Produkte im Warenkorb des Benutzers berechnet."
-msgstr "This is a unique product without variations"
+msgstr "Enter a special tax rate for this product. Without a % sign, the value is charged as a fixed amount for each product in the customer's cart."
 
 #: includes/admin/class-mp-products-admin.php:1786
 #: includes/admin/class-mp-products-admin.php:2199
 #: includes/admin/class-mp-products-admin.php:2519
 msgid "Bitte gib einen gültigen Steuersatz ein"
-msgstr "Sale Price (if applicable)"
+msgstr "Enter a valid tax rate"
 
 #: includes/admin/class-mp-products-admin.php:1799
 msgid "Versand berechnen"
@@ -2779,19 +2779,19 @@ msgstr "Unzen"
 
 #: includes/admin/class-mp-products-admin.php:1850
 msgid "Zusätzliche Versandkosten %1$s(if applicable)%2$s"
-msgstr "This product has a multiple variations %1$s(e.g. Multiple colors, sizes)%2$s"
+msgstr "Additional shipping cost %1$s(optional)%2$s"
 
 #: includes/admin/class-mp-products-admin.php:1861
 msgid "Produktbestand verfolgen"
-msgstr "Sale Price (if applicable)"
+msgstr "Track product inventory"
 
 #: includes/admin/class-mp-products-admin.php:1912
 msgid "Erlaube den Kauf dieses Produkts, auch wenn es nicht auf Lager ist"
-msgstr "Sale Price (if applicable)"
+msgstr "Allow purchases when this product is out of stock"
 
 #: includes/admin/class-mp-products-admin.php:1925
 msgid "Dies ist ein einzigartiges Produkt ohne Variationen"
-msgstr "Sale Price (if applicable)"
+msgstr "This is a unique product without variations"
 
 #: includes/admin/class-mp-products-admin.php:1926
 msgid "Dieses Produkt hat mehrere Variationen %1$s(z.B. Mehrere Farben, Größen)%2$s"
@@ -2803,11 +2803,11 @@ msgstr "%3$sAdd variations for%2$s %1$sProduct%2$s"
 
 #: includes/admin/class-mp-products-admin.php:1956
 msgid "Füge Variationen für dieses Produkt hinzu. z.B. Wenn Du T-Shirts verkaufst, kannst Du Farb- und Größenvariationen erstellen"
-msgstr "Sale Price (if applicable)"
+msgstr "Add variations for this product, for example color and size options for a T-shirt."
 
 #: includes/admin/class-mp-products-admin.php:1973
 msgid "Wähle eine Datei"
-msgstr "Sale Price (if applicable)"
+msgstr "Select a file"
 
 #: includes/admin/class-mp-products-admin.php:1992
 msgid "Externer Link"
@@ -10929,4 +10929,3 @@ msgstr "Edit Order"
 msgctxt "mp_order"
 msgid "Neu hinzufügen"
 msgstr "Add New"
-

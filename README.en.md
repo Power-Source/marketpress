@@ -2,7 +2,7 @@
 
 [Deutsch](README.md) | **English**
 
-[![Version](https://img.shields.io/badge/Version-1.1.6-2271b1?style=flat-square)](readme.txt)
+[![Version](https://img.shields.io/badge/Version-1.1.7-2271b1?style=flat-square)](readme.txt)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4?style=flat-square&logo=php&logoColor=white)
 ![WordPress](https://img.shields.io/badge/WordPress-up%20to%207.1.0-21759b?style=flat-square&logo=wordpress&logoColor=white)
 ![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.4-03768e?style=flat-square)

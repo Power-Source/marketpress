@@ -5,7 +5,7 @@ Requires at least: 4.9
 Requires PHP: 8.0
 Tested up to: 7.1.0
 ClassicPress: 2.7.4
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -83,6 +83,11 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 
 == Changelog ==
+
+= 1.1.7 =
+* Fix: Die Beschriftungen im Produkteditor und in dessen Sidebar sind wieder eindeutig; Angebot, Sondersteuer, Versand, Lagerbestand, verwandte Produkte und hervorgehobene Produkte werden nicht mehr mit falschen Texten angezeigt.
+* Fix: Variantenoptionen werden nur für Produkte mit gespeicherten Varianten angezeigt.
+* Fix: Die Produktbildgalerie wird zuverlässig genau einmal registriert.
 
 = 1.1.6 =
 * Fix: Auszahlungsfreigabe und Netzwerk-Abrechnung werden im PS-MarketPress-Netzwerk-Dashboard registriert und sind für Netzwerk-Administratoren erreichbar.

@@ -39,7 +39,8 @@ class MP_Products_Screen {
 		// Remove add-new submenu item from store admin menu.
 		add_action( 'admin_menu', array( &$this, 'remove_menu_items' ), 999 );
 		// Hide featured image for variable products.
-		add_action( 'psource_field/print_scripts/has_variations', array( &$this, 'maybe_hide_core_metaboxes' ) );
+		add_action( 'psource_field/print_scripts/has_variation', array( &$this, 'maybe_hide_core_metaboxes' ) );
+		add_filter( 'psource_field/save_value/has_variation', array( &$this, 'sync_variation_state' ), 10, 3 );
 		// Product variations save/get value.
 		add_action( 'init', array( &$this, 'save_init_product_variations' ) );
 		add_action( 'wp_ajax_save_inline_post_data', array( &$this, 'save_inline_variation_post_data' ) );
@@ -77,8 +78,6 @@ class MP_Products_Screen {
 		}
 		add_filter( 'enter_title_here', array( &$this, 'custom_placeholder_title' ), 10, 2 );
 		add_action( 'admin_menu', array( &$this, 'remove_metaboxes' ) );
-		   // Füge die eigene Produktbilder-Metabox (PSOURCE_Metabox) hinzu
-		   add_action( 'add_meta_boxes', array( $this, 'init_product_images_metabox' ) );
 	}
 
 	/**
@@ -238,20 +237,24 @@ class MP_Products_Screen {
 	 *
 	 * @since 1.0
 	 * @access public
-	 * @action psource_field/print_scripts/has_variations
+	 * @action psource_field/print_scripts/has_variation
 	 */
 	public function maybe_hide_core_metaboxes() {
 		?>
 		<script type="text/javascript">
 		document.addEventListener('DOMContentLoaded', function() {
-			var variationInput = document.querySelector('[name="has_variations"]');
+			var variationInputs = document.querySelectorAll('[name="has_variation"]');
 			var elms = [
 				document.getElementById('postimagediv'),
 				document.getElementById('postdivrich'),
 				document.getElementById('postexcerpt')
 			].filter(Boolean);
 			function toggleMetaboxes() {
-				if (variationInput && variationInput.checked) {
+				var hasVariations = Array.prototype.some.call(variationInputs, function(input) {
+					return input.checked && input.value === 'yes';
+				});
+
+				if (hasVariations) {
 					elms.forEach(function(el) { if (el) el.style.display = 'none'; });
 				} else {
 					elms.forEach(function(el) { if (el) el.style.display = ''; });
@@ -259,13 +262,33 @@ class MP_Products_Screen {
 					window.dispatchEvent(new Event('scroll'));
 				}
 			}
-			if (variationInput) {
-				variationInput.addEventListener('change', toggleMetaboxes);
+			if (variationInputs.length) {
+				variationInputs.forEach(function(input) {
+					input.addEventListener('change', toggleMetaboxes);
+				});
 				toggleMetaboxes();
 			}
 		});
 		</script>
 		<?php
+	}
+
+	/**
+	 * Keeps the persisted variation state aligned with the editor selection.
+	 *
+	 * Existing variation posts are retained so an accidental switch does not delete product data.
+	 *
+	 * @param string       $value   Selected variation mode.
+	 * @param int          $post_id Product post ID.
+	 * @param PSOURCE_Field $field  Field being saved.
+	 * @return string
+	 */
+	public function sync_variation_state( $value, $post_id, $field ) {
+		if ( 'no' === $value ) {
+			delete_post_meta( $post_id, 'has_variations' );
+		}
+
+		return $value;
 	}
 
 	/**
@@ -695,11 +718,9 @@ class MP_Products_Screen {
 	 */
 	public function init_metaboxes() {
 		$this->init_product_type_metabox();
-		$this->init_product_withdrawal_metabox();
 		$this->init_product_price_inventory_variants_metabox();
-//		$this->init_product_images_metabox();
-//$this->init_product_details_metabox();
-//$this->init_variations_metabox();
+		$this->init_product_images_metabox();
+		$this->init_product_withdrawal_metabox();
 		$this->init_related_products_metabox();
 		$this->init_featured_product_metabox();
 	}
@@ -1238,7 +1259,7 @@ class MP_Products_Screen {
 		}
 
 		if ( get_post_type( $post_id ) == MP_Product::get_post_type() ) {
-			$has_variations = get_post_meta( $post_id, 'has_variations', false );
+			$has_variations = ! empty( get_post_meta( $post_id, 'has_variations', true ) );
 			if ( $has_variations ) {
 				remove_post_type_support( MP_Product::get_post_type(), 'editor' );
 			}
@@ -1613,9 +1634,9 @@ WHERE $delete_where"
 	public function init_product_withdrawal_metabox() {
 		$metabox = new PSOURCE_Metabox( apply_filters( 'mp_metabox_array_mp-product-withdrawal-metabox', array(
 			'id'        => 'mp-product-withdrawal-metabox',
-			'title'     => __( 'Widerruf', 'mp' ),
+			'title'     => __( 'Rechtliche Angaben', 'mp' ),
 			'post_type' => MP_Product::get_post_type(),
-			'context'   => 'side',
+			'context'   => 'normal',
 		) ) );
 
 		$metabox->add_field( 'checkbox', array(
@@ -1939,27 +1960,8 @@ WHERE $delete_where"
 			$metabox->add_field( 'variations', apply_filters( 'mp_add_field_array_variations_module', array(
 				'name'    => 'variations_module',
 				'label'   => '',
-				//array( 'text' => sprintf( __( '%3$sProduct Variations%2$s', 'mp' ), '<span class="mp_variations_product_name">', '</span>', '<span class="mp_variations_title">' ) ),
 				'message' => __( 'Variationen', 'mp' ),
-				/* 'conditional'	 => array(
-				  'name'	 => 'has_variation',
-				  'value'	 => 'yes',
-				  'action' => 'show',
-				  ), */
 				'class'   => 'mp_variations_table_box'
-			), $has_variations ) );
-		} else {
-			$metabox->add_field( 'variations', apply_filters( 'mp_add_field_array_variations_module', array(
-				'name'        => 'variations_module',
-				'label'       => array( 'text' => sprintf( __( '%3$sFüge Variationen für%2$s %1$sProdukt%2$s', 'mp' ), '<span class="mp_variations_product_name">', '</span>', '<span class="mp_variations_title">' ) ),
-				'message'     => __( 'Variationen', 'mp' ),
-				'desc'        => __( 'Füge Variationen für dieses Produkt hinzu. z.B. Wenn Du T-Shirts verkaufst, kannst Du Farb- und Größenvariationen erstellen', 'mp' ),
-				'conditional' => array(
-					'name'   => 'has_variation',
-					'value'  => 'yes',
-					'action' => 'show',
-				),
-				'class'       => 'mp_variations_box'
 			), $has_variations ) );
 		}
 
@@ -2602,23 +2604,6 @@ WHERE $delete_where"
 		}
 	}
 
-	/**
-	 * Füge die Standard-ClassicPress-Metabox für Produktbilder wieder hinzu
-	 *
-	 * @since 1.0
-	 * @access public
-	 * @action add_meta_boxes
-	 */
-	public function add_product_image_metabox() {
-		add_meta_box(
-			'postimagediv',
-			__( 'Produktbild', 'mp' ),
-			'post_thumbnail_meta_box',
-			MP_Product::get_post_type(),
-			'side',
-			'default'
-		);
-	}
 }
 
 MP_Products_Screen::get_instance();
