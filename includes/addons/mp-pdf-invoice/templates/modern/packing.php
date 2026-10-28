@@ -241,7 +241,7 @@
 			</tbody>
 		</table>
 
-		<div class="note"><?php _e( 'Bitte Lieferung auf Vollstaendigkeit und Schaeden beim Empfang pruefen.', 'mp' ); ?></div>
+		<div class="note"><?php _e( 'Bitte Lieferung auf Vollstaendigkeit und Schaeden beim Empfang prüfen.', 'mp' ); ?></div>
 
 		<div class="footer">{{company_name}} &bull; {{company_address}}</div>
 	</div>

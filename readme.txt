@@ -5,7 +5,7 @@ Requires at least: 4.9
 Requires PHP: 8.0
 Tested up to: 7.1.0
 ClassicPress: 2.7.4
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 
@@ -13,6 +13,12 @@ PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress
 
 PS MarketPress ist eine umfassende E-Commerce-Lösung für ClassicPress und Multisite.
 Mit PS MarketPress verkaufst du physische Produkte, digitale Downloads und Varianten in einem zentralen, leistungsstarken Shop-System.
+
+= B2B-Rechnungen ohne Suite-Ballast =
+
+PS MarketPress bringt B2B-Rechnungsdaten und strukturierte B2B-Rechnungs-XML als schlanke, optionale Erweiterungen mit. Geschäftskunden können sich im Checkout oder Benutzerprofil mit Firma, USt-IdNr. und Steuernummer kennzeichnen. Die Daten werden revisionssicher mit der Bestellung gespeichert und auf der bestehenden PDF-Rechnung ausgegeben.
+
+Der B2B-Rechnungs-XML-Export ergänzt die PDF-Rechnung um Verkäufer- und Käuferdaten, Rechnungsnummer, Positionen, Versand, Rabatte sowie Netto-, Steuer- und Bruttosummen. Shop-Admins können die XML pro Bestellung herunterladen; Kunden-Download und E-Mail-Anhang sind optional konfigurierbar. Es handelt sich bewusst nicht um ein Behördenformat: keine Java-Laufzeit, keine externen Dienste und keine große Abhängigkeitskette.
 
 = Multisite im Fokus =
 
@@ -39,6 +45,8 @@ Deinen eigenen Online-Shop richtest du mit PS MarketPress schnell und übersicht
 * Lege fest, wie oft ein Kunde eine gekaufte Datei herunterladen kann
 * Bereit für Steuern und Mehrwertsteuer
 * PDF-Rechnungen
+* Optionale B2B-Rechnungsdaten im Checkout und Benutzerprofil
+* Schlanker B2B-Rechnungs-XML-Export zusätzlich zur PDF-Rechnung
 * Berechnete Versandmodule (UPS, USPS, Fedex, Abholung im Geschäft)
 * Pinterest-, Facebook- und Twitter-Share-Buttons
 * Gutscheine, Rabatte und Affiliate-fähig
@@ -83,6 +91,11 @@ So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich l
 
 
 == Changelog ==
+
+= 1.1.8 =
+* Neu: B2B-Rechnungsdaten als optionale Erweiterung für Geschäftskunden mit Firma, USt-IdNr. und Steuernummer im Checkout, Benutzerprofil und Bestell-Snapshot.
+* Neu: B2B-Rechnungs-XML zusätzlich zur PDF-Rechnung mit Rechnungspositionen, Versand, Rabatten und Summen; Admin-Download sowie optionaler Kunden-Download und E-Mail-Anhang.
+* Neu: Optionales EU-Reverse-Charge für qualifizierte B2B-Bestellungen mit Hinweis auf PDF und XML.
 
 = 1.1.7 =
 * Fix: Die Beschriftungen im Produkteditor und in dessen Sidebar sind wieder eindeutig; Angebot, Sondersteuer, Versand, Lagerbestand, verwandte Produkte und hervorgehobene Produkte werden nicht mehr mit falschen Texten angezeigt.

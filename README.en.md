@@ -2,7 +2,7 @@
 
 [Deutsch](README.md) | **English**
 
-[![Version](https://img.shields.io/badge/Version-1.1.7-2271b1?style=flat-square)](readme.txt)
+[![Version](https://img.shields.io/badge/Version-1.1.8-2271b1?style=flat-square)](readme.txt)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4?style=flat-square&logo=php&logoColor=white)
 ![WordPress](https://img.shields.io/badge/WordPress-up%20to%207.1.0-21759b?style=flat-square&logo=wordpress&logoColor=white)
 ![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.4-03768e?style=flat-square)
@@ -15,6 +15,14 @@
 PS MarketPress powers both standalone online stores and complete shop networks. Products, variations, orders, payments, shipping, digital downloads, and customer workflows are included out of the box. In a Multisite environment, it becomes a centralized marketplace platform with a global cart, shop profiles, a customer hub, commission settlement, and granular permission management.
 
 No mandatory extensions, no feature restrictions, and no recurring license fees.
+
+## B2B invoicing without suite bloat
+
+For ordinary business-to-business commerce, PS MarketPress includes two lean, optional add-ons rather than an oversized enterprise suite:
+
+- **B2B billing details:** Business customers can provide a company name, VAT ID, and tax number at checkout or in their user profile. The details are saved with the order and included in the existing PDF invoice.
+- **B2B invoice XML:** Complements the PDF invoice with a structured XML file containing seller and buyer information, invoice number, line items, shipping, discounts, and net, tax, and gross totals. Admin download, customer download, and email attachment are configurable per store.
+- **Practical instead of government workflow:** Optional EU reverse charge for qualifying B2B orders; no XRechnung or ZUGFeRD claim, Java runtime, external service, or new large dependency tree.
 
 ## Why PS MarketPress?
 
@@ -100,6 +108,8 @@ flowchart LR
 - Email notifications with customizable templates
 - Product reviews with star ratings and a helpful-vote feature
 - PDF invoices and delivery notes
+- Optional B2B billing details for business customers at checkout and in user profiles
+- Structured B2B invoice XML export in addition to the PDF invoice
 - Export and statistics features
 
 ### Digital withdrawals
@@ -142,6 +152,8 @@ The [PSOURCE Update Manager](https://github.com/Power-Source/ps-update-manager/r
 
 - Coupons and discount codes
 - PDF invoices and delivery notes
+- B2B billing details with configurable extra fields and optional EU reverse charge
+- B2B invoice XML with admin and optional customer downloads plus email attachment
 - Multiple download files per product
 - Product comments and reviews
 - Shop statistics with Chart.js

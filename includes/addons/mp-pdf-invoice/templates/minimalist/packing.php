@@ -189,7 +189,7 @@
 		</tbody>
 	</table>
 
-	<div class="note"><?php _e( 'Interner Hinweis: Dieser Lieferschein enthaelt keine Preisangaben.', 'mp' ); ?></div>
+	<div class="note"><?php _e( 'Interner Hinweis: Dieser Lieferschein enthält keine Preisangaben.', 'mp' ); ?></div>
 
 	<div class="footer">{{company_name}} &bull; {{company_address}}</div>
 </div>

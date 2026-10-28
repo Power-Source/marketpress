@@ -3,7 +3,7 @@
 Plugin Name: PS MarketPress
 Plugin URI:  https://psource.eimen.net/psource/ps-marketpress/
 Description: Das komplette ClassicPress E-Commerce-Plugin – funktioniert auch perfekt mit Multisite, um einen sozialen Marktplatz zu erstellen, auf dem Du eine Provision einbehalten kannst! Aktiviere das Plugin, passen Deine Einstellungen an und füge dann Produkte zu Deinem Shop hinzu.
-Version:     1.1.7
+Version:     1.1.8
 Author:      PSOURCE
 Author URI:  https://psource.eimen.net/
 Text Domain: mp
@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-define( 'MP_VERSION', '1.1.7' );
+define( 'MP_VERSION', '1.1.8' );
 
 if ( ! function_exists( 'mp_marketpress_access_is_allowed' ) ) {
 	function mp_marketpress_access_is_allowed() {
@@ -846,6 +846,22 @@ class Marketpress {
 			'desc'         => 'Erstelle PDF Rechnungen für deine Bestellungen',
 			'class'        => 'MP_PDF_Invoice_Addon',
 			'path'         => mp_plugin_dir( 'includes/addons/mp-pdf-invoice/class-mp-pdf-invoice-addon.php' ),
+			'has_settings' => true,
+		) );
+
+		mp_register_addon( array(
+			'label'        => __( 'B2B-Rechnungsdaten', 'mp' ),
+			'desc'         => __( 'Erfasse konfigurierbare Geschäftskunden- und Rechnungsdaten im Checkout und Benutzerprofil.', 'mp' ),
+			'class'        => 'MP_B2B_Addon',
+			'path'         => mp_plugin_dir( 'includes/addons/mp-b2b/class-mp-b2b-addon.php' ),
+			'has_settings' => true,
+		) );
+
+		mp_register_addon( array(
+			'label'        => __( 'B2B-Rechnungs-XML', 'mp' ),
+			'desc'         => __( 'Erstellt eine schlanke strukturierte XML-Rechnung für B2B-Bestellungen zusätzlich zur PDF-Rechnung.', 'mp' ),
+			'class'        => 'MP_E_Invoice_Addon',
+			'path'         => mp_plugin_dir( 'includes/addons/mp-e-invoice/class-mp-e-invoice-addon.php' ),
 			'has_settings' => true,
 		) );
 

@@ -2,7 +2,7 @@
 
 **Deutsch** | [English](README.en.md)
 
-[![Version](https://img.shields.io/badge/Version-1.1.7-2271b1?style=flat-square)](readme.txt)
+[![Version](https://img.shields.io/badge/Version-1.1.8-2271b1?style=flat-square)](readme.txt)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4?style=flat-square&logo=php&logoColor=white)
 ![WordPress](https://img.shields.io/badge/WordPress-bis%207.1.0-21759b?style=flat-square&logo=wordpress&logoColor=white)
 ![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.4-03768e?style=flat-square)
@@ -15,6 +15,14 @@
 PS MarketPress betreibt sowohl eigenständige Onlineshops als auch komplette Shop-Netzwerke. Produkte, Varianten, Bestellungen, Zahlungen, Versand, digitale Downloads und Kundenprozesse sind direkt enthalten. Im Multisite-Betrieb wird daraus eine zentrale Marketplace-Plattform mit globalem Warenkorb, Shopprofilen, Kundenhub, Provisionsabrechnung und gezielter Rechteverwaltung.
 
 Keine Pflicht-Erweiterungen, keine Funktionssperren und keine laufenden Lizenzkosten.
+
+## B2B-Rechnungen ohne Suite-Ballast
+
+Für normale Geschäfte zwischen Unternehmen bringt PS MarketPress zwei schlanke, optionale Add-ons mit - keine aufgeblähte Enterprise-Suite:
+
+- **B2B-Rechnungsdaten:** Geschäftskunden erfassen Firma, USt-IdNr. und Steuernummer im Checkout oder Benutzerprofil. Die Rechnungsdaten werden mit der Bestellung gespeichert und in die bestehende PDF-Rechnung übernommen.
+- **B2B-Rechnungs-XML:** Ergänzt die PDF-Rechnung um eine strukturierte XML-Datei mit Verkäufer und Käufer, Rechnungsnummer, Positionen, Versand, Rabatten sowie Netto-, Steuer- und Bruttosummen. Admin-Download, Kunden-Download und E-Mail-Anhang lassen sich je Shop konfigurieren.
+- **Praxistauglich statt Behörden-Workflow:** Optionales EU-Reverse-Charge für qualifizierte B2B-Bestellungen; kein XRechnung-/ZUGFeRD-Anspruch, keine Java-Laufzeit, keine externen Dienste und keine neue große Abhängigkeitskette.
 
 ## Warum PS MarketPress?
 
@@ -100,6 +108,8 @@ flowchart LR
 - E-Mail-Benachrichtigungen mit anpassbaren Vorlagen
 - Produktbewertungen mit Sternebewertung und Hilfreich-Funktion
 - PDF-Rechnungen und Lieferscheine
+- Optionale B2B-Rechnungsdaten für Geschäftskunden im Checkout und Benutzerprofil
+- Strukturierter B2B-Rechnungs-XML-Export zusätzlich zur PDF-Rechnung
 - Export- und Statistikfunktionen
 
 ### Digitaler Widerruf
@@ -142,6 +152,8 @@ Der [PSOURCE Update Manager](https://github.com/Power-Source/ps-update-manager/r
 
 - Gutscheine und Rabattcodes
 - PDF-Rechnungen und Lieferscheine
+- B2B-Rechnungsdaten mit konfigurierbaren Zusatzfeldern und optionalem EU-Reverse-Charge
+- B2B-Rechnungs-XML mit Admin- und optionalem Kunden-Download sowie E-Mail-Anhang
 - Mehrere Download-Dateien pro Produkt
 - Produktkommentare und Bewertungen
 - Shop-Statistiken mit Chart.js
