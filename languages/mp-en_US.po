@@ -10859,19 +10859,19 @@ msgstr "Grant access to themes and gateways depending on the user's Pro Site lev
 
 #: marketpress.php:854
 msgid "Mehrere Downloads"
-msgstr "Grant access to themes and gateways depending on the user's Pro Site level"
+msgstr "Multiple Downloads"
 
 #: marketpress.php:855
 msgid "Erlaube mehrere Downloads pro Produkt"
-msgstr "Multiple Downloads"
+msgstr "Allow multiple downloads per product"
 
 #: marketpress.php:863
 msgid "Erlaube Produktkommentare"
-msgstr "Multiple Downloads"
+msgstr "Allow product comments"
 
 #: marketpress.php:864
 msgid "Erlaube das kommentieren von Produkten"
-msgstr "Enable multiple downloads per product"
+msgstr "Allow commenting on products"
 
 #: marketpress.php:872
 msgid "Shop Statistiken (ALFAVERSION)"
@@ -10879,7 +10879,7 @@ msgstr "Shop Statistiken (ALFAVERSION)"
 
 #: marketpress.php:873
 msgid "Aktiviere diese Erweiterung um eine Dashboard-Seite mit Shop-Statistiken zu erstellen"
-msgstr "Enable multiple downloads per product"
+msgstr "Enable this extension to create a dashboard page with shop statistics"
 
 #: marketpress.php:882
 msgid "Netzwerk Shop-Profile"
@@ -10887,7 +10887,7 @@ msgstr "Netzwerk Shop-Profile"
 
 #: marketpress.php:883
 msgid "Optionale Profilverwaltung für Shopseiten im Netzwerk-Marktplatz (Branding, Links, Socials)"
-msgstr "Product Categories"
+msgstr "Optional profile management for shop pages within the network marketplace (branding, links, social media)"
 
 #. Plugin URI of the plugin/theme
 msgid "https://psource.eimen.net/psource/ps-marketpress/"
@@ -10895,7 +10895,7 @@ msgstr "https://psource.eimen.net/psource/ps-marketpress/"
 
 #. Description of the plugin/theme
 msgid "Das komplette ClassicPress E-Commerce-Plugin – funktioniert auch perfekt mit Multisite, um einen sozialen Marktplatz zu erstellen, auf dem Du eine Provision einbehalten kannst! Aktiviere das Plugin, passen Deine Einstellungen an und füge dann Produkte zu Deinem Shop hinzu."
-msgstr "http://premium.wpmudev.org"
+msgstr "The complete ClassicPress e-commerce plugin – it also works perfectly with Multisite, allowing you to create a social marketplace where you can retain a commission! Activate the plugin, adjust your settings, and then add products to your shop."
 
 #. Author of the plugin/theme
 msgid "PSOURCE"
@@ -10913,17 +10913,17 @@ msgstr "Product Category"
 #: marketpress.php:231
 msgctxt "product_category"
 msgid "Produktkategorie"
-msgstr "Products for your e-commerce store."
+msgstr "Product category"
 
 #: marketpress.php:264
 msgctxt "product_tag"
 msgid "Produkt-Tags"
-msgstr "Add New Order"
+msgstr "Product tags"
 
 #: marketpress.php:265
 msgctxt "product_tag"
 msgid "Produkt-Tag"
-msgstr "Edit Order"
+msgstr "Product tag"
 
 #: marketpress.php:344
 msgctxt "mp_order"
