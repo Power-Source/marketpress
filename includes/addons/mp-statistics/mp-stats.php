@@ -83,6 +83,25 @@ function mp_st_track_download( $url, $order, $download_count ) {
     );
 }
 
+add_action( 'mp_free_download_served', 'mp_st_track_free_download' );
+function mp_st_track_free_download( $product_id ) {
+    global $wpdb;
+
+    $wpdb->insert(
+        $wpdb->prefix . 'mp_download_events',
+        [
+            'order_id'      => 0,
+            'product_id'    => absint( $product_id ),
+            'user_id'       => (int) get_current_user_id(),
+            'order_total'   => 0,
+            'is_free'       => 1,
+            'downloaded_at' => current_time( 'mysql' ),
+            'blog_id'       => (int) get_current_blog_id(),
+        ],
+        [ '%d', '%d', '%d', '%f', '%d', '%s', '%d' ]
+    );
+}
+
 /* ---------------------------------------------------------------
  * Admin-Menü
  * ------------------------------------------------------------- */

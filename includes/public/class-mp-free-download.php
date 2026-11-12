@@ -65,11 +65,13 @@ class MP_Free_Download {
 		
 		// Externe URL oder Alternative Download-Methode: Einfach weiterleiten
 		if ( wp_http_validate_url( $file_url ) || mp_get_setting( 'use_alt_download_method' ) || ( defined( 'MP_LARGE_DOWNLOADS' ) && MP_LARGE_DOWNLOADS === true ) ) {
+			do_action( 'mp_free_download_served', $product_id );
 			wp_redirect( esc_url_raw( $file_url ) );
 			exit;
 		}
 		
 		// Lokale Datei: Direkt serven mit Download-Headers
+		do_action( 'mp_free_download_served', $product_id );
 		$this->serve_file( $file_url, basename( $file_url ) );
 		exit;
 	}

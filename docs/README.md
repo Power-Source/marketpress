@@ -19,6 +19,12 @@ Währung, Steuern, Versand und Zahlungen festzulegen.
 > **Vor dem Livegang:** Schließe erst die Konfiguration ab und teste Checkout,
 > E-Mail-Versand, Zahlung und Versandkosten mit einer Testbestellung.
 
+## PSOURCE Manager
+
+Mit dem [PSOURCE Manager](https://psource.eimen.net/psource/psource-manager/)
+kannst Du alle PSOURCE-Plugins und Themes zentral entdecken, verwalten und
+aktualisieren.
+
 ## Verwaltung im Backend
 
 Die tägliche Arbeit findet in zwei Menübereichen statt:

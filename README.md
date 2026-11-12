@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/Version-1.1.8-2271b1?style=flat-square)](readme.txt)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4?style=flat-square&logo=php&logoColor=white)
-![WordPress](https://img.shields.io/badge/WordPress-bis%207.1.0-21759b?style=flat-square&logo=wordpress&logoColor=white)
+![WordPress](https://img.shields.io/badge/WordPress-bis%207.1.4-21759b?style=flat-square&logo=wordpress&logoColor=white)
 ![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.4-03768e?style=flat-square)
 [![Lizenz](https://img.shields.io/badge/Lizenz-GPL--2.0--or--later-2ea44f?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
 
@@ -18,6 +18,11 @@ Keine Pflicht-Erweiterungen, keine Funktionssperren und keine laufenden Lizenzko
 
 Die ausführliche deutschsprachige Anleitung mit Screenshots findest Du unter
 [docs/README.md](docs/README.md).
+
+## PSOURCE unterstützen
+
+Wenn Dir PS MarketPress hilft, kannst Du die Weiterentwicklung von PSOURCE mit einer Unterstützung fördern:
+[PSOURCE unterstützen](https://psource.eimen.net/spendenaktionen/psource-unterstuetzen/)
 
 ## B2B-Rechnungen ohne Suite-Ballast
 
@@ -147,9 +152,9 @@ Für kommerzielle Shop-Netzwerke können Funktionen nach Tariflevel freigeschalt
 - Verfügbare Shop-Themes nach Tarif
 - Automatische Berücksichtigung des aktiven Levels eines Subshops
 
-### PS Update Manager
+### PSOURCE Manager
 
-Der [PSOURCE Update Manager](https://github.com/Power-Source/ps-update-manager/releases/latest) bündelt Installation und Aktualisierung von PSOURCE-Projekten. Damit lassen sich PS MarketPress und ergänzende Plugins zentral aktuell halten.
+Mit dem [PSOURCE Manager](https://psource.eimen.net/psource/psource-manager/) kannst Du alle PSOURCE-Plugins und Themes zentral entdecken, verwalten und aktualisieren.
 
 ### Integrierte Add-ons
 
@@ -268,7 +273,7 @@ composer install
 - [Releases](https://github.com/Power-Source/marketpress/releases/latest)
 - [Quellcode und Issues](https://github.com/Power-Source/marketpress)
 - [PSOURCE](https://psource.eimen.net/)
-- [PS Update Manager](https://github.com/Power-Source/ps-update-manager/releases/latest)
+- [PSOURCE Manager](https://psource.eimen.net/psource/psource-manager/)
 
 ## Lizenz
 

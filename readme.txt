@@ -84,13 +84,20 @@ Egal ob ein einzelner Shop oder ein komplettes E-Commerce-Netzwerk: Mit PS Marke
 
 PS MarketPress arbeitet mit vielen weiteren PSOURCE-Plugins zusammen und lässt sich dadurch flexibel erweitern.
 
-Mit dem PSOURCE Manager kannst du noch mehr entdecken, bequem verwalten und neue Erweiterungen schneller einbinden:
-https://github.com/Power-Source/ps-update-manager/releases/latest
+Mit dem PSOURCE Manager kannst du alle PSOURCE-Plugins und Themes zentral entdecken, verwalten und aktualisieren:
+https://psource.eimen.net/psource/psource-manager/
 
 So bleibt PS MarketPress zuverlässig mit Updates versorgt und entwickelt sich laufend weiter.
 
+= PSOURCE unterstützen =
+
+Wenn dir PS MarketPress hilft, kannst du die Weiterentwicklung von PSOURCE mit einer Unterstützung fördern:
+https://psource.eimen.net/spendenaktionen/psource-unterstuetzen/
 
 == Changelog ==
+
+= 1.1.9 =
+* Fix: Direkte kostenlose digitale Downloads werden jetzt in der Shopstatistik als Gratis-Downloads erfasst.
 
 = 1.1.8 =
 * Neu: B2B-Rechnungsdaten als optionale Erweiterung für Geschäftskunden mit Firma, USt-IdNr. und Steuernummer im Checkout, Benutzerprofil und Bestell-Snapshot.

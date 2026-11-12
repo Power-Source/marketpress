@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/Version-1.1.8-2271b1?style=flat-square)](readme.txt)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4?style=flat-square&logo=php&logoColor=white)
-![WordPress](https://img.shields.io/badge/WordPress-up%20to%207.1.0-21759b?style=flat-square&logo=wordpress&logoColor=white)
+![WordPress](https://img.shields.io/badge/WordPress-up%20to%207.1.4-21759b?style=flat-square&logo=wordpress&logoColor=white)
 ![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.4-03768e?style=flat-square)
 [![License](https://img.shields.io/badge/License-GPL--2.0--or--later-2ea44f?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
 
@@ -15,6 +15,11 @@
 PS MarketPress powers both standalone online stores and complete shop networks. Products, variations, orders, payments, shipping, digital downloads, and customer workflows are included out of the box. In a Multisite environment, it becomes a centralized marketplace platform with a global cart, shop profiles, a customer hub, commission settlement, and granular permission management.
 
 No mandatory extensions, no feature restrictions, and no recurring license fees.
+
+## Support PSOURCE
+
+If PS MarketPress helps you, you can support the continued development of PSOURCE:
+[Support PSOURCE](https://psource.eimen.net/spendenaktionen/psource-unterstuetzen/)
 
 ## B2B invoicing without suite bloat
 
@@ -144,9 +149,9 @@ For commercial shop networks, features can be enabled by plan level:
 - Available shop themes by plan
 - Automatic consideration of an active subshop plan
 
-### PS Update Manager
+### PSOURCE Manager
 
-The [PSOURCE Update Manager](https://github.com/Power-Source/ps-update-manager/releases/latest) centralizes installation and updates of PSOURCE projects. It keeps PS MarketPress and complementary plugins up to date from one place.
+With the [PSOURCE Manager](https://psource.eimen.net/psource/psource-manager/), you can discover, manage, and update all PSOURCE plugins and themes from one place.
 
 ### Included add-ons
 
@@ -265,7 +270,7 @@ composer install
 - [Releases](https://github.com/Power-Source/marketpress/releases/latest)
 - [Source code and issues](https://github.com/Power-Source/marketpress)
 - [PSOURCE](https://psource.eimen.net/)
-- [PS Update Manager](https://github.com/Power-Source/ps-update-manager/releases/latest)
+- [PSOURCE Manager](https://psource.eimen.net/psource/psource-manager/)
 
 ## License
 
