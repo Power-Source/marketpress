@@ -16,6 +16,9 @@ PS MarketPress betreibt sowohl eigenständige Onlineshops als auch komplette Sho
 
 Keine Pflicht-Erweiterungen, keine Funktionssperren und keine laufenden Lizenzkosten.
 
+Die ausführliche deutschsprachige Anleitung mit Screenshots findest Du unter
+[docs/README.md](docs/README.md).
+
 ## B2B-Rechnungen ohne Suite-Ballast
 
 Für normale Geschäfte zwischen Unternehmen bringt PS MarketPress zwei schlanke, optionale Add-ons mit - keine aufgeblähte Enterprise-Suite:
