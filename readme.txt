@@ -3,9 +3,10 @@ Contributors: PSOURCE
 Tags: E-commerce, ecommerce, storefront, sell, store, shopping, cart, payment gateways, digital downloads, online store
 Requires at least: 4.9
 Requires PHP: 8.0
-Tested up to: 7.1.0
+Requires CP: 2.7
+Tested up to: 7.1.4
 ClassicPress: 2.7.4
-Stable tag: 1.1.9
+Stable tag: 1.2.0
 
 PS MarketPress ist dein leistungsstarker E-Commerce-Marktplatz für ClassicPress und Multisite. 100 % kostenlos, ohne Pflicht-Add-ons.
 

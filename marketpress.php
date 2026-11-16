@@ -3,7 +3,7 @@
 Plugin Name: PS MarketPress
 Plugin URI:  https://psource.eimen.net/psource/ps-marketpress/
 Description: Das komplette ClassicPress E-Commerce-Plugin – funktioniert auch perfekt mit Multisite, um einen sozialen Marktplatz zu erstellen, auf dem Du eine Provision einbehalten kannst! Aktiviere das Plugin, passen Deine Einstellungen an und füge dann Produkte zu Deinem Shop hinzu.
-Version:     1.1.9
+Version:     1.2.0
 Author:      PSOURCE
 Author URI:  https://psource.eimen.net/
 Text Domain: mp
@@ -114,7 +114,7 @@ if ( ! mp_site_shop_is_active() ) {
 	}
 }
 
-define( 'MP_VERSION', '1.1.9' );
+define( 'MP_VERSION', '1.2.0' );
 
 /**
  * Main class Marketpress.
