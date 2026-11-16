@@ -96,6 +96,9 @@ https://psource.eimen.net/spendenaktionen/psource-unterstuetzen/
 
 == Changelog ==
 
+= 1.2.0 =
+* Fix: Lokale Gratis-Downloads mit fehlender Datei werden nicht mehr als erfolgreiche Gratis-Downloads in der Statistik gezählt.
+
 = 1.1.9 =
 * Fix: Direkte kostenlose digitale Downloads werden jetzt in der Shopstatistik als Gratis-Downloads erfasst.
 

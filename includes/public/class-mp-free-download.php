@@ -71,8 +71,7 @@ class MP_Free_Download {
 		}
 		
 		// Lokale Datei: Direkt serven mit Download-Headers
-		do_action( 'mp_free_download_served', $product_id );
-		$this->serve_file( $file_url, basename( $file_url ) );
+		$this->serve_file( $file_url, basename( $file_url ), $product_id );
 		exit;
 	}
 
@@ -157,9 +156,9 @@ class MP_Free_Download {
 	}
 	
 	/**
-	 * Serve a file for download
+	 * Serve an existing local file for download.
 	 */
-	private function serve_file( $file_path, $filename ) {
+	private function serve_file( $file_path, $filename, $product_id ) {
 		if ( wp_http_validate_url( $file_path ) ) {
 			$dirs     = wp_upload_dir();
 			$location = str_replace( $dirs['baseurl'], $dirs['basedir'], $file_path );
@@ -172,6 +171,8 @@ class MP_Free_Download {
 		if ( ! file_exists( $file_path ) ) {
 			$this->redirect_with_status( $this->get_return_url(), absint( mp_get_get_value( 'product_id' ) ), 'error', __( 'Fehler: Datei nicht gefunden.', 'mp' ) );
 		}
+
+		do_action( 'mp_free_download_served', $product_id );
 		
 		set_time_limit( 0 );
 		
