@@ -165,7 +165,9 @@ class MP_Admin {
 		require_once mp_plugin_dir( 'includes/admin/class-mp-product-attributes-admin.php' );
 		require_once mp_plugin_dir( 'includes/admin/class-mp-store-settings-admin.php' );
 		require_once mp_plugin_dir( 'includes/admin/class-mp-setup-wizard.php' );
-		require_once mp_plugin_dir( 'includes/admin/class-mp-shortcode-builder.php' );
+		if ( mp_site_shop_is_active() ) {
+			require_once mp_plugin_dir( 'includes/admin/class-mp-shortcode-builder.php' );
+		}
 	}
 
 	/**

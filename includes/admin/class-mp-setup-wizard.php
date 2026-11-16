@@ -684,6 +684,7 @@ class MP_Setup_Wizard {
 	 */
 	private function __construct() {
 		//add_action( 'admin_notices', array( &$this, 'nag_message' ) );
+		add_action( 'psource_metabox/after_all_settings_metaboxes_saved/store-setup-wizard', 'mp_finish_site_shop_setup' );
 		add_action( 'init', array( &$this, 'init_metaboxes' ) );
 		add_action( 'wp_ajax_mp_preset_currency_base_country', array( &$this, 'determine_currency' ) );
 		if ( isset( $_GET['page'] ) && $_GET['page'] == 'store-setup-wizard' ) {

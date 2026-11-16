@@ -46,7 +46,7 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 
 				<?php if ( get_option( 'mp_needs_pages', 1 ) == 1 && current_user_can( 'manage_options' ) ) { ?>
 					<div class="mp_callout">
-						<a href="<?php echo admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'install_mp_pages' => 'true' ), 'admin.php' ) ); ?>" class="button-primary mp_button"><?php _e( 'Shop-Seiten installieren', 'mp' ); ?></a>
+						<a href="<?php echo esc_url( wp_nonce_url( admin_url( add_query_arg( array( 'page' => 'store-setup-wizard', 'install_mp_pages' => 'true' ), 'admin.php' ) ), 'mp_install_store_pages' ) ); ?>" class="button-primary mp_button"><?php _e( 'Shop-Seiten installieren', 'mp' ); ?></a>
 					</div><!-- end mp_callout -->
 
 					<div class="mp_skip_step">
@@ -170,6 +170,13 @@ class PSOURCE_Field_Quick_Setup extends PSOURCE_Field {
 			</div><!-- end mp_quick_setup_content_step-2 -->
 			<?php
 		} else {//Final Step
+
+			if ( ! mp_site_shop_is_active() ) {
+				echo '<p>' . esc_html__( 'Der Shop ist noch nicht aktiviert. Schließe die Schnelleinrichtung ab oder aktiviere den Shop unter Allgemein.', 'mp' ) . '</p>';
+				echo '<p><a class="button" href="' . esc_url( admin_url( 'admin.php?page=store-settings' ) ) . '">' . esc_html__( 'Zu Allgemein', 'mp' ) . '</a></p>';
+				$this->after_field();
+				return;
+			}
 
 			// If Skip
 			if( $quick_setup_step == 'skip' ) {

@@ -26,8 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-define( 'MP_VERSION', '1.1.9' );
-
 if ( ! function_exists( 'mp_marketpress_access_is_allowed' ) ) {
 	function mp_marketpress_access_is_allowed() {
 		global $wpdb;
@@ -93,9 +91,35 @@ if ( ! mp_marketpress_access_is_allowed() ) {
 	return;
 }
 
+require_once __DIR__ . '/includes/common/site-activation.php';
+register_activation_hook( __FILE__, 'mp_plugin_activate' );
+register_uninstall_hook( __FILE__, 'mp_plugin_uninstall' );
+
+if ( is_multisite() && isset( get_site_option( 'active_sitewide_plugins', array() )[ plugin_basename( __FILE__ ) ] ) ) {
+	add_action( 'wp_initialize_site', 'mp_mark_new_site_inactive', 100 );
+}
+
+if ( ! mp_site_shop_is_active() ) {
+	add_action( 'admin_post_mp_activate_site_shop', 'mp_activate_site_shop_action' );
+	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+	$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
+	$setup_request = is_admin() && (
+		( ! wp_doing_ajax() && 'store-setup-wizard' === $page ) ||
+		( wp_doing_ajax() && 'psource_fields_save' === $action && 'store-setup-wizard' === $page ) ||
+		( wp_doing_ajax() && 'mp_preset_currency_base_country' === $action )
+	);
+	if ( ! $setup_request ) {
+		add_action( 'admin_menu', 'mp_inactive_shop_menu' );
+		return;
+	}
+}
+
+define( 'MP_VERSION', '1.1.9' );
+
 /**
  * Main class Marketpress.
  */
+if ( ! class_exists( 'Marketpress', false ) ) {
 class Marketpress {
 
 	public $currencies;
@@ -447,6 +471,10 @@ class Marketpress {
 		// Init variables.
 		$this->_init_vars();
 
+		if ( ! mp_site_shop_is_active() || '1' === (string) get_option( 'mp_site_shop_needs_caps', '0' ) ) {
+			add_action( 'init', 'mp_prepare_site_shop_settings', -2 );
+		}
+
 		// Include constants.
 		require_once $this->plugin_dir( 'includes/common/constants.php' );
 
@@ -466,13 +494,20 @@ class Marketpress {
 		add_action( 'init', array( &$this, 'load_plugins' ), 2 );
 
 		// Register system addons.
-		add_action( 'init', array( &$this, 'register_addons' ), 2 );
+		if ( mp_site_shop_is_active() ) {
+			add_action( 'init', array( &$this, 'register_addons' ), 2 );
+		}
 
 		// Setup custom types.
-		add_action( 'init', array( &$this, 'register_custom_types' ), 1 );
+		if ( mp_site_shop_is_active() ) {
+			add_action( 'init', array( &$this, 'register_custom_types' ), 1 );
+			add_action( 'init', 'mp_setup_shop_capabilities', 9 );
+		}
 
 		// Maybe flush rewrites.
-		add_action( 'init', array( &$this, 'maybe_flush_rewrites' ), 99 );
+		if ( mp_site_shop_is_active() ) {
+			add_action( 'init', array( &$this, 'maybe_flush_rewrites' ), 99 );
+		}
 
 		// Fix insecure images.
 		add_filter( 'wp_get_attachment_url', array( &$this, 'fix_insecure_images' ), 10, 2 );
@@ -509,6 +544,9 @@ class Marketpress {
 	 * Add menus.
 	 */
 	function add_menu_items() {
+		if ( ! mp_site_shop_is_active() ) {
+			return;
+		}
 		add_submenu_page( 'edit.php?post_type=' . MP_Product::get_post_type(), __( 'Produkt hinzufügen', 'mp' ), __( 'Produkt hinzufügen', 'mp' ), apply_filters( 'mp_add_new_product_capability', 'manage_options' ), 'post-new.php?post_type=' . MP_Product::get_post_type() );
 	}
 
@@ -732,6 +770,10 @@ class Marketpress {
 	function install_actions() {
 		// Install - Add pages button.
 		if ( ! empty( $_GET['install_mp_pages'] ) ) {
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_die( esc_html__( 'Du darfst keine Shopseiten erstellen.', 'mp' ), '', array( 'response' => 403 ) );
+			}
+			check_admin_referer( 'mp_install_store_pages' );
 			$this->create_pages();
 
 			// We no longer need to install pages.
@@ -1026,7 +1068,7 @@ class Marketpress {
 	public function maybe_flush_rewrites() {
 		$flush_rewrites = get_option( 'mp_flush_rewrites_30', 1 );
 
-		if ( 1 === $flush_rewrites ) {
+		if ( 1 === (int) $flush_rewrites ) {
 			flush_rewrite_rules();
 			update_option( 'mp_flush_rewrites_30', 0 );
 		}
@@ -1172,11 +1214,10 @@ class Marketpress {
 	}
 
 }
+}
 
 $GLOBALS['mp'] = Marketpress::get_instance();
 
-register_activation_hook( __FILE__, 'mp_plugin_activate' );
-register_uninstall_hook( __FILE__, 'mp_plugin_uninstall' );
 add_action( 'admin_init', 'mp_plugin_redirect', 1 );
 
 function mp_plugin_activate() {
@@ -1293,6 +1334,11 @@ function mp_plugin_uninstall_site_data() {
                 'mp_coupons',
                 'mp_coupons_legacy',
                 'mp_db_update_required',
+                'mp_attributes_db_version',
+                'mp_site_shop_active',
+                'mp_site_shop_activation_source',
+                'mp_site_shop_migration_version',
+                'mp_site_shop_needs_caps',
                 'mp_deprecated_gateway_notice_showed',
                 'mp_flush_rewrites',
                 'mp_flush_rewrites_30',

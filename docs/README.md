@@ -19,6 +19,46 @@ Währung, Steuern, Versand und Zahlungen festzulegen.
 > **Vor dem Livegang:** Schließe erst die Konfiguration ab und teste Checkout,
 > E-Mail-Versand, Zahlung und Versandkosten mit einer Testbestellung.
 
+### Shop auf einer Netzwerk-Unterseite aktivieren
+
+Wenn PS MarketPress netzwerkweit aktiviert ist, starten neu angelegte
+Unterseiten ohne aktiven Shop. Im Dashboard siehst Du zunächst nur
+**MarketPress → Allgemein** und **MarketPress → Schnelle Einrichtung**.
+Produkte, Bestellungen und die übrigen Shopfunktionen sind noch nicht aktiv.
+Auch bereits vorhandene Unterseiten ohne Shop werden beim nächsten Aufruf
+auf diesen Zustand umgestellt, sofern sie eindeutig als ungenutzt erkennbar
+sind.
+
+![Deaktivierter Shop auf einer Netzwerk-Unterseite](images/subsite-inactive.png)
+
+Du hast zwei Möglichkeiten:
+
+1. **Manuell:** Öffne **MarketPress → Allgemein** und klicke auf
+   **Shop jetzt aktivieren**. Danach erscheinen die vollständigen Shopmenüs.
+   Konfiguriere Shopseiten, Land, Währung, Steuern, Versand und Zahlungen
+   anschließend selbst.
+2. **Mit Assistent:** Öffne **MarketPress → Schnelle Einrichtung**, erstelle
+   bei Bedarf die Shopseiten und fülle die Einrichtungsschritte aus. Erst
+   nach dem erfolgreichen Speichern über **Einrichtung abschließen** wird
+   der Shop aktiviert. Bereits während des Assistenten angelegte Shopseiten
+   bleiben auch bei einem Abbruch bestehen.
+
+![Schnelle Einrichtung auf einer Netzwerk-Unterseite](images/subsite-setup.png)
+
+Die Aktivierung richtet den Shop nicht automatisch für den Verkauf ein:
+Prüfe insbesondere Land, Steuern und Zahlungsmethoden vor dem Livegang.
+Die Aktivierung einer Unterseite verändert weder den Hauptshop noch andere
+Unterseiten. Vorhandene Shopdaten, Shopseiten, Einstellungen oder eine
+abgeschlossene beziehungsweise übersprungene Einrichtung verhindern die
+automatische Deaktivierung. Auch bei unklaren Daten oder Datenbankfehlern
+bleibt der Shop vorsichtshalber aktiv. Die Prüfung erfolgt pro Unterseite beim
+ersten Aufruf; es werden keine Shopdaten gelöscht. Automatische Versandmodul-
+Einträge und die Seitenzuordnung **Keine** gelten nicht als eingerichteter
+Shop. Über den Aktivierungsknopf oder die Schnelleinrichtung aktivierte Shops
+bleiben aktiv; deaktivierte Shops bleiben deaktiviert. Alte Aktiv-Markierungen
+ohne gespeicherte Herkunft werden einmalig erneut geprüft, sofern keine
+Aktivierung oder Einrichtung erkennbar ist.
+
 ## PSOURCE Manager
 
 Mit dem [PSOURCE Manager](https://psource.eimen.net/psource/psource-manager/)

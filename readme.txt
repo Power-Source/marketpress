@@ -97,7 +97,10 @@ https://psource.eimen.net/spendenaktionen/psource-unterstuetzen/
 == Changelog ==
 
 = 1.2.0 =
+* Neu: Neue und eindeutig ungenutzte bestehende Unterseiten starten bei Netzwerkaktivierung mit deaktiviertem Shop und können ihn manuell oder über die Schnelleinrichtung aktivieren. Einrichtungsstatus, echte Shopseiten und Shopdaten werden berücksichtigt; frühere automatische Aktiv-Einstufungen werden erneut geprüft. Vorhandene und unklare Shops bleiben aktiv.
 * Fix: Lokale Gratis-Downloads mit fehlender Datei werden nicht mehr als erfolgreiche Gratis-Downloads in der Statistik gezählt.
+* Fix: Fehlende Produkteigenschaftstabellen und die Sortierspalte werden bei aktiven Shops bei Bedarf angelegt.
+* Fix: Die USPS-Registrierung verursacht keine Warnung mehr, wenn das Shop-Land noch nicht eingestellt ist.
 
 = 1.1.9 =
 * Fix: Direkte kostenlose digitale Downloads werden jetzt in der Shopstatistik als Gratis-Downloads erfasst.

@@ -345,6 +345,9 @@ class PSOURCE_Metabox {
 			$post_id = $post->ID;
 		} elseif ( isset( $_GET['page'] ) ) {
 			$url = admin_url( 'admin-ajax.php?page=' . $_GET['page'] );
+			if ( 'store-setup-wizard' === $_GET['page'] && '2' === (string) mp_get_get_value( 'quick_setup_step' ) ) {
+				$url = add_query_arg( 'quick_setup_step', '2', $url );
+			}
 		}
 
 		//no case here

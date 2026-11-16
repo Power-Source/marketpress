@@ -110,6 +110,14 @@ private function __construct() {
 	 */
 	public function add_menu_items() {
 	
+		if ( ! mp_site_shop_is_active() ) {
+			$cap = 'manage_options';
+			add_menu_page( __( 'MarketPress', 'mp' ), __( 'MarketPress', 'mp' ), $cap, 'store-settings', 'mp_inactive_shop_page', 'dashicons-store', 99.33 );
+			add_submenu_page( 'store-settings', __( 'Allgemein', 'mp' ), __( 'Allgemein', 'mp' ), $cap, 'store-settings', 'mp_inactive_shop_page' );
+			add_submenu_page( 'store-settings', __( 'Schnelle Einrichtung', 'mp' ), __( 'Schnelle Einrichtung', 'mp' ), $cap, 'store-setup-wizard', array( &$this, 'display_settings_form' ) );
+			return;
+		}
+
 		$cap = apply_filters( 'mp_store_settings_cap', 'manage_store_settings' );
 	
 		add_menu_page( __( 'MarketPress', 'mp' ), __( 'MarketPress', 'mp' ), $cap, 'store-settings', null, 'dashicons-store', 99.33 );

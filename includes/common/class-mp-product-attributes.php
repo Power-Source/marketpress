@@ -53,6 +53,65 @@ class MP_Product_Attributes {
 	}
 
 	/**
+	 * Initialize the current site's attribute storage without configuring its shop.
+	 *
+	 * @return bool Whether the storage is ready.
+	 */
+	public function maybe_install() {
+		if ( '1' === get_option( 'mp_attributes_db_version' ) ) {
+			return true;
+		}
+
+		global $wpdb;
+
+		$charset_collate = $wpdb->get_charset_collate();
+		$attributes      = $wpdb->prefix . 'mp_product_attributes';
+		$categories      = $wpdb->prefix . 'mp_product_attributes_terms';
+		$queries         = array(
+			$attributes => "CREATE TABLE IF NOT EXISTS $attributes (
+				attribute_id int(11) unsigned NOT NULL AUTO_INCREMENT,
+				attribute_name varchar(45) DEFAULT '',
+				attribute_terms_sort_by enum('ID','ALPHA','CUSTOM') DEFAULT NULL,
+				attribute_terms_sort_order enum('ASC','DESC') DEFAULT NULL,
+				PRIMARY KEY (attribute_id)
+			) $charset_collate",
+			$categories => "CREATE TABLE IF NOT EXISTS $categories (
+				attribute_id int(11) unsigned NOT NULL,
+				term_id bigint(20) unsigned NOT NULL,
+				PRIMARY KEY (attribute_id, term_id)
+			) $charset_collate",
+		);
+
+		foreach ( $queries as $table => $query ) {
+			$existing = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
+			if ( $wpdb->last_error ) {
+				error_log( 'MarketPress: Could not check product attribute tables: ' . $wpdb->last_error );
+				return false;
+			}
+			if ( $table !== $existing && false === $wpdb->query( $query ) ) {
+				error_log( 'MarketPress: Could not initialize product attribute tables: ' . $wpdb->last_error );
+				return false;
+			}
+		}
+
+		$column = $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->terms} LIKE 'term_order'" );
+		if ( $wpdb->last_error ) {
+			error_log( 'MarketPress: Could not check product attribute term ordering: ' . $wpdb->last_error );
+			return false;
+		}
+		if ( null === $column && false === $wpdb->query( "ALTER TABLE {$wpdb->terms} ADD `term_order` SMALLINT UNSIGNED NULL DEFAULT '0' AFTER `term_group`" ) ) {
+			$error = $wpdb->last_error;
+			if ( null === $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->terms} LIKE 'term_order'" ) ) {
+				error_log( 'MarketPress: Could not initialize product attribute term ordering: ' . $error );
+				return false;
+			}
+		}
+
+		update_option( 'mp_attributes_db_version', '1' );
+		return true;
+	}
+
+	/**
 	 * Deletes a product attribute(s)
 	 *
 	 * @since 1.0
@@ -193,6 +252,10 @@ class MP_Product_Attributes {
 	 * @access public
 	 */
 	public function register() {
+		if ( ! $this->maybe_install() ) {
+			return;
+		}
+
 		$atts = $this->get();
 		$product_atts = MP_Product_Attributes::get_instance();
 		

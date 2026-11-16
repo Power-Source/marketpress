@@ -890,7 +890,7 @@ endif;
 
 //register plugin as calculated. Only in US and US Possesions
 $settings = get_option( 'mp_settings' );
-if ( in_array( $settings['base_country'], array(
+if ( isset( $settings['base_country'] ) && in_array( $settings['base_country'], array(
 	'US',
 	'UM',
 	'AS',
@@ -902,6 +902,6 @@ if ( in_array( $settings['base_country'], array(
 	'PR',
 	'PI',
 	'VI'
-) ) ) {
+), true ) ) {
 	MP_Shipping_API::register_plugin( 'MP_Shipping_USPS', 'usps', __( 'USPS', 'mp' ), true );
 }
